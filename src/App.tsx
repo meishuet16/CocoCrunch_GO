@@ -1,132 +1,271 @@
 import React, { useMemo, useState } from 'react';
-import { ArrowRight, Box, Check, CircleDollarSign, CloudRain, Gavel, Heart, Home, Map, PackageCheck, ReceiptText, Route, Send, Sparkles, Users } from 'lucide-react';
-import { familyReport, savedPlace, splitBill } from './features';
+import {
+  Bell, BookOpen, Box, Check, ChevronRight, CircleDollarSign, CloudRain,
+  Gavel, Heart, Home, Link2, Map, MapPin, PackageCheck, ReceiptText,
+  RefreshCw, Route, Send, Sparkles, Suitcase, Users, X
+} from 'lucide-react';
 
-const steps = [
-  { id: 'me', label: 'Know me', icon: Heart },
-  { id: 'us', label: 'Know us', icon: Users },
-  { id: 'plan', label: 'Plan', icon: Map },
-  { id: 'court', label: 'Court', icon: Gavel },
-  { id: 'reality', label: 'Reality', icon: CloudRain },
-  { id: 'family', label: 'Report', icon: Send },
-  { id: 'budget', label: 'Budget', icon: ReceiptText },
-  { id: 'memories', label: 'Memories', icon: Box },
-] as const;
-
-type StepId = typeof steps[number]['id'];
+type Tab = 'home' | 'plan' | 'during' | 'memories' | 'me';
 type TripMode = 'group' | 'solo';
-type TravelTrait = 'Slow mornings' | 'Food-first' | 'Budget-aware' | 'Flexible plans';
+type CourtPick = 'ramen' | 'sushi' | null;
 type Mood = 'great' | 'okay' | 'tired' | null;
-type ArrivalState = 'waiting' | 'arrived' | 'delayed';
-type HeartbeatState = 'together' | 'on-time' | 'delayed' | 'decision';
-type CommunityMode = 'private' | 'public';
-type ImportStatus = 'idle' | 'analyzing' | 'ready';
-type PhotoStatus = 'idle' | 'indexed';
+type Privacy = 'status' | 'area' | 'exact';
+type Drawer = 'profile' | 'group' | 'packing' | 'backup' | 'budget' | 'family' | 'community' | 'import' | null;
 
-type PackItem = { id: number; label: string; owner: string; done: boolean; shared: boolean };
-type CourtHistory = { title: string; result: string; note: string };
-type BackupOption = { id: number; name: string; support: number; costDelta: number; timeDelta: number; viable: boolean };
+type Backup = { name: string; support: number; cost: number; time: number; viable: boolean };
+type PackItem = { name: string; owner: string; shared: boolean; done: boolean };
 type CommunityTrip = { id: number; title: string; author: string; match: number; saved: boolean };
 
-const palette = { cream: '#FFF8E7', sangria: '#930500', blue: '#95BBEA' };
-const allTraits: TravelTrait[] = ['Slow mornings','Food-first','Budget-aware','Flexible plans'];
+const tabs: { id: Tab; label: string; icon: React.ComponentType<{ size?: number }> }[] = [
+  { id: 'home', label: 'Home', icon: Home },
+  { id: 'plan', label: 'Plan', icon: BookOpen },
+  { id: 'during', label: 'During', icon: Route },
+  { id: 'memories', label: 'Memories', icon: Suitcase },
+  { id: 'me', label: 'Me', icon: Heart },
+];
 
-function Coco({ mood = 'idle', compact = false }: { mood?: 'idle' | 'happy' | 'panic'; compact?: boolean }) {
-  return <div className={`coco coco-${mood}${compact ? ' coco-compact' : ''}`} aria-label={`Coco mascot ${mood}`}><span className="antenna left"/><span className="antenna right"/><span className="coco-body"><span className="eye left"/><span className="eye right"/><span className="mouth"/></span><span className="leg l1"/><span className="leg l2"/><span className="leg r1"/><span className="leg r2"/></div>;
+const backups: Backup[] = [
+  { name: 'Underground food hall', support: 4, cost: 8, time: 12, viable: true },
+  { name: 'Retro kissaten crawl', support: 3, cost: 4, time: 18, viable: true },
+  { name: 'Riverside night market', support: 1, cost: -6, time: 6, viable: false },
+];
+
+function Coco({ mood = 'idle', tiny = false }: { mood?: 'idle' | 'happy' | 'panic'; tiny?: boolean }) {
+  return (
+    <div className={`coco ${mood} ${tiny ? 'tiny' : ''}`} aria-label={`Coco ${mood}`}>
+      <span className="antenna a1" /><span className="antenna a2" />
+      <span className="coco-shell"><i className="eye e1" /><i className="eye e2" /><i className="mouth" /></span>
+      <span className="leg l1" /><span className="leg l2" /><span className="leg l3" />
+      <span className="leg r1" /><span className="leg r2" /><span className="leg r3" />
+    </div>
+  );
 }
 
-function CaptureCapsule({ active }: { active: boolean }) {
-  return <div className={`capsule-stage${active ? ' is-captured' : ''}`} aria-hidden="true"><div className="capture-place">伏</div><div className="capture-orbit"/><div className="capture-capsule"><span/></div></div>;
+function SectionTitle({ kicker, title, copy }: { kicker: string; title: string; copy?: string }) {
+  return <header className="page-title"><span>{kicker}</span><h2>{title}</h2>{copy && <p>{copy}</p>}</header>;
 }
 
-function MapRide({ riding, onRide }: { riding: boolean; onRide: () => void }) {
-  return <div className={`route-map${riding ? ' is-riding' : ''}`}><div className="map-label one">Tsukiji</div><div className="map-label two">Daikanyama</div><div className="map-label three">Shibuya</div><svg viewBox="0 0 320 130" role="img" aria-label="Schematic itinerary route"><path d="M30 95 C90 28, 155 115, 285 38"/><circle cx="30" cy="95" r="6"/><circle cx="160" cy="83" r="6"/><circle cx="285" cy="38" r="6"/></svg><div className="coco-rider"><Coco compact mood="happy"/><span className="tiny-rider">•</span></div><button className="map-action" onClick={onRide}><Route size={17}/>{riding ? 'Coco is on the move' : 'Ride with Coco'}</button></div>;
+function MiniTool({ icon: Icon, label, note, onClick }: { icon: React.ComponentType<{ size?: number }>; label: string; note: string; onClick: () => void }) {
+  return <button className="mini-tool" onClick={onClick}><Icon size={18}/><span><b>{label}</b><small>{note}</small></span><ChevronRight size={16}/></button>;
 }
 
 export default function App() {
-  const [active, setActive] = useState<StepId>('me');
+  const [tab, setTab] = useState<Tab>('home');
+  const [drawer, setDrawer] = useState<Drawer>(null);
   const [mode, setMode] = useState<TripMode>('group');
-  const [traits, setTraits] = useState<TravelTrait[]>(['Slow mornings','Food-first','Budget-aware']);
   const [mustGo, setMustGo] = useState('Tsukiji food walk');
   const [veto, setVeto] = useState('No raw-food-only dinner');
   const [tripVibe, setTripVibe] = useState('Relax + Food');
   const [preference, setPreference] = useState('One scenic café each day');
   const [flexible, setFlexible] = useState('Evening activity can move');
-  const [courtChoice, setCourtChoice] = useState<'ramen' | 'sushi' | null>(null);
+  const [plannerTurn, setPlannerTurn] = useState('Mei');
+  const [packing, setPacking] = useState<PackItem[]>([
+    { name: 'Portable charger', owner: 'Mei', shared: false, done: true },
+    { name: 'Umbrella', owner: 'JH', shared: true, done: false },
+    { name: 'Pocket Wi-Fi', owner: 'Zi Shan', shared: true, done: true },
+  ]);
+  const [courtOpen, setCourtOpen] = useState(false);
+  const [courtPick, setCourtPick] = useState<CourtPick>(null);
   const [gacha, setGacha] = useState<string | null>(null);
   const [courtConfirmed, setCourtConfirmed] = useState(false);
-  const [plannerTurn, setPlannerTurn] = useState('Mei');
-  const [replanned, setReplanned] = useState(false);
-  const [replanConfirmed, setReplanConfirmed] = useState(false);
-  const [emergencyCourtApproved, setEmergencyCourtApproved] = useState(false);
-  const [reported, setReported] = useState(false);
-  const [printed, setPrinted] = useState(false);
-  const [captured, setCaptured] = useState(false);
-  const [riding, setRiding] = useState(false);
-  const [privacy, setPrivacy] = useState<'status' | 'area' | 'exact'>('status');
-  const [worthIt, setWorthIt] = useState<'yes' | 'mixed' | 'no' | null>(null);
-  const [learningConfirmed, setLearningConfirmed] = useState(false);
-  const [moodCheck, setMoodCheck] = useState<Mood>(null);
-  const [splitActive, setSplitActive] = useState(false);
+  const [delay, setDelay] = useState(false);
+  const [replanPreview, setReplanPreview] = useState(false);
+  const [emergencyApproved, setEmergencyApproved] = useState(false);
+  const [replanApplied, setReplanApplied] = useState(false);
+  const [mood, setMood] = useState<Mood>(null);
+  const [split, setSplit] = useState(false);
+  const [privacy, setPrivacy] = useState<Privacy>('status');
   const [continuousLocation, setContinuousLocation] = useState(false);
-  const [published, setPublished] = useState(false);
-  const [arrivalState, setArrivalState] = useState<ArrivalState>('waiting');
-  const [heartbeat, setHeartbeat] = useState<HeartbeatState>('together');
-  const [assistantPreview, setAssistantPreview] = useState(false);
-  const [assistantApplied, setAssistantApplied] = useState(false);
-  const [externalLink, setExternalLink] = useState('https://example.com/tokyo-cafe-list');
-  const [importStatus, setImportStatus] = useState<ImportStatus>('idle');
-  const [photoStatus, setPhotoStatus] = useState<PhotoStatus>('idle');
+  const [reported, setReported] = useState(false);
+  const [receiptPrinted, setReceiptPrinted] = useState(false);
+  const [worthIt, setWorthIt] = useState<'yes' | 'mixed' | 'no' | null>(null);
+  const [profileLearned, setProfileLearned] = useState(false);
+  const [photoIndexed, setPhotoIndexed] = useState(false);
   const [journalGenerated, setJournalGenerated] = useState(false);
-  const [communityMode, setCommunityMode] = useState<CommunityMode>('private');
-  const [compareOpened, setCompareOpened] = useState(false);
+  const [published, setPublished] = useState(false);
+  const [externalLink, setExternalLink] = useState('https://example.com/tokyo-cafe-list');
+  const [linkAnalyzed, setLinkAnalyzed] = useState(false);
   const [communityTrips, setCommunityTrips] = useState<CommunityTrip[]>([
     { id: 1, title: 'Tokyo: slow food + vintage streets', author: 'Aki', match: 92, saved: false },
     { id: 2, title: 'Rain-proof Tokyo weekend', author: 'Mina', match: 86, saved: false },
   ]);
-  const [packing, setPacking] = useState<PackItem[]>([
-    { id: 1, label: 'Portable charger', owner: 'Mei', done: true, shared: false },
-    { id: 2, label: 'Umbrella', owner: 'JH', done: false, shared: true },
-    { id: 3, label: 'Pocket Wi-Fi', owner: 'Zi Shan', done: true, shared: true },
-  ]);
-  const [backups] = useState<BackupOption[]>([
-    { id: 1, name: 'Underground food hall', support: 4, costDelta: 8, timeDelta: 12, viable: true },
-    { id: 2, name: 'Retro kissaten crawl', support: 3, costDelta: 4, timeDelta: 18, viable: true },
-    { id: 3, name: 'Riverside night market', support: 1, costDelta: -6, timeDelta: 6, viable: false },
-  ]);
 
-  const index = steps.findIndex((step) => step.id === active);
-  const next = steps[Math.min(index + 1, steps.length - 1)]?.id ?? 'memories';
-  const mood = active === 'reality' && !replanConfirmed ? 'panic' : courtChoice || replanConfirmed || reported || printed || captured || riding || worthIt ? 'happy' : 'idle';
-  const activeStep = steps[index];
   const travellerCount = mode === 'group' ? 4 : 1;
   const budgetTotal = mode === 'group' ? 2400 : 1200;
-  const plannedBudget = mode === 'group' ? 1760 : 820;
-  const spentBudget = mode === 'group' ? 1288 : 604;
-  const reservedBudget = mode === 'group' ? 472 : 196;
-  const freeBuffer = budgetTotal - plannedBudget - (replanConfirmed ? 8 : 0);
-  const fatigueWarning = moodCheck === 'tired';
-  const slowestMemberMinutes = mode === 'group' ? 18 : 12;
-  const decisionHistory: CourtHistory[] = [
-    ...(courtConfirmed && gacha ? [{ title: 'Dinner Court', result: gacha, note: '2–2 tie resolved with Gacha and confirmed by the group.' }] : []),
-    ...(replanConfirmed ? [{ title: mode === 'group' ? 'Emergency Court' : 'Replan confirmation', result: 'Underground food hall accepted', note: '+RM8 · +12 min · Anchor protected.' }] : []),
-  ];
+  const planned = mode === 'group' ? 1760 : 820;
+  const spent = mode === 'group' ? 1288 : 604;
+  const replanCost = replanApplied ? 8 : 0;
+  const remaining = budgetTotal - spent - replanCost;
+  const planHealth = replanApplied ? 91 : 86;
+  const cocoMood: 'idle' | 'happy' | 'panic' = delay && !replanApplied ? 'panic' : courtConfirmed || replanApplied || reported || receiptPrinted ? 'happy' : 'idle';
 
-  const toggleTrait = (trait: TravelTrait) => setTraits((current) => current.includes(trait) ? current.filter((item) => item !== trait) : [...current, trait]);
-  const togglePack = (id: number) => setPacking((items) => items.map((item) => item.id === id ? { ...item, done: !item.done } : item));
-  const toggleCommunitySave = (id: number) => setCommunityTrips((trips) => trips.map((trip) => trip.id === id ? { ...trip, saved: !trip.saved } : trip));
-  const canConfirmReplan = mode === 'solo' || emergencyCourtApproved;
+  const decisionHistory = useMemo(() => [
+    ...(courtConfirmed && gacha ? [`Dinner Court · ${gacha}`] : []),
+    ...(replanApplied ? ['Emergency Court · Underground food hall accepted'] : []),
+  ], [courtConfirmed, gacha, replanApplied]);
 
-  const content = useMemo(() => {
-    if (active === 'me') return <section className="content-block"><p className="eyebrow">01 · Coco Profile</p><h2>Coco learns how you travel.</h2><div className="mode-switch" role="group" aria-label="Trip mode"><button className={mode === 'group' ? 'mode active' : 'mode'} onClick={() => setMode('group')}>Group trip</button><button className={mode === 'solo' ? 'mode active' : 'mode'} onClick={() => setMode('solo')}>Solo trip</button></div><div className="trait-grid">{allTraits.map((trait) => <button key={trait} onClick={() => toggleTrait(trait)} className={traits.includes(trait) ? 'chip selected' : 'chip'}>{trait}</button>)}</div><div className="constraint-grid"><label><span>Trip vibe</span><input value={tripVibe} onChange={(event) => setTripVibe(event.target.value)} /></label><label><span>Must-Go</span><input value={mustGo} onChange={(event) => setMustGo(event.target.value)} /></label><label><span>Deal breaker</span><input value={veto} onChange={(event) => setVeto(event.target.value)} /></label><label><span>Preference</span><input value={preference} onChange={(event) => setPreference(event.target.value)} /></label><label><span>Flexible</span><input value={flexible} onChange={(event) => setFlexible(event.target.value)} /></label></div><div className="packing-block"><div className="mini-heading"><span>Packing checklist</span><small>{packing.filter((item) => item.done).length}/{packing.length} ready</small></div>{packing.map((item) => <button key={item.id} className={`pack-row${item.done ? ' done' : ''}`} onClick={() => togglePack(item.id)}><span>{item.done ? '✓' : '○'}</span><div><b>{item.label}</b><small>{item.shared && mode === 'group' ? `Shared · claimed by ${item.owner}` : `Owner: ${item.owner}`}</small></div></button>)}</div><div className="p2-card"><span>EXTERNAL LINK FIT · P2</span><input value={externalLink} onChange={(event) => setExternalLink(event.target.value)} /><button className="secondary" onClick={() => setImportStatus(importStatus === 'idle' ? 'analyzing' : 'ready')}>{importStatus === 'idle' ? 'Analyze supported link' : importStatus === 'analyzing' ? 'Finish mock analysis' : 'Re-analyze'}</button>{importStatus !== 'idle' && <small>{importStatus === 'analyzing' ? 'Placeholder pipeline: fetch → extract places → score against Coco Profile.' : 'Mock result: 84% fit · 3 cafés match your pace · 1 place conflicts with your budget cap.'}</small>}<em>Placeholder until a supported-source parser/API is connected.</em></div><div className="soft-note"><Sparkles size={18}/><span>{mode === 'group' ? 'Preferences stay private until Coco builds Group DNA, reducing groupthink.' : 'Solo mode skips Group Court but keeps budget, disruption handling and explanations.'}</span></div></section>;
-    if (active === 'us') return <section className="content-block"><p className="eyebrow">02 · {mode === 'group' ? 'Group Travel DNA' : 'Solo Travel DNA'}</p><h2>{mode === 'group' ? 'Your group mostly agrees… except here.' : 'Your constraints become the trip contract.'}</h2>{mode === 'group' ? <><div className="metric-list"><div><span>Trip vibe</span><strong>{tripVibe}</strong></div><div><span>Food</span><strong>High priority</strong></div><div><span>Pace</span><strong>Relaxed</strong></div><div><span>Budget</span><strong>RM 600 / person</strong></div></div><div className="accent-card"><span>⚠ Preference conflict</span><b>Mei: {mustGo} · JH: {veto}</b><small>Coco won’t average this away. This conflict needs Court.</small></div><div className="assignment-grid"><div><span>Food lead</span><b>Mei</b></div><div><span>Transit lead</span><b>JH</b></div><div><span>Stay lead</span><b>Zi Shan</b></div><div><span>Slowest member buffer</span><b>+{slowestMemberMinutes} min</b></div></div><div className="workspace-card"><span>GROUP WORKSPACE</span><b>Editing turn: {plannerTurn}</b><small>Only the active planner can edit the official timeline. Everyone else can comment, flag conflict, or propose changes.</small><button className="secondary" onClick={() => setPlannerTurn(plannerTurn === 'Mei' ? 'JH' : plannerTurn === 'JH' ? 'Zi Shan' : 'Mei')}>Pass planning turn</button></div></> : <><div className="metric-list"><div><span>Must-Go</span><strong>{mustGo}</strong></div><div><span>Hard no</span><strong>{veto}</strong></div><div><span>Pace</span><strong>{traits.includes('Slow mornings') ? 'Slow start' : 'Flexible'}</strong></div></div><div className="accent-card"><span>SOLO RULE</span><b>No Court needed.</b><small>Coco can propose changes, but still must show impact and wait for confirmation.</small></div></>}</section>;
-    if (active === 'plan') return <section className="content-block"><p className="eyebrow">03 · Executable plan</p><div className="title-row"><div><h2>Tokyo · 5 days</h2><p className="muted">{tripVibe} · {mode === 'group' ? 'leave room to wander together.' : 'keep one protected highlight per day.'}</p></div><div className="health-pill" aria-label="Plan Health 86 out of 100">86</div></div><div className="trip-promise"><span>TRIP PROMISE</span><b>Easy pace, food-first, one protected highlight, leave room for surprise.</b></div><div className="budget-snapshot"><div><span>Trip budget</span><strong>RM {budgetTotal.toLocaleString()}</strong></div><div><span>Planned</span><strong>RM {plannedBudget.toLocaleString()}</strong></div><div><span>Surprise fund</span><strong>RM 160</strong></div></div><div className="timeline"><div className="timeline-item"><span>10:00</span><div><b>{mustGo}</b><small>Must-Go · protected</small></div><strong>⚓ Anchor</strong></div><div className="timeline-item"><span>14:30</span><div><b>Daikanyama cafés</b><small>{preference} · RM38 est.</small></div><strong>🫧 Floating</strong></div><div className="timeline-item mystery"><span>17:00</span><div><b>Mystery Window</b><small>{flexible}</small></div><strong>🎰 Open</strong></div></div><div className="why-card"><span>WHY THIS?</span><b>Food-first without rushing the day.</b><small>{mustGo} satisfies the protected priority, cafés preserve the preferred pace, and the open block protects spontaneity without exceeding the buffer.</small></div><div className="feasibility-card"><span>FEASIBILITY CHECK</span><small>✓ transfer includes +{slowestMemberMinutes} min slowest-member buffer · ✓ venue open until 20:00 · ✓ no red-eye travel · ⚠ rain-sensitive evening block</small></div><div className="deadline-row"><span>Cancellation deadline</span><b>Hotel · Sep 16, 23:59</b><small>No deposit lost if cancelled before this time.</small></div><div className="backup-pool"><span>BACKUP PLAN POOL</span>{backups.map((item) => <div key={item.id} className={item.viable ? 'backup-option' : 'backup-option unavailable'}><b>{item.name}</b><small>{item.support} supporters · {item.costDelta >= 0 ? '+' : ''}RM{item.costDelta} · +{item.timeDelta} min {item.viable ? '· viable' : '· weather-blocked'}</small></div>)}</div><div className="price-compare p2-card"><span>SMART COMPARE · P2</span><div><b>Hotel A · RM420</b><small>92% comfort fit · free cancellation</small></div><div><b>Hotel B · RM368</b><small>78% comfort fit · +18 min daily transit</small></div><button className="secondary" onClick={() => setCompareOpened(!compareOpened)}>{compareOpened ? 'Hide impact' : 'Compare member budget impact'}</button>{compareOpened && <small>Mock impact: Hotel B saves RM52 but adds ~90 min transit across 5 days. Placeholder until real pricing feeds are connected.</small>}</div><div className="assistant-shell"><span>COCO PLAN ASSISTANT</span><b>“Can we make tomorrow less tiring?”</b><small>Coco can draft changes but cannot silently write them into the timeline.</small><button className="secondary" onClick={() => { setAssistantPreview(true); setAssistantApplied(false); }}>Preview suggestion</button>{assistantPreview && <div className="assistant-diff"><small>Move café from 14:30 → 15:15 · add 30 min rest · budget unchanged · Anchor untouched.</small><button className="primary inline" onClick={() => setAssistantApplied(true)}>{assistantApplied ? '✓ Applied' : 'Apply this suggestion'}</button>{assistantApplied && <button className="undo-link" onClick={() => setAssistantApplied(false)}>Undo assistant change</button>}</div>}</div><MapRide riding={riding} onRide={() => { setRiding(false); requestAnimationFrame(() => setRiding(true)); }}/><div className="plan-health"><span>Plan Health</span><small>Budget ✓ · Walking moderate · Time pressure low · 1 weather-sensitive block</small></div></section>;
-    if (active === 'court') return <section className="content-block"><p className="eyebrow">04 · {mode === 'group' ? 'Group Court' : 'Solo decision'}</p>{mode === 'group' ? <><h2>We disagree. Decide transparently.</h2><div className="court-score"><span>Current vote</span><b>2 · 2 tie</b><small>Gacha unlocks only because the vote is tied.</small></div><div className="court-stack"><button className={courtChoice === 'ramen' ? 'court-choice selected' : 'court-choice'} onClick={() => { setCourtChoice('ramen'); setCourtConfirmed(false); }}><span>🍜</span><b>Ramen dinner</b><small>2 supporters · cheaper</small></button><button className={courtChoice === 'sushi' ? 'court-choice selected' : 'court-choice'} onClick={() => { setCourtChoice('sushi'); setCourtConfirmed(false); }}><span>🍣</span><b>Sushi dinner</b><small>2 supporters · Must-Go conflict</small></button></div><div className="trade-card"><span>TRADE / CONCESSION</span><small>Option: choose ramen tonight ↔ keep sushi market as tomorrow’s protected lunch. Linked trade is cancelled if either side withdraws.</small></div><button className="gacha" onClick={() => { setGacha(Math.random() > 0.5 ? 'Ramen wins the tie.' : 'Sushi wins the tie.'); setCourtConfirmed(false); }}>🎰 Resolve this tie with Gacha</button>{gacha && <><div className="result">{gacha}<span>Random result proposed. It is not official until confirmed.</span></div><button className="primary" onClick={() => setCourtConfirmed(true)}>{courtConfirmed ? '✓ Decision confirmed' : 'Confirm to official timeline'}</button></>}</> : <><h2>No group conflict to resolve.</h2><div className="accent-card"><span>SOLO MODE</span><b>Coco keeps the decision lightweight.</b><small>Your Must-Go and veto act as hard constraints; uncertain choices can still use Gacha if you genuinely cannot choose.</small></div><button className="gacha" onClick={() => setGacha(Math.random() > 0.5 ? 'Ramen tonight.' : 'Sushi tonight.')}>🎰 I genuinely cannot choose</button>{gacha && <div className="result">{gacha}<span>Solo Gacha is allowed for genuine indecision.</span></div>}</>}</section>;
-    if (active === 'reality') return <section className="content-block"><p className="eyebrow">05 · Reality happens</p><h2>Heavy rain hits your outdoor block.</h2><div className="live-strip"><span>LIVE TIMELINE</span><b>{arrivalState === 'waiting' ? '16:40 · heading to the market' : arrivalState === 'arrived' ? '16:52 · arrived nearby' : '17:10 · 30 min behind plan'}</b><small>Manual check-in works without continuous tracking.</small><div className="arrival-controls"><button className="secondary" onClick={() => setArrivalState('arrived')}>Mark arrived</button><button className="secondary" onClick={() => setArrivalState('delayed')}>Simulate delay</button></div></div>{arrivalState === 'delayed' && <div className="delay-prompt"><span>PROGRESS DETECTION</span><b>You are 30 min behind. Replan now?</b><small>Coco detected the mismatch from your manual progress update, not background tracking.</small></div>}<div className="heartbeat-card"><span>GROUP HEARTBEAT</span><div className="heartbeat-row">{(['together','on-time','delayed','decision'] as HeartbeatState[]).map((state) => <button key={state} className={heartbeat === state ? 'heartbeat active' : 'heartbeat'} onClick={() => setHeartbeat(state)}>{state === 'together' ? 'Together' : state === 'on-time' ? 'Can reunite' : state === 'delayed' ? 'Delayed' : 'Needs decision'}</button>)}</div><small>No exact coordinates are shown to the group.</small></div>{!replanned ? <><div className="weather-callout"><CloudRain size={24}/><div><b>17:00 outdoor market is no longer viable.</b><small>Anchor stays protected. Coco ranks viable backups by support + budget fit.</small></div></div><div className="ghost-row"><span>👻 Ghost revival</span><b>{backups[0].name}</b><small>Highest-support viable backup · +RM{backups[0].costDelta} · +{backups[0].timeDelta} min</small></div><button className="primary" onClick={() => setReplanned(true)}>Preview minimum-loss replan <ArrowRight size={18}/></button></> : !replanConfirmed ? <><div className="replan-preview"><span>CHANGE PREVIEW</span><div><b>Keep</b><small>{mustGo}</small></div><div><b>Replace</b><small>Outdoor market → {backups[0].name}</small></div><div><b>Move</b><small>Mystery Window → 19:00</small></div><div><b>Impact</b><small>+RM{backups[0].costDelta} · +{backups[0].timeDelta} min · promise preserved</small></div></div>{mode === 'group' && <div className="emergency-court"><span>EMERGENCY COURT · 90 sec</span><b>{emergencyCourtApproved ? 'Approved by 3 / 4' : 'Group approval required before applying.'}</b><small>AI cannot delete or replace a group item on its own.</small><button className="secondary" onClick={() => setEmergencyCourtApproved(true)}>{emergencyCourtApproved ? '✓ Emergency Court approved' : 'Simulate group approval'}</button></div>}<div className="confirm-row"><button className="secondary" onClick={() => setReplanned(false)}>Not now</button><button className="primary inline" disabled={!canConfirmReplan} onClick={() => setReplanConfirmed(true)}>Confirm change</button></div></> : <><div className="success"><Check size={22}/><div><b>Plan repaired.</b><small>{mustGo} preserved · Mystery Window moved · +RM8 · Trip Promise intact.</small></div></div><button className="undo-link" onClick={() => { setReplanConfirmed(false); setReplanned(true); }}>Undo this change</button></>}<div className="mood-block"><span>DAILY ENERGY CHECK</span><div className="mood-row">{(['great','okay','tired'] as const).map((value) => <button key={value} className={moodCheck === value ? 'mood-choice active' : 'mood-choice'} onClick={() => setMoodCheck(value)}>{value === 'great' ? '⚡ Great' : value === 'okay' ? '🙂 Okay' : '🥱 Tired'}</button>)}</div>{fatigueWarning && <small>Coco suggests trimming one floating item and adding 45 min rest. Anchors stay untouched.</small>}</div>{mode === 'group' && <div className="split-card"><span>SMART SPLIT + REUNION</span><b>{splitActive ? '2 people café · 2 people shopping' : 'Different energy levels detected.'}</b><small>{splitActive ? 'Reunion: Shibuya Hachiko · 19:30 · 15 min tolerance.' : 'Split only if both mini-plans remain feasible.'}</small><button className="secondary" onClick={() => setSplitActive(!splitActive)}>{splitActive ? 'Cancel split' : 'Create safe split'}</button></div>}<div className="location-guard"><span>LOCATION MINIMIZATION</span><b>Continuous location: {continuousLocation ? 'ON by consent' : 'OFF by default'}</b><small>Manual check-ins and coarse trip status are enough for this prototype.</small><button className="secondary" onClick={() => setContinuousLocation(!continuousLocation)}>{continuousLocation ? 'Turn off' : 'Allow continuous location'}</button></div><div className="safety-card"><span>LOCAL SAFETY SERVICES</span><div className="service-grid"><button>Nearest clinic</button><button>24h pharmacy</button><button>Luggage storage</button><button>Emergency contact</button></div><small>Framework only: these actions are ready for a real places/safety data source later.</small></div><div className="prayer-ritual"><div className="incense">〰︎</div><b>Still worried? Coco recommends praying.</b><small>Entertainment only. Scientific backup plan stays active.</small></div></section>;
-    if (active === 'family') return <section className="content-block"><p className="eyebrow">06 · Family Window</p><h2>Reassurance, not surveillance.</h2><div className="privacy-row" role="group" aria-label="Report privacy level">{(['status','area','exact'] as const).map((level) => <button key={level} className={privacy === level ? 'privacy active' : 'privacy'} onClick={() => setPrivacy(level)}>{level === 'status' ? 'Status only' : level === 'area' ? 'Approx. area' : 'Exact'}</button>)}</div><div className="family-status"><span>🟡 Plan changed, but everything is okay.</span><b>{privacy === 'status' ? 'Kyoto trip · safe' : privacy === 'area' ? familyReport.area : `${familyReport.area} · exact location shared`}</b><small>{familyReport.note}</small><small>{familyReport.withGroup && mode === 'group' ? 'Still with the group' : 'Travelling solo'} · expected back {familyReport.returnTime}</small></div><div className="reassurance-contract"><span>Reassurance Contract</span><small>Notify only for: city arrival · &gt;2h delay · group split · return-time change</small></div><button className="primary" onClick={() => setReported(true)}><Send size={18}/>{reported ? 'Coco delivered it.' : 'Send one-tap report'}</button>{reported && <div className="delivery"><Coco mood="happy" compact/><span>🪳💨 Coco carried the note out of the screen.</span></div>}</section>;
-    if (active === 'budget') return <section className="content-block"><p className="eyebrow">07 · Budget + Split Bill</p><h2>Know the trip cost before the receipt arrives.</h2><div className="budget-snapshot detailed"><div><span>Total budget</span><strong>RM {budgetTotal.toLocaleString()}</strong></div><div><span>Spent</span><strong>RM {spentBudget.toLocaleString()}</strong></div><div><span>Reserved</span><strong>RM {reservedBudget.toLocaleString()}</strong></div><div><span>Free buffer</span><strong>RM {freeBuffer.toLocaleString()}</strong></div></div><div className="category-budget"><div><span>Stay</span><b>RM 760 / 800</b></div><div><span>Food</span><b>RM 280 / 420</b></div><div><span>Transit</span><b>RM 120 / 220</b></div><div><span>Activities</span><b>RM 128 / 240</b></div></div><div className="budget-health"><span>Budget health</span><b>73%</b><small>{replanConfirmed ? 'Rain replan already included: +RM8.' : 'Rain replan preview would use RM8 of buffer.'}</small></div><div className="deal-card"><span>SMART VALUE CHECK</span><b>Transit pass saves ~RM34 for this route.</b><small>Prototype recommendation only; live fares/discount feeds are a P2 integration placeholder.</small></div>{mode === 'group' ? <><div className={`printer${printed ? ' is-printing' : ''}`}><div className="printer-mouth"/><div className="receipt-card"><div className="receipt-head"><ReceiptText size={20}/><b>COCOCRUNCH TRAVEL OFFICE</b></div><div className="receipt-line"><span>Total</span><strong>{splitBill.currency} {splitBill.total.toLocaleString()}</strong></div>{splitBill.members.map((member) => <div className="receipt-line" key={member.name}><span>{member.name}</span><strong>{member.amount.toLocaleString()}</strong></div>)}</div></div><button className="primary" onClick={() => { setPrinted(false); requestAnimationFrame(() => setPrinted(true)); }}><ReceiptText size={18}/>{printed ? 'RRRIP— print again' : 'Print & tear receipt'}</button>{printed && <div className="printed">PAID · budget history updated</div>}</> : <div className="accent-card"><span>SOLO BUDGET</span><b>No split bill needed.</b><small>Coco keeps category budgets, actual spend and surprise buffer visible.</small></div>}</section>;
-    return <section className="content-block"><p className="eyebrow">08 · Memories</p><h2>Your trip lives in a box, not a grid.</h2><div className="memory-box"><div className="trunk-lid">POSTCARDS · TICKETS · RECEIPTS</div><div className="trunk-body"><span className="postcard">KYOTO<br/>wish you were here</span><span className="ticket">TOKYO<br/>17:40</span><span className="stub">¥480</span></div></div><div className="photo-map p2-card"><span>PHOTO MAP · P2</span><b>{photoStatus === 'indexed' ? '12 photos grouped into 4 stops' : 'No photos imported yet'}</b><small>{photoStatus === 'indexed' ? 'Mock EXIF index: Tsukiji · Daikanyama · Shibuya · Underground food hall.' : 'Framework placeholder for EXIF time/location grouping.'}</small><button className="secondary" onClick={() => setPhotoStatus('indexed')}>{photoStatus === 'indexed' ? 'Re-index mock photos' : 'Import sample photos'}</button></div><div className="journal-card p2-card"><span>AUTO TRAVEL JOURNAL · P2</span><b>{journalGenerated ? 'Day 2 draft ready' : 'Turn timeline + photos into a draft'}</b><small>{journalGenerated ? '“Rain changed the plan, but the food-first promise survived. We split for an hour, reunited in Shibuya, and spent RM8 more than planned.”' : 'Placeholder generator until real photo/text summarization is connected.'}</small><button className="secondary" onClick={() => setJournalGenerated(!journalGenerated)}>{journalGenerated ? 'Regenerate mock draft' : 'Generate mock journal'}</button></div><CaptureCapsule active={captured}/><div className="capture-card"><PackageCheck size={22}/><div><b>{savedPlace.name}</b><small>{savedPlace.reason}</small></div><button className={captured ? 'vote active' : 'vote'} onClick={() => { setCaptured(false); requestAnimationFrame(() => setCaptured(true)); }}>{captured ? 'Captured' : 'Capture'}</button></div>{captured && <div className="result">WHOOP— location absorbed into Coco Capsule.<span>Saved to Ghost Wish / Saved Places.</span></div>}<div className="review-grid"><div><span>Budget vs actual</span><b>RM {plannedBudget} planned</b><small>RM {spentBudget + (replanConfirmed ? 8 : 0)} actual so far</small></div><div><span>Declared vs lived</span><b>Food-first confirmed</b><small>Markets got more time than cafés.</small></div></div><div className="learning-card"><span>WAS IT WORTH IT?</span><div className="mood-row">{(['yes','mixed','no'] as const).map((value) => <button key={value} className={worthIt === value ? 'mood-choice active' : 'mood-choice'} onClick={() => { setWorthIt(value); setLearningConfirmed(false); }}>{value === 'yes' ? 'Worth it' : value === 'mixed' ? 'Mixed' : 'Not really'}</button>)}</div>{worthIt && <><small>Coco noticed you stayed longer at food markets than cafés. Learn “markets &gt; scenic cafés” for future ranking?</small><button className="secondary" onClick={() => setLearningConfirmed(true)}>{learningConfirmed ? '✓ Learning confirmed' : 'Confirm learning'}</button></>}</div>{decisionHistory.length > 0 && <div className="decision-history"><span>DECISION HISTORY</span>{decisionHistory.map((item) => <div key={item.title}><b>{item.title}</b><small>{item.result} · {item.note}</small></div>)}</div>}<div className="community-browser p2-card"><span>COMMUNITY DISCOVERY · P2</span>{communityTrips.map((trip) => <div className="community-trip" key={trip.id}><div><b>{trip.title}</b><small>{trip.author} · {trip.match}% match</small></div><button className="secondary" onClick={() => toggleCommunitySave(trip.id)}>{trip.saved ? 'Saved' : 'Save'}</button></div>)}<em>Mock public trips; replace with real published-trip datasource later.</em></div><div className="community-card"><span>COMMUNITY PRIVACY</span><b>{communityMode === 'private' ? 'Private by default' : 'Published publicly'}</b><small>Publishing always requires explicit consent and can be revoked immediately.</small><button className={published ? 'secondary' : 'primary'} onClick={() => { setPublished(!published); setCommunityMode(published ? 'private' : 'public'); }}>{published ? 'Unpublish now' : 'Publish this trip'}</button></div></section>;
-  }, [active, mode, traits, mustGo, veto, tripVibe, preference, flexible, packing, plannerTurn, courtChoice, gacha, courtConfirmed, replanned, replanConfirmed, emergencyCourtApproved, reported, printed, captured, riding, privacy, worthIt, learningConfirmed, moodCheck, splitActive, continuousLocation, arrivalState, heartbeat, assistantPreview, assistantApplied, importStatus, externalLink, photoStatus, journalGenerated, compareOpened, communityTrips, communityMode, published, budgetTotal, plannedBudget, spentBudget, reservedBudget, freeBuffer, fatigueWarning, slowestMemberMinutes, decisionHistory, backups]);
+  function togglePack(index: number) {
+    setPacking(items => items.map((item, i) => i === index ? { ...item, done: !item.done } : item));
+  }
 
-  return <main className="app-shell" style={{ '--cream': palette.cream, '--sangria': palette.sangria, '--blue': palette.blue } as React.CSSProperties}><header className="topbar"><div><p className="brand-kicker">COCOCRUNCH</p><h1>COCO IN YOUR AREA.</h1><p className="subtitle">Trips get messy. Coco rolls with it.</p></div><Coco mood={mood}/></header><section className="trip-summary"><div><span className="summary-label">CURRENT TRIP</span><strong>Tokyo · 5 days</strong></div><div className="summary-meta"><span><CircleDollarSign size={15}/> RM {budgetTotal.toLocaleString()}</span><span><Users size={15}/> {travellerCount} traveller{travellerCount > 1 ? 's' : ''}</span></div></section><div className="section-context"><span>{String(index + 1).padStart(2, '0')}</span><div><small>{activeStep.label}</small><b>{active === 'reality' ? 'During the trip' : active === 'memories' ? 'After the trip' : 'Before the trip'}</b></div></div>{content}{active !== 'memories' && <button className="next" onClick={() => setActive(next)}>Continue <ArrowRight size={17}/></button>}<footer className="bottom-nav"><button onClick={() => setActive('me')} className={active === 'me' || active === 'us' ? 'active' : ''}><Home size={18}/><span>Home</span></button><button onClick={() => setActive('plan')} className={active === 'plan' || active === 'court' ? 'active' : ''}><Map size={18}/><span>Plan</span></button><button onClick={() => setActive('reality')} className={active === 'reality' ? 'active' : ''}><Route size={18}/><span>During</span></button><button onClick={() => setActive('family')} className={active === 'family' ? 'active' : ''}><Send size={18}/><span>Report</span></button><button onClick={() => setActive('memories')} className={active === 'budget' || active === 'memories' ? 'active' : ''}><Box size={18}/><span>Memory</span></button></footer></main>;
+  function renderHome() {
+    return <>
+      <section className="home-hero paper-sheet">
+        <div><span className="eyebrow">DAY 2 · TOKYO</span><h2>Good morning, Mei.</h2><p>Today is gentle on purpose. One anchor, two flexible pockets, and room for the city to surprise you.</p></div>
+        <Coco mood={cocoMood}/>
+      </section>
+
+      <section className="today-card">
+        <div className="today-head"><div><span>Today’s journey</span><b>Oct 13 · 18°C · cloudy</b></div><button onClick={() => setTab('plan')}>Full plan <ChevronRight size={15}/></button></div>
+        <div className="journey-line">
+          <div className="journey-stop anchor"><time>10:00</time><span/><div><b>{mustGo}</b><small>⚓ Anchor · protected</small></div></div>
+          <div className="journey-stop"><time>14:30</time><span/><div><b>Daikanyama cafés</b><small>🫧 Floating · RM38 est.</small></div></div>
+          <div className="journey-stop mystery"><time>17:00</time><span/><div><b>Mystery Window</b><small>🎰 Open · spontaneous slot</small></div></div>
+        </div>
+      </section>
+
+      <section className="status-strip">
+        <div><span>Plan health</span><b>{planHealth}/100</b></div>
+        <div><span>Budget left</span><b>RM {remaining}</b></div>
+        <div><span>Group</span><b>{travellerCount} people</b></div>
+      </section>
+
+      <section className="home-tools">
+        <MiniTool icon={Users} label="Group DNA" note="1 conflict needs a decision" onClick={() => setDrawer('group')}/>
+        <MiniTool icon={PackageCheck} label="Packing" note={`${packing.filter(i => i.done).length}/${packing.length} ready`} onClick={() => setDrawer('packing')}/>
+        <MiniTool icon={Send} label="Family Window" note="Status-only sharing" onClick={() => setDrawer('family')}/>
+      </section>
+    </>;
+  }
+
+  function renderPlan() {
+    return <>
+      <SectionTitle kicker="PLAN · TRAVEL NOTEBOOK" title="Build a plan that can bend." copy="Keep the important things firm. Let the rest breathe." />
+
+      <section className="trip-promise paper-strip"><span>TRIP PROMISE</span><b>Easy pace · food-first · one protected highlight · room for surprise</b></section>
+
+      <section className="itinerary-sheet paper-sheet">
+        <div className="sheet-heading"><div><span>DAY 2</span><h3>Tokyo · city wandering</h3></div><div className="score-stamp">{planHealth}</div></div>
+        <div className="itinerary-row anchor"><time>10:00</time><div><b>{mustGo}</b><small>Must-Go · cannot be AI-replaced</small></div><em>ANCHOR</em></div>
+        <div className="itinerary-row"><time>14:30</time><div><b>Daikanyama cafés</b><small>{preference}</small></div><em>FLOATING</em></div>
+        <div className="itinerary-row mystery"><time>17:00</time><div><b>Mystery Window</b><small>{flexible}</small></div><em>OPEN</em></div>
+        <div className="itinerary-row anchor"><time>19:30</time><div><b>Neighbourhood dinner</b><small>Group reunion point</small></div><em>ANCHOR</em></div>
+      </section>
+
+      <section className="why-note"><Sparkles size={19}/><div><b>Why this plan?</b><p>{mustGo} protects the strongest preference. The café stays floating so weather or fatigue can move it without breaking the trip promise.</p></div></section>
+
+      <section className="plan-toolbox">
+        <MiniTool icon={Users} label="Group workspace" note={`Editing turn: ${plannerTurn}`} onClick={() => setDrawer('group')}/>
+        <MiniTool icon={Box} label="Backup Plan pool" note="2 viable · 1 weather-blocked" onClick={() => setDrawer('backup')}/>
+        <MiniTool icon={CircleDollarSign} label="Budget planner" note={`RM ${planned} planned of RM ${budgetTotal}`} onClick={() => setDrawer('budget')}/>
+        <MiniTool icon={Link2} label="Import inspiration" note="P2 parser placeholder ready" onClick={() => setDrawer('import')}/>
+      </section>
+
+      {mode === 'group' && <section className="conflict-ticket">
+        <span>UNRESOLVED CONFLICT</span><b>Ramen tonight vs sushi tonight</b><small>2–2 tie · Gacha unlocks only after a real tie</small>
+        <button className="ritual-trigger" onClick={() => { setCourtOpen(true); setGacha(null); setCourtConfirmed(false); }}>Open Group Court <Gavel size={18}/></button>
+      </section>}
+    </>;
+  }
+
+  function renderDuring() {
+    return <>
+      <SectionTitle kicker="DURING · LIVE TRIP" title={delay ? 'Reality changed.' : 'The trip is moving.'} copy="Coco watches the plan, not your every step." />
+
+      <section className={`live-map ${delay ? 'rain' : ''}`}>
+        <div className="map-top"><span><MapPin size={15}/> Shibuya area</span><b>{delay ? '30 min behind' : 'On schedule'}</b></div>
+        <svg viewBox="0 0 340 180" role="img" aria-label="Schematic route map"><path d="M25 135 C78 64 132 126 185 85 S265 52 315 42"/><circle cx="25" cy="135" r="6"/><circle cx="185" cy="85" r="6"/><circle cx="315" cy="42" r="7"/></svg>
+        <div className="ride-coco"><Coco tiny mood={delay ? 'panic' : 'happy'}/></div>
+        <div className="next-stop"><span>Next</span><b>{delay ? 'Replan needed' : 'Daikanyama cafés · 14:30'}</b></div>
+      </section>
+
+      {!delay && <button className="event-button" onClick={() => { setDelay(true); setReplanPreview(false); setReplanApplied(false); setEmergencyApproved(false); }}><CloudRain size={20}/> Simulate heavy rain disruption</button>}
+
+      {delay && !replanApplied && <section className="disruption-stage">
+        <div className="disruption-head"><CloudRain size={26}/><div><span>OUTDOOR BLOCK FAILED</span><b>17:00 market is no longer viable.</b></div></div>
+        {!replanPreview ? <>
+          <div className="ghost-suggestion"><span>👻 GHOST REVIVAL</span><b>Underground food hall</b><small>Highest-support viable backup · +RM8 · +12 min · Anchor protected</small></div>
+          <button className="primary" onClick={() => setReplanPreview(true)}>Preview minimum-loss repair</button>
+        </> : <>
+          <div className="change-ticket"><div><span>KEEP</span><b>{mustGo}</b></div><div><span>REPLACE</span><b>Market → food hall</b></div><div><span>MOVE</span><b>Mystery Window → 19:00</b></div><div><span>IMPACT</span><b>+RM8 · +12 min</b></div></div>
+          {mode === 'group' && <div className="emergency-court"><span>EMERGENCY COURT · 90 SEC</span><b>{emergencyApproved ? 'Approved · 3/4' : 'Group approval required'}</b><button onClick={() => setEmergencyApproved(true)}>{emergencyApproved ? '✓ Approved' : 'Simulate group approval'}</button></div>}
+          <div className="action-row"><button className="secondary" onClick={() => setReplanPreview(false)}>Not now</button><button className="primary" disabled={mode === 'group' && !emergencyApproved} onClick={() => setReplanApplied(true)}>Apply repair</button></div>
+        </>}
+      </section>}
+
+      {replanApplied && <section className="success-note"><Check size={21}/><div><b>Plan repaired.</b><small>Anchor protected · Mystery Window moved · +RM8 · undo available</small></div><button onClick={() => setReplanApplied(false)}>Undo</button></section>}
+
+      <section className="energy-check"><span>HOW’S THE GROUP?</span><div>{(['great','okay','tired'] as const).map(value => <button key={value} className={mood === value ? 'active' : ''} onClick={() => setMood(value)}>{value === 'great' ? '⚡ Great' : value === 'okay' ? '🙂 Okay' : '🥱 Tired'}</button>)}</div>{mood === 'tired' && <small>Coco suggests dropping one floating item and adding 45 min rest. Anchors stay untouched.</small>}</section>
+
+      {mode === 'group' && <section className="split-note"><div><span>SMART SPLIT</span><b>{split ? '2 café · 2 shopping' : 'Different energy levels?'}</b><small>{split ? 'Reunion · Hachiko 19:30 · ±15 min' : 'Split only when both mini-plans stay feasible.'}</small></div><button onClick={() => setSplit(!split)}>{split ? 'Cancel' : 'Create split'}</button></section>}
+
+      <section className="during-tools">
+        <MiniTool icon={Send} label="Family Window" note={reported ? 'Latest reassurance sent' : 'Reassurance, not surveillance'} onClick={() => setDrawer('family')}/>
+        <MiniTool icon={MapPin} label="Location privacy" note={continuousLocation ? 'Continuous location on by consent' : 'Continuous location off'} onClick={() => setDrawer('family')}/>
+      </section>
+    </>;
+  }
+
+  function renderMemories() {
+    return <>
+      <SectionTitle kicker="AFTER · MEMORY TRUNK" title="Keep what the trip taught you." copy="Photos, choices, little failures, and the things you would do again." />
+
+      <section className="trunk-hero">
+        <div className="trunk-lid"/><div className="trunk-body"><span className="postcard p1">TOKYO</span><span className="postcard p2">雨の日</span><span className="ticket">10.13</span><Coco tiny mood="happy"/></div>
+      </section>
+
+      <section className="memory-actions">
+        <button onClick={() => setPhotoIndexed(true)}><Map size={20}/><span><b>Photo Map</b><small>{photoIndexed ? '18 photos indexed · 4 areas' : 'Import EXIF placeholder'}</small></span></button>
+        <button onClick={() => setJournalGenerated(true)}><BookOpen size={20}/><span><b>Travel journal</b><small>{journalGenerated ? 'Draft generated' : 'Generate from timeline + photos'}</small></span></button>
+      </section>
+
+      {journalGenerated && <section className="postcard-note"><span>OCT 13 · TOKYO</span><p>Rain changed the evening, but the group kept the one thing everyone cared about. We ended up underground, warmer, later, and somehow happier.</p><small>Mock AI draft · editable before saving</small></section>}
+
+      <section className="worth-card"><span>WORTH IT?</span><h3>Would you choose this kind of day again?</h3><div>{(['yes','mixed','no'] as const).map(value => <button key={value} className={worthIt === value ? 'active' : ''} onClick={() => setWorthIt(value)}>{value === 'yes' ? 'Worth it' : value === 'mixed' ? 'Mixed' : 'Not really'}</button>)}</div>{worthIt && <p>Coco noticed you declared “slow mornings” but enjoyed the earlier food walk. Update your profile only if you agree.</p>}{worthIt && <button className="secondary" onClick={() => setProfileLearned(true)}>{profileLearned ? '✓ Preference learning saved' : 'Confirm this learning'}</button>}</section>
+
+      <section className="review-ledger paper-sheet"><div><span>Budget vs actual</span><b>RM {spent + replanCost} spent</b><small>RM {remaining} remaining</small></div><div><span>Decisions</span><b>{decisionHistory.length || 0} recorded</b><small>{decisionHistory[0] || 'No Court history yet'}</small></div></section>
+
+      <section className="community-entry"><div><span>COMMUNITY</span><b>{published ? 'Published with consent' : 'Private by default'}</b><small>Nothing becomes public without an explicit action.</small></div><button onClick={() => setDrawer('community')}>Open</button></section>
+    </>;
+  }
+
+  function renderMe() {
+    return <>
+      <SectionTitle kicker="ME · COCO PROFILE" title="How do you actually like to travel?" copy="Private preferences first. Group DNA comes after." />
+      <section className="profile-hero paper-sheet"><Coco mood="happy"/><div><span>MEI · GROUP TRAVELLER</span><h3>{tripVibe}</h3><p>Food-first · budget-aware · flexible plans</p></div></section>
+      <section className="profile-fields">
+        <label><span>Trip vibe</span><input value={tripVibe} onChange={e => setTripVibe(e.target.value)}/></label>
+        <label><span>Must-Go</span><input value={mustGo} onChange={e => setMustGo(e.target.value)}/></label>
+        <label><span>Deal breaker</span><input value={veto} onChange={e => setVeto(e.target.value)}/></label>
+        <label><span>Preference</span><input value={preference} onChange={e => setPreference(e.target.value)}/></label>
+        <label><span>Flexible</span><input value={flexible} onChange={e => setFlexible(e.target.value)}/></label>
+      </section>
+      <div className="mode-toggle"><button className={mode === 'group' ? 'active' : ''} onClick={() => setMode('group')}>Group trip</button><button className={mode === 'solo' ? 'active' : ''} onClick={() => setMode('solo')}>Solo trip</button></div>
+      <section className="me-tools"><MiniTool icon={Users} label="Group DNA" note="See common ground + explicit conflict" onClick={() => setDrawer('group')}/><MiniTool icon={PackageCheck} label="Packing ownership" note="Shared items have one clear owner" onClick={() => setDrawer('packing')}/><MiniTool icon={Link2} label="External inspiration" note="P2 parser placeholder" onClick={() => setDrawer('import')}/></section>
+    </>;
+  }
+
+  function renderDrawer() {
+    if (!drawer) return null;
+    return <div className="overlay" onMouseDown={() => setDrawer(null)}><section className="drawer" onMouseDown={e => e.stopPropagation()}><button className="close" onClick={() => setDrawer(null)}><X size={20}/></button>
+      {drawer === 'group' && <><span className="drawer-kicker">GROUP DNA</span><h3>Mostly aligned. One thing needs a real decision.</h3><div className="dna-grid"><div><span>Vibe</span><b>{tripVibe}</b></div><div><span>Pace</span><b>Relaxed</b></div><div><span>Budget</span><b>RM600 / person</b></div><div><span>Food</span><b>High priority</b></div></div><div className="conflict-mini"><span>CONFLICT</span><b>Mei: {mustGo}</b><b>JH: {veto}</b></div><div className="planner-turn"><span>Editing turn</span><b>{plannerTurn}</b><button onClick={() => setPlannerTurn(plannerTurn === 'Mei' ? 'JH' : plannerTurn === 'JH' ? 'Zi Shan' : 'Mei')}>Pass turn</button></div></>}
+      {drawer === 'packing' && <><span className="drawer-kicker">PACKING</span><h3>One bag, zero “I thought you brought it.”</h3>{packing.map((item, i) => <button className={`pack-row ${item.done ? 'done' : ''}`} key={item.name} onClick={() => togglePack(i)}><span>{item.done ? '✓' : '○'}</span><div><b>{item.name}</b><small>{item.shared ? `Shared · ${item.owner} owns this` : `Owner · ${item.owner}`}</small></div></button>)}</>}
+      {drawer === 'backup' && <><span className="drawer-kicker">BACKUP PLAN POOL</span><h3>Ideas worth keeping when reality misbehaves.</h3>{backups.map(item => <div className={`backup-row ${item.viable ? '' : 'off'}`} key={item.name}><b>{item.name}</b><small>{item.support} supporters · {item.cost >= 0 ? '+' : ''}RM{item.cost} · +{item.time} min {item.viable ? '· viable' : '· blocked'}</small></div>)}</>}
+      {drawer === 'budget' && <><span className="drawer-kicker">TRIP BUDGET</span><h3>Spend on what matters, not on surprises you forgot to price.</h3><div className="budget-big"><b>RM {remaining}</b><span>remaining</span></div><div className="budget-lines"><div><span>Stay</span><b>RM900</b></div><div><span>Food</span><b>RM420</b></div><div><span>Transit</span><b>RM220</b></div><div><span>Activities</span><b>RM220</b></div></div><button className="receipt-button" onClick={() => setReceiptPrinted(true)}><ReceiptText size={18}/>{receiptPrinted ? '✓ Receipt printed' : 'Print split-bill receipt'}</button>{receiptPrinted && <div className="receipt-paper"><b>COCOCRUNCH · DINNER</b><span>Mei · RM47</span><span>JH · RM43</span><span>Zi Shan · RM46</span><span>Alex · RM44</span><em>PAID</em></div>}</>}
+      {drawer === 'family' && <><span className="drawer-kicker">FAMILY WINDOW</span><h3>Reassurance, not surveillance.</h3><div className="porch-light"><span className="lantern">◉</span><div><b>{delay ? '🟡 Plan changed, everyone is safe.' : '🟢 Everything is going as planned.'}</b><small>No action needed.</small></div></div><div className="privacy-grid">{(['status','area','exact'] as Privacy[]).map(level => <button key={level} className={privacy === level ? 'active' : ''} onClick={() => setPrivacy(level)}>{level === 'status' ? 'Status only' : level === 'area' ? 'Approx. area' : 'Exact location'}</button>)}</div><label className="toggle-row"><span><b>Continuous location</b><small>Off by default</small></span><input type="checkbox" checked={continuousLocation} onChange={e => setContinuousLocation(e.target.checked)}/></label><button className="courier-button" onClick={() => setReported(true)}>{reported ? '🪳💨 Sent to family' : 'Send reassurance with Coco'}</button></>}
+      {drawer === 'import' && <><span className="drawer-kicker">IMPORT INSPIRATION · P2</span><h3>Check if an outside recommendation fits your trip.</h3><input className="big-input" value={externalLink} onChange={e => setExternalLink(e.target.value)}/><button className="primary" onClick={() => setLinkAnalyzed(true)}>{linkAnalyzed ? 'Analyze again' : 'Analyze link'}</button>{linkAnalyzed && <div className="analysis-result"><b>84% fit</b><small>3 places match your pace · 1 conflicts with the budget cap · parser/data source still placeholder.</small></div>}</>}
+      {drawer === 'community' && <><span className="drawer-kicker">COMMUNITY · P2</span><h3>Borrow ideas, not someone else’s whole trip.</h3>{communityTrips.map(trip => <div className="community-row" key={trip.id}><div><b>{trip.title}</b><small>{trip.match}% fit · by {trip.author}</small></div><button onClick={() => setCommunityTrips(items => items.map(item => item.id === trip.id ? { ...item, saved: !item.saved } : item))}>{trip.saved ? 'Saved' : 'Save'}</button></div>)}<div className="publish-row"><div><b>Your trip</b><small>{published ? 'Public by explicit consent' : 'Private'}</small></div><button onClick={() => setPublished(!published)}>{published ? 'Unpublish' : 'Publish'}</button></div></>}
+    </section></div>;
+  }
+
+  return <div className="app-shell">
+    <header className="topbar"><div className="wordmark"><span>COCOCRUNCH</span><b>COCO IN YOUR AREA.</b></div><button className="bell"><Bell size={19}/><i/></button></header>
+    <main>{tab === 'home' ? renderHome() : tab === 'plan' ? renderPlan() : tab === 'during' ? renderDuring() : tab === 'memories' ? renderMemories() : renderMe()}</main>
+
+    <nav className="bottom-nav">{tabs.map(item => { const Icon = item.icon; return <button key={item.id} className={tab === item.id ? 'active' : ''} onClick={() => setTab(item.id)}><Icon size={20}/><span>{item.label}</span></button>; })}</nav>
+
+    {courtOpen && <div className="ritual-overlay"><section className="court-stage"><button className="close light" onClick={() => setCourtOpen(false)}><X size={20}/></button><span className="ritual-kicker">GROUP COURT</span><Coco mood="happy"/><h3>Lunch argument, now with due process.</h3><p>2–2 tie. No averaging away the conflict.</p><div className="court-options"><button className={courtPick === 'ramen' ? 'active' : ''} onClick={() => setCourtPick('ramen')}>🍜<b>Ramen</b><small>2 votes · cheaper</small></button><button className={courtPick === 'sushi' ? 'active' : ''} onClick={() => setCourtPick('sushi')}>🍣<b>Sushi</b><small>2 votes · stronger wish</small></button></div><div className="trade-slip"><b>Possible trade</b><small>Ramen tonight ↔ sushi market becomes tomorrow’s protected lunch.</small></div><button className="gacha-machine" onClick={() => { setGacha(Math.random() > .5 ? 'Ramen wins the tie.' : 'Sushi wins the tie.'); setCourtConfirmed(false); }}>🎰 Pull Gacha</button>{gacha && <div className="verdict"><span>VERDICT</span><b>{gacha}</b><small>Random result is still only a proposal.</small><button onClick={() => setCourtConfirmed(true)}>{courtConfirmed ? '✓ Added to official timeline' : 'Confirm result'}</button></div>}</section></div>}
+
+    {renderDrawer()}
+  </div>;
 }
