@@ -1,4 +1,4 @@
-import type { BudgetPlan } from './domain/budget';
+import type { BudgetActuals, BudgetPlan } from './domain/budget';
 import type { CourtVote } from './domain/court';
 import type { TravelProfile, TripReview } from './domain/preferences';
 import type { TingoAnswer, TingoDimensions } from './domain/tingo';
@@ -44,6 +44,8 @@ export type PersistedState = {
   soloBudgetTotal: number;
   groupBudgetPlan: BudgetPlan;
   soloBudgetPlan: BudgetPlan;
+  groupBudgetActuals?: BudgetActuals;
+  soloBudgetActuals?: BudgetActuals;
   privacy: 'status' | 'area' | 'exact';
   continuousLocation: boolean;
   recommendations: PersistedRecommendation[];
