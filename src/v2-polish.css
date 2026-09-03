@@ -1,0 +1,118 @@
+/* CocoCrunch V2 interface polish.
+   Loaded last so the reference-led consumer UI can override legacy V1/editorial treatments
+   without rewriting the existing stylesheet wholesale. */
+
+/* Typography: keep the product friendly and contemporary, not editorial/Georgia-heavy. */
+.page-title h2,
+.home-hero h2,
+.sheet-heading h3,
+.conflict-ticket b,
+.ghost-wish h3,
+.future-postcard h3,
+.signature-lab > header b,
+.prayer-stage > b,
+.pack-replica-head h2,
+.workspace-title h2,
+.drawer h3,
+.court-stage h3 {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  letter-spacing: -.025em;
+}
+.page-title h2 { font-size: clamp(25px, 6.2vw, 32px); line-height: 1.08; font-weight: 820; }
+.home-hero h2 { font-size: 27px; line-height: 1.08; font-weight: 820; }
+
+/* Fix the actual wordmark DOM rather than styling the old selector shape. */
+.brand-lockup { border: 0; background: transparent; color: inherit; padding: 0; display: flex; align-items: center; gap: 9px; text-align: left; }
+.wordmark b { color: var(--sangria); font-size: 14px; font-weight: 950; letter-spacing: .08em; }
+.wordmark small { color: #826c64; font-size: 9px; font-weight: 700; letter-spacing: .06em; }
+.brand-mark { width: 28px; height: 28px; border-radius: 10px 10px 8px 12px; display: grid; place-items: center; background: var(--sangria); color: var(--cream); font-weight: 950; transform: rotate(-4deg); }
+
+/* Touch and keyboard ergonomics. */
+.bottom-nav button,
+.lifecycle-tabs button,
+.primary,
+.secondary,
+.hero-link,
+.new-trip-link,
+.back-link,
+.workspace-more,
+.ritual-trigger,
+.gacha-machine,
+.courier-button,
+.receipt-button,
+.signature-primary {
+  min-height: 44px;
+}
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid rgba(149,187,234,.72);
+  outline-offset: 3px;
+}
+
+/* Keep the global nav stable above device safe areas. */
+.bottom-nav {
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+}
+
+/* Make the trip index and trip workspace read as two levels, not the same screen. */
+.trip-workspace-head { margin-bottom: 12px; }
+.back-link { color: var(--sangria); }
+.workspace-context { margin-bottom: 18px; }
+
+/* Canonical Coco should read crisply; never blend with legacy CSS anatomy. */
+.coco-canonical { inset: 0 !important; }
+.coco-canonical img { object-fit: contain; }
+
+/* Packing: use the canonical mascot and preserve the physical-object feeling. */
+.replica-coco { width: 58px !important; height: 58px !important; right: -8px !important; bottom: 2px !important; }
+.replica-coco img { width: 100%; height: 100%; object-fit: contain; display: block; filter: drop-shadow(0 5px 5px rgba(84,46,34,.13)); }
+.replica-coco i,
+.replica-coco b { display: none !important; }
+.loose-item.dragging { transform-origin: center; }
+.loose-item.dragging .loose-object { box-shadow: 0 16px 26px rgba(80,44,34,.18); }
+
+/* Reduce the old repeated-card feel: lists rely more on spacing and rules than containers. */
+.home-tools,
+.plan-toolbox,
+.during-tools,
+.me-tools { border-top-color: rgba(147,5,0,.08); }
+.mini-tool { min-height: 60px; padding-block: 12px; }
+.paper-sheet { box-shadow: 0 8px 24px rgba(86,52,36,.04); }
+
+/* Narrow-phone resilience. */
+@media (max-width: 390px) {
+  .app-shell { padding-inline: 15px; }
+  .status-strip { gap: 4px; }
+  .status-strip div { padding-inline: 6px; }
+  .lifecycle-tabs button { min-width: 0; padding-inline: 6px; }
+  .lifecycle-tabs small { white-space: normal; }
+  .page-title h2 { font-size: 26px; }
+}
+@media (max-width: 360px) {
+  .app-shell { padding-inline: 13px; }
+  .home-hero { grid-template-columns: minmax(0, 1fr) 64px; padding-inline: 16px; }
+  .home-hero .coco { transform: scale(.84); transform-origin: right bottom; }
+  .status-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .status-strip b { font-size: 11px; }
+}
+
+/* Motion review: entrances use short ease-out motion, and all non-essential motion opts out. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+  }
+  main,
+  .coco,
+  .capture-capsule,
+  .capture-ball,
+  .coco-courier.sent .coco,
+  .ritual-coco,
+  .incense-scene span,
+  .trunk-button .trunk-lid,
+  .ritual-receipt,
+  .loose-item,
+  .pack-progress b {
+    animation: none !important;
+    transition: none !important;
+  }
+}
