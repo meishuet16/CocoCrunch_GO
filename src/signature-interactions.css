@@ -1,0 +1,41 @@
+/* CocoCrunch signature interaction layer.
+   Everyday planning stays quiet; only memorable actions become tactile rituals. */
+.signature-lab { display:grid; gap:14px; margin-top:18px; }
+.signature-lab > header { display:grid; gap:4px; }
+.signature-lab > header span { color:var(--sangria); font-size:10px; font-weight:950; letter-spacing:.12em; }
+.signature-lab > header b { font-family:Georgia,serif; font-size:22px; }
+.ritual-card { border:1px solid var(--line); border-radius:22px; padding:16px; background:rgba(255,255,255,.5); box-shadow:0 10px 28px rgba(86,52,36,.045); display:grid; gap:12px; }
+.ritual-card.blue { background:rgba(149,187,234,.13); }
+.ritual-card > header { display:flex; gap:12px; align-items:center; }
+.ritual-card > header > div { display:grid; gap:3px; flex:1; }
+.ritual-card > header span { color:var(--sangria); font-size:9px; font-weight:950; letter-spacing:.1em; }
+.ritual-card > header b { font-size:14px; }
+.ritual-card p { margin:0; color:var(--muted); font-size:11px; line-height:1.5; }
+.ritual-actions { display:flex; gap:8px; flex-wrap:wrap; }
+.ritual-actions button { min-height:44px; border:1px solid rgba(147,5,0,.22); border-radius:14px; padding:0 14px; background:var(--cream); color:var(--sangria); font-weight:850; font-size:11px; }
+.ritual-actions button.primary-ritual { background:var(--sangria); color:var(--cream); border-color:var(--sangria); }
+.ritual-actions button:active { transform:scale(.98); }
+.capsule-stage { min-height:124px; border-radius:18px; background:rgba(149,187,234,.13); display:grid; place-items:center; overflow:hidden; position:relative; }
+.capture-capsule { width:82px; height:82px; border:3px solid var(--ink); border-radius:50%; position:relative; overflow:hidden; background:linear-gradient(to bottom,var(--sangria) 0 46%,var(--ink) 46% 52%,var(--cream) 52%); box-shadow:0 8px 0 rgba(147,5,0,.09); }
+.capture-capsule::after { content:''; position:absolute; width:22px; height:22px; border:3px solid var(--ink); border-radius:50%; background:var(--cream); left:27px; top:29px; }
+.capture-capsule.captured { animation:capsuleCatch 560ms cubic-bezier(.16,1,.3,1) 1; }
+@keyframes capsuleCatch { 0%{transform:translateY(-8px) scale(.94) rotate(-5deg)} 55%{transform:translateY(2px) scale(1.04) rotate(4deg)} 100%{transform:none} }
+.prayer-stage { text-align:center; padding:18px 12px; border-radius:18px; background:linear-gradient(180deg,rgba(255,255,255,.35),rgba(147,5,0,.04)); }
+.prayer-stage .incense { font-size:30px; letter-spacing:8px; display:block; margin-bottom:7px; }
+.prayer-stage b { display:block; font-family:Georgia,serif; font-size:18px; }
+.prayer-stage small { display:block; color:var(--muted); margin-top:5px; line-height:1.45; }
+.courier-slip { border:1px dashed rgba(147,5,0,.28); border-radius:10px; padding:13px; background:var(--cream); transform:rotate(-.5deg); display:grid; gap:5px; }
+.courier-slip strong { color:var(--sangria); font-size:11px; }
+.courier-slip span { font-size:12px; font-weight:800; }
+.courier-slip small { color:var(--muted); font-size:10px; }
+.coco-courier { display:flex; align-items:center; gap:10px; min-height:54px; }
+.coco-courier .coco { transform:scale(.7); transform-origin:left center; margin-right:-18px; }
+.coco-courier.sent .coco { animation:courierDash 620ms cubic-bezier(.16,1,.3,1) 1; }
+@keyframes courierDash { 0%{transform:scale(.7) translateX(-10px)} 60%{transform:scale(.7) translateX(12px) rotate(3deg)} 100%{transform:scale(.7) translateX(0)} }
+.receipt-paper { width:min(260px,100%); margin:auto; padding:14px; background:#fffdf5; border:1px solid rgba(91,65,49,.15); box-shadow:0 8px 20px rgba(86,52,36,.06); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:10px; line-height:1.6; position:relative; }
+.receipt-paper::after { content:''; position:absolute; left:0; right:0; bottom:-6px; height:7px; background:linear-gradient(135deg,#fffdf5 5px,transparent 0) 0 0/10px 10px repeat-x; }
+.receipt-paper .paid { display:block; margin-top:8px; color:var(--sangria); font-family:Inter,sans-serif; font-size:20px; font-weight:950; transform:rotate(-5deg); text-align:right; }
+.memory-object-row { display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; }
+.memory-object { flex:0 0 108px; min-height:92px; border:1px solid var(--line); border-radius:14px; padding:11px; background:rgba(255,255,255,.5); display:grid; align-content:space-between; gap:8px; }
+.memory-object span { font-size:22px; }.memory-object b { font-size:11px; }.memory-object small { color:var(--muted); font-size:9px; }
+@media (prefers-reduced-motion:reduce){ .capture-capsule.captured,.coco-courier.sent .coco{animation:none!important}.ritual-actions button:active{transform:none} }
