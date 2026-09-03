@@ -1,6 +1,6 @@
 # CocoCrunch Rescue Log
 
-Living handoff for the V2 rescue pass on `feat/p0-foundation` / PR #1.
+Living handoff for the V2 rescue pass on `feat/p0-foundation` / PR #1. This file is updated as rescue work continues.
 
 ## Ground rules
 
@@ -11,6 +11,7 @@ Living handoff for the V2 rescue pass on `feat/p0-foundation` / PR #1.
 - Group governance stays explicit; official Court and entertainment randomness remain separate.
 - Continuous location remains off by default; public memories remain private until explicit consent.
 - CI status is recorded only when verified against the exact head SHA.
+- Source/CSS inspection is not screenshot QA.
 
 ## Rescue work completed so far
 
@@ -63,18 +64,32 @@ Living handoff for the V2 rescue pass on `feat/p0-foundation` / PR #1.
 - Workflow run #89 for rescue head `0da0c24e238d30543062a00e2938ba47786ecc2f` was verified `completed / success`.
 - Later heads must be checked independently; do not infer CI success from an earlier green run.
 
+## Current audit findings
+
+- `persistence.ts` already persists Court options, active conflict, decision history, Tingo answers/dimensions, members and item reviews under versioned storage.
+- `trip.ts` now contains responsibility suggestion + explicit-apply helpers; App UI has not consumed them yet, so #28 remains Partial.
+- `budget.ts` now contains category actuals, variance and learning guidance; App still uses a single seeded `spent` number, so #51 remains Partial until the Completed UI consumes category actuals.
+- `preferences.ts` now consumes per-stop reviews in domain learning; App `confirmLearning()` still calls trip-level `learnFromTrip()` only, so #49 remains Partial until the App uses reconciliation.
+- Current App recommendations are still created from base discovery data; Tingo-aware ranking is not yet wired through the visible search flow, so #1 remains Partial.
+- Memory Trunk source contains real CSS perspective/opening/keepsake layering and reduced-motion support, but rendered mobile quality remains unverified.
+
 ## Still open / do not call Done yet
 
-- Wire Tingo ranking/guidance through every relevant App flow and verify behavior in the rendered product.
-- Finish concession preview/rollback semantics for Group Court (#23).
-- Surface personality-derived responsibility suggestions in Group UI with explicit confirmation (#28).
-- Surface per-stop Worth It learning and category budget variance in Completed UI (#49/#51), not only domain helpers.
-- Verify preference-vs-actual retrospective (#50) against real state rather than seeded copy.
-- Continue contextual canonical Coco extraction/usage beyond the idle crop.
-- Independently inspect Gacha, Packing, and Memory Trunk rendered behavior; source/CSS inspection is not screenshot QA.
-- Mobile QA at 360 / 390 / 430 px remains required.
-- Run current-head CI after each coherent rescue batch and fix failures on the same branch.
+1. Wire Tingo ranking/guidance through visible App flows and verify each dimension has a meaningful downstream effect.
+2. Finish concession preview/rollback semantics for Group Court (#23).
+3. Surface personality-derived responsibility suggestions in Group UI with explicit confirmation (#28).
+4. Make Completed learning consume per-stop Worth It data and persist the resulting learning (#49).
+5. Implement/verify preference-vs-actual retrospective (#50) against actual trip state rather than seeded copy.
+6. Surface category planned-vs-actual budget reconciliation and learning in Completed UI (#51).
+7. Continue contextual canonical Coco extraction/usage beyond the idle crop.
+8. Independently inspect Gacha, Packing, and Memory Trunk rendered behavior; source/CSS inspection is not screenshot QA.
+9. Mobile QA at 360 / 390 / 430 px remains required.
+10. Run current-head CI after each coherent rescue batch and fix failures on the same branch.
 
-## Current rescue batch
+## Next implementation batch
 
-This batch adds the domain contracts for Tingo-derived group responsibilities and category-level planned-vs-actual budget learning, plus this living rescue log. Next step is wiring these contracts into the App UI and persistence without duplicating state.
+Wire the already-added domain contracts into App state/UI without introducing duplicate state: Tingo-aware discovery, explicit responsibility preview/apply, per-stop review reconciliation, and category budget retrospective. Then verify exact-head CI before moving to deeper signature-interaction/mobile QA.
+
+## Current risk posture
+
+The product is materially healthier than the Codex V2 handoff, but it is **not merge-ready yet**. Remaining risk is concentrated in domain-to-UI closure, retrospective data loops, contextual Coco coverage, and rendered mobile/signature-interaction QA rather than basic TypeScript scaffolding.
