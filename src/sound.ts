@@ -1,4 +1,4 @@
-import { createUISFX } from 'uisfx';
+import { createUISFX, type CueName } from 'uisfx';
 
 export type CocoSound =
   | 'tap'
@@ -17,7 +17,7 @@ const SOUND_KEY = 'cococrunch:sound-enabled';
 const ui = createUISFX({ pack: 'zen' });
 let ready = false;
 
-const cue = {
+const cue: Record<CocoSound, CueName> = {
   tap: 'select',
   save: 'success',
   decision: 'complete',
@@ -29,7 +29,7 @@ const cue = {
   'prayer-step': 'progress-step',
   'memory-open': 'open',
   'memory-seal': 'checkpoint',
-} as const;
+};
 
 function readEnabled(): boolean {
   if (typeof window === 'undefined') return true;
@@ -40,15 +40,13 @@ function readEnabled(): boolean {
   }
 }
 
-export function unlockSound() {
+export function unlockSound(): void {
   if (ready) return;
   ready = true;
   ui.setEnabled(readEnabled());
-  // The published uisfx player lazily creates/resumes Web Audio from play().
-  // This function is intentionally called only from a trusted user gesture.
 }
 
-export function playSound(sound: CocoSound) {
+export function playSound(sound: CocoSound): void {
   if (!ready) return;
   try {
     ui.play(cue[sound]);
@@ -57,7 +55,7 @@ export function playSound(sound: CocoSound) {
   }
 }
 
-export function setSoundEnabled(enabled: boolean) {
+export function setSoundEnabled(enabled: boolean): void {
   ui.setEnabled(enabled);
   try {
     window.localStorage.setItem(SOUND_KEY, String(enabled));
