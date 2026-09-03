@@ -19,6 +19,14 @@ export type TingoBehavior = {
   groupRole: 'connector' | 'scout' | 'planner' | 'independent';
 };
 
+export type TingoGuidance = {
+  roleSuggestion: string;
+  itineraryGuidance: string;
+  budgetGuidance: string;
+  courtGuidance: string;
+  accommodationGuidance: string;
+};
+
 export const tingoQuestions: TingoQuestion[] = [
   { id: 'morning', prompt: 'A free morning sounds best when…', options: [
     { id: 'slow', label: 'I follow the smell of breakfast', hint: 'slow pace', weights: { pace: -2, food: 2, flexibility: 1 } },
@@ -85,6 +93,17 @@ export function deriveTingoBehavior(dimensions: TingoDimensions): TingoBehavior 
     budgetMode,
     changeStyle,
     groupRole,
+  };
+}
+
+export function tingoGuidance(dimensions: TingoDimensions): TingoGuidance {
+  const behavior = deriveTingoBehavior(dimensions);
+  return {
+    roleSuggestion: behavior.groupRole === 'connector' ? 'Group coordinator' : behavior.groupRole === 'scout' ? 'Discovery scout' : behavior.groupRole === 'planner' ? 'Itinerary planner' : 'Independent flex lead',
+    itineraryGuidance: `${behavior.dailyStops} meaningful stops/day with about ${behavior.bufferMinutes} min breathing room between fixed blocks.`,
+    budgetGuidance: behavior.budgetMode === 'value-first' ? 'Prefer lower-cost equivalents before cutting a Must-Go.' : behavior.budgetMode === 'experience-first' ? 'Protect memorable experiences, then rebalance flexible spend.' : 'Balance fit and price before escalating spend.',
+    courtGuidance: behavior.changeStyle === 'adapt-fast' ? 'Offer two viable options quickly and keep discussion short.' : behavior.changeStyle === 'explain-first' ? 'Show impact and reasoning before asking for a vote.' : 'Start by showing which anchors and commitments stay protected.',
+    accommodationGuidance: behavior.accommodationBias === 'central-comfort' ? 'Prioritize central, low-friction stays.' : behavior.accommodationBias === 'character' ? 'Allow a longer transfer for a distinctive stay.' : 'Prioritize clean, well-connected value stays.',
   };
 }
 
