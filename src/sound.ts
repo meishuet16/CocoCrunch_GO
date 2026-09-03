@@ -1,4 +1,4 @@
-import { createUISFX, type CueName } from 'uisfx';
+import { createUISFX } from 'uisfx';
 
 export type CocoSound =
   | 'tap'
@@ -13,14 +13,15 @@ export type CocoSound =
   | 'memory-open'
   | 'memory-seal';
 
-const ui = createUISFX({ pack: 'zen', preferences: {} });
-let unlocked = false;
+const SOUND_KEY = 'cococrunch:sound-enabled';
+const ui = createUISFX({ pack: 'zen' });
+let ready = false;
 
-const cue: Record<CocoSound, CueName> = {
+const cue = {
   tap: 'select',
-  save: 'checkpoint',
+  save: 'success',
   decision: 'complete',
-  gacha: 'bonus',
+  gacha: 'reveal',
   repair: 'success',
   capture: 'drop',
   courier: 'send',
@@ -28,27 +29,39 @@ const cue: Record<CocoSound, CueName> = {
   'prayer-step': 'progress-step',
   'memory-open': 'open',
   'memory-seal': 'checkpoint',
-};
+} as const;
 
-export async function unlockSound() {
-  if (unlocked) return;
+function readEnabled(): boolean {
+  if (typeof window === 'undefined') return true;
   try {
-    await ui.unlock();
-    unlocked = true;
+    return window.localStorage.getItem(SOUND_KEY) !== 'false';
   } catch {
-    // Audio is progressive enhancement; the visible interaction remains complete.
+    return true;
   }
 }
 
+export function unlockSound() {
+  if (ready) return;
+  ready = true;
+  ui.setEnabled(readEnabled());
+  // The published uisfx player lazily creates/resumes Web Audio from play().
+  // This function is intentionally called only from a trusted user gesture.
+}
+
 export function playSound(sound: CocoSound) {
-  if (!unlocked) return;
+  if (!ready) return;
   try {
     ui.play(cue[sound]);
   } catch {
-    // Never let audio failure block product logic.
+    // Audio is progressive enhancement; never block product logic.
   }
 }
 
 export function setSoundEnabled(enabled: boolean) {
   ui.setEnabled(enabled);
+  try {
+    window.localStorage.setItem(SOUND_KEY, String(enabled));
+  } catch {
+    // Storage can be unavailable in constrained/private contexts.
+  }
 }
