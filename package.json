@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "tsc --noEmit && vite build"
+    "test": "vitest run",
+    "check": "tsc --noEmit && vitest run && vite build"
   },
   "dependencies": {
     "react": "latest",
@@ -18,6 +19,7 @@
   "devDependencies": {
     "@vitejs/plugin-react": "latest",
     "vite": "latest",
+    "vitest": "latest",
     "typescript": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest"
