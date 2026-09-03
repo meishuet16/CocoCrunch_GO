@@ -1,10 +1,10 @@
-# Travel domain
+# CocoCrunch domain layer
 
-Pure planning rules live here so UI components do not own business invariants.
+Keep product rules here instead of burying them in JSX or CSS.
 
-- `court.ts`: member vote tally and true-tie detection. Gacha is allowed only when `canUseGacha(votes)` is true.
-- `budget.ts`: editable category values, sanitization, totals and remaining-budget math.
-- `preferences.ts`: explicit post-trip learning transforms and a reviewable before/after summary.
-- `discovery.ts`: destination-specific prototype catalog. Unknown destinations are explicitly labeled fallback examples rather than presented as live data.
+- `court.ts` owns vote tallying and the **true-tie-only** Gacha invariant.
+- `budget.ts` owns amount sanitization, editable category totals and remaining-budget math.
+- `preferences.ts` owns post-trip learning transforms; UI must ask for confirmation before applying them.
+- `discovery.ts` is the replaceable destination data boundary. The current source is an explicitly labelled local prototype catalog with a clearly marked fallback; it must never pretend to be live recommendation data.
 
-Browser persistence is isolated in `src/persistence.ts`. UI code should consume these APIs instead of duplicating their rules.
+`App.tsx` may orchestrate these rules, but must not duplicate their calculations. Side-effectful signature interactions travel through the typed `experience.ts` event contract rather than DOM inspection. Durable product state goes through versioned `persistence.ts`; transient drawers, overlays and animation steps stay in memory.
