@@ -1,3 +1,5 @@
+import { deriveTingoBehavior, type TingoDimensions } from './tingo';
+
 export type DiscoveryPlace = { name: string; type: string; match: number; cost: string; duration: string; why: string; source: 'prototype-catalog' | 'fallback' };
 const catalog: Record<string, Omit<DiscoveryPlace, 'source'>[]> = {
   tokyo: [
@@ -16,9 +18,42 @@ const catalog: Record<string, Omit<DiscoveryPlace, 'source'>[]> = {
     { name: 'Nakanoshima', type: 'Walk · riverside', match: 84, cost: 'Free', duration: '1.5h', why: 'Low-cost flexible recovery block.' },
   ],
 };
-export function discoverPlaces(destination: string): DiscoveryPlace[] {
+
+function scoreWithTingo(place: DiscoveryPlace, dimensions: TingoDimensions): DiscoveryPlace {
+  const behavior = deriveTingoBehavior(dimensions);
+  const text = `${place.name} ${place.type} ${place.cost}`.toLowerCase();
+  let boost = 0;
+  const reasons: string[] = [];
+
+  if (behavior.recommendationBias === 'food' && /food|market|cafe|cafés/.test(text)) {
+    boost += 8;
+    reasons.push('food-first profile');
+  }
+  if (behavior.recommendationBias === 'adventure' && /walk|temple|vintage|streets|scenery/.test(text)) {
+    boost += 6;
+    reasons.push('exploration preference');
+  }
+  if (behavior.recommendationBias === 'value' && /free|walk|market/.test(text)) {
+    boost += 5;
+    reasons.push('value-first preference');
+  }
+  if (behavior.itineraryDensity === 'gentle' && place.duration === '1.5h') {
+    boost += 3;
+    reasons.push('gentle pacing');
+  }
+
+  return {
+    ...place,
+    match: Math.max(0, Math.min(100, place.match + boost)),
+    why: reasons.length ? `${place.why} Tingo also boosts it for ${reasons.join(' + ')}.` : place.why,
+  };
+}
+
+export function discoverPlaces(destination: string, dimensions?: TingoDimensions): DiscoveryPlace[] {
   const key = destination.trim().toLowerCase();
   const exact = catalog[key];
-  if (exact) return exact.map(place => ({ ...place, source: 'prototype-catalog' }));
-  return catalog.tokyo.map(place => ({ ...place, match: Math.max(70, place.match - 12), why: `Fallback example only for ${destination || 'this destination'}; live destination data is not connected.`, source: 'fallback' }));
+  const places = exact
+    ? exact.map(place => ({ ...place, source: 'prototype-catalog' as const }))
+    : catalog.tokyo.map(place => ({ ...place, match: Math.max(70, place.match - 12), why: `Fallback example only for ${destination || 'this destination'}; live destination data is not connected.`, source: 'fallback' as const }));
+  return dimensions ? places.map(place => scoreWithTingo(place, dimensions)).sort((a, b) => b.match - a.match) : places;
 }
