@@ -1,0 +1,29 @@
+export type TripConstraint = { id: string; type: 'must-go' | 'deal-breaker' | 'preference' | 'flexible'; value: string; source: 'member' | 'ai'; };
+export type TripMember = { id: string; name: string; role: string; inviteStatus: 'joined' | 'pending'; pace: 'slow' | 'steady' | 'fast'; };
+export type TripReminder = { id: string; label: string; date: string; kind: 'deposit' | 'cancel' | 'arrival' | 'custom'; done: boolean; };
+export type HumanCommitment = { id: string; label: string; time: string; owner: string; fixed: boolean; };
+export type ReunionAgreement = { time: string; place: string; tolerance: number; };
+
+export const defaultMembers: TripMember[] = [
+  { id: 'mei', name: 'Mei', role: 'Trip lead', inviteStatus: 'joined', pace: 'steady' },
+  { id: 'jh', name: 'JH', role: 'Food scout', inviteStatus: 'joined', pace: 'fast' },
+  { id: 'zishan', name: 'Zi Shan', role: 'Memory keeper', inviteStatus: 'joined', pace: 'slow' },
+  { id: 'alex', name: 'Alex', role: 'Transit buddy', inviteStatus: 'pending', pace: 'steady' },
+];
+
+export const defaultReminders: TripReminder[] = [
+  { id: 'hotel-cancel', label: 'Hotel cancellation window', date: 'Oct 08 · 23:59', kind: 'cancel', done: false },
+  { id: 'rail-deposit', label: 'Rail pass deposit', date: 'Oct 05 · RM120', kind: 'deposit', done: false },
+  { id: 'arrival', label: 'Arrival check-in', date: 'Oct 12 · 16:00', kind: 'arrival', done: false },
+];
+
+export const defaultCommitments: HumanCommitment[] = [
+  { id: 'video', label: 'Family video call', time: 'Oct 15 · 20:30', owner: 'Mei', fixed: true },
+  { id: 'medicine', label: 'Medicine reminder', time: 'Daily · 08:00', owner: 'Zi Shan', fixed: true },
+];
+
+export const defaultReunion: ReunionAgreement = { time: '19:30', place: 'Shinjuku station west exit', tolerance: 15 };
+
+export function slowestMemberMinutes(members: TripMember[]): number {
+  return members.reduce((max, member) => Math.max(max, member.pace === 'slow' ? 1.35 : member.pace === 'fast' ? .9 : 1), 1);
+}

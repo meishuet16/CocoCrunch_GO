@@ -7,6 +7,7 @@ import { playSound, unlockSound } from './sound';
 
 export default function AppExperience() {
   const [ritual, setRitual] = useState<Ritual>(null);
+  const [packingVisible, setPackingVisible] = useState(false);
   const [place, setPlace] = useState('this place');
   const [destination, setDestination] = useState('Tokyo');
   const [privacy, setPrivacy] = useState<PrivacyLevel>('status');
@@ -28,12 +29,14 @@ export default function AppExperience() {
       case 'send-family-reassurance': setDestination(event.destination); setPrivacy(event.privacy); setDelayed(event.delayed); setRitual('courier'); playSound('courier'); break;
       case 'print-receipt': setRitual('receipt'); playSound('receipt'); break;
       case 'open-prayer': setRitual('prayer'); playSound('prayer-step'); break;
+      case 'open-packing': setPackingVisible(true); break;
+      case 'close-packing': setPackingVisible(false); break;
     }
   }), []);
 
   return <>
     <App />
-    <PackingReplica />
+    <PackingReplica visible={packingVisible} onClose={() => { setPackingVisible(false); }} />
     <SignatureRituals ritual={ritual} place={place} destination={destination} privacy={privacy} delayed={delayed} onClose={() => setRitual(null)} />
   </>;
 }

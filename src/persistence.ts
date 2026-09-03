@@ -1,6 +1,8 @@
 import type { BudgetPlan } from './domain/budget';
 import type { CourtVote } from './domain/court';
 import type { TravelProfile, TripReview } from './domain/preferences';
+import type { TingoAnswer, TingoDimensions } from './domain/tingo';
+import type { HumanCommitment, ReunionAgreement, TripConstraint, TripMember, TripReminder } from './domain/trip';
 
 const STORAGE_KEY = 'cococrunch:v1';
 
@@ -28,6 +30,19 @@ export type PersistedState = {
   recommendations: PersistedRecommendation[];
   worthIt: TripReview | null;
   profileLearned: boolean;
+  tingoAnswers?: TingoAnswer[];
+  tingoDimensions?: TingoDimensions;
+  basePackingPreferences?: string[];
+  tripCreated?: boolean;
+  members?: TripMember[];
+  constraints?: TripConstraint[];
+  reminders?: TripReminder[];
+  commitments?: HumanCommitment[];
+  reunion?: ReunionAgreement;
+  published?: boolean;
+  memoryNote?: string;
+  memoryPublic?: boolean;
+  itemReviews?: Record<string, 'worth' | 'mixed' | 'skip'>;
 };
 
 export function loadPersisted(): Partial<PersistedState> {

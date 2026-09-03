@@ -4,7 +4,9 @@ export type ExperienceEvent =
   | { type: 'capture-place'; place: string }
   | { type: 'send-family-reassurance'; destination: string; privacy: PrivacyLevel; delayed: boolean }
   | { type: 'print-receipt' }
-  | { type: 'open-prayer' };
+  | { type: 'open-prayer' }
+  | { type: 'open-packing'; items?: string[] }
+  | { type: 'close-packing' };
 
 type ExperienceListener = (event: ExperienceEvent) => void;
 

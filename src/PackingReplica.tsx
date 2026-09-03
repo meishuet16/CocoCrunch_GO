@@ -3,6 +3,7 @@ import {
   BatteryCharging, BookOpen, Camera, Droplets, Glasses, Headphones, Map,
   Package, Pill, Plug, Shirt, Smartphone, Ticket, Umbrella, Wallet, Wifi, X,
 } from 'lucide-react';
+import { subscribeExperience, emitExperience } from './experience';
 import { playSound } from './sound';
 import './packing-replica.css';
 
@@ -56,21 +57,21 @@ const scatter = [
   { left: 2, top: 29, rotate: -5 }, { left: 78, top: 30, rotate: 5 },
 ];
 
-export default function PackingReplica() {
-  const [visible, setVisible] = useState(false);
+type Props = { visible: boolean; onClose: () => void };
+
+export default function PackingReplica({ visible, onClose }: Props) {
   const [items, setItems] = useState<PackItem[]>(readItems);
   const [draft, setDraft] = useState('');
   const [drag, setDrag] = useState<DragState>(null);
   const playfieldRef = useRef<HTMLDivElement>(null);
   const suitcaseRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const sync = () => setVisible(Boolean(document.querySelector('.drawer .pack-row')));
-    sync();
-    const observer = new MutationObserver(sync);
-    observer.observe(document.body, { childList: true, subtree: true });
-    return () => observer.disconnect();
-  }, []);
+  useEffect(() => subscribeExperience(event => {
+    if (event.type === 'close-packing') onClose();
+    if (event.type === 'open-packing' && event.items?.length) {
+      setItems(current => event.items!.map((name, index) => ({ id: `${index}-${name}`, name, packed: current.find(item => item.name === name)?.packed ?? false })));
+    }
+  }), [onClose]);
 
   useEffect(() => {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch { /* progressive persistence */ }
@@ -82,7 +83,7 @@ export default function PackingReplica() {
 
   if (!visible) return null;
 
-  const close = () => document.querySelector<HTMLButtonElement>('.drawer .close')?.click();
+  const close = () => { emitExperience({ type: 'close-packing' }); onClose(); };
 
   const setPacked = (id: string, packed: boolean) => {
     setItems(current => current.map(item => item.id === id ? { ...item, packed } : item));

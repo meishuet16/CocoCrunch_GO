@@ -10,7 +10,7 @@ CocoCrunch treats travel as two kinds of uncertainty at once: human disagreement
 
 - Must-Go items are protected anchors and cannot be silently AI-replaced.
 - One individual cannot rewrite the official group itinerary; substantive changes go through Group Court, including timed emergency approval during disruptions.
-- Gacha is a tie-breaker only after a true unresolved vote tie. It is not a general random planner.
+- Gacha is used for a true unresolved Court tie or an explicitly everyday indecision; it never silently decides official group itinerary changes.
 - Disruption repair protects anchors first, prefers high-support viable backups, previews impact before execution, requires confirmation, and exposes undo.
 - AI suggestions are proposals, not execution.
 - Family Window is reassurance rather than surveillance. Continuous location is separate and off by default.
@@ -19,7 +19,7 @@ CocoCrunch treats travel as two kinds of uncertainty at once: human disagreement
 
 ## Current prototype
 
-The mobile prototype covers budgeting, itinerary planning, group preference syncing, solo/group mode, destination discovery, Group Court, disruption repair, packing ownership, Family Window/privacy, and post-trip memories.
+The mobile prototype covers the global Home / Trips / Explore / Memories / Me shell, the Planning / Traveling / Completed trip lifecycle, Tingo Card assessment, budgeting, itinerary planning, group preference syncing, solo/group trip setup, destination discovery, Group Court, disruption repair, packing ownership, Family Window/privacy, safety/local-info contracts, and post-trip memories.
 
 Core interactions implemented in the current feature branch include:
 
@@ -28,13 +28,14 @@ Core interactions implemented in the current feature branch include:
 - confirmed post-trip preference learning that writes back into the profile
 - versioned local persistence for durable product state
 - destination-aware local demo catalogs for Tokyo, Kyoto and Osaka with explicitly marked fallback data
+- deterministic comparison, feasibility, reminder, reunion, photo metadata, and safety adapters with honest non-live labels
 - Capture Capsule, Coco courier, staged split-bill receipt, and multi-step optional prayer ritual
 - openable Memory Trunk, Ghost Wish revive/release history, and Future Postcard
 - disruption preview → emergency group approval → apply/undo, with Must-Go anchors protected
 
 ## Architecture
 
-Business rules live under `src/domain/` rather than inside presentation code. Signature interactions use the typed `experience.ts` event boundary instead of DOM selectors or text inspection. Durable state is owned by `persistence.ts`; transient overlay and animation state is intentionally not persisted.
+Business rules live under `src/domain/` rather than inside presentation code. The Tingo assessment, trip setup contracts, and deterministic external-service adapters live in `src/domain/`; lifecycle navigation is isolated in `src/components/TripWorkspace.tsx`. Signature interactions use the typed `experience.ts` event boundary instead of DOM selectors or text inspection. Durable state is owned by `persistence.ts`; transient overlay and animation state is intentionally not persisted.
 
 ## Data honesty
 

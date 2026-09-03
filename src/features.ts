@@ -1,6 +1,10 @@
 export const FEATURES = {
   groupCourt: true,
   tieOnlyGacha: true,
+  everydayGacha: true,
+  tingoAssessment: true,
+  tripSetup: true,
+  deterministicAdapters: true,
   editableBudget: true,
   persistentCoreState: true,
   confirmedPreferenceLearning: true,
