@@ -26,6 +26,7 @@ Living handoff for the V2 rescue pass on `feat/p0-foundation` / PR #1. Update th
 - Confirmed Court and emergency decisions write persisted structured decision records.
 - Official unresolved-tie Gacha, everyday indecision Gacha, and entertainment Lucky Draw remain separate contexts.
 - Added a concession snapshot path: attaching a concession captures the pre-concession vote state; withdrawing restores that snapshot. This remains a prototype rollback model pending rendered interaction QA.
+- Removed the legacy `ramen` / `sushi` compatibility counters from `CourtResult`; active UI reads the generic `counts` map, so Court domain no longer carries demo-specific result fields.
 
 ### Tingo → visible downstream behavior
 - Tingo derives itinerary density, daily stop target, buffer minutes, recommendation bias, accommodation bias, budget mode, change style, and group role.
@@ -47,7 +48,9 @@ Living handoff for the V2 rescue pass on `feat/p0-foundation` / PR #1. Update th
 ### Planned vs actual / budget retrospective
 - App consumes category actuals through the budget domain and shows category-level planned-vs-actual variance plus learning guidance.
 - Planned pace is derived from Tingo; actual pace copy is derived from runtime disruption / energy / arrival state.
-- #50 / #51 are materially improved, but actual spend is still deterministic local prototype data rather than a live transaction/import source.
+- `persistence.ts` can now store group and solo category actuals without breaking existing `cococrunch:v1` saves.
+- Added `domain/retrospective.ts` with normalization/update helpers for persisted actual spend plus specific-decision satisfaction update/summary helpers.
+- #50 / #51 are materially improved, but active App still reads deterministic default actuals; actual-category ownership/editing must be wired before #51 is closed.
 
 ### Signature interaction rescue
 - Canonical Coco PNG is authoritative where integrated; CSS anatomy is fallback.
@@ -71,8 +74,10 @@ The audit found a real closure gap: the active App displays category actuals, bu
 
 - `persistence.ts` now supports optional persisted `groupBudgetActuals` and `soloBudgetActuals` while remaining backward-compatible with existing `cococrunch:v1` saves.
 - Persistence schema commit `41d6a01da16b94a85fe1f007d1735c056de9e806` passed exact-head CI run #100 (`npm run check`).
-- This schema addition does **not** by itself close #51: the active App still needs to own/edit/save actual category spend rather than reading deterministic defaults.
-- Decision satisfaction remains open: the record field exists, but Completed still needs an explicit rating action tied to a specific persisted decision.
+- Rescue-log head `972b91277197e30ea233437dbc7d2dd735bba841` passed exact-head CI run #101.
+- `CourtResult` demo compatibility fields were removed at `4374f8e6f7620eef550bec982fa30f7ee35d7e67` after verifying active App uses generic tally counts.
+- `src/domain/retrospective.ts` was added at `52b8f46f3cdb57f705b81731caae7206554afb64` to give the next App integration batch typed actual-spend replay and decision-rating operations instead of ad-hoc mutation.
+- This domain/persistence work does **not** by itself close #30 or #51. The active App still needs to own/edit/save category actuals and expose satisfaction actions against specific decision IDs.
 
 ## Current status by previously-open item
 1. Tingo downstream wiring — **materially implemented in visible local prototype flow**; still needs rendered behavior QA and per-question audit.
@@ -81,6 +86,7 @@ The audit found a real closure gap: the active App displays category actuals, bu
 4. Per-stop Worth It (#49) — **wired into confirmed learning**; still needs runtime / persistence replay QA.
 5. Preference/planned-vs-actual retrospective (#50) — **derived from live prototype state instead of fixed copy**, but still local prototype data.
 6. Category planned-vs-actual budget (#51) — **visible and domain-backed, but still Partial** until active App actual-category state is editable/persisted.
+7. Decision satisfaction / Decision History (#30 extension) — **schema + domain update helper ready, UI linkage still open**.
 
 ## Invariant sweep observations
 - Must-Go remains rendered as a protected anchor and the disruption repair explicitly keeps it.
@@ -90,19 +96,19 @@ The audit found a real closure gap: the active App displays category actuals, bu
 - Everyday Gacha and Lucky Draw remain separate drawer contexts and do not write official Court state.
 - Family Window text and state keep continuous location off unless explicitly enabled.
 - Memory/publication controls remain opt-in.
+- Court result calculation is now fully proposal-ID agnostic; no legacy ramen/sushi result fields remain.
 - Source audit still needs a dedicated regression test layer; these observations are not a substitute for runtime QA.
 
 ## Still open / do not call merge-ready yet
 - Wire editable/persisted category actuals into active App, then replay persistence.
-- Link Decision History satisfaction to specific persisted records.
+- Link Decision History satisfaction controls to specific persisted records using the new retrospective helper.
 - Independently audit all #1–#53 requirements against active `AppRescued`; do not inherit Codex labels.
 - Re-check all 15 business invariants after each remaining integration change.
 - Continue contextual canonical Coco extraction/usage beyond the current minimal idle asset.
 - Perform rendered mobile QA at 360 / 390 / 430 px: overflow, safe-area nav, touch targets, Court, Gacha, Packing, Memory Trunk, drawers/modals, reduced motion.
 - Verify signature interaction quality in a real browser; source/CSS inspection is not visual validation.
-- Remove compatibility/migration debt only after proving no active UI depends on it.
 - Keep PR #1 open and unmerged until the final audit is complete.
 
 ## Current risk posture
 
-The active branch is type/build healthy through the persistence-schema audit, but it is **not yet safe to merge**. Remaining risk is concentrated in actual-spend state closure, decision-satisfaction linkage, rendered mobile/signature QA, contextual Coco coverage, full #1–#53 compliance, and regression/invariant verification.
+The branch has removed one remaining Court migration shim and now has typed persistence/domain support for the next retrospective closure step, but it is **not yet safe to merge**. Remaining risk is concentrated in active-App actual-spend ownership, decision-satisfaction linkage, rendered mobile/signature QA, contextual Coco coverage, full #1–#53 compliance, and regression/invariant verification.
