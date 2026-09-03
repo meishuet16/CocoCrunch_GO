@@ -2,9 +2,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   Bell, BookOpen, Box, CalendarDays, Check, ChevronRight, CircleDollarSign, CloudRain,
   Compass, Gavel, Heart, Home, Link2, Map, MapPin, PackageCheck, ReceiptText,
-  Route, Send, Sparkles, Users, X
+  Send, Sparkles, Users, X
 } from 'lucide-react';
-import { emitExperience, subscribeExperience } from './experience';
+import { emitExperience } from './experience';
 import { courtTally, type CourtOption, type CourtVote } from './domain/court';
 import {
   defaultGroupBudget, defaultSoloBudget, plannedBudget, remainingBudget,
@@ -12,7 +12,7 @@ import {
 } from './domain/budget';
 import { discoverPlaces, type DiscoveryPlace } from './domain/discovery';
 import { learnFromTrip, learningSummary, type TravelProfile, type TripReview } from './domain/preferences';
-import { loadPersisted, savePersisted } from './persistence';
+import { loadPersisted, savePersisted, type CourtOptionState, type DecisionRecord } from './persistence';
 import { TripLifecycleTabs, TripWorkspaceContext, TripWorkspaceHeader, type TripPhase } from './components/TripWorkspace';
 import { describeTingo, defaultTingoDimensions, scoreTingo, tingoCompletion, tingoQuestions, type TingoAnswer, type TingoDimensions } from './domain/tingo';
 import { checkFeasibility, comparisonOptions, importPhotoMetadata } from './domain/adapters';
@@ -23,12 +23,11 @@ type Tab = 'home' | 'trips' | 'explore' | 'memories' | 'me';
 type TripMode = 'group' | 'solo';
 type Mood = 'great' | 'okay' | 'tired' | null;
 type Privacy = 'status' | 'area' | 'exact';
-type Drawer = 'group' | 'packing' | 'backup' | 'budget' | 'family' | 'community' | 'import' | 'discover' | 'tingo' | 'tripSetup' | 'compare' | 'feasibility' | 'reminders' | 'commitments' | 'safety' | 'assistant' | 'gacha' | 'lucky' | 'memoryCard' | null;
-type Backup = { name: string; support: number; cost: number; time: number; viable: boolean };
-type PackItem = { name: string; owner: string; shared: boolean; done: boolean };
+type Drawer = 'group' | 'backup' | 'budget' | 'family' | 'community' | 'import' | 'discover' | 'tingo' | 'tripSetup' | 'compare' | 'feasibility' | 'reminders' | 'commitments' | 'safety' | 'assistant' | 'gacha' | 'lucky' | 'memoryCard' | null;
 type CommunityTrip = { id: number; title: string; author: string; match: number; saved: boolean };
 type PlaceRecommendation = DiscoveryPlace & { id: number; saved: boolean; added: boolean };
 type GhostWish = { id: number; name: string; reason: string; status: 'resting' | 'revived' | 'released' };
+type Backup = { name: string; support: number; cost: number; time: number; viable: boolean };
 
 const defaultProfile: TravelProfile = {
   vibe: 'Relax + Food',
@@ -37,6 +36,11 @@ const defaultProfile: TravelProfile = {
   preference: 'One scenic café each day',
   flexible: 'Evening activity can move',
 };
+
+const defaultCourtOptions: CourtOptionState[] = [
+  { id: 'ramen', label: 'Ramen tonight' },
+  { id: 'sushi', label: 'Sushi tonight' },
+];
 
 const defaultVotes: CourtVote[] = [
   { member: 'Mei', pick: 'ramen' },
@@ -66,6 +70,17 @@ function makeRecommendations(destination: string, saved: { name: string; saved: 
   });
 }
 
+function optionSlug(label: string, index: number): string {
+  const slug = label.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return slug || `option-${index + 1}`;
+}
+
+function parseConflictOptions(conflict: string): CourtOptionState[] | null {
+  const parts = conflict.split(/\s+(?:vs\.?|versus|or)\s+|\s*\/\s*/i).map(value => value.trim()).filter(Boolean);
+  if (parts.length !== 2) return null;
+  return parts.map((label, index) => ({ id: optionSlug(label, index), label }));
+}
+
 function Coco({ mood = 'idle', tiny = false }: { mood?: 'idle' | 'happy' | 'panic'; tiny?: boolean }) {
   return <div className={`coco ${mood} ${tiny ? 'tiny' : ''}`} aria-label={`Coco ${mood}`}>
     <span className="coco-canonical" aria-hidden="true"><img src={cocoCanonicalSheet} alt=""/></span>
@@ -87,21 +102,19 @@ function MiniTool({ icon: Icon, label, note, onClick }: { icon: React.ComponentT
 export default function App() {
   const [stored] = useState(() => loadPersisted());
   const [tab, setTab] = useState<Tab>('home');
+  const [tripWorkspaceOpen, setTripWorkspaceOpen] = useState(false);
   const [tripPhase, setTripPhase] = useState<TripPhase>('planning');
   const [drawer, setDrawer] = useState<Drawer>(null);
   const [mode, setMode] = useState<TripMode>(stored.mode ?? 'group');
   const [profile, setProfile] = useState<TravelProfile>({ ...defaultProfile, ...stored.profile });
   const [plannerTurn, setPlannerTurn] = useState(stored.plannerTurn ?? 'Mei');
-  const [packing, setPacking] = useState<PackItem[]>([
-    { name: 'Portable charger', owner: 'Mei', shared: false, done: true },
-    { name: 'Umbrella', owner: 'JH', shared: true, done: false },
-    { name: 'Pocket Wi-Fi', owner: 'Zi Shan', shared: true, done: true },
-  ]);
   const [courtOpen, setCourtOpen] = useState(false);
+  const [courtOptions, setCourtOptions] = useState<CourtOptionState[]>(stored.courtOptions?.length === 2 ? stored.courtOptions : defaultCourtOptions);
   const [courtVotes, setCourtVotes] = useState<CourtVote[]>(stored.courtVotes?.length ? stored.courtVotes : defaultVotes);
   const [gacha, setGacha] = useState<string | null>(null);
   const [courtDecision, setCourtDecision] = useState<string | null>(stored.courtDecision ?? null);
   const [courtConfirmed, setCourtConfirmed] = useState(Boolean(stored.courtConfirmed));
+  const [decisionHistory, setDecisionHistory] = useState<DecisionRecord[]>(stored.decisionHistory ?? []);
   const [delay, setDelay] = useState(false);
   const [replanPreview, setReplanPreview] = useState(false);
   const [emergencyApproved, setEmergencyApproved] = useState(false);
@@ -133,7 +146,7 @@ export default function App() {
   const [tradeAccepted, setTradeAccepted] = useState(false);
   const [draftConflict, setDraftConflict] = useState('');
   const [conflictMarked, setConflictMarked] = useState(false);
-  const [activeConflict, setActiveConflict] = useState('Ramen tonight vs sushi tonight');
+  const [activeConflict, setActiveConflict] = useState(stored.activeConflict ?? 'Ramen tonight vs Sushi tonight');
   const [luckyDraw, setLuckyDraw] = useState<string | null>(null);
   const [memoryNote, setMemoryNote] = useState(stored.memoryNote ?? 'The rain made us choose slower, and that was the best part.');
   const [memoryPublic, setMemoryPublic] = useState(Boolean(stored.memoryPublic));
@@ -171,39 +184,28 @@ export default function App() {
   const spent = mode === 'group' ? 1288 : 604;
   const replanCost = replanApplied ? 8 : 0;
   const remaining = remainingBudget(budgetTotal, spent, replanCost);
-  const travellerCount = mode === 'group' ? 4 : 1;
+  const travellerCount = mode === 'group' ? members.filter(member => member.inviteStatus === 'joined').length : 1;
   const planHealth = replanApplied ? 91 : 86;
-  const majorityDecision = tally.majority ? `${tally.majority === 'ramen' ? 'Ramen' : 'Sushi'} wins the vote.` : null;
+  const optionLabel = (id: string | null) => courtOptions.find(option => option.id === id)?.label ?? id ?? '';
+  const majorityDecision = tally.majority ? optionLabel(tally.majority) : null;
   const proposedDecision = gacha ?? majorityDecision;
   const cocoMood: 'idle' | 'happy' | 'panic' = delay && !replanApplied ? 'panic' : courtConfirmed || replanApplied || reported || receiptPrinted ? 'happy' : 'idle';
-
-  const decisionHistory = useMemo(() => [
-    ...(courtConfirmed && courtDecision ? [`Dinner Court · ${courtDecision}`] : []),
-    ...(replanApplied ? ['Emergency Court · Underground food hall accepted'] : []),
-  ], [courtConfirmed, courtDecision, replanApplied]);
 
   useEffect(() => {
     savePersisted({
       version: 1, mode, destination, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision,
+      courtOptions, activeConflict, decisionHistory,
       groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, privacy, continuousLocation,
       recommendations: recommendations.map(({ name, saved, added }) => ({ name, saved, added })),
       worthIt, profileLearned, tingoAnswers, tingoDimensions, basePackingPreferences, tripCreated,
       members, constraints, reminders, commitments, reunion, published, memoryNote, memoryPublic, itemReviews,
     });
-  }, [mode, destination, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, privacy, continuousLocation, recommendations, worthIt, profileLearned, tingoAnswers, tingoDimensions, basePackingPreferences, tripCreated, members, constraints, reminders, commitments, reunion, published, memoryNote, memoryPublic, itemReviews]);
-
-  useEffect(() => subscribeExperience(event => {
-    if (event.type === 'close-packing') setDrawer(null);
-  }), []);
+  }, [mode, destination, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, privacy, continuousLocation, recommendations, worthIt, profileLearned, tingoAnswers, tingoDimensions, basePackingPreferences, tripCreated, members, constraints, reminders, commitments, reunion, published, memoryNote, memoryPublic, itemReviews]);
 
   function setProfileField(field: keyof TravelProfile, value: string) {
     setProfile(current => ({ ...current, [field]: value }));
     setProfileLearned(false);
     setLearningChanges([]);
-  }
-
-  function togglePack(index: number) {
-    setPacking(items => items.map((item, i) => i === index ? { ...item, done: !item.done } : item));
   }
 
   function searchDestination() {
@@ -220,18 +222,26 @@ export default function App() {
   function castVote(member: string, pick: CourtOption) {
     setCourtVotes(votes => votes.map(vote => vote.member === member ? { ...vote, pick } : vote));
     setGacha(null);
+    setTradeAccepted(false);
     setCourtConfirmed(false);
     setCourtDecision(null);
   }
 
   function confirmCourt() {
     if (!proposedDecision) return;
-    setCourtDecision(proposedDecision);
+    const decision = proposedDecision;
+    setCourtDecision(decision);
     setCourtConfirmed(true);
+    setDecisionHistory(history => {
+      if (history[0]?.kind === 'court' && history[0].topic === activeConflict && history[0].decision === decision) return history;
+      const voteSummary = courtOptions.map(option => `${option.label}: ${tally.counts[option.id] ?? 0}`).join(' · ');
+      return [{ id: `court-${Date.now()}`, kind: 'court', topic: activeConflict, decision, voteSummary, usedGacha: Boolean(gacha), createdAt: new Date().toISOString() }, ...history];
+    });
   }
 
   function applyRepair() {
     setReplanApplied(true);
+    setDecisionHistory(history => history.some(record => record.kind === 'emergency' && record.topic === 'Heavy rain disruption') ? history : [{ id: `emergency-${Date.now()}`, kind: 'emergency', topic: 'Heavy rain disruption', decision: 'Underground food hall accepted; Mystery Window moved to 19:00', voteSummary: mode === 'group' ? 'Emergency Court approved 3/4' : 'Solo confirmation', usedGacha: false, createdAt: new Date().toISOString() }, ...history]);
     emitExperience({ type: 'open-prayer' });
   }
 
@@ -259,13 +269,22 @@ export default function App() {
   }
 
   function openPacking() {
-    setDrawer('packing');
-    const generated = Array.from(new Set([...basePackingPreferences, 'passport', 'portable water bottle', ...(destination.toLowerCase().includes('tokyo') ? ['transit card'] : []), ...(delay ? ['compact umbrella'] : [])]));
+    setDrawer(null);
+    const weatherItems = delay ? ['compact umbrella', 'quick-dry layer'] : ['light rain layer'];
+    const destinationItems = /tokyo|kyoto|osaka/i.test(destination) ? ['transit card'] : [];
+    const fiveDayItems = ['5-day clothing set', 'laundry pouch'];
+    const generated = Array.from(new Set([...basePackingPreferences, 'passport', 'portable water bottle', ...fiveDayItems, ...destinationItems, ...weatherItems]));
     emitExperience({ type: 'open-packing', items: generated });
   }
 
   function openTrip(phase: TripPhase = 'planning') {
     setTripPhase(phase);
+    setTripWorkspaceOpen(true);
+    setTab('trips');
+  }
+
+  function openTripsIndex() {
+    setTripWorkspaceOpen(false);
     setTab('trips');
   }
 
@@ -305,10 +324,21 @@ export default function App() {
   }
 
   function markConflict() {
-    if (!draftConflict.trim()) return;
-    setActiveConflict(draftConflict.trim());
+    const conflict = draftConflict.trim();
+    if (!conflict) return;
+    const parsedOptions = parseConflictOptions(conflict);
+    setActiveConflict(conflict);
     setConflictMarked(true);
+    setCourtConfirmed(false);
+    setCourtDecision(null);
+    setGacha(null);
+    setTradeAccepted(false);
+    if (parsedOptions) {
+      setCourtOptions(parsedOptions);
+      setCourtVotes(members.filter(member => member.inviteStatus === 'joined').map((member, index) => ({ member: member.name, pick: parsedOptions[index % 2].id })));
+    }
     setDraftConflict('');
+    setDrawer(null);
     setCourtOpen(true);
   }
 
@@ -317,7 +347,7 @@ export default function App() {
       <section className="home-hero paper-sheet"><div><span className="eyebrow">YOUR TRAVEL NOTEBOOK</span><h2>Good morning, Mei.</h2><p>One protected highlight, a little room to wander, and Coco keeping the plan human.</p><button className="hero-link" onClick={() => openTrip('planning')}>Open {destination} trip <ChevronRight size={15}/></button></div><Coco mood={cocoMood}/></section>
       <section className="today-card"><div className="today-head"><div><span>Today’s journey</span><b>Oct 13 · 18°C · cloudy</b></div><button onClick={() => openTrip('planning')}>Full plan <ChevronRight size={15}/></button></div><div className="journey-line"><div className="journey-stop anchor"><time>10:00</time><span/><div><b>{profile.mustGo}</b><small>⚓ Anchor · protected</small></div></div><div className="journey-stop"><time>{cafeTime}</time><span/><div><b>Scenic café block</b><small>🫧 Floating · flexible</small></div></div><div className="journey-stop mystery"><time>17:00</time><span/><div><b>Mystery Window</b><small>🎰 Open · spontaneous slot</small></div></div></div></section>
       <section className="status-strip"><div><span>Plan health</span><b>{planHealth}/100</b></div><div><span>Budget left</span><b>RM {remaining}</b></div><div><span>Group</span><b>{travellerCount} people</b></div></section>
-      <section className="home-tools"><MiniTool icon={MapPin} label="Discover places" note="Destination-aware prototype catalog" onClick={() => setTab('explore')}/><MiniTool icon={Users} label="Group DNA" note={courtConfirmed ? 'Latest conflict resolved' : '1 conflict needs a decision'} onClick={() => setDrawer('group')}/><MiniTool icon={PackageCheck} label="Packing" note={`${packing.filter(i => i.done).length}/${packing.length} ready`} onClick={openPacking}/><MiniTool icon={Send} label="Family Window" note="Status-only sharing by default" onClick={() => setDrawer('family')}/></section>
+      <section className="home-tools"><MiniTool icon={MapPin} label="Discover places" note="Destination-aware prototype catalog" onClick={() => setTab('explore')}/><MiniTool icon={Users} label="Group DNA" note={courtConfirmed ? 'Latest conflict resolved' : '1 conflict needs a decision'} onClick={() => setDrawer('group')}/><MiniTool icon={PackageCheck} label="Packing" note={`${basePackingPreferences.length} habits + trip essentials`} onClick={openPacking}/><MiniTool icon={Send} label="Family Window" note="Status-only sharing by default" onClick={() => setDrawer('family')}/></section>
     </>;
   }
 
@@ -325,7 +355,7 @@ export default function App() {
     return <>
       <SectionTitle kicker="TRIPS · YOUR NOTEBOOK" title="Keep the trip in view." copy="Planning, traveling, and remembering all belong to the same journey."/>
       <button className="new-trip-link" onClick={() => { setTripCreated(false); setDrawer('tripSetup'); }}>+ Start a new trip</button>
-      <section className="trip-card active-trip paper-sheet"><div className="trip-card-art"><span>COCOCRUNCH</span><b>{destination}</b><small>12–21 Oct 2025 · 4 travellers</small><i>✦</i></div><div className="trip-card-body"><div className="trip-card-heading"><div><span>IN MOTION</span><h3>{destination} · slow food + small discoveries</h3></div><b>{planHealth}</b></div><div className="trip-phase-preview"><span className={tripPhase === 'planning' ? 'active' : ''}>Planning</span><span className={tripPhase === 'traveling' ? 'active' : ''}>Traveling</span><span className={tripPhase === 'completed' ? 'active' : ''}>Completed</span></div><p>Today: {profile.mustGo} · 18°C · one open pocket</p><button className="primary" onClick={() => openTrip(tripPhase)}>Continue trip <ChevronRight size={16}/></button></div></section>
+      <section className="trip-card active-trip paper-sheet"><div className="trip-card-art"><span>COCOCRUNCH</span><b>{destination}</b><small>12–21 Oct 2026 · {travellerCount} travellers</small><i>✦</i></div><div className="trip-card-body"><div className="trip-card-heading"><div><span>IN MOTION</span><h3>{destination} · slow food + small discoveries</h3></div><b>{planHealth}</b></div><div className="trip-phase-preview"><span className={tripPhase === 'planning' ? 'active' : ''}>Planning</span><span className={tripPhase === 'traveling' ? 'active' : ''}>Traveling</span><span className={tripPhase === 'completed' ? 'active' : ''}>Completed</span></div><p>Today: {profile.mustGo} · one open pocket</p><button className="primary" onClick={() => openTrip(tripPhase)}>Continue trip <ChevronRight size={16}/></button></div></section>
       <section className="trip-list"><div className="section-rule"><span>OTHER TRIPS</span><button onClick={() => setTab('explore')}>Find inspiration <ChevronRight size={14}/></button></div><article className="trip-list-row"><div className="trip-thumb sea-thumb"/><div><b>Jeju · salt air and citrus</b><small>Completed · 5 days · shared privately</small></div><button onClick={() => openTrip('completed')} aria-label="Open Jeju trip"><ChevronRight size={17}/></button></article><article className="trip-list-row"><div className="trip-thumb blue-thumb"/><div><b>Kyoto · temple mornings</b><small>Draft · solo · 3 anchor ideas</small></div><button onClick={() => openTrip('planning')} aria-label="Open Kyoto trip"><ChevronRight size={17}/></button></article></section>
       <section className="trip-footer-note"><Coco tiny mood="happy"/><div><b>Every trip gets a little wiser.</b><small>Reviews and actual spend feed back into your private Tingo Card.</small></div></section>
     </>;
@@ -344,7 +374,7 @@ export default function App() {
   function renderGlobalMemories() {
     return <>
       <SectionTitle kicker="MEMORIES · YOUR ARCHIVE" title="The trips that stayed with you." copy="Private by default. Keep the decisions, detours, and tiny wins close."/>
-      <section className="memory-archive-feature paper-sheet"><div className="archive-photo"><span>OCT 2025</span><b>{destination}</b></div><div><span>LAST TRIP · 4.2 / 5</span><h3>Rain changed the evening. The group kept the promise.</h3><p>18 photos · 2 decisions · RM {spent + replanCost} actual</p><button className="primary" onClick={() => openTrip('completed')}>Open Memory Trunk <ChevronRight size={16}/></button></div></section>
+      <section className="memory-archive-feature paper-sheet"><div className="archive-photo"><span>OCT 2026</span><b>{destination}</b></div><div><span>LAST TRIP · 4.2 / 5</span><h3>Rain changed the evening. The group kept the promise.</h3><p>18 photos · {decisionHistory.length} decisions · RM {spent + replanCost} actual</p><button className="primary" onClick={() => openTrip('completed')}>Open Memory Trunk <ChevronRight size={16}/></button></div></section>
       <div className="explore-section-heading"><span>KEEPSAKE SHELF</span><span className="quiet-note">Only you can see these</span></div><section className="keepsake-grid"><article><span>PHOTO MAP</span><b>4 places</b><small>Tsukiji · café · underground · hotel</small></article><article><span>FUTURE POSTCARD</span><b>1 sealed</b><small>Waiting for your next trip</small></article><article><span>GHOST WISHES</span><b>{ghostWishes.length} remembered</b><small>Some plans can come back</small></article></section>
       <section className="community-entry"><div><span>COMMUNITY</span><b>{published ? 'Published with consent' : 'Private by default'}</b><small>Nothing becomes public without an explicit action.</small></div><button onClick={() => setDrawer('community')}>Manage</button></section>
     </>;
@@ -352,14 +382,18 @@ export default function App() {
 
   function renderTripWorkspace() {
     return <>
-      <TripWorkspaceHeader destination={destination} travellerCount={travellerCount} planHealth={planHealth} onBack={() => setTab('home')} />
+      <TripWorkspaceHeader destination={destination} travellerCount={travellerCount} planHealth={planHealth} onBack={openTripsIndex} />
       <TripLifecycleTabs phase={tripPhase} onChange={setTripPhase} />
-      <TripWorkspaceContext phase={tripPhase} onExit={() => setTab('home')} />
+      <TripWorkspaceContext phase={tripPhase} onExit={openTripsIndex} />
       {tripPhase === 'planning' ? renderPlan() : tripPhase === 'traveling' ? renderDuring() : renderMemories()}
     </>;
   }
 
   function renderPlan() {
+    const first = courtOptions[0];
+    const second = courtOptions[1];
+    const firstCount = first ? tally.counts[first.id] ?? 0 : 0;
+    const secondCount = second ? tally.counts[second.id] ?? 0 : 0;
     return <>
       <SectionTitle kicker="PLAN · TRAVEL NOTEBOOK" title="Build a plan that can bend." copy="Keep the important things firm. Let the rest breathe."/>
       {!tripCreated && <section className="setup-banner"><div><span>NEW TRIP</span><b>Give this journey a home before Coco plans it.</b><small>Destination, people, vibe, constraints, then a reviewable plan.</small></div><button className="primary" onClick={() => setDrawer('tripSetup')}>Set up trip <ChevronRight size={15}/></button></section>}
@@ -370,7 +404,7 @@ export default function App() {
       <section className="why-note"><Sparkles size={19}/><div><b>Why this plan?</b><p>{profile.mustGo} protects the strongest preference. Floating blocks can move without breaking the trip promise.</p></div></section>
       <section className="plan-health"><div className="section-rule"><span>PLAN HEALTH · EXPLAINED</span><button onClick={() => setDrawer('feasibility')}>Run checks <ChevronRight size={14}/></button></div><div className="health-score"><b>{planHealth}</b><span><strong>Healthy with one watch item</strong><small>Based on pace, budget, food match, transfer time, and protected anchors.</small></span></div><div className="health-metrics"><span>Walk <b>{(4.2 * slowestMemberMinutes(members)).toFixed(1)} km</b></span><span>Pressure <b>low</b></span><span>Budget <b>RM {remaining}</b></span><span>Anchors <b>2 protected</b></span></div></section>
       <section className="plan-toolbox"><MiniTool icon={Users} label="Group workspace" note={`Editing turn: ${plannerTurn}`} onClick={() => setDrawer('group')}/><MiniTool icon={Box} label="Backup Plan pool" note="2 viable · 1 weather-blocked" onClick={() => setDrawer('backup')}/><MiniTool icon={CircleDollarSign} label="Budget planner" note={`RM ${planned} planned of RM ${budgetTotal}`} onClick={() => setDrawer('budget')}/><MiniTool icon={Link2} label="Import inspiration" note="Source parser demo" onClick={() => setDrawer('import')}/></section>
-      {mode === 'group' && <section className="conflict-ticket"><span>{courtConfirmed ? 'COURT DECISION RECORDED' : 'UNRESOLVED CONFLICT'}</span><b>{activeConflict}</b><small>{tally.ramen}–{tally.sushi} {tally.tied ? 'tie · Gacha is eligible' : `vote · ${tally.majority === 'ramen' ? 'Ramen' : 'Sushi'} has majority`}</small><button className="ritual-trigger" onClick={() => setCourtOpen(true)}>{courtConfirmed ? 'Review Group Court' : 'Open Group Court'} <Gavel size={18}/></button></section>}
+      {mode === 'group' && <section className="conflict-ticket"><span>{courtConfirmed ? 'COURT DECISION RECORDED' : 'UNRESOLVED CONFLICT'}</span><b>{activeConflict}</b><small>{first?.label ?? 'Option A'} {firstCount} · {second?.label ?? 'Option B'} {secondCount} · {tally.tied ? 'tie · Gacha is eligible' : `${optionLabel(tally.majority)} has majority`}</small><button className="ritual-trigger" onClick={() => setCourtOpen(true)}>{courtConfirmed ? 'Review Group Court' : 'Open Group Court'} <Gavel size={18}/></button></section>}
     </>;
   }
 
@@ -403,7 +437,7 @@ export default function App() {
       <section className="ghost-wish"><span>GHOST WISH CEMETERY</span><h3>Trips that didn’t make it.</h3>{ghostWishes.map(wish => <div className={`ghost-wish-row ${wish.status}`} key={wish.id}><div><b>{wish.name}</b><small>{wish.reason}</small><em>{wish.status === 'resting' ? 'Still remembered' : wish.status === 'revived' ? 'Revived into Backup Plan' : 'Released, history kept'}</em></div>{wish.status === 'resting' && <div><button onClick={() => setGhostWishes(items => items.map(item => item.id === wish.id ? { ...item, status: 'revived' } : item))}>Revive</button><button onClick={() => setGhostWishes(items => items.map(item => item.id === wish.id ? { ...item, status: 'released' } : item))}>超度行程</button></div>}</div>)}</section>
       <section className="future-postcard"><span>FUTURE POSTCARD</span><h3>To your next-trip self.</h3>{postcardSealed ? <div className="sealed-postcard"><b>✉ Sealed for the next trip</b><button onClick={() => setPostcardSealed(false)}>Reopen</button></div> : <><textarea value={futurePostcard} onChange={e => setFuturePostcard(e.target.value)}/><button className="primary" onClick={() => setPostcardSealed(true)}>Seal postcard</button></>}</section>
       <section className="worth-card"><span>WORTH IT?</span><h3>Would you choose this kind of day again?</h3><div>{(['yes','mixed','no'] as const).map(value => <button key={value} className={worthIt === value ? 'active' : ''} onClick={() => { setWorthIt(value); setProfileLearned(false); setLearningChanges([]); }}>{value === 'yes' ? 'Worth it' : value === 'mixed' ? 'Mixed' : 'Not really'}</button>)}</div>{worthIt && <p>Coco can turn your review into a profile change, but only after you confirm it.</p>}{worthIt && <button className="secondary" onClick={confirmLearning}>{profileLearned ? '✓ Profile updated' : 'Confirm this learning'}</button>}{learningChanges.length > 0 && <div className="learning-changes">{learningChanges.map(change => <small key={change}>{change}</small>)}</div>}</section>
-      <section className="review-ledger paper-sheet"><div><span>Budget vs actual</span><b>RM {spent + replanCost} spent</b><small>RM {remaining} remaining</small></div><div><span>Decisions</span><b>{decisionHistory.length} recorded</b><small>{decisionHistory[0] || 'No Court history yet'}</small></div></section>
+      <section className="review-ledger paper-sheet"><div><span>Budget vs actual</span><b>RM {spent + replanCost} spent</b><small>RM {remaining} remaining</small></div><div><span>Decisions</span><b>{decisionHistory.length} recorded</b><small>{decisionHistory[0] ? `${decisionHistory[0].topic} · ${decisionHistory[0].decision}` : 'No Court history yet'}</small></div></section>
       <section className="compare-ledger"><span>PLANNED VS ACTUAL</span><div><b>Planned pace</b><i/><small>Relaxed · 2 floating blocks</small></div><div><b>Actual behaviour</b><i className="actual"/><small>Slower after rain · one block skipped</small></div><p>Coco will down-rank over-packed evenings next time after you confirm learning.</p></section>
       <section className="community-entry"><div><span>COMMUNITY</span><b>{published ? 'Published with consent' : 'Private by default'}</b><small>Nothing becomes public without an explicit action.</small></div><button onClick={() => setDrawer('community')}>Open</button></section>
     </>;
@@ -425,10 +459,9 @@ export default function App() {
     if (!drawer) return null;
     return <div className="overlay" onMouseDown={() => setDrawer(null)}><section className="drawer" onMouseDown={e => e.stopPropagation()}><button className="close" onClick={() => setDrawer(null)}><X size={20}/></button>
       {drawer === 'discover' && <><span className="drawer-kicker">DISCOVER · COCO PICKS</span><h3>Where are we going?</h3><p className="drawer-copy">Search Tokyo, Kyoto or Osaka for destination-aware prototype data. Unknown destinations are explicitly marked as fallback examples.</p><div className="discover-search"><input className="big-input" value={destination} onChange={e => { setDestination(e.target.value); setDestinationSearched(false); }} placeholder="Tokyo, Kyoto, Osaka…"/><button className="primary" onClick={searchDestination}>Search</button></div>{destinationSearched && <div className="discover-results"><span className="drawer-kicker">FOR YOUR {destination.toUpperCase()} TRIP</span>{recommendations.map(place => <article className="community-row discover-row" key={place.id}><div><b>{place.name}</b><small>{place.match}% match · {place.type}</small><small>{place.cost} · {place.duration}</small><small><strong>Why Coco picked this:</strong> {place.why}</small><small>{place.source === 'prototype-catalog' ? 'Local prototype catalog' : 'Fallback example · not live destination data'}</small><div className="inline-actions"><button onClick={() => toggleRecommendation(place.id, 'save')}>{place.saved ? '✓ Saved' : 'Save idea'}</button><button onClick={() => toggleRecommendation(place.id, 'add')}>{place.added ? '✓ In plan' : 'Add to plan'}</button></div></div></article>)}</div>}</>}
-      {drawer === 'tingo' && <><span className="drawer-kicker">TINGO CARD · {tingoCompletion(tingoAnswers)}% COMPLETE</span><h3>Tell Coco what a good trip feels like.</h3><p className="drawer-copy">Six small choices become a persistent, explainable profile — not a personality label.</p>{tingoCompletion(tingoAnswers) < 100 ? <><div className="assessment-progress"><i style={{ width: `${tingoCompletion(tingoAnswers)}%` }}/></div><div className="assessment-question"><span>QUESTION {tingoStep + 1} / {tingoQuestions.length}</span><b>{tingoQuestions[tingoStep].prompt}</b></div><div className="assessment-options">{tingoQuestions[tingoStep].options.map(option => <button key={option.id} className={tingoAnswers.some(answer => answer.questionId === tingoQuestions[tingoStep].id && answer.optionId === option.id) ? 'active' : ''} onClick={() => answerTingo(option.id)}><b>{option.label}</b><small>{option.hint}</small></button>)}</div></> : <><div className="tingo-result"><span>YOUR TRAVEL DNA</span><b>{describeTingo(tingoDimensions).join(' · ')}</b><small>Pace, experience, budget, comfort, food, adventure, planning, flexibility, and group style are now available to recommendations and Court guidance.</small></div><button className="primary" onClick={finishTingo}>Refresh explained profile</button></>}</>}
+      {drawer === 'tingo' && <><span className="drawer-kicker">TINGO CARD · {tingoCompletion(tingoAnswers)}% COMPLETE</span><h3>Tell Coco what a good trip feels like.</h3><p className="drawer-copy">Six small choices become a persistent, explainable profile — not a personality label.</p>{tingoCompletion(tingoAnswers) < 100 ? <><div className="assessment-progress"><i style={{ width: `${tingoCompletion(tingoAnswers)}%` }}/></div><div className="assessment-question"><span>QUESTION {tingoStep + 1} / {tingoQuestions.length}</span><b>{tingoQuestions[tingoStep].prompt}</b></div><div className="assessment-options">{tingoQuestions[tingoStep].options.map(option => <button key={option.id} className={tingoAnswers.some(answer => answer.questionId === tingoQuestions[tingoStep].id && answer.optionId === option.id) ? 'active' : ''} onClick={() => answerTingo(option.id)}><b>{option.label}</b><small>{option.hint}</small></button>)}</div></> : <><div className="tingo-result"><span>YOUR TRAVEL DNA</span><b>{describeTingo(tingoDimensions).join(' · ')}</b><small>Pace, experience, budget, comfort, food, adventure, planning, flexibility, and group style are available to downstream prototype rules.</small></div><button className="primary" onClick={finishTingo}>Refresh explained profile</button></>}</>}
       {drawer === 'tripSetup' && <><span className="drawer-kicker">NEW TRIP · BEFORE</span><h3>Give this journey a shape.</h3><label className="setup-field"><span>Destination</span><input className="big-input" value={destination} onChange={e => { setDestination(e.target.value); setDestinationSearched(false); }}/></label><div className="mode-toggle"><button className={mode === 'group' ? 'active' : ''} onClick={() => setMode('group')}>Group</button><button className={mode === 'solo' ? 'active' : ''} onClick={() => setMode('solo')}>Solo</button></div><div className="setup-fields"><label><span>Trip vibe / goal</span><input value={profile.vibe} onChange={e => setProfileField('vibe', e.target.value)}/></label><label><span>Must-Go anchor</span><input value={profile.mustGo} onChange={e => setProfileField('mustGo', e.target.value)}/></label><label><span>Deal breaker</span><input value={profile.veto} onChange={e => setProfileField('veto', e.target.value)}/></label><label><span>Preference</span><input value={profile.preference} onChange={e => setProfileField('preference', e.target.value)}/></label><label><span>Flexible</span><input value={profile.flexible} onChange={e => setProfileField('flexible', e.target.value)}/></label></div><div className="constraint-row"><button onClick={() => updateConstraint('must-go', profile.mustGo)}>Save Must-Go</button><button onClick={() => updateConstraint('deal-breaker', profile.veto)}>Save Deal Breaker</button><button onClick={() => updateConstraint('preference', profile.preference)}>Save Preference</button><button onClick={() => updateConstraint('flexible', profile.flexible)}>Save Flexible</button></div><div className="adapter-note"><b>Coco plan adapter</b><small>Deterministic prototype preview using your Tingo Card, local destination catalog, budget, and stated constraints. No live weather, map, or pricing service is connected.</small></div><button className="primary" onClick={() => { setTripCreated(true); setDrawer(null); openTrip('planning'); }}>Confirm inputs & open plan <ChevronRight size={15}/></button></>}
-      {drawer === 'group' && <><span className="drawer-kicker">GROUP DNA</span><h3>Mostly aligned. Conflict stays visible until the group decides.</h3><div className="dna-grid"><div><span>Vibe</span><b>{profile.vibe}</b></div><div><span>Pace</span><b>{tingoDimensions.pace <= 0 ? 'Relaxed' : 'Full days'}</b></div><div><span>Budget</span><b>RM{Math.round(groupBudgetTotal / Math.max(1, members.length))} / person</b></div><div><span>Food</span><b>{tingoDimensions.food >= 2 ? 'High priority' : 'Balanced'}</b></div></div><div className="member-list">{members.map(member => <div key={member.id}><div><b>{member.name}</b><small>{member.inviteStatus === 'pending' ? 'Invite pending' : member.role} · {member.pace} pace</small></div><button onClick={() => setMembers(current => current.map(item => item.id === member.id ? { ...item, role: item.role === 'Trip lead' ? 'Food scout' : item.role === 'Food scout' ? 'Memory keeper' : 'Trip lead' } : item))}>Rotate role</button></div>)}</div><button className="secondary" onClick={inviteMember}>+ Invite a traveller</button><div className="conflict-mini"><span>EXPLICIT PREFERENCE CONFLICT</span><b>Mei: {profile.mustGo}</b><b>JH: {profile.veto}</b><small>AI can explain options, but cannot silently choose for the group.</small></div><label className="setup-field"><span>Mark another uncertainty</span><input className="big-input" value={draftConflict} onChange={e => setDraftConflict(e.target.value)} placeholder="e.g. hotel area vs budget"/></label><button className="secondary" onClick={markConflict}>{conflictMarked ? 'Conflict sent to Court' : 'Mark conflict & open Court'}</button><div className="planner-turn"><span>Editing turn</span><b>{plannerTurn}</b><button onClick={() => setPlannerTurn(plannerTurn === 'Mei' ? 'JH' : plannerTurn === 'JH' ? 'Zi Shan' : plannerTurn === 'Zi Shan' ? 'Alex' : 'Mei')}>Pass turn</button></div><button className="secondary" onClick={() => setDrawer('reminders')}>Reminders & human commitments</button></>}
-      {drawer === 'packing' && <><span className="drawer-kicker">PACKING</span><h3>One bag, zero “I thought you brought it.”</h3>{packing.map((item, i) => <button className={`pack-row ${item.done ? 'done' : ''}`} key={item.name} onClick={() => togglePack(i)}><span>{item.done ? '✓' : '○'}</span><div><b>{item.name}</b><small>{item.shared ? `Shared · ${item.owner} owns this` : `Owner · ${item.owner}`}</small></div></button>)}</>}
+      {drawer === 'group' && <><span className="drawer-kicker">GROUP DNA</span><h3>Mostly aligned. Conflict stays visible until the group decides.</h3><div className="dna-grid"><div><span>Vibe</span><b>{profile.vibe}</b></div><div><span>Pace</span><b>{tingoDimensions.pace <= 0 ? 'Relaxed' : 'Full days'}</b></div><div><span>Budget</span><b>RM{Math.round(groupBudgetTotal / Math.max(1, members.length))} / person</b></div><div><span>Food</span><b>{tingoDimensions.food >= 2 ? 'High priority' : 'Balanced'}</b></div></div><div className="member-list">{members.map(member => <div key={member.id}><div><b>{member.name}</b><small>{member.inviteStatus === 'pending' ? 'Invite pending' : member.role} · {member.pace} pace</small></div><button onClick={() => setMembers(current => current.map(item => item.id === member.id ? { ...item, role: item.role === 'Trip lead' ? 'Food scout' : item.role === 'Food scout' ? 'Memory keeper' : 'Trip lead' } : item))}>Rotate role</button></div>)}</div><button className="secondary" onClick={inviteMember}>+ Invite a traveller</button><div className="conflict-mini"><span>EXPLICIT PREFERENCE CONFLICT</span><b>Mei: {profile.mustGo}</b><b>JH: {profile.veto}</b><small>AI can explain options, but cannot silently choose for the group.</small></div><label className="setup-field"><span>Mark another uncertainty</span><input className="big-input" value={draftConflict} onChange={e => setDraftConflict(e.target.value)} placeholder="e.g. Shinjuku hotel vs Asakusa hotel"/></label><button className="secondary" onClick={markConflict}>{conflictMarked ? 'Send another conflict to Court' : 'Mark conflict & open Court'}</button><div className="planner-turn"><span>Editing turn</span><b>{plannerTurn}</b><button onClick={() => setPlannerTurn(plannerTurn === 'Mei' ? 'JH' : plannerTurn === 'JH' ? 'Zi Shan' : plannerTurn === 'Zi Shan' ? 'Alex' : 'Mei')}>Pass turn</button></div><button className="secondary" onClick={() => setDrawer('reminders')}>Reminders & human commitments</button></>}
       {drawer === 'backup' && <><span className="drawer-kicker">BACKUP PLAN POOL</span><h3>Ideas worth keeping when reality misbehaves.</h3>{backups.map(item => <div className={`backup-row ${item.viable ? '' : 'off'}`} key={item.name}><b>{item.name}</b><small>{item.support} supporters · {item.cost >= 0 ? '+' : ''}RM{item.cost} · +{item.time} min {item.viable ? '· viable' : '· blocked'}</small></div>)}{ghostWishes.filter(wish => wish.status === 'revived').map(wish => <div className="backup-row" key={`ghost-${wish.id}`}><b>👻 {wish.name}</b><small>Revived from Ghost Wish · preserved with original reason</small></div>)}</>}
       {drawer === 'budget' && <><span className="drawer-kicker">TRIP BUDGET</span><h3>Editable totals, computed every time.</h3><label className="budget-total-input"><span>{mode === 'group' ? 'Group' : 'Solo'} total</span><input type="number" min="0" value={budgetTotal} onChange={e => mode === 'group' ? setGroupBudgetTotal(sanitizeAmount(Number(e.target.value))) : setSoloBudgetTotal(sanitizeAmount(Number(e.target.value)))}/></label><div className="budget-big"><b>RM {remaining}</b><span>remaining after RM {spent + replanCost} actual spend</span></div><div className="surprise-budget"><span>SPONTANEITY RESERVE</span><b>RM {mode === 'group' ? 120 : 60}</b><small>Held outside the base plan for a real little surprise.</small></div><div className="budget-lines">{(['stay','food','transport','activities'] as BudgetCategory[]).map(category => <label key={category}><span>{category === 'transport' ? 'Transit' : category[0].toUpperCase() + category.slice(1)}</span><input type="number" min="0" value={budgetPlan[category]} onChange={e => changeBudgetCategory(category, Number(e.target.value))}/></label>)}</div><div className={`budget-balance ${planned > budgetTotal ? 'over' : ''}`}><span>Planned</span><b>RM {planned} / RM {budgetTotal}</b><small>{planned > budgetTotal ? `Over plan by RM ${planned - budgetTotal}` : `RM ${budgetTotal - planned} unallocated buffer`}</small></div><button className="receipt-button" onClick={printReceipt}><ReceiptText size={18}/>{receiptPrinted ? 'Print receipt again' : 'Print split-bill receipt'}</button></>}
       {drawer === 'compare' && <><span className="drawer-kicker">COMPARE · HONEST PROTOTYPE</span><h3>Shortlist the option that fits the trip, not just the price.</h3><p className="drawer-copy">These are deterministic demo prices. No live supplier, inventory, or external checkout is connected.</p>{comparisonOptions.map(option => <article className="compare-option" key={option.id}><div><span>{option.category.toUpperCase()} · {option.fit}% fit</span><b>{option.label}</b><small>{option.why}</small></div><strong>RM {option.price}<em>{option.deal}</em></strong><small className={option.price <= remaining ? 'within-budget' : 'over-budget'}>{option.price <= remaining ? 'Within current remaining budget' : 'Over current remaining budget'}</small><button className="secondary" onClick={() => setDrawer(null)}>Preview in plan</button></article>)}</>}
@@ -446,11 +479,25 @@ export default function App() {
     </section></div>;
   }
 
+  const renderCourt = () => {
+    if (!courtOpen) return null;
+    const first = courtOptions[0];
+    const second = courtOptions[1];
+    const gachaResult = () => {
+      const winner = Math.random() > .5 ? first : second;
+      if (!winner) return;
+      setGacha(winner.label);
+      setCourtConfirmed(false);
+      setCourtDecision(null);
+    };
+    return <div className="ritual-overlay"><section className="court-stage"><button className="close light" onClick={() => setCourtOpen(false)}><X size={20}/></button><span className="ritual-kicker">GROUP COURT</span><Coco mood="happy"/><h3>{activeConflict}</h3><p>{courtOptions.map(option => `${option.label}: ${tally.counts[option.id] ?? 0}`).join(' · ')}. {tally.tied ? 'This is a true unresolved tie.' : 'There is a majority, so Gacha stays locked.'}</p><div className="member-votes">{courtVotes.map(vote => <div key={vote.member}><b>{vote.member}</b><span>{courtOptions.map(option => <button key={option.id} className={vote.pick === option.id ? 'active' : ''} onClick={() => castVote(vote.member, option.id)}>{option.label}</button>)}</span></div>)}</div><div className="trade-slip"><b>Possible exchange</b><small>{first?.label ?? 'Option A'} ↔ protect a linked concession for {second?.label ?? 'Option B'} later.</small><button onClick={() => setTradeAccepted(!tradeAccepted)}>{tradeAccepted ? '✓ Exchange attached' : 'Attach concession'}</button></div>{tally.tied ? <button className="gacha-machine" onClick={gachaResult}>Turn Gacha for this tie</button> : <div className="majority-note"><b>Majority decides normally.</b><small>Randomness is not used when the vote already resolves the conflict.</small></div>}{proposedDecision && <div className="verdict"><span>PROPOSED VERDICT</span><b>{proposedDecision}</b><small>{gacha ? 'Random tie-break is still only a proposal.' : 'Computed from member votes.'}</small><button onClick={confirmCourt}>{courtConfirmed && courtDecision === proposedDecision ? '✓ Added to official timeline' : 'Confirm result'}</button></div>}</section></div>;
+  };
+
   return <div className="app-shell">
-    <header className="topbar"><button className="brand-lockup" onClick={() => setTab('home')} aria-label="Go to Home"><span className="brand-mark">c</span><span className="wordmark"><b>COCOCRUNCH</b><small>travel, with room to breathe</small></span></button><div className="topbar-actions"><span className="tiny-avatar">M</span><button className="bell" aria-label="Notifications"><Bell size={19}/><i/></button></div></header>
-    <main>{tab === 'home' ? renderHome() : tab === 'trips' ? renderTripWorkspace() : tab === 'explore' ? renderExplore() : tab === 'memories' ? renderGlobalMemories() : renderMe()}</main>
-    <nav className="bottom-nav">{tabs.map(item => { const Icon = item.icon; return <button key={item.id} className={tab === item.id ? 'active' : ''} onClick={() => setTab(item.id)}><Icon size={20}/><span>{item.label}</span></button>; })}</nav>
-    {courtOpen && <div className="ritual-overlay"><section className="court-stage"><button className="close light" onClick={() => setCourtOpen(false)}><X size={20}/></button><span className="ritual-kicker">GROUP COURT</span><Coco mood="happy"/><h3>{activeConflict}</h3><p>{tally.ramen} ramen · {tally.sushi} sushi. {tally.tied ? 'This is a true unresolved tie.' : 'There is a majority, so Gacha stays locked.'}</p><div className="member-votes">{courtVotes.map(vote => <div key={vote.member}><b>{vote.member}</b><span><button className={vote.pick === 'ramen' ? 'active' : ''} onClick={() => castVote(vote.member, 'ramen')}>🍜 Ramen</button><button className={vote.pick === 'sushi' ? 'active' : ''} onClick={() => castVote(vote.member, 'sushi')}>🍣 Sushi</button></span></div>)}</div><div className="trade-slip"><b>Possible exchange</b><small>Ramen tonight ↔ sushi market becomes tomorrow’s protected lunch.</small><button onClick={() => setTradeAccepted(!tradeAccepted)}>{tradeAccepted ? '✓ Exchange attached' : 'Attach concession'}</button></div>{tally.tied ? <button className="gacha-machine" onClick={() => { setGacha(Math.random() > .5 ? 'Ramen wins the tie.' : 'Sushi wins the tie.'); setCourtConfirmed(false); setCourtDecision(null); }}>Turn Gacha for this tie</button> : <div className="majority-note"><b>Majority decides normally.</b><small>Randomness is not used when the vote already resolves the conflict.</small></div>}{proposedDecision && <div className="verdict"><span>PROPOSED VERDICT</span><b>{proposedDecision}</b><small>{gacha ? 'Random tie-break is still only a proposal.' : 'Computed from member votes.'}</small><button onClick={confirmCourt}>{courtConfirmed && courtDecision === proposedDecision ? '✓ Added to official timeline' : 'Confirm result'}</button></div>}</section></div>}
+    <header className="topbar"><button className="brand-lockup" onClick={() => { setTripWorkspaceOpen(false); setTab('home'); }} aria-label="Go to Home"><span className="brand-mark">c</span><span className="wordmark"><b>COCOCRUNCH</b><small>travel, with room to breathe</small></span></button><div className="topbar-actions"><span className="tiny-avatar">M</span><button className="bell" aria-label="Notifications"><Bell size={19}/><i/></button></div></header>
+    <main>{tab === 'home' ? renderHome() : tab === 'trips' ? (tripWorkspaceOpen ? renderTripWorkspace() : renderTrips()) : tab === 'explore' ? renderExplore() : tab === 'memories' ? renderGlobalMemories() : renderMe()}</main>
+    <nav className="bottom-nav">{tabs.map(item => { const Icon = item.icon; return <button key={item.id} className={tab === item.id ? 'active' : ''} onClick={() => { if (item.id === 'trips') setTripWorkspaceOpen(false); setTab(item.id); }}><Icon size={20}/><span>{item.label}</span></button>; })}</nav>
+    {renderCourt()}
     {renderDrawer()}
   </div>;
 }
