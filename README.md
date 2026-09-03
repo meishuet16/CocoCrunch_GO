@@ -1,47 +1,45 @@
-# CocoCrunch_GO
+# CocoCrunch
 
 **COCO IN YOUR AREA.**
 
-A mobile-first group travel planner built for preferences, surprises, and plans that go wrong.
+A group travel planner built for preferences, surprises, and plans that go wrong.
 
-## Prototype focus
+CocoCrunch treats travel as two kinds of uncertainty at once: human disagreement and real-world disruption. The product keeps disagreement visible until the group resolves it, protects Must-Go anchors, and repairs the plan around what still matters when reality changes.
 
-CocoCrunch demonstrates the complete P0 decision loop for CodeNection 2026 Travel Planner:
+## Product rules
 
-1. **Know me** — traveller preferences, pace, food priorities, budget awareness.
-2. **Know us** — Group Travel DNA and explicit conflicts instead of averaging them away.
-3. **Plan** — itinerary with Anchor / Floating / Mystery Window, budget context, Plan Health and "Why this?" explanations.
-4. **Decide together** — Group Court for conflicts; Gacha is only used when the vote is tied.
-5. **Adapt** — disruptions protect Anchors first, surface backup / Ghost options, show time + cost impact, then require confirmation with undo.
-6. **Reassure** — Family Window shares only the chosen level of information and follows a reassurance contract rather than continuous tracking.
-7. **Budget** — trip budget, spend, reserved funds, buffer and tactile split-bill receipt interaction.
-8. **Remember** — Memory Trunk, Capture Capsule and saved Ghost Wishes.
+- Must-Go items are protected anchors and cannot be silently AI-replaced.
+- One individual cannot rewrite the official group itinerary; substantive changes go through Group Court, including timed emergency approval during disruptions.
+- Gacha is a tie-breaker only after a true unresolved vote tie. It is not a general random planner.
+- Disruption repair protects anchors first, prefers high-support viable backups, previews impact before execution, requires confirmation, and exposes undo.
+- AI suggestions are proposals, not execution.
+- Family Window is reassurance rather than surveillance. Continuous location is separate and off by default.
+- Community sharing is private by default.
+- Prayer is a post-repair emotional ritual and never changes weather or planning logic.
 
-## Brand / interaction language
+## Current prototype
 
-- Palette: `#FFF8E7`, `#930500`, `#95BBEA`
-- Coco is a character and interaction guide, not a generic sparkle chatbot.
-- Tactile absurdism is reserved for meaningful moments: Ride with Coco, Capture Capsule, receipt printer, Gacha and optional prayer ritual.
-- Prayer is entertainment only and never changes weather or itinerary logic.
-- AI suggestions always show reasoning / impact before the user confirms them.
+The mobile prototype covers budgeting, itinerary planning, group preference syncing, solo/group mode, destination discovery, Group Court, disruption repair, packing ownership, Family Window/privacy, and post-trip memories.
 
-## Run locally
+Core interactions implemented in the current feature branch include:
 
-```bash
-npm install
-npm run dev
-```
+- member-level Group Court voting with computed majority/tie and tie-only Gacha
+- editable category budgets with computed planned/remaining totals
+- confirmed post-trip preference learning that writes back into the profile
+- versioned local persistence for durable product state
+- destination-aware local demo catalogs for Tokyo, Kyoto and Osaka with explicitly marked fallback data
+- Capture Capsule, Coco courier, staged split-bill receipt, and multi-step optional prayer ritual
+- openable Memory Trunk, Ghost Wish revive/release history, and Future Postcard
+- disruption preview → emergency group approval → apply/undo, with Must-Go anchors protected
 
-Open the Vite URL printed in the terminal (normally `http://localhost:5173/`).
+## Architecture
 
-## Verify before pushing
+Business rules live under `src/domain/` rather than inside presentation code. Signature interactions use the typed `experience.ts` event boundary instead of DOM selectors or text inspection. Durable state is owned by `persistence.ts`; transient overlay and animation state is intentionally not persisted.
 
-```bash
-npm run check
-```
+## Data honesty
 
-`npm run check` runs TypeScript validation followed by a production Vite build.
+The discovery catalog is prototype data, not a live places service. Unknown destinations show an explicit fallback label instead of pretending that Tokyo examples are live results. A production datasource can replace the discovery boundary without changing the planning flow.
 
-## CI
+## Validation
 
-GitHub Actions runs the same check for pull requests targeting `main`, and again when changes land on `main`. Feature-branch pushes are intentionally not checked a second time, avoiding duplicate CI runs.
+`npm run check` runs TypeScript validation and a Vite production build through GitHub Actions CI.
