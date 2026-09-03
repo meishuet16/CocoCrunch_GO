@@ -2,9 +2,9 @@
 
 Pure planning rules live here so UI components do not own business invariants.
 
-- `court.ts`: vote tally and true-tie detection. Gacha belongs to the UI flow only when `tied` is true.
-- `budget.ts`: editable category totals and remaining-budget math.
-- `preferences.ts`: explicit, user-confirmed post-trip learning transforms.
-- `discovery.ts`: destination-specific prototype catalog with an explicit fallback rather than pretending fallback data is live.
+- `court.ts`: member vote tally and true-tie detection. Gacha is allowed only when `canUseGacha(votes)` is true.
+- `budget.ts`: editable category values, sanitization, totals and remaining-budget math.
+- `preferences.ts`: explicit post-trip learning transforms and a reviewable before/after summary.
+- `discovery.ts`: destination-specific prototype catalog. Unknown destinations are explicitly labeled fallback examples rather than presented as live data.
 
-These modules must stay framework-free and side-effect-free. Browser persistence is isolated in `src/persistence.ts`.
+Browser persistence is isolated in `src/persistence.ts`. UI code should consume these APIs instead of duplicating their rules.
