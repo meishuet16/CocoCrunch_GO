@@ -12,6 +12,22 @@ export type PersistedRecommendation = {
   added: boolean;
 };
 
+export type CourtOptionState = {
+  id: string;
+  label: string;
+};
+
+export type DecisionRecord = {
+  id: string;
+  kind: 'court' | 'emergency';
+  topic: string;
+  decision: string;
+  voteSummary?: string;
+  usedGacha?: boolean;
+  satisfaction?: 'worth' | 'mixed' | 'skip';
+  createdAt: string;
+};
+
 export type PersistedState = {
   version: 1;
   mode: 'group' | 'solo';
@@ -21,6 +37,9 @@ export type PersistedState = {
   courtVotes: CourtVote[];
   courtConfirmed: boolean;
   courtDecision: string | null;
+  courtOptions?: CourtOptionState[];
+  activeConflict?: string;
+  decisionHistory?: DecisionRecord[];
   groupBudgetTotal: number;
   soloBudgetTotal: number;
   groupBudgetPlan: BudgetPlan;
