@@ -1,4 +1,4 @@
-import { createUISFX } from 'uisfx';
+import { createUISFX, type CueName } from 'uisfx';
 
 export type CocoSound =
   | 'tap'
@@ -16,18 +16,18 @@ export type CocoSound =
 const ui = createUISFX({ pack: 'zen', preferences: {} });
 let unlocked = false;
 
-const cue: Record<CocoSound, string> = {
+const cue: Record<CocoSound, CueName> = {
   tap: 'select',
-  save: 'success',
+  save: 'checkpoint',
   decision: 'complete',
-  gacha: 'reveal',
+  gacha: 'bonus',
   repair: 'success',
   capture: 'drop',
   courier: 'send',
   receipt: 'complete',
-  'prayer-step': 'step',
+  'prayer-step': 'progress-step',
   'memory-open': 'open',
-  'memory-seal': 'success',
+  'memory-seal': 'checkpoint',
 };
 
 export async function unlockSound() {
@@ -43,7 +43,7 @@ export async function unlockSound() {
 export function playSound(sound: CocoSound) {
   if (!unlocked) return;
   try {
-    ui.play(cue[sound] as Parameters<typeof ui.play>[0]);
+    ui.play(cue[sound]);
   } catch {
     // Never let audio failure block product logic.
   }
