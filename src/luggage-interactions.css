@@ -1,10 +1,10 @@
 /* CocoCrunch luggage interaction language
    Before = pack the trip. After = unpack the memory.
-   Reference-inspired interaction only; CocoCrunch keeps its own cream / sangria / blue palette. */
+   Reference-inspired interaction only; CocoCrunch keeps cream / sangria / blue. */
 
 /* BEFORE · Pack A Bag */
 .drawer:has(.pack-row) {
-  min-height: min(690px, 88svh);
+  min-height: min(720px, 90svh);
   overflow: hidden auto;
   padding-bottom: calc(34px + env(safe-area-inset-bottom));
 }
@@ -12,27 +12,26 @@
 .drawer:has(.pack-row)::before {
   content: '';
   display: block;
-  width: min(292px, 82vw);
-  height: 210px;
-  margin: 18px auto 4px;
+  width: min(286px, 80vw);
+  height: 196px;
+  margin: 22px auto 18px;
   border: 3px solid var(--sangria);
-  border-radius: 34px 34px 24px 24px;
+  border-radius: 36px 36px 26px 26px;
   background:
-    linear-gradient(90deg, transparent 47%, rgba(147,5,0,.16) 47% 53%, transparent 53%),
-    linear-gradient(180deg, rgba(149,187,234,.25) 0 46%, rgba(255,255,255,.75) 46% 100%);
+    linear-gradient(90deg, transparent 47%, rgba(147,5,0,.14) 47% 53%, transparent 53%),
+    linear-gradient(180deg, rgba(149,187,234,.26) 0 48%, rgba(255,255,255,.78) 48% 100%);
   box-shadow:
-    inset 0 0 0 8px rgba(255,248,231,.78),
-    0 18px 42px rgba(77,37,25,.12);
+    inset 0 0 0 8px rgba(255,248,231,.82),
+    0 18px 42px rgba(77,37,25,.14);
   transform: perspective(650px) rotateX(4deg);
   transform-origin: bottom;
-  position: relative;
 }
 
 .drawer:has(.pack-row)::after {
   content: 'PACK A BAG  ·  tap an item to toss it in';
   display: block;
-  width: min(292px, 82vw);
-  margin: -116px auto 102px;
+  margin: -121px auto 100px;
+  width: min(286px, 80vw);
   color: var(--sangria);
   text-align: center;
   font-size: 9px;
@@ -43,78 +42,47 @@
 }
 
 .drawer:has(.pack-row) > .drawer-kicker,
-.drawer:has(.pack-row) > h3 {
-  position: relative;
-  z-index: 3;
-}
+.drawer:has(.pack-row) > h3 { position: relative; z-index: 3; }
 
 .pack-row {
   position: relative;
   z-index: 4;
-  width: calc(50% - 6px);
+  width: calc(50% - 8px);
   display: inline-grid;
   vertical-align: top;
-  min-height: 88px;
-  margin: 5px 3px;
-  padding: 12px 10px;
-  grid-template-columns: 30px 1fr;
+  min-height: 92px;
+  margin: 6px 4px;
+  padding: 13px 11px;
+  grid-template-columns: 32px 1fr;
   align-items: center;
-  border: 1px solid rgba(147,5,0,.16);
-  border-radius: 18px;
-  background: rgba(255,255,255,.68);
-  box-shadow: 0 8px 20px rgba(72,42,31,.05);
-  transform-origin: 50% -150px;
+  border: 1px solid rgba(147,5,0,.18);
+  border-radius: 20px;
+  background: rgba(255,255,255,.76);
+  box-shadow: 0 8px 22px rgba(72,42,31,.06);
+  transform-origin: 50% -155px;
   transition: transform .36s cubic-bezier(.2,.85,.2,1), opacity .3s ease, background .25s ease, box-shadow .25s ease;
 }
-
 .pack-row:nth-of-type(1) { transform: rotate(-2deg); }
 .pack-row:nth-of-type(2) { transform: rotate(2deg); }
 .pack-row:nth-of-type(3) { transform: rotate(-1deg); }
-
 .pack-row > span {
-  width: 27px;
-  height: 27px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  border: 1px solid rgba(147,5,0,.22);
-  background: var(--cream);
-  color: var(--sangria);
+  width: 29px; height: 29px; display: grid; place-items: center;
+  border-radius: 50%; border: 1px solid rgba(147,5,0,.22);
+  background: var(--cream); color: var(--sangria);
 }
-
 .pack-row b { text-decoration: none; opacity: 1; }
 .pack-row small { line-height: 1.4; }
-
-.pack-row:not(.done):hover {
-  transform: translateY(-3px) rotate(1deg);
-  box-shadow: 0 13px 28px rgba(72,42,31,.09);
-}
-
-.pack-row.done {
-  animation: tossIntoBag .62s cubic-bezier(.18,.78,.25,1) both;
-  background: rgba(149,187,234,.18);
-  border-color: rgba(147,5,0,.11);
-}
-
-.pack-row.done b {
-  text-decoration: none;
-  opacity: .72;
-}
-
-.pack-row.done > span {
-  background: var(--sangria);
-  color: #fff8e7;
-  border-color: var(--sangria);
-  animation: packedStamp .45s .28s cubic-bezier(.2,.8,.2,1) both;
-}
+.pack-row:not(.done):hover { transform: translateY(-4px) rotate(1deg); box-shadow: 0 14px 30px rgba(72,42,31,.1); }
+.pack-row.done { animation: tossIntoBag .68s cubic-bezier(.18,.78,.25,1) both; background: rgba(149,187,234,.2); border-color: rgba(147,5,0,.12); }
+.pack-row.done b { text-decoration: none; opacity: .7; }
+.pack-row.done > span { background: var(--sangria); color: #fff8e7; border-color: var(--sangria); animation: packedStamp .45s .3s cubic-bezier(.2,.8,.2,1) both; }
 
 @keyframes tossIntoBag {
   0% { transform: translate(0,0) rotate(0) scale(1); opacity: 1; }
-  44% { transform: translate(0,-112px) rotate(-7deg) scale(.92); opacity: 1; }
-  72% { transform: translate(38px,-165px) rotate(7deg) scale(.62); opacity: .76; }
-  100% { transform: translate(0,0) rotate(0) scale(1); opacity: .72; }
+  38% { transform: translate(0,-86px) rotate(-6deg) scale(.94); opacity: 1; }
+  68% { transform: translate(18px,-151px) rotate(8deg) scale(.52); opacity: .45; }
+  100% { transform: translate(0,0) rotate(0) scale(1); opacity: .7; }
 }
-
 @keyframes packedStamp {
   0% { transform: scale(.45) rotate(-18deg); }
   70% { transform: scale(1.16) rotate(4deg); }
@@ -126,99 +94,131 @@
   isolation: isolate;
   border: 0;
   width: 100%;
+  height: 250px;
   background:
-    radial-gradient(circle at 50% 70%, rgba(149,187,234,.13), transparent 46%),
-    rgba(255,255,255,.3);
-  border-radius: 24px;
+    radial-gradient(circle at 50% 75%, rgba(149,187,234,.18), transparent 47%),
+    rgba(255,255,255,.34);
+  border: 2px solid rgba(149,187,234,.7);
+  border-radius: 30px;
   overflow: visible;
-  transition: transform .28s cubic-bezier(.2,.8,.2,1), background .28s ease;
+  transition: transform .28s cubic-bezier(.2,.8,.2,1), background .28s ease, min-height .4s ease;
 }
-
 .trunk-button:hover { transform: translateY(-2px); }
 .trunk-button:active { transform: translateY(1px) scale(.995); }
 
 .trunk-lid {
   z-index: 5;
+  top: 22px;
   backface-visibility: hidden;
-  transition: transform .68s cubic-bezier(.18,.82,.22,1), top .68s cubic-bezier(.18,.82,.22,1), filter .35s ease;
+  transition: transform .72s cubic-bezier(.18,.82,.22,1), top .72s cubic-bezier(.18,.82,.22,1), filter .35s ease;
   box-shadow: inset 0 7px rgba(255,255,255,.08), 0 8px 18px rgba(67,35,23,.14);
 }
-
 .trunk-body {
-  transition: transform .5s cubic-bezier(.2,.8,.2,1), box-shadow .5s ease;
+  top: 77px;
+  height: 146px;
+  transition: transform .58s cubic-bezier(.2,.8,.2,1), box-shadow .5s ease, filter .45s ease;
 }
-
+.trunk-button.open {
+  min-height: 282px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255,255,255,.92), rgba(149,187,234,.24) 45%, transparent 70%),
+    rgba(255,255,255,.45);
+}
 .trunk-button.open .trunk-lid {
-  top: -19px;
-  transform: rotateX(-72deg) translateY(-10px);
-  filter: brightness(1.08);
+  top: 0;
+  transform: perspective(700px) rotateX(76deg) translateY(-20px) scaleY(.92);
+  filter: brightness(1.12);
 }
-
 .trunk-button.open .trunk-body {
-  transform: translateY(8px) scale(1.015);
-  box-shadow: inset 0 0 0 8px rgba(255,255,255,.06), 0 24px 38px rgba(68,39,25,.18);
+  transform: translateY(22px) scale(1.02);
+  filter: brightness(1.04);
+  box-shadow: inset 0 0 0 8px rgba(255,255,255,.08), 0 28px 42px rgba(68,39,25,.2);
 }
 
 .trunk-button .postcard,
 .trunk-button .ticket,
 .trunk-button .trunk-body .coco {
-  transition: transform .66s cubic-bezier(.2,.85,.2,1), opacity .45s ease;
+  transition: transform .72s cubic-bezier(.2,.85,.2,1), opacity .45s ease;
+}
+.trunk-button.open .p1 { transform: translate(-14px,-54px) rotate(-15deg) scale(1.08); }
+.trunk-button.open .p2 { transform: translate(14px,-62px) rotate(13deg) scale(1.08); }
+.trunk-button.open .ticket { transform: translateY(-54px) rotate(-5deg) scale(1.12); }
+.trunk-button.open .trunk-body .coco { transform: translateY(-21px) rotate(5deg) scale(1.08); }
+
+/* When the trunk is open, keepsakes visually come out of the suitcase instead of reading like a normal list below it. */
+.trunk-button.open + .trunk-contents {
+  position: relative;
+  z-index: 8;
+  margin: -125px 22px 26px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  overflow: visible;
+  pointer-events: auto;
+}
+.trunk-button.open + .trunk-contents > b {
+  grid-column: 1 / -1;
+  justify-self: center;
+  padding: 0 10px 4px;
+  color: var(--sangria);
+  font-family: inherit;
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  background: rgba(255,248,231,.86);
+  border-radius: 999px;
+}
+.trunk-button.open + .trunk-contents > span {
+  min-height: 78px;
+  padding: 12px 11px;
+  border: 1px solid rgba(147,5,0,.18);
+  border-radius: 12px 18px 13px 16px;
+  background: #fffaf0;
+  box-shadow: 0 12px 24px rgba(65,35,24,.13);
+  display: grid;
+  align-content: center;
+  font-family: Georgia, serif;
+  font-size: 11px;
+  line-height: 1.3;
+  animation: keepsakePop .62s cubic-bezier(.18,.82,.22,1) both;
+}
+.trunk-button.open + .trunk-contents > span:nth-of-type(1) { transform: rotate(-5deg); animation-delay: .08s; }
+.trunk-button.open + .trunk-contents > span:nth-of-type(2) { transform: rotate(4deg); animation-delay: .14s; }
+.trunk-button.open + .trunk-contents > span:nth-of-type(3) { transform: rotate(3deg); animation-delay: .2s; }
+.trunk-button.open + .trunk-contents > span:nth-of-type(4) { transform: rotate(-4deg); animation-delay: .26s; }
+
+@keyframes keepsakePop {
+  0% { opacity: 0; translate: 0 54px; scale: .7; }
+  72% { opacity: 1; translate: 0 -7px; scale: 1.04; }
+  100% { opacity: 1; translate: 0 0; scale: 1; }
 }
 
-.trunk-button.open .p1 { transform: translate(-8px,-31px) rotate(-13deg); }
-.trunk-button.open .p2 { transform: translate(8px,-37px) rotate(11deg); }
-.trunk-button.open .ticket { transform: translateY(-29px) rotate(-4deg); }
-.trunk-button.open .trunk-body .coco { transform: translateY(-10px) rotate(4deg); }
-
+/* Closed fallback — no ordinary list card pretending to be the interaction. */
 .trunk-contents {
-  margin-top: -3px;
+  margin-top: 0;
   border-radius: 18px;
   overflow: hidden;
   animation: keepsakesRise .52s cubic-bezier(.18,.82,.22,1) both;
 }
+.trunk-contents > b { display: block; padding: 14px 15px 8px; color: var(--sangria); font-family: Georgia, serif; font-size: 18px; }
+.trunk-contents > span { display: block; padding: 12px 15px; border-top: 1px dashed rgba(147,5,0,.14); background: rgba(255,255,255,.28); }
+@keyframes keepsakesRise { from { opacity: 0; transform: translateY(-18px) scale(.98); } to { opacity: 1; transform: none; } }
 
-.trunk-contents > b {
-  display: block;
-  padding: 14px 15px 8px;
-  color: var(--sangria);
-  font-family: Georgia, serif;
-  font-size: 18px;
-}
-
-.trunk-contents > span {
-  display: block;
-  padding: 12px 15px;
-  border-top: 1px dashed rgba(147,5,0,.14);
-  background: rgba(255,255,255,.28);
-  transform-origin: left center;
-  animation: keepsakeFan .46s cubic-bezier(.2,.8,.2,1) both;
-}
-
-.trunk-contents > span:nth-of-type(1) { animation-delay: .06s; }
-.trunk-contents > span:nth-of-type(2) { animation-delay: .12s; }
-.trunk-contents > span:nth-of-type(3) { animation-delay: .18s; }
-.trunk-contents > span:nth-of-type(4) { animation-delay: .24s; }
-
-@keyframes keepsakesRise {
-  from { opacity: 0; transform: translateY(-18px) scale(.98); }
-  to { opacity: 1; transform: none; }
-}
-
-@keyframes keepsakeFan {
-  from { opacity: 0; transform: translateY(-18px) rotate(-2deg); }
-  to { opacity: 1; transform: none; }
-}
-
-/* Keep the same tactile language usable for touch and motion-sensitive users. */
 @media (max-width: 370px) {
   .pack-row { width: 100%; margin-inline: 0; }
+  .trunk-button.open + .trunk-contents { margin-inline: 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .pack-row.done,
   .pack-row.done > span,
   .trunk-contents,
-  .trunk-contents > span { animation: none !important; }
+  .trunk-button.open + .trunk-contents > span { animation: none !important; }
   .trunk-lid,
   .trunk-body,
   .trunk-button .postcard,
