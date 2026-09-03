@@ -50,13 +50,13 @@ Living handoff for the V2 rescue pass on `feat/p0-foundation` / PR #1. Update th
 - Planned pace is derived from Tingo; actual pace copy is derived from runtime disruption / energy / arrival state.
 - `persistence.ts` stores optional group and solo category actuals while remaining backward-compatible with existing `cococrunch:v1` saves.
 - `domain/retrospective.ts` normalizes/updates actual spend and rates specific Decision Records.
-- Active App now owns `groupBudgetActuals` / `soloBudgetActuals` state, initializes them from persisted values with deterministic defaults only as first-run fallback, exposes editable Actual inputs by category, and saves them through normal app persistence.
+- Active App owns `groupBudgetActuals` / `soloBudgetActuals` state, initializes them from persisted values with deterministic defaults only as first-run fallback, exposes editable Actual inputs by category, and saves them through normal app persistence.
 - Completed retrospective reads the same live/persisted actual state, so #51 is no longer just a deterministic display. It remains local prototype data rather than bank/receipt/import integration.
 
 ### Decision History satisfaction
-- Completed now renders each persisted Decision Record as a specific review item.
+- Completed renders each persisted Decision Record as a specific review item.
 - `Worth it / Mixed / Skip next time` writes satisfaction back to that exact record ID through the retrospective domain helper.
-- Decision satisfaction is part of the existing `decisionHistory` persistence payload, so it survives the same local replay path instead of being transient UI state.
+- Decision satisfaction is part of the existing `decisionHistory` persistence payload, so it follows the normal local replay path instead of transient UI state.
 
 ### Signature interaction rescue
 - Canonical Coco PNG is authoritative where integrated; CSS anatomy is fallback.
@@ -80,18 +80,37 @@ Living handoff for the V2 rescue pass on `feat/p0-foundation` / PR #1. Update th
 - Rescue-log head `972b91277197e30ea233437dbc7d2dd735bba841` passed exact-head CI run #101.
 - Court generic-result cleanup landed at `4374f8e6f7620eef550bec982fa30f7ee35d7e67`.
 - `src/domain/retrospective.ts` was added at `52b8f46f3cdb57f705b81731caae7206554afb64`.
-- Active App retrospective closure landed at `4efbeb688778fe8d702cd739b5b98b7e51e48dd5`.
-- Exact-head CI run #105 for `4efbeb688778fe8d702cd739b5b98b7e51e48dd5` completed successfully, including `npm run check`.
+- Active App retrospective closure landed at `4efbeb688778fe8d702cd739b5b98b7e51e48dd5` and passed exact-head CI run #105.
+- Rescue-log head `9a38f3edae6f289fffbe325f0f9f8d3dece8f275` passed exact-head CI run #106.
+
+## Automated domain regression gate
+
+Build-green was not enough for the remaining invariant work, so the CI gate now runs domain tests as part of `npm run check`:
+
+`tsc --noEmit && vitest run && vite build`
+
+The first regression suite covers:
+- official Court Gacha eligibility only on a real tie;
+- generic proposal IDs rather than food-demo IDs;
+- Tingo assessment → concrete planning behavior;
+- Tingo-aware discovery explanation/ranking path;
+- trip-level + stop-level learning while preserving Must-Go;
+- category actual normalization/update without source mutation;
+- satisfaction updates only the requested Decision Record while preserving its official verdict.
+
+Package/test gate landed across `8269cc0152f658b47e46ad522b9f57266aaf22f3` and `83be6ea4945ae137130dcdfdf5d5c274694088bd`. Exact-head CI run #109 for `83be6ea4945ae137130dcdfdf5d5c274694088bd` completed successfully, including the new Vitest step through `npm run check`.
+
+This automated suite covers pure domain invariants only. It does not prove browser orchestration, modal/drawer interaction, persistence reload, or rendered mobile behavior.
 
 ## Current status by previously-open item
 
-1. Tingo downstream wiring — **materially implemented in visible local prototype flow**; still needs rendered behavior QA and per-question audit.
-2. Concession rollback (#23) — **prototype rollback implemented**; needs interaction QA and final invariant review.
+1. Tingo downstream wiring — **materially implemented in visible local prototype flow**; pure behavior now has regression coverage, rendered per-question behavior QA remains.
+2. Concession rollback (#23) — **prototype rollback implemented**; still needs interaction/browser QA because it is component state rather than a pure-domain transaction.
 3. Personality/Tingo role suggestions (#28) — **visible + explicit apply**, still Partial because member-level personality data is not individually assessed.
-4. Per-stop Worth It (#49) — **wired into confirmed learning**; still needs runtime / persistence replay QA.
-5. Preference/planned-vs-actual retrospective (#50) — **derived from active prototype state instead of fixed copy**; still local prototype data.
-6. Category planned-vs-actual budget (#51) — **editable + persisted local prototype implementation now wired**; remaining limitation is lack of live transaction/import source and rendered replay QA.
-7. Decision satisfaction / Decision History (#30 extension) — **specific-record UI + persistence wiring implemented**; still needs runtime replay QA.
+4. Per-stop Worth It (#49) — **wired into confirmed learning**; pure reconciliation has regression coverage, persistence reload still needs browser replay.
+5. Preference/planned-vs-actual retrospective (#50) — **derived from active prototype state instead of fixed copy**; runtime pace signals are not all persisted yet.
+6. Category planned-vs-actual budget (#51) — **editable + persisted local prototype implementation wired**; actual-state helpers now have regression coverage, browser replay remains.
+7. Decision satisfaction / Decision History (#30 extension) — **specific-record UI + persistence wiring implemented**; specific-record mutation now has regression coverage, browser replay remains.
 
 ## Invariant sweep observations
 
@@ -105,13 +124,18 @@ Living handoff for the V2 rescue pass on `feat/p0-foundation` / PR #1. Update th
 - Court result calculation is fully proposal-ID agnostic.
 - Editing retrospective actual spend does not mutate the planned budget; plan and actual remain separate records.
 - Decision satisfaction updates one existing Decision Record rather than creating/replacing the official decision.
-- Source audit still needs dedicated runtime regression coverage; these observations are not a substitute for browser QA.
+- Pure-domain versions of several of these rules now fail CI if regressed.
+
+## Newly identified replay gap
+
+The #50 pace retrospective currently derives `actualPaceCopy` from runtime-only `delay`, `mood`, and `arrivalChecked`. Those signals are not persisted today, so a reload can lose the actual-pace evidence even though category spend and decision satisfaction survive. Treat #50 as Partial until the minimum retrospective runtime signals needed for Completed are replayable or an explicit completed-trip actual record replaces them.
 
 ## Still open / do not call merge-ready yet
 
+- Close the #50 replay gap for actual pace / completed-trip signals.
 - Replay persistence in a real browser: edit actual category values, rate a decision, reload, confirm both survive and computed retrospective remains correct.
 - Independently audit all #1–#53 requirements against active `AppRescued`; do not inherit Codex labels.
-- Re-check all 15 business invariants after remaining integration changes.
+- Extend regression coverage to the remaining pure business rules where practical; keep UI-only rules for browser QA rather than faking unit coverage.
 - Continue contextual canonical Coco extraction/usage beyond the current minimal idle asset.
 - Perform rendered mobile QA at 360 / 390 / 430 px: overflow, safe-area nav, touch targets, Court, Gacha, Packing, Memory Trunk, retrospective controls, drawers/modals, reduced motion.
 - Verify signature interaction quality in a real browser; source/CSS inspection is not visual validation.
@@ -119,4 +143,4 @@ Living handoff for the V2 rescue pass on `feat/p0-foundation` / PR #1. Update th
 
 ## Current risk posture
 
-The two largest retrospective closure holes are now wired through the active App and exact-head CI is green. The branch is still **not safe to merge yet** because rendered persistence replay, mobile/signature QA, contextual Coco coverage, full #1–#53 compliance, and final invariant/regression verification remain outstanding.
+The branch now has an automated pure-domain regression gate in addition to type/build CI, and the major retrospective state paths are wired. It is still **not safe to merge yet** because the #50 replay gap, browser persistence replay, rendered mobile/signature QA, contextual Coco coverage, and full #1–#53 audit remain outstanding.
