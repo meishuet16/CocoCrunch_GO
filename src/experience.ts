@@ -10,11 +10,13 @@ type ExperienceListener = (event: ExperienceEvent) => void;
 
 const listeners = new Set<ExperienceListener>();
 
-export function emitExperience(event: ExperienceEvent) {
+export function emitExperience(event: ExperienceEvent): void {
   listeners.forEach(listener => listener(event));
 }
 
-export function subscribeExperience(listener: ExperienceListener) {
+export function subscribeExperience(listener: ExperienceListener): () => void {
   listeners.add(listener);
-  return () => listeners.delete(listener);
+  return () => {
+    listeners.delete(listener);
+  };
 }
