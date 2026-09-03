@@ -4,7 +4,6 @@ import AppExperience from './AppExperience';
 import './styles.css';
 import './coco-character.css';
 import './signature-interactions.css';
-import './memories/memory-rituals.css';
 
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
