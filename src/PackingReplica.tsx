@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { subscribeExperience, emitExperience } from './experience';
 import { playSound } from './sound';
+import cocoIdle from './assets/coco/coco-idle.png';
 import './packing-replica.css';
 
 type PackItem = { id: string; name: string; packed: boolean };
@@ -63,7 +64,6 @@ export default function PackingReplica({ visible, onClose }: Props) {
   const [items, setItems] = useState<PackItem[]>(readItems);
   const [draft, setDraft] = useState('');
   const [drag, setDrag] = useState<DragState>(null);
-  const playfieldRef = useRef<HTMLDivElement>(null);
   const suitcaseRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => subscribeExperience(event => {
@@ -129,7 +129,7 @@ export default function PackingReplica({ visible, onClose }: Props) {
       <header className="pack-replica-head">
         <span>PACK A BAG</span>
         <h2>Drag your things into the suitcase</h2>
-        <p>Your checklist becomes the objects around the bag.</p>
+        <p>Your trip inputs become the objects around the bag. Tap is always available as a fallback.</p>
       </header>
 
       <form className="pack-add" onSubmit={event => { event.preventDefault(); addItem(); }}>
@@ -145,7 +145,7 @@ export default function PackingReplica({ visible, onClose }: Props) {
         </div>)}
       </div>
 
-      <div className="pack-playfield" ref={playfieldRef}>
+      <div className="pack-playfield">
         <div className="packing-hint">drag → drop</div>
         {items.map((item, index) => {
           const Icon = iconFor(item.name);
@@ -182,7 +182,7 @@ export default function PackingReplica({ visible, onClose }: Props) {
               {packedItems.map(item => { const Icon = iconFor(item.name); return <button key={item.id} onClick={() => setPacked(item.id, false)} aria-label={`Take ${item.name} back out`}><Icon size={20}/><small>{item.name}</small></button>; })}
             </div>
           </div>
-          <div className="replica-coco"><i/><b>COCO</b></div>
+          <div className="replica-coco" aria-hidden="true"><img src={cocoIdle} alt=""/></div>
         </div>
       </div>
 
