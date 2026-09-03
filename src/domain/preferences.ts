@@ -45,6 +45,14 @@ export function applyItemReviewLearning(profile: TravelProfile, itemReviews: Rec
   return next;
 }
 
+export function reconcileTripLearning(profile: TravelProfile, worthIt: TripReview, itemReviews: Record<string, ItemReview>): TravelProfile {
+  return applyItemReviewLearning(learnFromTrip(profile, worthIt), itemReviews);
+}
+
+export function reviewLearningSummary(itemReviews: Record<string, ItemReview>): string[] {
+  return learnFromItemReviews(itemReviews).notes;
+}
+
 export function learningSummary(before: TravelProfile, after: TravelProfile): string[] {
   return (Object.keys(after) as (keyof TravelProfile)[]).filter(key => before[key] !== after[key]).map(key => `${key}: ${before[key]} → ${after[key]}`);
 }
