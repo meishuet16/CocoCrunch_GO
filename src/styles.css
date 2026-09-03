@@ -14,7 +14,7 @@ button { font: inherit; }
   min-height: 100vh;
   max-width: 460px;
   margin: 0 auto;
-  padding: 18px 16px 92px;
+  padding: 18px 16px 100px;
   background:
     radial-gradient(circle at top right, rgba(149,187,234,.28), transparent 30%),
     var(--cream);
@@ -28,7 +28,7 @@ h1 { margin: 0; font-size: clamp(28px, 8vw, 40px); line-height: .95; letter-spac
 .status-strip { margin: 20px 0 14px; display: grid; gap: 8px; }
 .status-strip > div { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid rgba(147,5,0,.12); border-radius: 14px; background: rgba(255,255,255,.52); font-size: 12px; }
 
-.stepper { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; margin-bottom: 14px; }
+.stepper { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-bottom: 14px; }
 .step { border: 1px solid rgba(147,5,0,.14); background: rgba(255,255,255,.55); color: #6c5d59; border-radius: 16px; padding: 9px 4px; min-height: 68px; display: grid; place-items: center; gap: 2px; }
 .step > span { width: 20px; height: 20px; border-radius: 999px; display: grid; place-items: center; font-size: 11px; background: #efe8da; }
 .step small { font-size: 10px; }
@@ -46,9 +46,9 @@ h1 { margin: 0; font-size: clamp(28px, 8vw, 40px); line-height: .95; letter-spac
 
 .dna-row, .court-option { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px dashed rgba(147,5,0,.15); gap: 12px; }
 .dna-row strong { color: var(--sangria); }
-.conflict-card, .backup, .absurd { margin-top: 16px; display: grid; gap: 6px; padding: 16px; border-radius: 18px; background: #fff0d8; border: 1px solid #efd7b1; }
-.conflict-card span, .backup span, .absurd span { color: var(--sangria); font-size: 12px; font-weight: 800; }
-.conflict-card small, .backup small, .absurd small { color: #796862; line-height: 1.4; }
+.conflict-card, .backup, .absurd, .family-status { margin-top: 16px; display: grid; gap: 6px; padding: 16px; border-radius: 18px; background: #fff0d8; border: 1px solid #efd7b1; }
+.conflict-card span, .backup span, .absurd span, .family-status span { color: var(--sangria); font-size: 12px; font-weight: 800; }
+.conflict-card small, .backup small, .absurd small, .family-status small { color: #796862; line-height: 1.4; }
 
 .promise { margin-bottom: 14px; padding: 12px 14px; border-radius: 15px; background: var(--blue); color: #15304c; font-size: 13px; font-weight: 700; }
 .timeline-item { display: grid; grid-template-columns: 70px 1fr auto; align-items: center; gap: 10px; padding: 14px 0; border-bottom: 1px dashed rgba(147,5,0,.14); }
@@ -57,6 +57,9 @@ h1 { margin: 0; font-size: clamp(28px, 8vw, 40px); line-height: .95; letter-spac
 .timeline-item small { color: #7a6964; }
 .timeline-item > strong { font-size: 11px; color: var(--sangria); }
 .timeline-item.mystery { background: rgba(149,187,234,.12); margin: 4px -8px; padding-inline: 8px; border-radius: 14px; }
+.map-ride { margin-top: 14px; display: flex; gap: 10px; align-items: flex-start; padding: 14px; border-radius: 16px; background: rgba(149,187,234,.18); }
+.map-ride div { display: grid; gap: 4px; }
+.map-ride small { color: #64727f; line-height: 1.35; }
 .health { margin-top: 16px; padding: 14px; display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; border-radius: 18px; border: 1px solid rgba(147,5,0,.15); }
 .health small { grid-column: 1 / -1; color: #786762; }
 
@@ -71,8 +74,21 @@ h1 { margin: 0; font-size: clamp(28px, 8vw, 40px); line-height: .95; letter-spac
 .alert small, .success small { color: #65706d; }
 .primary { margin-top: 16px; background: var(--sangria); color: white; display: flex; justify-content: center; align-items: center; gap: 8px; }
 .next { margin-top: 12px; background: transparent; color: var(--sangria); border: 1px solid rgba(147,5,0,.22); display: flex; align-items: center; justify-content: center; gap: 8px; }
+.delivery { margin-top: 14px; display: flex; gap: 10px; align-items: center; font-size: 12px; color: #6f625e; }
+.delivery .coco { transform: scale(.58); transform-origin: left center; width: 48px; margin-right: -18px; }
 
-footer { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); width: min(calc(100% - 24px), 436px); display: grid; grid-template-columns: repeat(4, 1fr); padding: 8px; border-radius: 22px; background: rgba(147,5,0,.96); box-shadow: 0 16px 36px rgba(74,19,12,.2); backdrop-filter: blur(12px); }
+.receipt-card { margin-top: 10px; background: #fffefa; border: 1px dashed rgba(147,5,0,.24); padding: 16px; border-radius: 6px 6px 18px 18px; box-shadow: inset 0 0 0 4px rgba(149,187,234,.05); }
+.receipt-head { display: flex; align-items: center; gap: 8px; padding-bottom: 12px; border-bottom: 1px dashed #cbbeb9; font-size: 12px; }
+.receipt-line { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px dotted #ddd0ca; font-size: 13px; }
+.printed { margin-top: 10px; text-align: center; padding: 9px; color: var(--sangria); font-weight: 900; border: 2px solid rgba(147,5,0,.45); border-radius: 8px; transform: rotate(-1.5deg); }
+
+.memory-box { min-height: 180px; display: grid; place-items: center; text-align: center; gap: 8px; padding: 24px; border-radius: 26px; background: linear-gradient(180deg, rgba(149,187,234,.24), rgba(255,248,231,.7)); border: 1px solid rgba(147,5,0,.14); }
+.memory-box small { max-width: 260px; color: #6f625e; line-height: 1.4; }
+.capture-card { margin-top: 14px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 14px; border-radius: 18px; background: rgba(255,255,255,.72); border: 1px solid rgba(147,5,0,.14); }
+.capture-card div { display: grid; gap: 3px; min-width: 0; }
+.capture-card small { color: #7a6964; }
+
+footer { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); width: min(calc(100% - 24px), 436px); display: grid; grid-template-columns: repeat(5, 1fr); padding: 8px; border-radius: 22px; background: rgba(147,5,0,.96); box-shadow: 0 16px 36px rgba(74,19,12,.2); backdrop-filter: blur(12px); }
 footer button { border: 0; background: transparent; color: white; padding: 10px 4px; border-radius: 14px; font-size: 12px; }
 footer button:active { background: rgba(255,255,255,.12); }
 
