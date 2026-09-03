@@ -145,7 +145,7 @@ export default function App() {
           {(['status','area','exact'] as const).map((level) => <button key={level} className={privacy === level ? 'privacy active' : 'privacy'} onClick={() => setPrivacy(level)}>{level === 'status' ? 'Status only' : level === 'area' ? 'Approx. area' : 'Exact'}</button>)}
         </div>
         <div className="family-status"><span>🟡 Plan changed, but everything is okay.</span><b>{privacy === 'status' ? 'Kyoto trip · safe' : privacy === 'area' ? familyReport.area : `${familyReport.area} · exact location shared`}</b><small>{familyReport.note}</small><small>{familyReport.withGroup ? 'Still with the group' : 'Travelling solo'} · expected back {familyReport.returnTime}</small></div>
-        <div className="trigger-grid"><span>Auto-remind when:</span><small>✓ city arrival</small><small>✓ >2h delay</small><small>✓ group split</small><small>✓ return time changes</small></div>
+        <div className="trigger-grid"><span>Auto-remind when:</span><small>✓ city arrival</small><small>✓ {'>2h'} delay</small><small>✓ group split</small><small>✓ return time changes</small></div>
         <button className="primary" onClick={() => setReported(true)}><Send size={18}/> {reported ? 'Coco delivered it.' : 'Send a one-tap report'}</button>
         {reported && <div className="delivery"><Coco mood="happy" compact/><span>🪳💨 Coco carried the note out of the screen.</span></div>}
       </section>
