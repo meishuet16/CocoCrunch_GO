@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, Send, X } from 'lucide-react';
 
 export type Ritual = 'capture' | 'courier' | 'receipt' | 'prayer' | null;
@@ -12,8 +12,22 @@ type Props = {
   onClose: () => void;
 };
 
+const prayerSteps = [
+  { label: '🙏 合十', copy: 'Coco先认真一下。' },
+  { label: '🕯 上香', copy: '科学方案已经完成，现在只是情绪仪式。' },
+  { label: '📳 晃手机', copy: '晃一晃，假装把申诉摇上去。' },
+  { label: '☀️ 晴天符', copy: '符有了，天气预报不会因此改变。' },
+  { label: '📨 已上诉天庭', copy: 'Weather: 90% rain · 科学方案 unchanged · Coco：尽力了…' },
+];
+
 export default function SignatureRituals({ ritual, place = 'this place', destination, privacy, delayed, onClose }: Props) {
-  const [blessed, setBlessed] = useState(false);
+  const [prayerStep, setPrayerStep] = useState(0);
+  const [receiptStep, setReceiptStep] = useState<'printing' | 'tear' | 'paid'>('printing');
+
+  useEffect(() => {
+    if (ritual === 'prayer') setPrayerStep(0);
+    if (ritual === 'receipt') setReceiptStep('printing');
+  }, [ritual]);
 
   if (!ritual) return null;
 
@@ -45,26 +59,31 @@ export default function SignatureRituals({ ritual, place = 'this place', destina
   );
 
   if (ritual === 'receipt') return (
-    <div className="signature-overlay" role="dialog" aria-modal="true" aria-label="Split bill printed">
+    <div className="signature-overlay" role="dialog" aria-modal="true" aria-label="Split bill receipt">
       <section className="signature-stage printer-stage">
         <button className="signature-close" onClick={onClose} aria-label="Close"><X size={20}/></button>
         <span className="signature-kicker">COCO RECEIPT</span>
-        <div className="mini-printer" aria-hidden="true"><div/><span>rrrrrr…</span></div>
-        <div className="ritual-receipt"><b>COCOCRUNCH · DINNER</b><span>Mei <strong>RM47</strong></span><span>JH <strong>RM43</strong></span><span>Zi Shan <strong>RM46</strong></span><span>Alex <strong>RM44</strong></span><em>PAID</em></div>
-        <button className="signature-primary" onClick={onClose}>Tear receipt</button>
+        <div className={`mini-printer ${receiptStep}`} aria-hidden="true"><div/><span>{receiptStep === 'printing' ? 'rrrrrr…' : receiptStep === 'tear' ? 'ready to tear' : 'done ✓'}</span></div>
+        <div className={`ritual-receipt ${receiptStep}`}><b>COCOCRUNCH · DINNER</b><span>Mei <strong>RM47</strong></span><span>JH <strong>RM43</strong></span><span>Zi Shan <strong>RM46</strong></span><span>Alex <strong>RM44</strong></span>{receiptStep === 'paid' && <em>PAID</em>}</div>
+        {receiptStep === 'printing' && <button className="signature-primary" onClick={() => setReceiptStep('tear')}>Print receipt</button>}
+        {receiptStep === 'tear' && <button className="signature-primary" onClick={() => setReceiptStep('paid')}>Tear receipt</button>}
+        {receiptStep === 'paid' && <button className="signature-primary" onClick={onClose}><Check size={18}/> Done</button>}
       </section>
     </div>
   );
 
+  const step = prayerSteps[prayerStep];
+  const prayerDone = prayerStep === prayerSteps.length - 1;
   return (
     <div className="signature-overlay" role="dialog" aria-modal="true" aria-label="Optional prayer ritual">
       <section className="signature-stage prayer-stage">
         <button className="signature-close" onClick={onClose} aria-label="Close"><X size={20}/></button>
         <span className="signature-kicker">REAL PLAN FIXED · OPTIONAL RITUAL</span>
-        <div className={`incense-scene ${blessed ? 'blessed' : ''}`} aria-hidden="true"><span>🪳</span><i/><i/><i/></div>
-        <h3>{blessed ? '玄学已收到。' : '剩下的交给玄学？'}</h3>
-        <p>{blessed ? '科学方案没有改变。Coco 只是陪你拜完了。' : 'The real replan is already done. This ritual changes absolutely nothing — except maybe your mood.'}</p>
-        {!blessed ? <button className="signature-primary" onClick={() => setBlessed(true)}>🙏 拜一下</button> : <button className="signature-primary" onClick={() => { setBlessed(false); onClose(); }}>Back to the trip</button>}
+        <div className={`incense-scene prayer-${prayerStep}`} aria-hidden="true"><span>🪳</span><i/><i/><i/></div>
+        <div className="prayer-progress" aria-label={`Prayer step ${prayerStep + 1} of ${prayerSteps.length}`}>{prayerSteps.map((_, index) => <i key={index} className={index <= prayerStep ? 'done' : ''}/>)}</div>
+        <h3>{step.label}</h3>
+        <p>{step.copy}</p>
+        {!prayerDone ? <button className="signature-primary" onClick={() => setPrayerStep(current => Math.min(current + 1, prayerSteps.length - 1))}>{prayerSteps[prayerStep + 1].label}</button> : <button className="signature-primary" onClick={onClose}>Back to the trip</button>}
       </section>
     </div>
   );
