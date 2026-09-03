@@ -21,7 +21,7 @@ const cue: Record<CocoSound, CueName> = {
   tap: 'select',
   save: 'success',
   decision: 'complete',
-  gacha: 'reveal',
+  gacha: 'bonus',
   repair: 'success',
   capture: 'drop',
   courier: 'send',
