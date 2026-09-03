@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import App from './App';
+import PackingReplica from './PackingReplica';
 import SignatureRituals, { type Ritual } from './SignatureRituals';
 import { subscribeExperience, type PrivacyLevel } from './experience';
 import { playSound, unlockSound } from './sound';
@@ -32,6 +33,7 @@ export default function AppExperience() {
 
   return <>
     <App />
+    <PackingReplica />
     <SignatureRituals ritual={ritual} place={place} destination={destination} privacy={privacy} delayed={delayed} onClose={() => setRitual(null)} />
   </>;
 }
