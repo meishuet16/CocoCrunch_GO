@@ -10,11 +10,12 @@ type TripMode = 'group' | 'solo';
 type CourtPick = 'ramen' | 'sushi' | null;
 type Mood = 'great' | 'okay' | 'tired' | null;
 type Privacy = 'status' | 'area' | 'exact';
-type Drawer = 'profile' | 'group' | 'packing' | 'backup' | 'budget' | 'family' | 'community' | 'import' | null;
+type Drawer = 'profile' | 'group' | 'packing' | 'backup' | 'budget' | 'family' | 'community' | 'import' | 'discover' | null;
 
 type Backup = { name: string; support: number; cost: number; time: number; viable: boolean };
 type PackItem = { name: string; owner: string; shared: boolean; done: boolean };
 type CommunityTrip = { id: number; title: string; author: string; match: number; saved: boolean };
+type PlaceRecommendation = { id: number; name: string; type: string; match: number; cost: string; duration: string; why: string; saved: boolean; added: boolean };
 
 const tabs: { id: Tab; label: string; icon: React.ComponentType<{ size?: number }> }[] = [
   { id: 'home', label: 'Home', icon: Home },
@@ -85,6 +86,13 @@ export default function App() {
   const [published, setPublished] = useState(false);
   const [externalLink, setExternalLink] = useState('https://example.com/tokyo-cafe-list');
   const [linkAnalyzed, setLinkAnalyzed] = useState(false);
+  const [destination, setDestination] = useState('Tokyo');
+  const [destinationSearched, setDestinationSearched] = useState(false);
+  const [recommendations, setRecommendations] = useState<PlaceRecommendation[]>([
+    { id: 1, name: 'Tsukiji Outer Market', type: 'Food · market', match: 96, cost: 'RM45 est.', duration: '1.5h', why: 'Strong food-first match, easy morning anchor, fits the current budget.', saved: false, added: false },
+    { id: 2, name: 'Daikanyama', type: 'Cafés · streets', match: 91, cost: 'RM38 est.', duration: '2h', why: 'Matches your scenic café preference and relaxed walking pace.', saved: false, added: false },
+    { id: 3, name: 'Shimokitazawa', type: 'Vintage · neighbourhood', match: 87, cost: 'RM30 est.', duration: '2h', why: 'Good flexible block: low commitment, weather-tolerant, easy to move.', saved: false, added: false },
+  ]);
   const [communityTrips, setCommunityTrips] = useState<CommunityTrip[]>([
     { id: 1, title: 'Tokyo: slow food + vintage streets', author: 'Aki', match: 92, saved: false },
     { id: 2, title: 'Rain-proof Tokyo weekend', author: 'Mina', match: 86, saved: false },
@@ -108,6 +116,15 @@ export default function App() {
     setPacking(items => items.map((item, i) => i === index ? { ...item, done: !item.done } : item));
   }
 
+  function searchDestination() {
+    setDestinationSearched(true);
+    setRecommendations(items => items.map(item => ({ ...item, saved: false, added: false })));
+  }
+
+  function toggleRecommendation(id: number, action: 'save' | 'add') {
+    setRecommendations(items => items.map(item => item.id === id ? { ...item, [action === 'save' ? 'saved' : 'added']: !item[action === 'save' ? 'saved' : 'added'] } : item));
+  }
+
   function renderHome() {
     return <>
       <section className="home-hero paper-sheet">
@@ -116,7 +133,7 @@ export default function App() {
       </section>
       <section className="today-card"><div className="today-head"><div><span>Today’s journey</span><b>Oct 13 · 18°C · cloudy</b></div><button onClick={() => setTab('plan')}>Full plan <ChevronRight size={15}/></button></div><div className="journey-line"><div className="journey-stop anchor"><time>10:00</time><span/><div><b>{mustGo}</b><small>⚓ Anchor · protected</small></div></div><div className="journey-stop"><time>14:30</time><span/><div><b>Daikanyama cafés</b><small>🫧 Floating · RM38 est.</small></div></div><div className="journey-stop mystery"><time>17:00</time><span/><div><b>Mystery Window</b><small>🎰 Open · spontaneous slot</small></div></div></div></section>
       <section className="status-strip"><div><span>Plan health</span><b>{planHealth}/100</b></div><div><span>Budget left</span><b>RM {remaining}</b></div><div><span>Group</span><b>{travellerCount} people</b></div></section>
-      <section className="home-tools"><MiniTool icon={Users} label="Group DNA" note="1 conflict needs a decision" onClick={() => setDrawer('group')}/><MiniTool icon={PackageCheck} label="Packing" note={`${packing.filter(i => i.done).length}/${packing.length} ready`} onClick={() => setDrawer('packing')}/><MiniTool icon={Send} label="Family Window" note="Status-only sharing" onClick={() => setDrawer('family')}/></section>
+      <section className="home-tools"><MiniTool icon={MapPin} label="Discover places" note="Search a destination and get Coco-matched picks" onClick={() => setDrawer('discover')}/><MiniTool icon={Users} label="Group DNA" note="1 conflict needs a decision" onClick={() => setDrawer('group')}/><MiniTool icon={PackageCheck} label="Packing" note={`${packing.filter(i => i.done).length}/${packing.length} ready`} onClick={() => setDrawer('packing')}/><MiniTool icon={Send} label="Family Window" note="Status-only sharing" onClick={() => setDrawer('family')}/></section>
     </>;
   }
 
@@ -124,6 +141,7 @@ export default function App() {
     return <>
       <SectionTitle kicker="PLAN · TRAVEL NOTEBOOK" title="Build a plan that can bend." copy="Keep the important things firm. Let the rest breathe." />
       <section className="trip-promise paper-strip"><span>TRIP PROMISE</span><b>Easy pace · food-first · one protected highlight · room for surprise</b></section>
+      <button className="mini-tool" onClick={() => setDrawer('discover')}><MapPin size={18}/><span><b>Find places in {destination}</b><small>Recommendations ranked by your vibe, budget and group constraints</small></span><ChevronRight size={16}/></button>
       <section className="itinerary-sheet paper-sheet"><div className="sheet-heading"><div><span>DAY 2</span><h3>Tokyo · city wandering</h3></div><div className="score-stamp">{planHealth}</div></div><div className="itinerary-row anchor"><time>10:00</time><div><b>{mustGo}</b><small>Must-Go · cannot be AI-replaced</small></div><em>ANCHOR</em></div><div className="itinerary-row"><time>14:30</time><div><b>Daikanyama cafés</b><small>{preference}</small></div><em>FLOATING</em></div><div className="itinerary-row mystery"><time>17:00</time><div><b>Mystery Window</b><small>{flexible}</small></div><em>OPEN</em></div><div className="itinerary-row anchor"><time>19:30</time><div><b>Neighbourhood dinner</b><small>Group reunion point</small></div><em>ANCHOR</em></div></section>
       <section className="why-note"><Sparkles size={19}/><div><b>Why this plan?</b><p>{mustGo} protects the strongest preference. The café stays floating so weather or fatigue can move it without breaking the trip promise.</p></div></section>
       <section className="plan-toolbox"><MiniTool icon={Users} label="Group workspace" note={`Editing turn: ${plannerTurn}`} onClick={() => setDrawer('group')}/><MiniTool icon={Box} label="Backup Plan pool" note="2 viable · 1 weather-blocked" onClick={() => setDrawer('backup')}/><MiniTool icon={CircleDollarSign} label="Budget planner" note={`RM ${planned} planned of RM ${budgetTotal}`} onClick={() => setDrawer('budget')}/><MiniTool icon={Link2} label="Import inspiration" note="P2 parser placeholder ready" onClick={() => setDrawer('import')}/></section>
@@ -169,6 +187,7 @@ export default function App() {
   function renderDrawer() {
     if (!drawer) return null;
     return <div className="overlay" onMouseDown={() => setDrawer(null)}><section className="drawer" onMouseDown={e => e.stopPropagation()}><button className="close" onClick={() => setDrawer(null)}><X size={20}/></button>
+      {drawer === 'discover' && <><span className="drawer-kicker">DISCOVER · COCO PICKS</span><h3>Where are we going?</h3><p style={{margin:'0 0 12px', color:'#756862', fontSize:12, lineHeight:1.5}}>Search a city or area. Coco ranks places against your trip vibe, budget, Must-Go and group constraints instead of showing a generic popularity list.</p><div style={{display:'grid', gridTemplateColumns:'1fr auto', gap:8}}><input className="big-input" value={destination} onChange={e => { setDestination(e.target.value); setDestinationSearched(false); }} placeholder="Tokyo, Shibuya, Osaka…"/><button className="primary" onClick={searchDestination}>Search</button></div>{destinationSearched && <div style={{marginTop:18}}><span className="drawer-kicker">FOR YOUR {destination.toUpperCase()} TRIP</span>{recommendations.map(place => <article className="community-row" key={place.id} style={{alignItems:'start', padding:'14px 0'}}><div style={{display:'grid', gap:4}}><b>{place.name}</b><small>{place.match}% match · {place.type}</small><small>{place.cost} · {place.duration}</small><small><strong style={{color:'#930500'}}>Why Coco picked this:</strong> {place.why}</small><div style={{display:'flex', gap:6, marginTop:5}}><button onClick={() => toggleRecommendation(place.id, 'save')}>{place.saved ? '✓ Saved' : 'Save idea'}</button><button onClick={() => toggleRecommendation(place.id, 'add')}>{place.added ? '✓ In plan' : 'Add to plan'}</button></div></div></article>)}</div>}<small style={{display:'block', marginTop:14, color:'#8a7770'}}>Prototype recommendations are local demo data. A real places/search datasource can replace this layer later without changing the flow.</small></>}
       {drawer === 'group' && <><span className="drawer-kicker">GROUP DNA</span><h3>Mostly aligned. One thing needs a real decision.</h3><div className="dna-grid"><div><span>Vibe</span><b>{tripVibe}</b></div><div><span>Pace</span><b>Relaxed</b></div><div><span>Budget</span><b>RM600 / person</b></div><div><span>Food</span><b>High priority</b></div></div><div className="conflict-mini"><span>CONFLICT</span><b>Mei: {mustGo}</b><b>JH: {veto}</b></div><div className="planner-turn"><span>Editing turn</span><b>{plannerTurn}</b><button onClick={() => setPlannerTurn(plannerTurn === 'Mei' ? 'JH' : plannerTurn === 'JH' ? 'Zi Shan' : 'Mei')}>Pass turn</button></div></>}
       {drawer === 'packing' && <><span className="drawer-kicker">PACKING</span><h3>One bag, zero “I thought you brought it.”</h3>{packing.map((item, i) => <button className={`pack-row ${item.done ? 'done' : ''}`} key={item.name} onClick={() => togglePack(i)}><span>{item.done ? '✓' : '○'}</span><div><b>{item.name}</b><small>{item.shared ? `Shared · ${item.owner} owns this` : `Owner · ${item.owner}`}</small></div></button>)}</>}
       {drawer === 'backup' && <><span className="drawer-kicker">BACKUP PLAN POOL</span><h3>Ideas worth keeping when reality misbehaves.</h3>{backups.map(item => <div className={`backup-row ${item.viable ? '' : 'off'}`} key={item.name}><b>{item.name}</b><small>{item.support} supporters · {item.cost >= 0 ? '+' : ''}RM{item.cost} · +{item.time} min {item.viable ? '· viable' : '· blocked'}</small></div>)}</>}
