@@ -5,6 +5,9 @@ export type CourtResult = {
   tied: boolean;
   majority: CourtOption | null;
   total: number;
+  /** Compatibility counts for the seeded ramen/sushi demo while UI migration completes. */
+  ramen: number;
+  sushi: number;
 };
 
 export function courtTally(votes: CourtVote[]): CourtResult {
@@ -14,7 +17,9 @@ export function courtTally(votes: CourtVote[]): CourtResult {
   }, {});
 
   const ranked = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-  if (ranked.length === 0) return { counts, tied: false, majority: null, total: 0 };
+  if (ranked.length === 0) {
+    return { counts, tied: false, majority: null, total: 0, ramen: 0, sushi: 0 };
+  }
 
   const topCount = ranked[0][1];
   const tied = ranked.length > 1 && ranked.filter(([, count]) => count === topCount).length > 1;
@@ -23,6 +28,8 @@ export function courtTally(votes: CourtVote[]): CourtResult {
     tied,
     majority: tied ? null : ranked[0][0],
     total: votes.length,
+    ramen: counts.ramen ?? 0,
+    sushi: counts.sushi ?? 0,
   };
 }
 
