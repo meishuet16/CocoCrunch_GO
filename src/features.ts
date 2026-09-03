@@ -1,30 +1,22 @@
-export type FamilyReportState = {
-  status: 'ok' | 'changed';
-  area: string;
-  withGroup: boolean;
-  returnTime: string;
-  note: string;
-};
+export const FEATURES = {
+  groupCourt: true,
+  tieOnlyGacha: true,
+  editableBudget: true,
+  persistentCoreState: true,
+  confirmedPreferenceLearning: true,
+  destinationCatalog: true,
+  disruptionRepair: true,
+  familyWindow: true,
+  captureCapsule: true,
+  splitReceiptRitual: true,
+  prayerRitual: true,
+  memoryTrunk: true,
+  ghostWish: true,
+  futurePostcard: true,
+} as const;
 
-export const familyReport: FamilyReportState = {
-  status: 'changed',
-  area: 'Tokyo · Shibuya area',
-  withGroup: true,
-  returnTime: '10:55 PM',
-  note: 'Rain changed the evening plan. The group moved indoors and is still together.',
-};
+export type FeatureName = keyof typeof FEATURES;
 
-export const splitBill = {
-  total: 6380,
-  currency: 'JPY',
-  members: [
-    { name: 'Mei', amount: 2130 },
-    { name: 'JH', amount: 2120 },
-    { name: 'Zi Shan', amount: 2130 },
-  ],
-};
-
-export const savedPlace = {
-  name: 'Kichijoji kissaten',
-  reason: 'Saved after capture · quiet, affordable, indoors',
-};
+export function isFeatureEnabled(name: FeatureName): boolean {
+  return FEATURES[name];
+}
