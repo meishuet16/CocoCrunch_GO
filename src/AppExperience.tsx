@@ -12,22 +12,10 @@ export default function AppExperience() {
 
   useEffect(() => subscribeExperience(event => {
     switch (event.type) {
-      case 'capture-place':
-        setPlace(event.place);
-        setRitual('capture');
-        break;
-      case 'send-family-reassurance':
-        setDestination(event.destination);
-        setPrivacy(event.privacy);
-        setDelayed(event.delayed);
-        setRitual('courier');
-        break;
-      case 'print-receipt':
-        setRitual('receipt');
-        break;
-      case 'open-prayer':
-        setRitual('prayer');
-        break;
+      case 'capture-place': setPlace(event.place); setRitual('capture'); break;
+      case 'send-family-reassurance': setDestination(event.destination); setPrivacy(event.privacy); setDelayed(event.delayed); setRitual('courier'); break;
+      case 'print-receipt': setRitual('receipt'); break;
+      case 'open-prayer': setRitual('prayer'); break;
     }
   }), []);
 
