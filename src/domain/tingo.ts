@@ -8,6 +8,17 @@ export type TingoQuestion = {
   options: { id: string; label: string; hint: string; weights: Partial<Record<TingoDimension, number>> }[];
 };
 
+export type TingoBehavior = {
+  itineraryDensity: 'gentle' | 'balanced' | 'full';
+  dailyStops: number;
+  bufferMinutes: number;
+  recommendationBias: 'food' | 'adventure' | 'memory' | 'value' | 'balanced';
+  accommodationBias: 'central-comfort' | 'character' | 'value';
+  budgetMode: 'value-first' | 'balanced' | 'experience-first';
+  changeStyle: 'adapt-fast' | 'explain-first' | 'protect-plan';
+  groupRole: 'connector' | 'scout' | 'planner' | 'independent';
+};
+
 export const tingoQuestions: TingoQuestion[] = [
   { id: 'morning', prompt: 'A free morning sounds best when…', options: [
     { id: 'slow', label: 'I follow the smell of breakfast', hint: 'slow pace', weights: { pace: -2, food: 2, flexibility: 1 } },
@@ -58,13 +69,36 @@ export function scoreTingo(answers: TingoAnswer[]): TingoDimensions {
   return score;
 }
 
+export function deriveTingoBehavior(dimensions: TingoDimensions): TingoBehavior {
+  const itineraryDensity = dimensions.pace >= 2 ? 'full' : dimensions.pace <= -1 ? 'gentle' : 'balanced';
+  const recommendationBias = dimensions.food >= 3 ? 'food' : dimensions.adventure >= 3 ? 'adventure' : dimensions.experience >= 2 ? 'memory' : dimensions.budget >= 2 ? 'value' : 'balanced';
+  const accommodationBias = dimensions.budget >= 2 ? 'value' : dimensions.comfort >= 2 ? 'central-comfort' : dimensions.experience >= 2 ? 'character' : 'value';
+  const budgetMode = dimensions.budget >= 2 ? 'value-first' : dimensions.experience >= 2 ? 'experience-first' : 'balanced';
+  const changeStyle = dimensions.flexibility >= 2 ? 'adapt-fast' : dimensions.planning >= 2 ? 'explain-first' : 'protect-plan';
+  const groupRole = dimensions.social >= 2 ? 'connector' : dimensions.adventure >= 3 ? 'scout' : dimensions.planning >= 2 ? 'planner' : 'independent';
+  return {
+    itineraryDensity,
+    dailyStops: itineraryDensity === 'full' ? 5 : itineraryDensity === 'gentle' ? 3 : 4,
+    bufferMinutes: itineraryDensity === 'full' ? 20 : itineraryDensity === 'gentle' ? 50 : 35,
+    recommendationBias,
+    accommodationBias,
+    budgetMode,
+    changeStyle,
+    groupRole,
+  };
+}
+
 export function describeTingo(dimensions: TingoDimensions): string[] {
+  const behavior = deriveTingoBehavior(dimensions);
   return [
     dimensions.pace <= 0 ? 'slow mornings' : 'full days with momentum',
     dimensions.experience >= 1 ? 'memory-first choices' : 'smart value choices',
     dimensions.food >= 2 ? 'food-led routes' : 'food as a daily ritual',
     dimensions.flexibility >= 2 ? 'easy adaptation' : 'clear context before changes',
     dimensions.social >= 2 ? 'group energy' : 'protected breathing room',
+    `${behavior.dailyStops} stops/day · ${behavior.bufferMinutes} min buffers`,
+    `${behavior.recommendationBias} discovery · ${behavior.budgetMode} budget`,
+    `${behavior.groupRole} group role`,
   ];
 }
 
