@@ -1,6 +1,6 @@
 # CocoCrunch Rescue Log
 
-Living handoff for the V2 rescue pass on `feat/p0-foundation` / PR #1. This file is updated as rescue work continues.
+Living handoff for the V2 rescue pass on `feat/p0-foundation` / PR #1. Update this file after each coherent rescue batch.
 
 ## Ground rules
 
@@ -9,7 +9,7 @@ Living handoff for the V2 rescue pass on `feat/p0-foundation` / PR #1. This file
 - Do not call prototype-only adapters live data or AI.
 - AI suggestion is not execution: plan-changing output needs reason, preview/diff, confirmation, and undo.
 - Group governance stays explicit; official Court and entertainment randomness remain separate.
-- Continuous location remains off by default; public memories remain private until explicit consent.
+- Continuous location stays off by default; public memories stay private until explicit consent.
 - CI status is recorded only when verified against the exact head SHA.
 - Source/CSS inspection is not screenshot QA.
 
@@ -18,78 +18,86 @@ Living handoff for the V2 rescue pass on `feat/p0-foundation` / PR #1. This file
 ### IA and trip lifecycle
 
 - Restored global navigation to `Home / Trips / Explore / Memories / Me`.
-- `Trips` is a journey index again; opening a trip enters its `Planning / Traveling / Completed` workspace instead of treating lifecycle phases as global navigation.
-- Removed the duplicate packing surface: App emits a typed packing experience and the tactile PackingReplica owns presentation.
+- `Trips` is a journey index; opening a trip enters `Planning / Traveling / Completed`.
+- Removed the duplicate Packing drawer path. The typed Packing experience owns the tactile suitcase UI.
 
 ### Group Court and decision durability
 
-- Generalized Court tallying away from hard-coded `ramen | sushi` IDs.
-- Conflict text such as `A vs B` can produce real Court proposal IDs/labels.
-- Confirmed Court and emergency decisions write structured, persisted decision records with topic, decision, vote summary, Gacha use, and timestamp.
-- Official tie Gacha, everyday indecision Gacha, and entertainment Lucky Draw are separate contexts.
+- Generalized Court tallying away from hard-coded `ramen | sushi` proposal IDs.
+- Conflict text such as `A vs B` can create actual Court proposals.
+- Confirmed Court and emergency decisions write persisted structured decision records.
+- Official unresolved-tie Gacha, everyday indecision Gacha, and entertainment Lucky Draw remain separate contexts.
+- Added a concession snapshot path: attaching a concession captures the pre-concession vote state; withdrawing the concession restores that snapshot instead of merely changing a visual toggle. This is a prototype-level rollback model for #23 and still needs rendered interaction QA.
 
-### Tingo → downstream behavior
+### Tingo → visible downstream behavior
 
-- Expanded Tingo into an explicit behavior contract: itinerary density, daily stop target, buffer minutes, recommendation bias, accommodation bias, budget mode, change style, and group role.
-- Added explainable planning guidance so Tingo dimensions can affect itinerary, budget, accommodation, Court, and recommendation behavior instead of only producing profile adjectives.
-- Discovery ranking can be adjusted by Tingo dimensions with user-readable reasons.
-
-### Post-trip learning
-
-- Added per-stop `worth / mixed / skip` learning rules rather than storing item reviews without consuming them.
-- Added reconciliation between per-stop reviews and trip-level Worth It feedback.
-- Added category-level planned-vs-actual budget variance and learning guidance; this is the domain foundation for #51 rather than a single total-spend number.
+- Tingo now derives itinerary density, daily stop target, buffer minutes, recommendation bias, accommodation bias, budget mode, change style, and group role.
+- Tingo guidance is now visible in Planning / Trip Setup / Group Court explanation copy rather than staying as unused domain helpers.
+- Destination discovery now calls `discoverPlaces(destination, tingoDimensions)`, so current Tingo dimensions actually alter ranking and explanation text.
+- Completing / refreshing Tingo re-ranks the current destination recommendations.
+- Explore surfaces current Tingo recommendation / pace / budget / accommodation signals instead of a fixed generic vibe row.
 
 ### Group responsibility suggestions
 
-- Added advisory responsibility suggestions derived from Tingo group behavior.
-- Suggestions never silently overwrite member roles; the intended UI contract is preview → explicit confirmation → apply.
+- Group DNA now previews responsibility suggestions derived from the current Tingo behavior.
+- Suggestions are explicitly advisory and require `Confirm & apply suggested roles`; they do not silently overwrite roles.
+- This improves #28, but it remains Partial because the prototype has one persisted Tingo profile rather than a separate assessment for every member.
+
+### Post-trip learning
+
+- Per-stop `worth / mixed / skip` reviews are now consumed by `reconcileTripLearning()` together with the trip-level Worth It review.
+- Confirming learning surfaces both profile field changes and stop-level ranking notes.
+- This closes the previous wiring hole where item reviews were persisted but ignored. #49 is now materially implemented in the local prototype flow, subject to rendered/runtime QA.
+
+### Planned vs actual / budget retrospective
+
+- App no longer uses one hard-coded total as the only retrospective source. It consumes category actuals through the budget domain.
+- Completed now shows category-level planned vs actual variance for food / transport / stay / activities, plus budget-learning guidance.
+- Planned pace is derived from Tingo; actual pace copy is derived from runtime disruption / energy / arrival state instead of fixed retrospective prose.
+- #50 / #51 are materially improved, but actual spend is still local deterministic prototype data rather than a live transaction/import source.
 
 ### Signature interaction rescue
 
-- Canonical Coco PNG is authoritative where integrated; CSS anatomy is fallback rather than the primary identity.
-- Packing uses the tactile suitcase experience rather than a duplicate drawer implementation.
-- Memory Trunk has a physical open state with perspective, layered keepsakes, motion reduction handling, and travel-ephemera depth.
-- Gacha received a tactile cream / Sangria / cornflower presentation layer with chamber, capsules, handle cue, press depth, and result reveal. Three.js remains optional; physical feedback is the requirement.
+- Canonical Coco PNG is authoritative where integrated; CSS anatomy is fallback.
+- Packing uses the tactile suitcase experience.
+- Memory Trunk has CSS perspective, layered keepsakes, reduced-motion handling and a real open/close state.
+- Gacha has a tactile cream / Sangria / cornflower presentation layer with chamber / capsule / handle cues, press depth and result reveal.
+- Three.js remains optional; physical feedback is the requirement.
 
 ### UI / accessibility polish
 
-- First-pass hierarchy and responsive polish follows CocoCrunch's cream notebook language, using external interface/motion principles only where they support it.
-- Added narrow-phone resilience, safe-area awareness, touch-target work, and reduced-motion handling.
+- Preserved CocoCrunch cream notebook language rather than replacing it with generic SaaS styling.
+- Added narrow-phone resilience, safe-area awareness, touch-target work and reduced-motion handling.
 
-## Verification history
+## Activated integration batch
 
-- Codex handoff commit `fe38036e71127520108dc44ca115f4b5315eb23d`: pushed to `feat/p0-foundation`; local `npm run check` reported passed.
-- Rescue commits after handoff have been pushed only to `feat/p0-foundation`; PR #1 remains unmerged.
-- Workflow run #89 for rescue head `0da0c24e238d30543062a00e2938ba47786ecc2f` was verified `completed / success`.
-- Later heads must be checked independently; do not infer CI success from an earlier green run.
+- Added `src/AppRescued.tsx` as the integrated app implementation.
+- CI run #97 validated the new file before activation: `npm run check` completed successfully.
+- `src/App.tsx` now exports `AppRescued`, so the rescued flow is the active application rather than dead/unreferenced code.
+- Exact activation commit: `756dc73343508301c71540da6bf1012bb7e09391`.
+- CI run #98 for that exact activation commit completed successfully, including `npm run check`.
 
-## Current audit findings
+## Current status by previously-open item
 
-- `persistence.ts` already persists Court options, active conflict, decision history, Tingo answers/dimensions, members and item reviews under versioned storage.
-- `trip.ts` now contains responsibility suggestion + explicit-apply helpers; App UI has not consumed them yet, so #28 remains Partial.
-- `budget.ts` now contains category actuals, variance and learning guidance; App still uses a single seeded `spent` number, so #51 remains Partial until the Completed UI consumes category actuals.
-- `preferences.ts` now consumes per-stop reviews in domain learning; App `confirmLearning()` still calls trip-level `learnFromTrip()` only, so #49 remains Partial until the App uses reconciliation.
-- Current App recommendations are still created from base discovery data; Tingo-aware ranking is not yet wired through the visible search flow, so #1 remains Partial.
-- Memory Trunk source contains real CSS perspective/opening/keepsake layering and reduced-motion support, but rendered mobile quality remains unverified.
+1. Tingo downstream wiring — **materially implemented in visible local prototype flow**; still needs rendered behavior QA and per-question audit.
+2. Concession rollback (#23) — **prototype rollback implemented**; needs interaction QA and final invariant review.
+3. Personality/Tingo role suggestions (#28) — **visible + explicit apply**, still Partial because member-level personality data is not individually assessed.
+4. Per-stop Worth It (#49) — **wired into confirmed learning**; still needs runtime / persistence replay QA.
+5. Preference/planned-vs-actual retrospective (#50) — **derived from live prototype state instead of fixed copy**, but still local prototype data.
+6. Category planned-vs-actual budget (#51) — **visible and domain-backed**, but actuals remain deterministic local prototype data.
 
-## Still open / do not call Done yet
+## Still open / do not call merge-ready yet
 
-1. Wire Tingo ranking/guidance through visible App flows and verify each dimension has a meaningful downstream effect.
-2. Finish concession preview/rollback semantics for Group Court (#23).
-3. Surface personality-derived responsibility suggestions in Group UI with explicit confirmation (#28).
-4. Make Completed learning consume per-stop Worth It data and persist the resulting learning (#49).
-5. Implement/verify preference-vs-actual retrospective (#50) against actual trip state rather than seeded copy.
-6. Surface category planned-vs-actual budget reconciliation and learning in Completed UI (#51).
-7. Continue contextual canonical Coco extraction/usage beyond the idle crop.
-8. Independently inspect Gacha, Packing, and Memory Trunk rendered behavior; source/CSS inspection is not screenshot QA.
-9. Mobile QA at 360 / 390 / 430 px remains required.
-10. Run current-head CI after each coherent rescue batch and fix failures on the same branch.
-
-## Next implementation batch
-
-Wire the already-added domain contracts into App state/UI without introducing duplicate state: Tingo-aware discovery, explicit responsibility preview/apply, per-stop review reconciliation, and category budget retrospective. Then verify exact-head CI before moving to deeper signature-interaction/mobile QA.
+- Independently audit all #1–#53 requirements against the active `AppRescued` flow; do not inherit Codex labels.
+- Re-check all 15 business invariants after the new integration wiring.
+- Validate persistence replay for Tingo-ranked recommendations and post-trip learning.
+- Review Decision History satisfaction linkage; records support satisfaction but the UI flow is not yet fully linked.
+- Continue contextual canonical Coco extraction/usage beyond the current minimal idle asset.
+- Perform rendered mobile QA at 360 / 390 / 430 px: overflow, safe-area nav, touch targets, Court, Gacha, Packing, Memory Trunk, drawers/modals, reduced motion.
+- Verify signature interaction quality in a real browser; source/CSS inspection is not visual validation.
+- Remove compatibility/migration debt only after proving no active UI depends on it (for example legacy Court demo compatibility fields).
+- Keep PR #1 open and unmerged until the final audit is complete.
 
 ## Current risk posture
 
-The product is materially healthier than the Codex V2 handoff, but it is **not merge-ready yet**. Remaining risk is concentrated in domain-to-UI closure, retrospective data loops, contextual Coco coverage, and rendered mobile/signature-interaction QA rather than basic TypeScript scaffolding.
+The biggest previous problem — domain helpers existing without the visible app consuming them — has now been reduced substantially. The branch is type/build healthy at the activated rescued flow, but it is **not yet safe to merge** because the remaining risk is now concentrated in rendered mobile QA, persistence/replay behavior, full #1–#53 compliance, contextual Coco coverage, and regression/invariant verification.
