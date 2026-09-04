@@ -465,7 +465,7 @@ This final bounded audit covers presentation/accessibility QA for the completed 
 
 ### Exact-head CI green
 
-- Not claimed. No push, PR update, merge, or remote CI run was performed in this task. The branch was `feat/p0-foundation`, with the local pre-commit head ahead of `origin/feat/p0-foundation`; `gh`/GitHub integration was unavailable in the workspace. Parent owns remote PR/CI synchronization.
+- Verified after pushing only `feat/p0-foundation`: GitHub Actions CI run `#133` completed successfully for exact head `435b3715814205bc1db6729f3a04b92efd69f693`. PR #1 remains open and unmerged; `main` was not pushed or changed.
 
 ### Browser/runtime verified
 
@@ -484,4 +484,4 @@ This final bounded audit covers presentation/accessibility QA for the completed 
 
 - No tablet viewport profile or reduced-motion emulation was available; neither is claimed.
 - The active shell begins these page views with `h2` headings and exposes no `h1` in the audited DOM. Drawer/Court overlays exposed labeled close controls, but the audited Court overlay did not expose `role=dialog`/`aria-modal`.
-- Remote PR description synchronization and exact-head CI green status remain pending parent-controlled push/CI work; this local audit does not imply remote status.
+- The PR description still needs the final post-push summary synchronized by the parent-controlled handoff; the verified remote CI state above is for `435b371`.
