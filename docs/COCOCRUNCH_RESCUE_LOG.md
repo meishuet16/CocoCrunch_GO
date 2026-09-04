@@ -54,7 +54,7 @@ Living handoff for the V2 rescue pass on `feat/p0-foundation` / PR #1. Update th
 - Active App now initializes `delay`, `mood`, and `arrivalChecked` from persisted `CompletedPaceEvidence`, saves that evidence through normal persistence, and computes Completed pace through `paceEvidenceSummary()`.
 - `persistence.ts` stores optional group and solo category actuals while remaining backward-compatible with existing `cococrunch:v1` saves.
 - Active App owns `groupBudgetActuals` / `soloBudgetActuals`, exposes editable Actual inputs by category, and saves them through normal app persistence.
-- Real disruption cost is no longer a detached `+RM8` total. Applying the rain repair folds RM8 into `activities` actual spend through `applyActualAdjustment()`; undo reverses that adjustment.
+- Real disruption cost is no longer a detached demo total. Applying a generated rain repair folds its computed cost delta into `activities` actual spend through `updateBudgetActual()`; undo reverses that exact delta.
 - Completed retrospective reads the same live/persisted actual state, so #50 and #51 are code-wired closed for the local prototype. Browser reload replay remains a QA task, not an unwired implementation gap.
 
 ### Decision History satisfaction
@@ -65,10 +65,39 @@ Living handoff for the V2 rescue pass on `feat/p0-foundation` / PR #1. Update th
 ### Group plan-mutation governance closure
 - `gatePlanMutation()` is now consumed by the active App rather than existing only as a domain contract.
 - Group Discover no longer says an individual can directly `Add to plan`; the same persisted flag is explicitly presented as `Save to group shortlist`, and copy states the official itinerary is unchanged.
-- Ask Coco still provides reason + preview/diff, but Group mode now routes the proposed café-time change into Group Court instead of directly mutating `cafeTime`.
+- Ask Coco still provides reason + preview/diff, but Group mode now routes the proposed floating-block move into Group Court instead of mutating a detached display-only time.
 - Smart Split creation and reunion requests now route through Group Court rather than toggling shared state from one person's button.
 - Solo mode retains direct explicit confirmation for these official changes.
 - The generic Court remains the single confirmation surface; the result is still a proposal until `Confirm result`.
+
+## P0 core-logic completion batch
+
+The following batch reconciles the active `src/AppRescued.tsx` flow against the authoritative attached `FINAL_PRODUCT_SPEC.md`. Tingo remains Mei’s long-term travel profile; Trip Vibe, constraints, member preferences, and Group DNA remain trip-specific inputs.
+
+### Implemented in code
+
+- `deriveGroupDNA()` consumes explicit per-member preference/constraint and budget profiles, retains optional support, budget range/sensitivity, and surfaces strong disagreements plus Must-Go versus Strongly Avoid conflicts without averaging them. Unassessed members receive no inferred Mei/Tingo preferences.
+- `generateTripPlan()` deterministically ranks destination candidates and emits protected anchors, floating items, buffers, open windows, Trip Promise text, and per-item evidence for Tingo behavior, Trip Vibe, constraints, member preferences, budget, group consensus, and candidate source.
+- `calculatePlanHealth()` derives a documented capped-deduction score from walking load, buffer/time pressure, budget overrun, represented preferences, transfers, protected anchors, unresolved conflicts, and operational risks. Computed output is re-derived rather than persisted.
+- `promoteCourtLosers()` filters Backup candidates to useful, supported, viable, Deal-Breaker-safe losing options while preserving support and supplied loss reason. `buildMinimumLossRepair()` protects anchors, ranks viable backups by support and loss metrics, computes cost/time/preference impact, and returns a preview. `applyRepairToPlan()` enforces Group confirmation and supports reversible application.
+- Persistence now retains member preference profiles, Court-derived Backup candidates, and their evidence/source state.
+
+### Wired into the active app
+
+- The active Home journey, Trip Workspace plan, During flow, Group DNA drawer, Backup drawer, Plan Health panel, Court confirmation, disruption repair, and Ask Coco floating-block move consume the domain outputs above.
+- Court losers are added to the persisted Backup pool only after confirmation; destination catalog entries remain candidate inputs and do not silently become Backup entries. Deal-Breaker-invalid options are excluded.
+
+### Regression tested
+
+- Added focused coverage for Group DNA conflict surfacing/non-projection, deterministic Must-Go anchors and evidence, explicit member evidence, transparent Plan Health metric changes including operational risks, Court-to-Backup filtering and loss reasons, Gacha tie-only behavior, anchor protection, support-prioritized repair, exact cost/time impact, and Group confirmation gating.
+- Local `npm run check` passed: TypeScript, 26 Vitest tests, and Vite production build.
+
+### Verification status
+
+- Exact-head CI: not verified from this checkout; remote GitHub access was unavailable during this batch.
+- Browser/runtime verified: not performed.
+- Visual/mobile QA verified: not performed. Source/CSS inspection is not screenshot QA.
+- PR #1 remains open and unmerged; no push to `main` was performed.
 
 ### Signature interaction rescue
 - Canonical Coco PNG is authoritative where integrated; CSS anatomy is fallback.

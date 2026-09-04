@@ -60,6 +60,7 @@ export type GenerateTripPlanInput = {
   members: TripMember[];
   groupDNA: GroupDNA;
   candidates: DestinationCandidate[];
+  floatingStartMinutes?: number;
 };
 
 function normalize(value: string): string {
@@ -93,6 +94,10 @@ function violatesDealBreaker(candidate: DestinationCandidate, dealBreaker: strin
   return false;
 }
 
+export function isDealBreakerSafe(candidate: DestinationCandidate, dealBreaker: string): boolean {
+  return !violatesDealBreaker(candidate, dealBreaker);
+}
+
 function candidateScore(candidate: DestinationCandidate, input: GenerateTripPlanInput): number {
   const text = normalize(`${candidate.name} ${candidate.type} ${candidate.tags.join(' ')}`);
   let score = 0;
@@ -102,7 +107,10 @@ function candidateScore(candidate: DestinationCandidate, input: GenerateTripPlan
   if (input.tingoBehavior.recommendationBias === 'adventure' && /walk|street|temple|scenery|vintage/.test(text)) score += 8;
   if (input.tingoBehavior.recommendationBias === 'value' && (candidate.estimatedCost === 0 || candidate.tags.includes('value'))) score += 8;
   if (input.tingoBehavior.itineraryDensity === 'gentle' && candidate.durationMinutes <= 90) score += 5;
-  if (candidate.estimatedCost <= input.budget / Math.max(1, input.members.length || 1)) score += 4;
+  const perMemberBudget = input.budget / Math.max(1, input.members.length || 1);
+  const groupBudgetCeiling = input.groupDNA.budgetRange.max > 0 ? Math.min(perMemberBudget, input.groupDNA.budgetRange.max) : perMemberBudget;
+  if (candidate.estimatedCost <= groupBudgetCeiling) score += 4;
+  if (input.groupDNA.budgetSensitivity === 'high' && input.groupDNA.budgetRange.min > 0 && candidate.estimatedCost <= input.groupDNA.budgetRange.min) score += 3;
   const sharedMatches = input.groupDNA.sharedPriorities.filter(signal => overlapsText(candidate, signal.label));
   score += sharedMatches.length * 9;
   return score;
@@ -199,7 +207,7 @@ export function generateTripPlan(input: GenerateTripPlanInput): TripPlan {
     protected: false,
     evidence: [evidence('tingo', 'Tingo pace', `${input.tingoBehavior.bufferMinutes} minutes of buffer follow the current long-term pace behavior.`)],
   };
-  const floatingStart = bufferEnd + (selected?.transferMinutes ?? 0);
+  const floatingStart = input.floatingStartMinutes ?? bufferEnd + (selected?.transferMinutes ?? 0);
   const floatingDuration = selected?.durationMinutes ?? 60;
   const floating: ItineraryItem = {
     id: 'floating-discovery',
@@ -218,6 +226,12 @@ export function generateTripPlan(input: GenerateTripPlanInput): TripPlan {
       evidence('trip-vibe', 'Trip Vibe', `The ${input.tripVibe || 'current'} trip goal contributed to this candidate ranking.`),
       evidence('constraint', 'Preference', input.preference || 'No optional preference was supplied.'),
       evidence('tingo', 'Tingo behavior', `${input.tingoBehavior.recommendationBias} recommendations and ${input.tingoBehavior.itineraryDensity} density influenced the ranking.`),
+      evidence('budget', 'Budget fit', input.groupDNA.budgetRange.max > 0
+        ? `RM${selected.estimatedCost} fits the observed member range of RM${input.groupDNA.budgetRange.min}–RM${input.groupDNA.budgetRange.max}; ${input.groupDNA.budgetSensitivity} sensitivity was included in ranking.`
+        : `RM${selected.estimatedCost} fits the trip budget of RM${input.budget}.`),
+      ...input.members.flatMap(member => (member.preferenceProfile?.preferences ?? [])
+        .filter(preference => preference.kind !== 'strongly-avoid' && overlapsText(selected, preference.label))
+        .map(preference => evidence('member-preference', `${member.name} preference`, preference.label))),
       ...input.groupDNA.sharedPriorities.filter(signal => overlapsText(selected, signal.label)).map(signal => evidence('group-consensus', `${signal.support} member supports`, signal.label)),
     ] : [evidence('constraint', 'Flexible fallback', input.flexible || 'This block stays open because no safe candidate matched.')],
   };

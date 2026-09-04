@@ -72,6 +72,28 @@ describe('deterministic itinerary generation', () => {
     expect(first.items.map(item => item.kind)).toEqual(expect.arrayContaining(['anchor', 'floating', 'buffer', 'open']));
     expect(first.items.flatMap(item => item.evidence).map(item => item.source)).toEqual(expect.arrayContaining(['tingo', 'trip-vibe', 'constraint', 'candidate']));
   });
+
+  it('includes evidence for explicit member preferences without using them as Tingo data', () => {
+    const memberPreferencePlan = generateTripPlan({
+      ...itineraryInput,
+      members: [{
+        id: 'jh',
+        name: 'JH',
+        role: 'Food scout',
+        inviteStatus: 'joined',
+        pace: 'steady',
+        preferenceProfile: {
+          tingoAssessed: false,
+          preferences: [{ id: 'member-cafe', label: 'Scenic café', kind: 'preference', strength: 'strong', source: 'member' }],
+        },
+      }],
+    });
+
+    const floating = memberPreferencePlan.items.find(item => item.kind === 'floating');
+    expect(floating?.evidence.some(entry => entry.source === 'member-preference')).toBe(true);
+    expect(floating?.evidence.some(entry => entry.source === 'tingo')).toBe(true);
+    expect(floating?.evidence.some(entry => entry.source === 'budget')).toBe(true);
+  });
 });
 
 describe('Plan Health', () => {
@@ -97,6 +119,21 @@ describe('Plan Health', () => {
     expect(result.metrics.unresolvedConflicts).toBe(1);
     expect(result.deductions.map(item => item.component)).toEqual(expect.arrayContaining(['budget', 'conflicts']));
   });
+
+  it('deducts unresolved operational risks and explains the deduction', () => {
+    const healthy = calculatePlanHealth({ plan, budget: 300, groupDNA: emptyDNA, tingoBehavior, dealBreaker: '' });
+    const disrupted = calculatePlanHealth({
+      plan: { ...plan, unresolvedRisks: ['Rain may close the outdoor floating item.'] },
+      budget: 300,
+      groupDNA: emptyDNA,
+      tingoBehavior,
+      dealBreaker: '',
+    });
+
+    expect(disrupted.overall).toBeLessThan(healthy.overall);
+    expect(disrupted.metrics.unresolvedRisks).toBe(1);
+    expect(disrupted.deductions.some(reason => reason.component === 'risks')).toBe(true);
+  });
 });
 
 describe('Backup Plan and minimum-loss repair', () => {
@@ -118,13 +155,13 @@ describe('Backup Plan and minimum-loss repair', () => {
   it('keeps only useful viable Court losers and rejects Deal-Breaker-invalid options', () => {
     const backups = promoteCourtLosers([
       { id: 'winner', label: 'Indoor hall', support: 3 },
-      { id: 'good', label: 'Kissaten', support: 2, viable: true, dealBreakerSafe: true, costDelta: 6, timeDeltaMinutes: 8 },
+      { id: 'good', label: 'Kissaten', support: 2, viable: true, dealBreakerSafe: true, costDelta: 6, timeDeltaMinutes: 8, lossReason: 'Lost narrowly after the group protected the anchor.' },
       { id: 'bad', label: 'Raw-only dinner', support: 1, viable: true, dealBreakerSafe: false },
       { id: 'blocked', label: 'Closed market', support: 1, viable: false },
     ], 'winner', 'No raw-only dinner');
 
     expect(backups).toHaveLength(1);
-    expect(backups[0]).toMatchObject({ id: 'good', support: 2, lossReason: 'Lost the Court vote.' });
+    expect(backups[0]).toMatchObject({ id: 'good', support: 2, lossReason: 'Lost narrowly after the group protected the anchor.' });
   });
 
   it('protects anchors and prefers the highest-support viable backup', () => {
@@ -135,6 +172,7 @@ describe('Backup Plan and minimum-loss repair', () => {
     expect(repair.replacement?.id).toBe('high-support');
     expect(repair.protectedAnchorIds).toContain('anchor');
     expect(repair.preview.join(' ')).toContain('KEEP');
+    expect(buildMinimumLossRepair({ plan: repairPlan, failedItemId: 'anchor', backups: [highSupportBackup], budgetRemaining: 100, mode: 'solo' }).applicable).toBe(false);
   });
 
   it('reports exact cost/time impacts and blocks unconfirmed Group apply', () => {

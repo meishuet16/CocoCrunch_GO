@@ -9,10 +9,31 @@ export type ReunionAgreement = { time: string; place: string; tolerance: number;
 export type ResponsibilitySuggestion = { memberId: string; memberName: string; suggestedRole: string; reason: string; source?: 'member-tingo' | 'fallback' };
 
 export const defaultMembers: TripMember[] = [
-  { id: 'mei', name: 'Mei', role: 'Trip lead', inviteStatus: 'joined', pace: 'steady' },
-  { id: 'jh', name: 'JH', role: 'Food scout', inviteStatus: 'joined', pace: 'fast' },
-  { id: 'zishan', name: 'Zi Shan', role: 'Memory keeper', inviteStatus: 'joined', pace: 'slow' },
-  { id: 'alex', name: 'Alex', role: 'Transit buddy', inviteStatus: 'pending', pace: 'steady' },
+  {
+    id: 'mei', name: 'Mei', role: 'Trip lead', inviteStatus: 'joined', pace: 'steady',
+    preferenceProfile: {
+      tingoAssessed: false,
+      preferences: [{ id: 'mei-cafe', label: 'Scenic café', kind: 'preference', strength: 'optional', source: 'member' }],
+      budget: { min: 600, max: 1000, sensitivity: 'medium' },
+    },
+  },
+  {
+    id: 'jh', name: 'JH', role: 'Food scout', inviteStatus: 'joined', pace: 'fast',
+    preferenceProfile: {
+      tingoAssessed: false,
+      preferences: [{ id: 'jh-ramen', label: 'Ramen tonight', kind: 'preference', strength: 'strong', source: 'member' }],
+      budget: { min: 500, max: 850, sensitivity: 'high' },
+    },
+  },
+  {
+    id: 'zishan', name: 'Zi Shan', role: 'Memory keeper', inviteStatus: 'joined', pace: 'slow',
+    preferenceProfile: {
+      tingoAssessed: false,
+      preferences: [{ id: 'zishan-sushi', label: 'Sushi tonight', kind: 'preference', strength: 'strong', source: 'member' }],
+      budget: { min: 700, max: 1100, sensitivity: 'medium' },
+    },
+  },
+  { id: 'alex', name: 'Alex', role: 'Transit buddy', inviteStatus: 'pending', pace: 'steady', preferenceProfile: { tingoAssessed: false, preferences: [] } },
 ];
 
 export const defaultReminders: TripReminder[] = [

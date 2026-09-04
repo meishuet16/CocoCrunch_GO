@@ -19,6 +19,8 @@ export type PlanHealthMetrics = {
   anchorDeduction: number;
   unresolvedConflicts: number;
   conflictDeduction: number;
+  unresolvedRisks: number;
+  riskDeduction: number;
 };
 
 export type PlanHealthDeduction = { component: string; points: number; reason: string };
@@ -43,6 +45,17 @@ function round(value: number): number {
 /**
  * Transparent Plan Health formula. Every component is a separately capped deduction
  * from 100, and the returned metrics expose the exact values used by the calculation.
+ *
+ * overall = clamp(100 - walking - timePressure - budget - preferences - transfers
+ *                 - unprotectedAnchors - conflicts - risks, 0, 100)
+ * walking      = clamp(round(max(0, walkingKm - 5) * 2), 0, 18)
+ * timePressure = clamp(round(max(0, tingoBuffer - availableBuffer) / 5), 0, 18)
+ * budget       = clamp(round(max(0, overrun) / max(1, budget) * 40), 0, 24)
+ * preferences  = clamp(preferenceMisses * 8, 0, 16)
+ * transfers    = clamp(round(max(0, transferMinutes - 45) / 5), 0, 12)
+ * anchors      = clamp(unprotectedAnchors * 25, 0, 25)
+ * conflicts    = clamp(unresolvedConflicts * 10, 0, 20)
+ * risks        = clamp(unresolvedOperationalRisks * 6, 0, 18)
  */
 export function calculatePlanHealth(input: PlanHealthInput): PlanHealth {
   const walkingKm = Number(Math.max(0, input.plan.walkingKm).toFixed(1));
@@ -67,6 +80,8 @@ export function calculatePlanHealth(input: PlanHealthInput): PlanHealth {
   const anchorDeduction = clamp(unprotectedAnchors * 25, 0, 25);
   const unresolvedConflicts = input.groupDNA.conflicts.length;
   const conflictDeduction = clamp(unresolvedConflicts * 10, 0, 20);
+  const unresolvedRisks = input.plan.unresolvedRisks.filter(risk => !risk.toLocaleLowerCase().includes('preference conflict')).length;
+  const riskDeduction = clamp(unresolvedRisks * 6, 0, 18);
 
   const deductions: PlanHealthDeduction[] = [];
   if (walkingDeduction > 0) deductions.push({ component: 'walking', points: walkingDeduction, reason: `Walking load is ${walkingKm.toFixed(1)} km, above the 5 km comfort threshold.` });
@@ -76,10 +91,8 @@ export function calculatePlanHealth(input: PlanHealthInput): PlanHealth {
   if (transferDeduction > 0) deductions.push({ component: 'transfers', points: transferDeduction, reason: `Transfer load is ${transferMinutes} minutes, above the 45 minute threshold.` });
   if (anchorDeduction > 0) deductions.push({ component: 'anchors', points: anchorDeduction, reason: `${unprotectedAnchors} anchor${unprotectedAnchors === 1 ? '' : 's'} is not protected.` });
   if (conflictDeduction > 0) deductions.push({ component: 'conflicts', points: conflictDeduction, reason: `${unresolvedConflicts} unresolved Group DNA conflict${unresolvedConflicts === 1 ? '' : 's'} still needs Court.` });
-  if (input.dealBreaker.trim() && input.plan.unresolvedRisks.some(risk => risk.toLocaleLowerCase().includes('deal-breaker'))) {
-    deductions.push({ component: 'constraints', points: 16, reason: 'The plan still carries an unresolved Deal Breaker risk.' });
-  }
+  if (riskDeduction > 0) deductions.push({ component: 'risks', points: riskDeduction, reason: `${unresolvedRisks} unresolved operational risk${unresolvedRisks === 1 ? '' : 's'} still needs attention.` });
 
   const overall = clamp(100 - deductions.reduce((total, deduction) => total + deduction.points, 0), 0, 100);
-  return { overall, metrics: { walkingKm, walkingDeduction, availableBufferMinutes, timePressureMinutes, timeDeduction, budgetOverrun, budgetDeduction, preferenceMisses, preferenceDeduction, transferMinutes, transferDeduction, protectedAnchors, unprotectedAnchors, anchorDeduction, unresolvedConflicts, conflictDeduction }, deductions, reasons: deductions.map(deduction => deduction.reason) };
+  return { overall, metrics: { walkingKm, walkingDeduction, availableBufferMinutes, timePressureMinutes, timeDeduction, budgetOverrun, budgetDeduction, preferenceMisses, preferenceDeduction, transferMinutes, transferDeduction, protectedAnchors, unprotectedAnchors, anchorDeduction, unresolvedConflicts, conflictDeduction, unresolvedRisks, riskDeduction }, deductions, reasons: deductions.map(deduction => deduction.reason) };
 }

@@ -23,6 +23,7 @@ export type CourtBackupOption = {
   costDelta?: number;
   timeDeltaMinutes?: number;
   preferenceLoss?: number;
+  lossReason?: string;
 };
 
 export type RepairMove = { itemId: string; fromMinutes: number; toMinutes: number };
@@ -70,7 +71,7 @@ export function promoteCourtLosers(options: CourtBackupOption[], winnerId: strin
       preferenceLoss: option.preferenceLoss ?? 0,
       viable: true,
       dealBreakerSafe: true,
-      lossReason: 'Lost the Court vote.',
+      lossReason: option.lossReason ?? 'Lost the Court vote.',
       source: 'court-loss' as const,
       evidence: [{ source: 'group-consensus', label: `${option.support} vote${option.support === 1 ? '' : 's'} retained`, detail: 'This alternative stayed in the Backup pool after losing the confirmed Court decision.' }],
     }));
@@ -129,7 +130,8 @@ export function applyRepairToPlan(plan: TripPlan, repair: RepairResult, groupCon
   if (repair.requiresGroupConfirmation && !groupConfirmed) return { applied: false, plan, reason: 'Group confirmation is required before applying this repair.' };
   const items = plan.items.map(item => {
     if (item.id === repair.failedItemId) {
-      return { ...item, name: repair.replacement!.name, estimatedCost: item.estimatedCost + repair.impact.costDelta, evidence: [...item.evidence, ...repair.replacement!.evidence, { source: 'constraint', label: 'Disruption repair', detail: repair.replacement!.lossReason }] };
+      const repairEvidence: RecommendationEvidence = { source: 'constraint', label: 'Disruption repair', detail: repair.replacement!.lossReason };
+      return { ...item, name: repair.replacement!.name, estimatedCost: item.estimatedCost + repair.impact.costDelta, evidence: [...item.evidence, ...repair.replacement!.evidence, repairEvidence] };
     }
     return repair.movedItems.reduce(updateMovedItem, item);
   });

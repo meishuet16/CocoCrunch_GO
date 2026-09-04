@@ -17,6 +17,12 @@ export type PersistedRecommendation = {
 export type CourtOptionState = {
   id: string;
   label: string;
+  viable?: boolean;
+  dealBreakerSafe?: boolean;
+  costDelta?: number;
+  timeDeltaMinutes?: number;
+  preferenceLoss?: number;
+  lossReason?: string;
 };
 
 export type DecisionRecord = {
