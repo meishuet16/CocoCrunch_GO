@@ -274,6 +274,6 @@ describe('Backup Plan and minimum-loss repair', () => {
       expect.objectContaining({ source: 'group-consensus', inputId: 'high-support', strength: 'strong', effect: 'supports', value: 'Higher support' }),
       expect.objectContaining({ source: 'constraint', inputId: 'outdoor', strength: 'supporting', effect: 'warns', value: 'Lost the Court vote.' }),
     ]));
-    expect(repairedItem?.evidence.at(-1)).toMatchObject({ source: 'constraint', inputId: 'outdoor', strength: 'supporting', effect: 'warns', value: 'Lost the Court vote.' });
+    expect(repairedItem?.evidence[repairedItem.evidence.length - 1]).toMatchObject({ source: 'constraint', inputId: 'outdoor', strength: 'supporting', effect: 'warns', value: 'Lost the Court vote.' });
   });
 });

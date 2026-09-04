@@ -78,7 +78,7 @@ describe('persistence compatibility', () => {
     expect(loaded.tingoDimensions).toEqual(scoreTingo(answers));
   });
 
-  it('keeps Mei profile hydration separate from trip intent hydration when both are stored', () => {
+  it('preserves stored blank trip-intent fields instead of reviving legacy profile or destination values', () => {
     const persisted = {
       version: 1,
       destination: 'Kyoto',
@@ -104,14 +104,14 @@ describe('persistence compatibility', () => {
       worthIt: null,
       profileLearned: false,
       tripIntent: {
-        destination: 'Osaka',
+        destination: '',
         dates: null,
         mode: 'solo',
-        tripVibe: 'Late-night snacks',
-        mustGo: 'Dotonbori walk',
-        dealBreaker: 'formal tasting menu',
+        tripVibe: '',
+        mustGo: '',
+        dealBreaker: '',
         preference: 'arcade stop',
-        flexible: 'hotel can move',
+        flexible: '',
         budget: 650,
       },
     };
@@ -122,11 +122,15 @@ describe('persistence compatibility', () => {
     });
 
     const loaded = derivePersistedTripState(loadPersisted());
-
     expect(loaded.profile).toEqual(persisted.profile);
     expect(loaded.tripIntent).toEqual(persisted.tripIntent);
+    expect(loaded.profile).toBeDefined();
+    if (!loaded.profile) {
+      throw new Error('expected stored profile to hydrate');
+    }
     expect(loaded.profile.mustGo).toBe('Nishiki Market habit');
-    expect(loaded.tripIntent.mustGo).toBe('Dotonbori walk');
+    expect(loaded.tripIntent.mustGo).toBe('');
+    expect(loaded.tripIntent.preference).toBe('arcade stop');
   });
 });
 

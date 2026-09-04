@@ -123,6 +123,17 @@ export default function AppRescued() {
   const [stored] = useState(() => loadPersisted());
   const storedPace = stored.completedPaceEvidence;
   const { mode: storedMode, tripBudget: storedTripBudget, profile: storedProfile, tripIntent: storedTripIntent } = derivePersistedTripState(stored);
+  const initialTripIntent = stored.tripIntent
+    ? storedTripIntent
+    : {
+      ...storedTripIntent,
+      destination: storedTripIntent.destination || stored.destination || 'Tokyo',
+      tripVibe: storedTripIntent.tripVibe || storedProfile?.vibe || defaultProfile.vibe,
+      mustGo: storedTripIntent.mustGo || storedProfile?.mustGo || defaultProfile.mustGo,
+      dealBreaker: storedTripIntent.dealBreaker || storedProfile?.veto || defaultProfile.veto,
+      preference: storedTripIntent.preference || storedProfile?.preference || defaultProfile.preference,
+      flexible: storedTripIntent.flexible || storedProfile?.flexible || defaultProfile.flexible,
+    };
   const storedTripDates = storedTripIntent.dates ?? null;
   const storedTingoDimensions = stored.tingoDimensions ?? defaultTingoDimensions;
   const [tab, setTab] = useState<Tab>('home');
@@ -131,18 +142,18 @@ export default function AppRescued() {
   const [drawer, setDrawer] = useState<Drawer>(null);
   const [mode, setMode] = useState<TripMode>(storedMode);
   const [profile, setProfile] = useState<TravelProfile>({
-    vibe: storedProfile?.vibe || defaultProfile.vibe,
-    mustGo: storedProfile?.mustGo || defaultProfile.mustGo,
-    veto: storedProfile?.veto || defaultProfile.veto,
-    preference: storedProfile?.preference || defaultProfile.preference,
-    flexible: storedProfile?.flexible || defaultProfile.flexible,
+    vibe: storedProfile?.vibe ?? defaultProfile.vibe,
+    mustGo: storedProfile?.mustGo ?? defaultProfile.mustGo,
+    veto: storedProfile?.veto ?? defaultProfile.veto,
+    preference: storedProfile?.preference ?? defaultProfile.preference,
+    flexible: storedProfile?.flexible ?? defaultProfile.flexible,
   });
   const [tripInputs, setTripInputs] = useState<TripScopedInputs>({
-    tripVibe: storedTripIntent.tripVibe || storedProfile?.vibe || defaultProfile.vibe,
-    mustGo: storedTripIntent.mustGo || storedProfile?.mustGo || defaultProfile.mustGo,
-    dealBreaker: storedTripIntent.dealBreaker || storedProfile?.veto || defaultProfile.veto,
-    preference: storedTripIntent.preference || storedProfile?.preference || defaultProfile.preference,
-    flexible: storedTripIntent.flexible || storedProfile?.flexible || defaultProfile.flexible,
+    tripVibe: initialTripIntent.tripVibe,
+    mustGo: initialTripIntent.mustGo,
+    dealBreaker: initialTripIntent.dealBreaker,
+    preference: initialTripIntent.preference,
+    flexible: initialTripIntent.flexible,
   });
   const [plannerTurn, setPlannerTurn] = useState(stored.plannerTurn ?? 'Mei');
   const [courtOpen, setCourtOpen] = useState(false);
@@ -204,9 +215,9 @@ export default function AppRescued() {
   const [published, setPublished] = useState(Boolean(stored.published));
   const [externalLink, setExternalLink] = useState('https://example.com/tokyo-cafe-list');
   const [linkAnalyzed, setLinkAnalyzed] = useState(false);
-  const [destination, setDestination] = useState(storedTripIntent.destination || (stored.destination ?? 'Tokyo'));
+  const [destination, setDestination] = useState(initialTripIntent.destination);
   const [destinationSearched, setDestinationSearched] = useState(true);
-  const [recommendations, setRecommendations] = useState<PlaceRecommendation[]>(() => makeRecommendations(storedTripIntent.destination || (stored.destination ?? 'Tokyo'), storedTingoDimensions, stored.recommendations));
+  const [recommendations, setRecommendations] = useState<PlaceRecommendation[]>(() => makeRecommendations(initialTripIntent.destination, storedTingoDimensions, stored.recommendations));
   const [backupCandidates, setBackupCandidates] = useState<BackupCandidate[]>(stored.backupCandidates ?? []);
   const [appliedRepair, setAppliedRepair] = useState<RepairResult | null>(stored.appliedRepair ?? null);
   const [groupBudgetTotal, setGroupBudgetTotal] = useState(storedMode === 'group' ? storedTripBudget : stored.groupBudgetTotal ?? 2400);
