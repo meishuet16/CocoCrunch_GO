@@ -1,8 +1,8 @@
 # P0 Core Logic Completion Design
 
-**Date:** 2026-09-04  
-**Branch:** `feat/p0-foundation`  
-**Product source of truth:** `D:/dunno/codenection26/FINAL_PRODUCT_SPEC.md` (v6)  
+**Date:** 2026-09-04
+**Branch:** `feat/p0-foundation`
+**Product source of truth:** `D:/dunno/codenection26/FINAL_PRODUCT_SPEC.md` (v6)
 **Implementation history:** `docs/COCOCRUNCH_RESCUE_LOG.md`
 
 ## Goal
