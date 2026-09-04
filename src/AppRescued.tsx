@@ -136,7 +136,7 @@ export default function AppRescued() {
   const [delay, setDelay] = useState(Boolean(storedPace?.delayed));
   const [replanPreview, setReplanPreview] = useState(false);
   const [emergencyApproved, setEmergencyApproved] = useState(false);
-  const [replanApplied, setReplanApplied] = useState(false);
+  const [replanApplied, setReplanApplied] = useState(Boolean(stored.appliedRepair));
   const [mood, setMood] = useState<Mood>(storedPace?.mood ?? null);
   const [split, setSplit] = useState(false);
   const [privacy, setPrivacy] = useState<Privacy>(stored.privacy ?? 'status');
@@ -190,7 +190,7 @@ export default function AppRescued() {
   const [destinationSearched, setDestinationSearched] = useState(true);
   const [recommendations, setRecommendations] = useState<PlaceRecommendation[]>(() => makeRecommendations(stored.destination ?? 'Tokyo', stored.tingoDimensions ?? defaultTingoDimensions, stored.recommendations));
   const [backupCandidates, setBackupCandidates] = useState<BackupCandidate[]>(stored.backupCandidates ?? []);
-  const [appliedRepair, setAppliedRepair] = useState<RepairResult | null>(null);
+  const [appliedRepair, setAppliedRepair] = useState<RepairResult | null>(stored.appliedRepair ?? null);
   const [groupBudgetTotal, setGroupBudgetTotal] = useState(stored.groupBudgetTotal ?? 2400);
   const [soloBudgetTotal, setSoloBudgetTotal] = useState(stored.soloBudgetTotal ?? 1200);
   const [groupBudgetPlan, setGroupBudgetPlan] = useState<BudgetPlan>(stored.groupBudgetPlan ?? defaultGroupBudget);
@@ -260,9 +260,9 @@ export default function AppRescued() {
       privacy, continuousLocation,
       recommendations: recommendations.map(({ name, saved, added }) => ({ name, saved, added })),
       worthIt, profileLearned, tingoAnswers, tingoDimensions, basePackingPreferences, tripCreated,
-      members, memberPreferenceProfiles, backupCandidates, constraints, reminders, commitments, reunion, published, memoryNote, memoryPublic, itemReviews,
+      members, memberPreferenceProfiles, backupCandidates, appliedRepair: appliedRepair ?? undefined, constraints, reminders, commitments, reunion, published, memoryNote, memoryPublic, itemReviews,
     });
-  }, [mode, destination, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals, delay, mood, arrivalChecked, privacy, continuousLocation, recommendations, worthIt, profileLearned, tingoAnswers, tingoDimensions, basePackingPreferences, tripCreated, members, memberPreferenceProfiles, backupCandidates, constraints, reminders, commitments, reunion, published, memoryNote, memoryPublic, itemReviews]);
+  }, [mode, destination, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals, delay, mood, arrivalChecked, privacy, continuousLocation, recommendations, worthIt, profileLearned, tingoAnswers, tingoDimensions, basePackingPreferences, tripCreated, members, memberPreferenceProfiles, backupCandidates, appliedRepair, constraints, reminders, commitments, reunion, published, memoryNote, memoryPublic, itemReviews]);
 
   function setProfileField(field: keyof TravelProfile, value: string) {
     setProfile(current => ({ ...current, [field]: value }));

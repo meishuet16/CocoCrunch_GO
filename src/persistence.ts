@@ -4,7 +4,7 @@ import type { TravelProfile, TripReview } from './domain/preferences';
 import type { TingoAnswer, TingoDimensions } from './domain/tingo';
 import type { HumanCommitment, ReunionAgreement, TripConstraint, TripMember, TripReminder } from './domain/trip';
 import type { MemberPreferenceProfile } from './domain/group-dna';
-import type { BackupCandidate } from './domain/backup-repair';
+import type { BackupCandidate, RepairResult } from './domain/backup-repair';
 
 const STORAGE_KEY = 'cococrunch:v1';
 
@@ -73,6 +73,7 @@ export type PersistedState = {
   members?: TripMember[];
   memberPreferenceProfiles?: Record<string, MemberPreferenceProfile>;
   backupCandidates?: BackupCandidate[];
+  appliedRepair?: RepairResult;
   constraints?: TripConstraint[];
   reminders?: TripReminder[];
   commitments?: HumanCommitment[];

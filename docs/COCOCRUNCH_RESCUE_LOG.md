@@ -82,6 +82,7 @@ The following batch reconciles the active `src/AppRescued.tsx` flow against the 
 - `calculatePlanHealth()` derives a documented capped-deduction score from walking load, buffer/time pressure, budget overrun, represented preferences, transfers, protected anchors, unresolved conflicts, and operational risks. Computed output is re-derived rather than persisted.
 - `promoteCourtLosers()` filters Backup candidates to useful, supported, viable, Deal-Breaker-safe losing options while preserving support and supplied loss reason. `buildMinimumLossRepair()` protects anchors, ranks viable backups by support and loss metrics, computes cost/time/preference impact, and returns a preview. `applyRepairToPlan()` enforces Group confirmation and supports reversible application.
 - Persistence now retains member preference profiles, Court-derived Backup candidates, and their evidence/source state.
+- An applied repair decision is persisted as source/evidence state; the visible repaired itinerary and Plan Health are re-derived from that decision after reload, while Plan Health itself is not persisted.
 
 ### Wired into the active app
 
