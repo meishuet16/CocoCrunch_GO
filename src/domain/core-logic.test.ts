@@ -3,6 +3,7 @@ import { deriveGroupDNA, type GroupMemberInput } from './group-dna';
 import { defaultTingoDimensions, deriveTingoBehavior } from './tingo';
 import { generateTripPlan, type DestinationCandidate } from './itinerary';
 import type { GroupDNA } from './group-dna';
+import { calculatePlanHealth } from './plan-health';
 
 const tingoBehavior = deriveTingoBehavior(defaultTingoDimensions);
 const emptyDNA: GroupDNA = { sharedPriorities: [], optionalPreferences: [], budgetRange: { min: 0, max: 0 }, budgetSensitivity: 'low', conflicts: [], evidence: [] };
@@ -12,6 +13,7 @@ const candidates: DestinationCandidate[] = [
   { id: 'market', name: 'Night market', type: 'Market', tags: ['market', 'outdoor'], estimatedCost: 25, durationMinutes: 90, transferMinutes: 20, walkingKm: 1.5, indoor: false, why: 'Candidate detail', source: 'prototype-catalog' },
 ];
 const itineraryInput = { destination: 'Test', tingoBehavior, tripVibe: 'Food', mustGo: 'Harbour walk', dealBreaker: 'No raw-only dinner', preference: 'Scenic café', flexible: 'Night market can move', budget: 300, members: [], groupDNA: emptyDNA, candidates };
+const plan = generateTripPlan(itineraryInput);
 
 describe('Group Travel DNA', () => {
   it('surfaces a strong Must-Go versus Strongly Avoid conflict instead of averaging it', () => {
@@ -67,5 +69,30 @@ describe('deterministic itinerary generation', () => {
     expect(first).toEqual(second);
     expect(first.items.map(item => item.kind)).toEqual(expect.arrayContaining(['anchor', 'floating', 'buffer', 'open']));
     expect(first.items.flatMap(item => item.evidence).map(item => item.source)).toEqual(expect.arrayContaining(['tingo', 'trip-vibe', 'constraint', 'candidate']));
+  });
+});
+
+describe('Plan Health', () => {
+  it('changes when walking load changes and exposes the deduction reason', () => {
+    const healthy = calculatePlanHealth({ plan: { ...plan, walkingKm: 2 }, budget: 300, groupDNA: emptyDNA, tingoBehavior, dealBreaker: '' });
+    const tiring = calculatePlanHealth({ plan: { ...plan, walkingKm: 12 }, budget: 300, groupDNA: emptyDNA, tingoBehavior, dealBreaker: '' });
+
+    expect(tiring.overall).toBeLessThan(healthy.overall);
+    expect(tiring.metrics.walkingDeduction).toBeGreaterThan(healthy.metrics.walkingDeduction);
+    expect(tiring.reasons.join(' ').toLocaleLowerCase()).toContain('walking');
+  });
+
+  it('derives budget and unresolved-conflict deductions instead of using a fixed score', () => {
+    const result = calculatePlanHealth({
+      plan: { ...plan, totalEstimatedCost: 450 },
+      budget: 300,
+      groupDNA: { ...emptyDNA, conflicts: [{ kind: 'strong-disagreement', label: 'Dinner', members: ['A', 'B'], reason: 'Strong preferences disagree.' }] },
+      tingoBehavior,
+      dealBreaker: '',
+    });
+
+    expect(result.metrics.budgetOverrun).toBe(150);
+    expect(result.metrics.unresolvedConflicts).toBe(1);
+    expect(result.deductions.map(item => item.component)).toEqual(expect.arrayContaining(['budget', 'conflicts']));
   });
 });
