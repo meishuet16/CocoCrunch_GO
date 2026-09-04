@@ -105,6 +105,10 @@ export type PersistedTripState = {
   tripIntent: TripIntent;
 };
 
+export function resetTripScopedSharing(): Pick<PersistedState, 'privacy' | 'continuousLocation'> {
+  return { privacy: 'status', continuousLocation: false };
+}
+
 function normalizePersistedState(parsed: Partial<PersistedState>): Partial<PersistedState> {
   if (!Array.isArray(parsed.tingoAnswers)) return parsed;
   return { ...parsed, tingoDimensions: scoreTingo(parsed.tingoAnswers) };

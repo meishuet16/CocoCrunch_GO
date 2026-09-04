@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { derivePersistedTripState, loadPersisted } from '../persistence';
+import { derivePersistedTripState, loadPersisted, resetTripScopedSharing } from '../persistence';
 import { defaultTingoDimensions, scoreTingo } from './tingo';
 import { emptyTripIntent, tripIntentFromLegacyState, tripIntentIsReviewable } from './trip-intent';
 
@@ -173,6 +173,12 @@ describe('journey state', () => {
     });
     expect(state.nextAction?.id).toBe('approve-repair');
     expect(state.canInspectOtherSections).toBe(true);
+  });
+});
+
+describe('trip-scoped sharing', () => {
+  it('starts each new trip with minimized sharing and no continuous location', () => {
+    expect(resetTripScopedSharing()).toEqual({ privacy: 'status', continuousLocation: false });
   });
 });
 

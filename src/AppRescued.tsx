@@ -25,7 +25,7 @@ import {
 } from './domain/preferences';
 import { buildLearningProposal, confirmLearningProposal, type LearningProposal } from './domain/learning';
 import { normalizeBudgetActuals, paceEvidenceSummary, rateDecision, updateBudgetActual } from './domain/retrospective';
-import { derivePersistedTripState, loadPersisted, savePersisted, type CompletedPaceEvidence, type ConfirmedLearningRecord, type CourtOptionState, type DecisionRecord } from './persistence';
+import { derivePersistedTripState, loadPersisted, resetTripScopedSharing, savePersisted, type CompletedPaceEvidence, type ConfirmedLearningRecord, type CourtOptionState, type DecisionRecord } from './persistence';
 import { RecommendationEvidenceText } from './components/RecommendationEvidenceText';
 import { TripLifecycleTabs, TripWorkspaceContext, TripWorkspaceHeader, type TripPhase } from './components/TripWorkspace';
 import {
@@ -470,7 +470,6 @@ export default function AppRescued() {
     setAppliedRepair(repairPreview);
     setReplanApplied(true);
     setDecisionHistory(history => history.some(record => record.kind === 'emergency' && record.topic === 'Weather disruption') ? history : [{ id: `emergency-${Date.now()}`, kind: 'emergency', topic: 'Weather disruption', decision: repairPreview.preview.join(' · '), voteSummary: mode === 'group' ? 'Emergency Court approved' : 'Solo confirmation', usedGacha: false, createdAt: new Date().toISOString() }, ...history]);
-    emitExperience({ type: 'open-prayer' });
   }
 
   function undoRepair() {
@@ -730,10 +729,43 @@ export default function AppRescued() {
     </>;
   }
 
+  function startNewTrip() {
+    const sharing = resetTripScopedSharing();
+    setReadyConfirmed(current => transitionReadyConfirmation(current, 'start-new-trip'));
+    setTripCreated(false);
+    setTripPhase('planning');
+    setDelay(false);
+    setReplanPreview(false);
+    setEmergencyApproved(false);
+    setReplanApplied(false);
+    setAppliedRepair(null);
+    setMood(null);
+    setArrivalChecked(false);
+    setSplit(false);
+    setBackupCandidates([]);
+    setCourtOptions(defaultCourtOptions);
+    setCourtVotes(defaultVotes);
+    setCourtConfirmed(false);
+    setCourtDecision(null);
+    setCourtConcession(null);
+    setTradeAccepted(false);
+    setTradeSnapshot(null);
+    setGacha(null);
+    setActiveConflict('Ramen tonight vs Sushi tonight');
+    setConflictMarked(false);
+    setPrivacy(sharing.privacy);
+    setContinuousLocation(sharing.continuousLocation);
+    setReported(false);
+    setPhotoImport(false);
+    setPhotoIndexed(false);
+    setJournalGenerated(false);
+    setDrawer('tripSetup');
+  }
+
   function renderTrips() {
     return <>
       <SectionTitle kicker="TRIPS · YOUR NOTEBOOK" title="Keep the trip in view." copy="Planning, traveling, and remembering all belong to the same journey."/>
-      <button className="new-trip-link" onClick={() => { setReadyConfirmed(current => transitionReadyConfirmation(current, 'start-new-trip')); setTripCreated(false); setDrawer('tripSetup'); }}>+ Start a new trip</button>
+      <button className="new-trip-link" onClick={startNewTrip}>+ Start a new trip</button>
       <section className="trip-card active-trip paper-sheet"><div className="trip-card-art"><span>COCOCRUNCH</span><b>{destination}</b><small>12–21 Oct 2026 · {travellerCount} travellers</small><i>✦</i></div><div className="trip-card-body"><div className="trip-card-heading"><div><span>IN MOTION</span><h3>{destination} · slow food + small discoveries</h3></div><b>{planHealth.overall}</b></div><div className="trip-phase-preview"><span className={tripPhase === 'planning' ? 'active' : ''}>Planning</span><span className={tripPhase === 'traveling' ? 'active' : ''}>Traveling</span><span className={tripPhase === 'completed' ? 'active' : ''}>Completed</span></div><p>Today: {tripInputs.mustGo} · one open pocket</p><button className="primary" onClick={() => openTrip(tripPhase)}>Continue trip <ChevronRight size={16}/></button></div></section>
       <section className="trip-list"><div className="section-rule"><span>OTHER TRIPS</span><button onClick={() => setTab('explore')}>Find inspiration <ChevronRight size={14}/></button></div><article className="trip-list-row"><div className="trip-thumb sea-thumb"/><div><b>Jeju · salt air and citrus</b><small>Completed · 5 days · shared privately</small></div><button onClick={() => openTrip('completed')} aria-label="Open Jeju trip"><ChevronRight size={17}/></button></article><article className="trip-list-row"><div className="trip-thumb blue-thumb"/><div><b>Kyoto · temple mornings</b><small>Draft · solo · 3 anchor ideas</small></div><button onClick={() => openTrip('planning')} aria-label="Open Kyoto trip"><ChevronRight size={17}/></button></article></section>
       <section className="trip-footer-note"><Coco tiny mood="happy" context="travel"/><div><b>Every trip gets a little wiser.</b><small>Reviews and category-level actual spend feed back into your private Tingo Card.</small></div></section>
@@ -818,7 +850,7 @@ export default function AppRescued() {
       />
       <section className="arrival-check"><div><span>PROGRESS CHECK</span><b>{arrivalChecked ? `Arrived at ${anchorItem?.name ?? 'the anchor'}.` : `Has the group reached ${anchorItem?.name ?? 'the morning anchor'}?`}</b><small>Manual check-in is always available; location permission is not required.</small></div><button onClick={() => setArrivalChecked(!arrivalChecked)}>{arrivalChecked ? 'Undo check-in' : 'Mark arrived'}</button></section>
       {!delay && <button className="event-button" onClick={() => { setDelay(true); setReplanPreview(false); setAppliedRepair(null); setReplanApplied(false); setEmergencyApproved(false); }}><CloudRain size={20}/> Simulate heavy rain disruption</button>}
-      {delay && !replanApplied && <section className="disruption-stage"><div className="disruption-head"><CloudRain size={26}/><div><span>FLOATING BLOCK FAILED</span><b>{failedPlanItem?.timeLabel ?? 'Current'} {failedPlanItem?.name ?? 'item'} is no longer viable.</b></div></div>{!replanPreview ? <><div className="ghost-suggestion"><span>MINIMUM-LOSS CANDIDATE</span><b>{repairPreview?.replacement?.name ?? 'No viable Backup candidate'}</b><small>{repairPreview?.replacement ? `${repairPreview.replacement.support} supporters · ${repairPreview.impact.costDelta >= 0 ? '+' : ''}RM${repairPreview.impact.costDelta} · ${repairPreview.impact.timeDeltaMinutes >= 0 ? '+' : ''}${repairPreview.impact.timeDeltaMinutes} min` : repairPreview?.reasons[repairPreview.reasons.length - 1] ?? 'No repair result available.'}</small></div><button className="primary" disabled={!repairPreview?.applicable} onClick={() => setReplanPreview(true)}>Preview minimum-loss repair</button></> : <><div className="change-ticket">{repairPreview?.preview.map(line => <div key={line}><span>REPAIR</span><b>{line}</b></div>)}</div>{repairPreview?.reasons.map(reason => <small className="adapter-note" key={reason}>{reason}</small>)}{mode === 'group' && repairPreview?.requiresGroupConfirmation && <div className="emergency-court"><span>EMERGENCY COURT · 90 SEC</span><b>{emergencyApproved ? 'Approved for this repair' : 'Group approval required'}</b><button onClick={() => setEmergencyApproved(true)}>{emergencyApproved ? '✓ Approved' : 'Simulate group approval'}</button></div>}<div className="action-row"><button className="secondary" onClick={() => setReplanPreview(false)}>Not now</button><button className="primary" disabled={!repairPreview?.applicable || (repairPreview.requiresGroupConfirmation && !emergencyApproved)} onClick={applyRepair}>Apply repair</button></div></>}</section>}
+      {delay && !replanApplied && <section className="disruption-stage"><div className="disruption-head"><CloudRain size={26}/><div><span>FLOATING BLOCK FAILED</span><b>{failedPlanItem?.timeLabel ?? 'Current'} {failedPlanItem?.name ?? 'item'} is no longer viable.</b></div></div>{!replanPreview ? <><div className="ghost-suggestion"><span>MINIMUM-LOSS REPAIR</span><b>{repairPreview?.replacement?.name ?? (repairPreview?.strategy === 'open-recovery' ? 'Open recovery block' : 'No safe repair available')}</b><small>{repairPreview?.replacement ? `${repairPreview.replacement.support} supporters · ${repairPreview.impact.costDelta >= 0 ? '+' : ''}RM${repairPreview.impact.costDelta} · ${repairPreview.impact.timeDeltaMinutes >= 0 ? '+' : ''}${repairPreview.impact.timeDeltaMinutes} min` : repairPreview?.strategy === 'open-recovery' ? 'No direct Backup candidate; the failed floating item can become recovery time.' : repairPreview?.reasons[repairPreview.reasons.length - 1] ?? 'No repair result available.'}</small></div><button className="primary" disabled={!repairPreview?.applicable} onClick={() => setReplanPreview(true)}>Preview minimum-loss repair</button></> : <><div className="change-ticket">{repairPreview?.preview.map(line => <div key={line}><span>REPAIR</span><b>{line}</b></div>)}</div>{repairPreview?.reasons.map(reason => <small className="adapter-note" key={reason}>{reason}</small>)}{mode === 'group' && repairPreview?.requiresGroupConfirmation && <div className="emergency-court"><span>EMERGENCY COURT · 90 SEC</span><b>{emergencyApproved ? 'Approved for this repair' : 'Group approval required'}</b><button onClick={() => setEmergencyApproved(true)}>{emergencyApproved ? '✓ Approved' : 'Simulate group approval'}</button></div>}<div className="action-row"><button className="secondary" onClick={() => setReplanPreview(false)}>Not now</button><button className="primary" disabled={!repairPreview?.applicable || (repairPreview.requiresGroupConfirmation && !emergencyApproved)} onClick={applyRepair}>Apply repair</button></div></>}</section>}
       {replanApplied && <section className="success-note"><Check size={21}/><div><b>Plan repaired.</b><small>{appliedRepair?.preview.join(' · ')} · undo available</small></div><button onClick={undoRepair}>Undo</button></section>}
       <section className="energy-check"><span>HOW’S THE GROUP?</span><div>{(['great','okay','tired'] as const).map(value => <button key={value} className={mood === value ? 'active' : ''} onClick={() => setMood(value)}>{value === 'great' ? '⚡ Great' : value === 'okay' ? '🙂 Okay' : '🥱 Tired'}</button>)}</div>{mood === 'tired' && <small>Coco suggests dropping one floating item and adding 45 min rest. Anchors stay untouched.</small>}</section>
       {mode === 'group' && <section className="heartbeat"><span>GROUP HEARTBEAT</span><b>{delay ? 'Needs a decision' : split ? 'Can reunite on time' : arrivalChecked ? 'Together at the anchor' : 'Status check pending'}</b><small>Only shared status is shown. Exact group coordinates stay hidden by default.</small></section>}

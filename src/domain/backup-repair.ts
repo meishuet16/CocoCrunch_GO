@@ -29,7 +29,9 @@ export type CourtBackupOption = {
 
 export type RepairMove = { itemId: string; fromMinutes: number; toMinutes: number };
 export type RepairImpact = { costDelta: number; timeDeltaMinutes: number; preferenceLoss: number };
+export type RepairStrategy = 'backup-replacement' | 'open-recovery' | 'none';
 export type RepairResult = {
+  strategy: RepairStrategy;
   applicable: boolean;
   requiresGroupConfirmation: boolean;
   failedItemId: string | null;
@@ -86,7 +88,7 @@ export function promoteCourtLosers(options: CourtBackupOption[], winnerId: strin
 
 function baseResult(plan: TripPlan, reason: string): RepairResult {
   const protectedAnchorIds = plan.items.filter(item => item.kind === 'anchor' && item.protected).map(item => item.id);
-  return { applicable: false, requiresGroupConfirmation: false, failedItemId: null, replacement: null, movedItems: [], impact: { costDelta: 0, timeDeltaMinutes: 0, preferenceLoss: 0 }, protectedAnchorIds, reasons: [reason], preview: [`KEEP ${protectedAnchorIds.length} protected anchor${protectedAnchorIds.length === 1 ? '' : 's'}`, reason] };
+  return { strategy: 'none', applicable: false, requiresGroupConfirmation: false, failedItemId: null, replacement: null, movedItems: [], impact: { costDelta: 0, timeDeltaMinutes: 0, preferenceLoss: 0 }, protectedAnchorIds, reasons: [reason], preview: [`KEEP ${protectedAnchorIds.length} protected anchor${protectedAnchorIds.length === 1 ? '' : 's'}`, reason] };
 }
 
 export function buildMinimumLossRepair(input: { plan: TripPlan; failedItemId: string; backups: BackupCandidate[]; budgetRemaining: number; mode: 'group' | 'solo' }): RepairResult {
@@ -100,7 +102,32 @@ export function buildMinimumLossRepair(input: { plan: TripPlan; failedItemId: st
   const replacement = candidates[0];
   const protectedAnchorIds = input.plan.items.filter(item => item.kind === 'anchor' && item.protected).map(item => item.id);
   if (!replacement) {
-    return { ...baseResult(input.plan, 'No viable, budget-safe Backup candidate can replace this floating item.'), failedItemId: failed.id };
+    const open = input.plan.items.find(item => item.kind === 'open' && item.id !== failed.id);
+    if (open) {
+      const impact = { costDelta: -failed.estimatedCost, timeDeltaMinutes: 0, preferenceLoss: 0 };
+      const reason = 'No direct Backup candidate is viable, but the failed floating block can become recovery time.';
+      return {
+        strategy: 'open-recovery',
+        applicable: true,
+        requiresGroupConfirmation: input.mode === 'group',
+        failedItemId: failed.id,
+        replacement: null,
+        movedItems: [],
+        impact,
+        protectedAnchorIds,
+        reasons: [
+          `Protected anchors first: ${protectedAnchorIds.join(', ') || 'none'}.`,
+          reason,
+          'The open pocket remains available for rest or a later human decision.',
+        ],
+        preview: [
+          `KEEP ${protectedAnchorIds.length} protected anchor${protectedAnchorIds.length === 1 ? '' : 's'}`,
+          `REMOVE ${failed.name} → OPEN RECOVERY BLOCK`,
+          `IMPACT ${impact.costDelta >= 0 ? '+' : ''}RM${impact.costDelta} · ${impact.timeDeltaMinutes >= 0 ? '+' : ''}${impact.timeDeltaMinutes} min · preference loss ${impact.preferenceLoss}`,
+        ],
+      };
+    }
+    return { ...baseResult(input.plan, 'No viable, budget-safe Backup candidate or open recovery block can replace this floating item.'), failedItemId: failed.id };
   }
 
   const impact = { costDelta: replacement.costDelta, timeDeltaMinutes: replacement.timeDeltaMinutes, preferenceLoss: replacement.preferenceLoss ?? 0 };
@@ -123,7 +150,7 @@ export function buildMinimumLossRepair(input: { plan: TripPlan; failedItemId: st
     }),
     `IMPACT ${impact.costDelta >= 0 ? '+' : ''}RM${impact.costDelta} · ${impact.timeDeltaMinutes >= 0 ? '+' : ''}${impact.timeDeltaMinutes} min · preference loss ${impact.preferenceLoss}`,
   ];
-  return { applicable: true, requiresGroupConfirmation, failedItemId: failed.id, replacement, movedItems, impact, protectedAnchorIds, reasons, preview };
+  return { strategy: 'backup-replacement', applicable: true, requiresGroupConfirmation, failedItemId: failed.id, replacement, movedItems, impact, protectedAnchorIds, reasons, preview };
 }
 
 function updateMovedItem(item: ItineraryItem, move: RepairMove): ItineraryItem {
@@ -133,10 +160,21 @@ function updateMovedItem(item: ItineraryItem, move: RepairMove): ItineraryItem {
 }
 
 export function applyRepairToPlan(plan: TripPlan, repair: RepairResult, groupConfirmed: boolean): { applied: boolean; plan: TripPlan; reason?: string } {
-  if (!repair.applicable || !repair.replacement || !repair.failedItemId) return { applied: false, plan, reason: repair.reasons[repair.reasons.length - 1] ?? 'Repair is not applicable.' };
+  const strategy = repair.strategy ?? (repair.replacement ? 'backup-replacement' : 'none');
+  if (!repair.applicable || !repair.failedItemId || (strategy === 'backup-replacement' && !repair.replacement)) return { applied: false, plan, reason: repair.reasons[repair.reasons.length - 1] ?? 'Repair is not applicable.' };
   if (repair.requiresGroupConfirmation && !groupConfirmed) return { applied: false, plan, reason: 'Group confirmation is required before applying this repair.' };
   const items = plan.items.map(item => {
     if (item.id === repair.failedItemId) {
+      if (strategy === 'open-recovery') {
+        const recoveryEvidence: RecommendationEvidence = {
+          source: 'adapter',
+          inputId: repair.failedItemId,
+          strength: 'supporting',
+          effect: 'warns',
+          value: 'Failed floating block became open recovery time.',
+        };
+        return { ...item, name: 'Open recovery block', kind: 'open' as const, estimatedCost: 0, transferMinutes: 0, walkingKm: 0, protected: false, candidateId: undefined, evidence: [...item.evidence, recoveryEvidence] };
+      }
       const repairEvidence: RecommendationEvidence = {
         source: 'constraint',
         inputId: repair.failedItemId,

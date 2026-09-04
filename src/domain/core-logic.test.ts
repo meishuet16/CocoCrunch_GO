@@ -260,6 +260,23 @@ describe('Backup Plan and minimum-loss repair', () => {
     expect(applyRepairToPlan(repairPlan, repair, true).applied).toBe(true);
   });
 
+  it('distinguishes a no-Backup recovery repair from a no-safe-repair state', () => {
+    const recovery = buildMinimumLossRepair({ plan: repairPlan, failedItemId: 'outdoor', backups: [], budgetRemaining: 100, mode: 'solo' });
+    const noSafeRepair = buildMinimumLossRepair({
+      plan: { ...repairPlan, items: repairPlan.items.filter(item => item.id !== 'open') },
+      failedItemId: 'outdoor',
+      backups: [],
+      budgetRemaining: 100,
+      mode: 'solo',
+    });
+
+    expect(recovery).toMatchObject({ applicable: true, strategy: 'open-recovery', replacement: null, impact: { costDelta: -30, timeDeltaMinutes: 0 } });
+    expect(recovery.preview.join(' ')).toContain('OPEN RECOVERY BLOCK');
+    expect(applyRepairToPlan(repairPlan, recovery, true).plan.items.find(item => item.id === 'outdoor')).toMatchObject({ kind: 'open', name: 'Open recovery block', estimatedCost: 0 });
+    expect(noSafeRepair).toMatchObject({ applicable: false, strategy: 'none', replacement: null });
+    expect(noSafeRepair.reasons.join(' ')).toContain('No viable');
+  });
+
   it('appends typed repair evidence to the repaired floating item', () => {
     const sourcePlan: TripPlan = {
       ...repairPlan,
