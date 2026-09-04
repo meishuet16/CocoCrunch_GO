@@ -135,6 +135,18 @@ describe('persistence compatibility', () => {
 });
 
 describe('journey state', () => {
+  it('resets stored ready confirmation when a new planning flow starts', async () => {
+    const journeyStateModule = await import('./journey-state');
+    const transitionReadyConfirmation = (journeyStateModule as {
+      transitionReadyConfirmation?: (current: boolean, action: string) => boolean;
+    }).transitionReadyConfirmation;
+
+    expect(transitionReadyConfirmation).toBeTypeOf('function');
+    expect(transitionReadyConfirmation?.(true, 'start-new-trip')).toBe(false);
+    expect(transitionReadyConfirmation?.(true, 'confirm-trip-setup')).toBe(false);
+    expect(transitionReadyConfirmation?.(false, 'confirm-ready')).toBe(true);
+  });
+
   it('prioritizes an unresolved Group conflict without preventing inspection', async () => {
     const { deriveJourneyState } = await import('./journey-state');
     const state = deriveJourneyState({

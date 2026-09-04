@@ -18,6 +18,11 @@ export type JourneyActionId =
 
 export type JourneyActionTarget = 'trip' | 'me' | 'memories' | 'explore';
 
+export type ReadyConfirmationAction =
+  | 'start-new-trip'
+  | 'confirm-trip-setup'
+  | 'confirm-ready';
+
 export type JourneyStateInput = {
   phase: JourneyPhase;
   tripCreated: boolean;
@@ -59,6 +64,12 @@ export type JourneyState = {
   evidence: JourneyEvidence[];
   canInspectOtherSections: true;
 };
+
+export function transitionReadyConfirmation(current: boolean, action: ReadyConfirmationAction): boolean {
+  if (action === 'confirm-ready') return true;
+  if (action === 'start-new-trip' || action === 'confirm-trip-setup') return false;
+  return current;
+}
 
 export function deriveJourneyState(input: JourneyStateInput): JourneyState {
   const base = {
