@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { emitExperience } from './experience';
 import { GlobalNav, type GlobalTab } from './components/GlobalNav';
+import { TripJourneyStatus } from './components/TripJourneyStatus';
 import { courtTally, type CourtOption, type CourtVote } from './domain/court';
 import { attachCourtConcession, withdrawCourtConcession, type CourtConcession } from './domain/concession';
 import { gatePlanMutation } from './domain/governance';
@@ -27,10 +28,11 @@ import {
   deriveTingoBehavior, describeTingo, defaultTingoDimensions, scoreTingo, tingoCompletion,
   tingoGuidance, tingoQuestions, type TingoAnswer, type TingoDimensions,
 } from './domain/tingo';
-import type { TripIntent } from './domain/trip-intent';
+import { tripIntentIsReviewable, type TripIntent } from './domain/trip-intent';
 import { checkFeasibility, comparisonOptions, importPhotoMetadata } from './domain/adapters';
 import { deriveGroupDNA, type MemberPreferenceProfile } from './domain/group-dna';
 import { candidateFromDiscovery, generateTripPlan } from './domain/itinerary';
+import { deriveJourneyState } from './domain/journey-state';
 import { calculatePlanHealth } from './domain/plan-health';
 import { applyRepairToPlan, buildMinimumLossRepair, promoteCourtLosers, type BackupCandidate, type RepairResult } from './domain/backup-repair';
 import {
@@ -293,7 +295,48 @@ export default function AppRescued() {
   const proposedDecision = gacha ?? majorityDecision;
   const completedPaceEvidence: CompletedPaceEvidence = { delayed: delay, mood, arrivalChecked };
   const actualPaceCopy = paceEvidenceSummary(completedPaceEvidence);
-  const cocoMood: 'idle' | 'happy' | 'panic' = delay && !replanApplied ? 'panic' : courtConfirmed || replanApplied || reported || receiptPrinted ? 'happy' : 'idle';
+  const tingoComplete = tingoCompletion(tingoAnswers) === 100;
+  const journeyState = useMemo(() => deriveJourneyState({
+    phase: tripPhase,
+    tripCreated,
+    tingoComplete,
+    mode,
+    unresolvedConflictCount: planHealth.metrics.unresolvedConflicts,
+    planHealth: planHealth.overall,
+    planHealthBlockers: planHealth.deductions
+      .filter(deduction => deduction.component !== 'conflicts' && deduction.points >= 10)
+      .map(deduction => deduction.reason),
+    hasPlan: tripIntentIsReviewable(tripIntent) && visibleTripPlan.items.length > 0,
+    readyConfirmed: tripPhase !== 'planning',
+    disruption: delay && !replanApplied ? 'failed-floating-item' : null,
+    repairAvailable: Boolean(repairPreview?.applicable),
+    repairRequiresGroupConfirmation: Boolean(repairPreview?.requiresGroupConfirmation),
+    currentStopNeedsCheckIn: tripPhase === 'traveling' && !arrivalChecked,
+    outcomeReviewed: Boolean(photoImport || journalGenerated || Object.keys(itemReviews).length > 0),
+    worthItRecorded: Boolean(worthIt),
+    learningProposalPending: Boolean(worthIt && !profileLearned),
+    learningConfirmed: profileLearned,
+  }), [
+    arrivalChecked,
+    delay,
+    itemReviews,
+    journalGenerated,
+    mode,
+    photoImport,
+    planHealth.deductions,
+    planHealth.metrics.unresolvedConflicts,
+    planHealth.overall,
+    profileLearned,
+    replanApplied,
+    repairPreview?.applicable,
+    repairPreview?.requiresGroupConfirmation,
+    tripCreated,
+    tripIntent,
+    tripPhase,
+    tingoComplete,
+    visibleTripPlan.items.length,
+    worthIt,
+  ]);
 
   useEffect(() => {
     savePersisted({
@@ -479,6 +522,68 @@ export default function AppRescued() {
     setTab('trips');
   }
 
+  function handleJourneyAction(target: NonNullable<typeof journeyState.nextAction>['target']) {
+    const actionId = journeyState.nextAction?.id;
+
+    if (actionId === 'setup-trip' || actionId === 'review-intent') {
+      openTrip('planning');
+      setDrawer('tripSetup');
+      return;
+    }
+
+    if (actionId === 'open-court') {
+      openTrip('planning');
+      setDrawer(null);
+      setCourtOpen(true);
+      return;
+    }
+
+    if (actionId === 'review-health' || actionId === 'confirm-ready') {
+      openTrip('planning');
+      setDrawer('feasibility');
+      return;
+    }
+
+    if (actionId === 'preview-repair' || actionId === 'approve-repair') {
+      openTrip('traveling');
+      setDrawer(null);
+      setReplanPreview(Boolean(repairPreview?.applicable));
+      return;
+    }
+
+    if (actionId === 'check-in' || actionId === 'continue-traveling') {
+      openTrip('traveling');
+      setDrawer(null);
+      return;
+    }
+
+    if (actionId === 'review-outcome' || actionId === 'open-memories' || actionId === 'review-learning') {
+      openTrip('completed');
+      setDrawer(null);
+      return;
+    }
+
+    if (actionId === 'complete-tingo') {
+      setTripWorkspaceOpen(false);
+      setTab('me');
+      setDrawer('tingo');
+      return;
+    }
+
+    if (actionId === 'continue-planning') {
+      openTrip('planning');
+      setDrawer(null);
+      return;
+    }
+
+    setDrawer(null);
+    if (target === 'trip') openTrip(tripPhase);
+    else {
+      setTripWorkspaceOpen(false);
+      setTab(target);
+    }
+  }
+
   function answerTingo(optionId: string) {
     const question = tingoQuestions[tingoStep];
     setTingoAnswers(current => {
@@ -567,11 +672,16 @@ export default function AppRescued() {
   }
 
   function renderHome() {
+    const groupStatus = mode === 'group'
+      ? planHealth.metrics.unresolvedConflicts > 0
+        ? `${planHealth.metrics.unresolvedConflicts} conflict${planHealth.metrics.unresolvedConflicts === 1 ? '' : 's'} to resolve`
+        : `${travellerCount} travellers aligned`
+      : 'Solo trip';
+
     return <>
-      <section className="home-hero paper-sheet"><div><span className="eyebrow">YOUR TRAVEL NOTEBOOK</span><h2>Good morning, Mei.</h2><p>One protected highlight, a little room to wander, and Coco keeping the plan human.</p><button className="hero-link" onClick={() => openTrip('planning')}>Open {destination} trip <ChevronRight size={15}/></button></div><Coco mood={cocoMood} context="travel"/></section>
-      <section className="today-card"><div className="today-head"><div><span>Today’s journey</span><b>Oct 13 · 18°C · cloudy</b></div><button onClick={() => openTrip('planning')}>Full plan <ChevronRight size={15}/></button></div><div className="journey-line">{visibleTripPlan.items.map(item => <div className={`journey-stop ${item.kind === 'anchor' ? 'anchor' : item.kind === 'open' ? 'mystery' : ''}`} key={item.id}><time>{item.timeLabel}</time><span/><div><b>{item.name}</b><small>{item.kind === 'anchor' ? '⚓ Anchor · protected' : item.kind === 'buffer' ? '🫧 Buffer · breathing room' : item.kind === 'open' ? '🎰 Open · flexible' : '🫧 Floating · flexible'}</small></div></div>)}</div></section>
-      <section className="status-strip"><div><span>Plan health</span><b>{planHealth.overall}/100</b></div><div><span>Budget left</span><b>RM {remaining}</b></div><div><span>Group</span><b>{travellerCount} people</b></div></section>
-      <section className="home-tools"><MiniTool icon={MapPin} label="Discover places" note={`Tingo-ranked · ${tingoBehavior.recommendationBias} bias`} onClick={() => setTab('explore')}/><MiniTool icon={Users} label="Group DNA" note={courtConfirmed ? 'Latest conflict resolved' : '1 conflict needs a decision'} onClick={() => setDrawer('group')}/><MiniTool icon={PackageCheck} label="Packing" note={`${basePackingPreferences.length} habits + trip essentials`} onClick={openPacking}/><MiniTool icon={Send} label="Family Window" note="Status-only sharing by default" onClick={() => setDrawer('family')}/></section>
+      <SectionTitle kicker="HOME · ACTIVE TRIP" title={`${destination} stays in view.`} copy="Follow the next meaningful action first, then inspect the rest of the trip as needed."/>
+      <TripJourneyStatus state={journeyState} destination={destination} onAction={handleJourneyAction} />
+      <section className="status-strip status-strip--home"><div><span>Current Phase</span><b>{tripPhase === 'planning' ? 'Planning' : tripPhase === 'traveling' ? 'Traveling' : 'Completed'}</b></div><div><span>Plan Health</span><b>{planHealth.overall}/100</b></div><div><span>Budget Remaining</span><b>RM {remaining}</b></div><div><span>Group Status</span><b>{groupStatus}</b></div></section>
     </>;
   }
 
@@ -609,6 +719,7 @@ export default function AppRescued() {
       <TripWorkspaceHeader destination={destination} travellerCount={travellerCount} planHealth={planHealth.overall} onBack={openTripsIndex} />
       <TripLifecycleTabs phase={tripPhase} onChange={setTripPhase} />
       <TripWorkspaceContext phase={tripPhase} onExit={openTripsIndex} />
+      <TripJourneyStatus state={journeyState} destination={destination} onAction={handleJourneyAction} />
       {tripPhase === 'planning' ? renderPlan() : tripPhase === 'traveling' ? renderDuring() : renderMemories()}
     </>;
   }
