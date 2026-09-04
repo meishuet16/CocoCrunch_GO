@@ -26,6 +26,7 @@ import {
   deriveTingoBehavior, describeTingo, defaultTingoDimensions, scoreTingo, tingoCompletion,
   tingoGuidance, tingoQuestions, type TingoAnswer, type TingoDimensions,
 } from './domain/tingo';
+import { tripIntentFromLegacyState, type TripIntent } from './domain/trip-intent';
 import { checkFeasibility, comparisonOptions, importPhotoMetadata } from './domain/adapters';
 import { deriveGroupDNA, type MemberPreferenceProfile } from './domain/group-dna';
 import { candidateFromDiscovery, generateTripPlan } from './domain/itinerary';
@@ -120,12 +121,30 @@ function MiniTool({ icon: Icon, label, note, onClick }: { icon: React.ComponentT
 export default function AppRescued() {
   const [stored] = useState(() => loadPersisted());
   const storedPace = stored.completedPaceEvidence;
+  const storedMode = stored.tripIntent?.mode ?? stored.mode ?? 'group';
+  const storedTripBudget = stored.tripIntent?.budget ?? (storedMode === 'group' ? stored.groupBudgetTotal : stored.soloBudgetTotal) ?? (storedMode === 'group' ? 2400 : 1200);
+  const storedTripIntent = stored.tripIntent ?? tripIntentFromLegacyState({
+    destination: stored.destination,
+    mode: storedMode,
+    profile: stored.profile,
+    budget: storedTripBudget,
+  });
+  const storedTripDates = storedTripIntent.dates ?? null;
+  const storedTingoDimensions = stored.tingoDimensions ?? defaultTingoDimensions;
   const [tab, setTab] = useState<Tab>('home');
   const [tripWorkspaceOpen, setTripWorkspaceOpen] = useState(false);
   const [tripPhase, setTripPhase] = useState<TripPhase>('planning');
   const [drawer, setDrawer] = useState<Drawer>(null);
-  const [mode, setMode] = useState<TripMode>(stored.mode ?? 'group');
-  const [profile, setProfile] = useState<TravelProfile>({ ...defaultProfile, ...stored.profile });
+  const [mode, setMode] = useState<TripMode>(storedMode);
+  const [profile, setProfile] = useState<TravelProfile>({
+    ...defaultProfile,
+    ...stored.profile,
+    vibe: storedTripIntent.tripVibe || stored.profile?.vibe || defaultProfile.vibe,
+    mustGo: storedTripIntent.mustGo || stored.profile?.mustGo || defaultProfile.mustGo,
+    veto: storedTripIntent.dealBreaker || stored.profile?.veto || defaultProfile.veto,
+    preference: storedTripIntent.preference || stored.profile?.preference || defaultProfile.preference,
+    flexible: storedTripIntent.flexible || stored.profile?.flexible || defaultProfile.flexible,
+  });
   const [plannerTurn, setPlannerTurn] = useState(stored.plannerTurn ?? 'Mei');
   const [courtOpen, setCourtOpen] = useState(false);
   const [courtOptions, setCourtOptions] = useState<CourtOptionState[]>(stored.courtOptions?.length === 2 ? stored.courtOptions : defaultCourtOptions);
@@ -148,7 +167,6 @@ export default function AppRescued() {
   const [profileLearned, setProfileLearned] = useState(Boolean(stored.profileLearned));
   const [learningChanges, setLearningChanges] = useState<string[]>([]);
   const [tingoAnswers, setTingoAnswers] = useState<TingoAnswer[]>(stored.tingoAnswers ?? []);
-  const [tingoDimensions, setTingoDimensions] = useState<TingoDimensions>(stored.tingoDimensions ?? defaultTingoDimensions);
   const [tingoStep, setTingoStep] = useState(0);
   const [basePackingPreferences, setBasePackingPreferences] = useState<string[]>(stored.basePackingPreferences ?? ['comfortable walking shoes', 'portable charger', 'light rain layer']);
   const [tripCreated, setTripCreated] = useState(stored.tripCreated ?? true);
@@ -187,13 +205,13 @@ export default function AppRescued() {
   const [published, setPublished] = useState(Boolean(stored.published));
   const [externalLink, setExternalLink] = useState('https://example.com/tokyo-cafe-list');
   const [linkAnalyzed, setLinkAnalyzed] = useState(false);
-  const [destination, setDestination] = useState(stored.destination ?? 'Tokyo');
+  const [destination, setDestination] = useState(storedTripIntent.destination || (stored.destination ?? 'Tokyo'));
   const [destinationSearched, setDestinationSearched] = useState(true);
-  const [recommendations, setRecommendations] = useState<PlaceRecommendation[]>(() => makeRecommendations(stored.destination ?? 'Tokyo', stored.tingoDimensions ?? defaultTingoDimensions, stored.recommendations));
+  const [recommendations, setRecommendations] = useState<PlaceRecommendation[]>(() => makeRecommendations(storedTripIntent.destination || (stored.destination ?? 'Tokyo'), storedTingoDimensions, stored.recommendations));
   const [backupCandidates, setBackupCandidates] = useState<BackupCandidate[]>(stored.backupCandidates ?? []);
   const [appliedRepair, setAppliedRepair] = useState<RepairResult | null>(stored.appliedRepair ?? null);
-  const [groupBudgetTotal, setGroupBudgetTotal] = useState(stored.groupBudgetTotal ?? 2400);
-  const [soloBudgetTotal, setSoloBudgetTotal] = useState(stored.soloBudgetTotal ?? 1200);
+  const [groupBudgetTotal, setGroupBudgetTotal] = useState(storedMode === 'group' ? storedTripBudget : stored.groupBudgetTotal ?? 2400);
+  const [soloBudgetTotal, setSoloBudgetTotal] = useState(storedMode === 'solo' ? storedTripBudget : stored.soloBudgetTotal ?? 1200);
   const [groupBudgetPlan, setGroupBudgetPlan] = useState<BudgetPlan>(stored.groupBudgetPlan ?? defaultGroupBudget);
   const [soloBudgetPlan, setSoloBudgetPlan] = useState<BudgetPlan>(stored.soloBudgetPlan ?? defaultSoloBudget);
   const [groupBudgetActuals, setGroupBudgetActuals] = useState<BudgetActuals>(() => normalizeBudgetActuals(stored.groupBudgetActuals, defaultGroupActuals));
@@ -212,6 +230,7 @@ export default function AppRescued() {
   const [postcardSealed, setPostcardSealed] = useState(false);
 
   const tally = useMemo(() => courtTally(courtVotes), [courtVotes]);
+  const tingoDimensions = useMemo(() => scoreTingo(tingoAnswers), [tingoAnswers]);
   const tingoBehavior = useMemo(() => deriveTingoBehavior(tingoDimensions), [tingoDimensions]);
   const tingoPlanGuidance = useMemo(() => tingoGuidance(tingoDimensions), [tingoDimensions]);
   const responsibilitySuggestions = useMemo(() => suggestResponsibilities(members, tingoBehavior, { mei: tingoBehavior }), [members, tingoBehavior]);
@@ -227,6 +246,17 @@ export default function AppRescued() {
   const budgetPlan = mode === 'group' ? groupBudgetPlan : soloBudgetPlan;
   const budgetActuals = mode === 'group' ? groupBudgetActuals : soloBudgetActuals;
   const budgetTotal = mode === 'group' ? groupBudgetTotal : soloBudgetTotal;
+  const tripIntent = useMemo<TripIntent>(() => ({
+    destination,
+    dates: storedTripDates,
+    mode,
+    tripVibe: profile.vibe,
+    mustGo: profile.mustGo,
+    dealBreaker: profile.veto,
+    preference: profile.preference,
+    flexible: profile.flexible,
+    budget: budgetTotal,
+  }), [destination, storedTripDates, mode, profile, budgetTotal]);
   const planned = plannedBudget(budgetPlan);
   const spent = actualBudget(budgetActuals);
   const replanCost = 0;
@@ -236,7 +266,21 @@ export default function AppRescued() {
   const travellerCount = mode === 'group' ? members.filter(member => member.inviteStatus === 'joined').length : 1;
   const destinationCandidates = useMemo(() => recommendations.map((place, index) => candidateFromDiscovery(place, index)), [recommendations]);
   const resolvedConflictLabels = useMemo(() => courtConfirmed ? [activeConflict] : [], [courtConfirmed, activeConflict]);
-  const baseTripPlan = useMemo(() => generateTripPlan({ destination, tingoBehavior, tripVibe: profile.vibe, mustGo: profile.mustGo, dealBreaker: profile.veto, preference: profile.preference, flexible: profile.flexible, budget: budgetTotal, members, groupDNA, candidates: destinationCandidates, floatingStartMinutes: floatingStartOverride ?? undefined, resolvedConflictLabels }), [destination, tingoBehavior, profile, budgetTotal, members, groupDNA, destinationCandidates, floatingStartOverride, resolvedConflictLabels]);
+  const baseTripPlan = useMemo(() => generateTripPlan({
+    destination: tripIntent.destination,
+    tingoBehavior,
+    tripVibe: tripIntent.tripVibe,
+    mustGo: tripIntent.mustGo,
+    dealBreaker: tripIntent.dealBreaker,
+    preference: tripIntent.preference,
+    flexible: tripIntent.flexible,
+    budget: tripIntent.budget,
+    members,
+    groupDNA,
+    candidates: destinationCandidates,
+    floatingStartMinutes: floatingStartOverride ?? undefined,
+    resolvedConflictLabels,
+  }), [tripIntent, tingoBehavior, members, groupDNA, destinationCandidates, floatingStartOverride, resolvedConflictLabels]);
   const failedPlanItem = baseTripPlan.items.find(item => item.kind === 'floating');
   const backupPool = backupCandidates;
   const repairSourcePlan = useMemo(() => delay && !replanApplied && failedPlanItem
@@ -260,10 +304,11 @@ export default function AppRescued() {
       completedPaceEvidence,
       privacy, continuousLocation,
       recommendations: recommendations.map(({ name, saved, added }) => ({ name, saved, added })),
+      tripIntent,
       worthIt, profileLearned, tingoAnswers, tingoDimensions, basePackingPreferences, tripCreated,
       members, memberPreferenceProfiles, backupCandidates, appliedRepair: appliedRepair ?? undefined, constraints, reminders, commitments, reunion, published, memoryNote, memoryPublic, itemReviews,
     });
-  }, [mode, destination, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals, delay, mood, arrivalChecked, privacy, continuousLocation, recommendations, worthIt, profileLearned, tingoAnswers, tingoDimensions, basePackingPreferences, tripCreated, members, memberPreferenceProfiles, backupCandidates, appliedRepair, constraints, reminders, commitments, reunion, published, memoryNote, memoryPublic, itemReviews]);
+  }, [mode, destination, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals, delay, mood, arrivalChecked, privacy, continuousLocation, recommendations, tripIntent, worthIt, profileLearned, tingoAnswers, tingoDimensions, basePackingPreferences, tripCreated, members, memberPreferenceProfiles, backupCandidates, appliedRepair, constraints, reminders, commitments, reunion, published, memoryNote, memoryPublic, itemReviews]);
 
   function setProfileField(field: keyof TravelProfile, value: string) {
     setProfile(current => ({ ...current, [field]: value }));
@@ -434,16 +479,13 @@ export default function AppRescued() {
   function answerTingo(optionId: string) {
     const question = tingoQuestions[tingoStep];
     setTingoAnswers(current => {
-      const next = [...current.filter(answer => answer.questionId !== question.id), { questionId: question.id, optionId }];
-      setTingoDimensions(scoreTingo(next));
-      return next;
+      return [...current.filter(answer => answer.questionId !== question.id), { questionId: question.id, optionId }];
     });
     if (tingoStep < tingoQuestions.length - 1) setTingoStep(step => step + 1);
   }
 
   function finishTingo() {
     const dimensions = scoreTingo(tingoAnswers);
-    setTingoDimensions(dimensions);
     setRecommendations(current => makeRecommendations(destination, dimensions, current));
     setProfile(current => ({ ...current, vibe: dimensions.food >= 2 ? 'Relax + Food' : dimensions.adventure >= 2 ? 'Culture + Adventure' : 'Slow + Flexible', flexible: dimensions.flexibility >= 2 ? 'Evening activity can move' : 'Explain changes before moving anything' }));
   }

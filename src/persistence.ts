@@ -1,7 +1,8 @@
 import type { BudgetActuals, BudgetPlan } from './domain/budget';
 import type { CourtVote } from './domain/court';
 import type { TravelProfile, TripReview } from './domain/preferences';
-import type { TingoAnswer, TingoDimensions } from './domain/tingo';
+import type { TripIntent } from './domain/trip-intent';
+import { scoreTingo, type TingoAnswer, type TingoDimensions } from './domain/tingo';
 import type { HumanCommitment, ReunionAgreement, TripConstraint, TripMember, TripReminder } from './domain/trip';
 import type { MemberPreferenceProfile } from './domain/group-dna';
 import type { BackupCandidate, RepairResult } from './domain/backup-repair';
@@ -66,6 +67,7 @@ export type PersistedState = {
   recommendations: PersistedRecommendation[];
   worthIt: TripReview | null;
   profileLearned: boolean;
+  tripIntent?: TripIntent;
   tingoAnswers?: TingoAnswer[];
   tingoDimensions?: TingoDimensions;
   basePackingPreferences?: string[];
@@ -84,13 +86,18 @@ export type PersistedState = {
   itemReviews?: Record<string, 'worth' | 'mixed' | 'skip'>;
 };
 
+function normalizePersistedState(parsed: Partial<PersistedState>): Partial<PersistedState> {
+  if (!Array.isArray(parsed.tingoAnswers)) return parsed;
+  return { ...parsed, tingoDimensions: scoreTingo(parsed.tingoAnswers) };
+}
+
 export function loadPersisted(): Partial<PersistedState> {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return {};
     const parsed = JSON.parse(raw) as Partial<PersistedState>;
     if (!parsed || typeof parsed !== 'object' || (parsed.version !== undefined && parsed.version !== 1)) return {};
-    return parsed;
+    return normalizePersistedState(parsed);
   } catch {
     return {};
   }

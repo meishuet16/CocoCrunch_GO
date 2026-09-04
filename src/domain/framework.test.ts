@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest';
-import { scoreTingo } from './tingo';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { loadPersisted } from '../persistence';
+import { defaultTingoDimensions, scoreTingo } from './tingo';
 import { emptyTripIntent, tripIntentFromLegacyState, tripIntentIsReviewable } from './trip-intent';
 
 describe('Tingo source of truth', () => {
@@ -14,6 +15,67 @@ describe('Tingo source of truth', () => {
       { questionId: 'morning', optionId: 'map' },
       { questionId: 'food', optionId: 'hunt' },
     ])).toMatchObject({ pace: 2, food: 3, flexibility: 0 });
+  });
+});
+
+describe('persistence compatibility', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('re-derives persisted dimensions from questionnaire answers and keeps stored trip intent', () => {
+    const answers = [
+      { questionId: 'morning', optionId: 'slow' },
+      { questionId: 'food', optionId: 'hunt' },
+    ];
+    const persisted = {
+      version: 1,
+      destination: 'Kyoto',
+      mode: 'group',
+      profile: {
+        vibe: 'slow and scenic',
+        mustGo: 'Fushimi Inari',
+        veto: 'red-eye flight',
+        preference: 'food markets',
+        flexible: 'museum day',
+      },
+      plannerTurn: 'Mei',
+      courtVotes: [],
+      courtConfirmed: false,
+      courtDecision: null,
+      groupBudgetTotal: 1200,
+      soloBudgetTotal: 800,
+      groupBudgetPlan: { stay: 0, food: 0, transport: 0, activities: 0 },
+      soloBudgetPlan: { stay: 0, food: 0, transport: 0, activities: 0 },
+      privacy: 'status',
+      continuousLocation: false,
+      recommendations: [],
+      worthIt: null,
+      profileLearned: false,
+      tingoAnswers: answers,
+      tingoDimensions: { ...defaultTingoDimensions, pace: 99, food: -99 },
+      tripIntent: {
+        destination: 'Kyoto',
+        dates: null,
+        mode: 'group',
+        tripVibe: 'slow and scenic',
+        mustGo: 'Fushimi Inari',
+        dealBreaker: 'red-eye flight',
+        preference: 'food markets',
+        flexible: 'museum day',
+        budget: 1200,
+      },
+    };
+    vi.stubGlobal('localStorage', {
+      getItem: (key: string) => key === 'cococrunch:v1' ? JSON.stringify(persisted) : null,
+      setItem: () => undefined,
+      removeItem: () => undefined,
+    });
+
+    const loaded = loadPersisted();
+
+    expect(loaded.tripIntent).toEqual(persisted.tripIntent);
+    expect(loaded.tingoDimensions).toEqual(scoreTingo(answers));
   });
 });
 
