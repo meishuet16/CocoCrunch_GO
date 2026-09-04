@@ -248,3 +248,55 @@ The approved framework slices are now complete through the exact validation stat
 - Live destination providers, routing, traffic, weather, inventory/pricing, and full per-member Tingo onboarding remain intentionally unavailable or prototype-scoped.
 - Runtime follow-up: after starting a Solo trip from the existing Group-seeded local state, Plan Health can still surface a stale Group DNA conflict even though the Solo workspace renders and exposes no Group Court mutation. This should be resolved before merge.
 - PR #1 remains open and unmerged. No push to `main` was performed.
+
+## Final stabilization and capability audit checkpoint
+
+This section supersedes the earlier open-risk note about Group-to-Solo stale Group DNA. The approved full 53-feature reconciliation remains in `docs/superpowers/specs/2026-09-04-full-product-framework-design.md`; this audit does not narrow that source of truth.
+
+### Stabilization fixes
+
+- `scopeGroupDNAForMode()` now keeps the derived per-member Group DNA available for Group mode while removing Group conflicts, shared priorities, optional preferences, and group budget signals from Solo operational plan generation, Plan Health, repair, and Journey State. The regression covers Group conflict → Solo operation with no stale conflict.
+- Minimum-loss repair now distinguishes `backup-replacement`, `open-recovery`, and `none`. A failed Floating item can become a generated Open Recovery Block when no direct Backup is viable; an unavailable recovery block remains a distinct no-safe-repair result. Generated cost/time/preference impact, protected anchors, preview, Group confirmation, Apply, and Undo remain intact.
+- Successful repair no longer emits `open-prayer`; Pray is not a repair side effect. The signature ritual remains non-mutating and optional rather than being opened after every repair.
+- Starting a new trip resets trip-operational disruption, repair, progress, Court, current Backup, and privacy state. Sharing returns to status-only with continuous location off; long-term Tingo answers/history remain intact.
+- Drawer and Group Court close controls now have accessible names.
+
+### Capability audit summary
+
+| Capability | Lifecycle / entry | State and governance | Audit result |
+| --- | --- | --- | --- |
+| Tingo | Me; planning guidance | Persistent questionnaire answers are the source; dimensions and behavior are derived; retake is explicit | Functional local flow; not projected onto members |
+| Trip Intent | Trip Workspace planning / New Trip | Trip-owned Vibe, Must-Go, Deal Breaker, Preference, Flexible, budget | Functional and persisted separately from Tingo |
+| Group DNA | Planning → People & Group DNA | Derived from joined members’ explicit preferences/budgets; conflicts remain visible | Functional local model; full member onboarding is not claimed |
+| Court / Court Gacha | Group planning; unresolved conflict | Official Group writes require confirmation; Gacha is true-tie-only and remains a proposal until Confirm | Functional local governance |
+| Itinerary / Anchors / Floating / Promise / Why this? | Planning Workspace | Deterministic candidate ranking; protected Must-Go anchors; typed source-linked evidence | Functional and wired into active App |
+| Plan Health | Planning, Workspace header, During | Re-derived capped deductions for walking, pressure, budget, preferences, transfers, anchors, conflicts, risks | Functional formula with component metrics and reasons |
+| Backup / repair | Court losers → Backup drawer; During disruption | Viable Deal-Breaker-safe losers retain support/loss reason; repair protects anchors and requires Group confirmation | Functional local domain and persistence; no live venue feasibility |
+| Budget / feasibility / reminders | Planning and Completed; Group drawer | Planned vs actual categories, deterministic adapter checks, persisted reminders | Functional local/demo |
+| Mood / fatigue / progress | During | Manual check-in, mood, delay, and completed pace evidence; no location permission required | Functional and persisted where used by retrospective |
+| Family Window / Location Privacy | During contextual tools | Status-only default, explicit area/exact and continuous-location consent, reassurance event | Local shell; no live tracking/provider |
+| Reunion / Smart Split / Safety | During contextual tools | Reunion agreement persisted; official Group split routes through Court; safety/help is a local contact/list shell | Reachable; local/demo, not external service |
+| Ask Coco | During contextual tool; planning move proposal | Read/propose first; Solo confirms explicitly; Group routes through Court; no live data claims | Functional local contextual assistant |
+| Reality / Weather | During “Simulate heavy rain disruption” | Explicit simulated state marks a failed Floating item and feeds Plan Health/repair; no forecast is presented | Honest demo adapter, not live weather |
+| Pray | Signature ritual event | No automatic repair trigger; no itinerary, governance, privacy, or learning mutation | Optional trigger path is intentionally not presented as a repair result |
+| Everyday Gacha / Lucky Draw | During contextual drawers | Everyday route choice and Lucky fortune are separate non-official, non-learning local actions | Reachable; related random concepts should be reconciled in a later surface pass, not duplicated into governance |
+| Memories / Photo Map / Memory Trunk | Global Memories and Completed | Actual outcome → Worth It/reflection → proposal → Confirm/Dismiss remains ahead of expressive artifacts; photo view is metadata-only | Functional local retrospective; no live route or upload |
+| Ghost Wish / Future Postcard / Community | Completed / Explore | Expressive local artifacts; Community is private until explicit publish | Reachable local/demo; not substitutes for learning |
+| External inspiration / import | Explore and planning tools | Prototype catalog/fallback provenance is labeled; Save idea/Suggest to group do not silently mutate official Group plan | Reachable and governed |
+| Decision History / learning | Completed → Me | Decision satisfaction and confirmed learning history persist; pending/dismissed state round-trips; Confirm alone changes answers | Functional local persistence |
+
+### Verification state
+
+- Stabilization commits: `c198921ca8d4c983e1eed7cc0b00a480f3186f6d` (Group DNA scope), `61f2ffafd163745b247ee2a2e6e522e4ef46b4e9` (repair/Pray/new-trip reset), and `fb8eafb980368b74aa061fa2d5e1155a24d4922c` (close-control labels).
+- Current local branch remains `feat/p0-foundation`; PR #1 is intentionally not merged and `main` was not touched.
+- Current local `npm run check` after the code fixes passed: TypeScript, 11 Vitest files, 61 tests, and Vite production build. Focused core/framework tests passed: 2 files, 27 tests. `git diff --check` passed for the reviewed changes.
+- Browser/runtime verification used the active local Vite app at `http://127.0.0.1:5175/` in the Codex in-app browser. Home, Trips, Explore, Memories, Me, Group planning/Court/tie Gacha/Backup, Group traveling/manual check-in/repair approval/Apply/Undo, Completed retrospective, Group → Solo scoping, and new-trip privacy/operational reset were exercised. Browser console error output was empty.
+- Reload checks exercised dismissed learning, Group/Solo operational state, and new-trip privacy reset. Earlier Task 5 runtime checks also covered confirmed learning non-resurrection, confirmed history, and intentional Tingo retake persistence.
+- A real narrow screenshot was inspected at `innerWidth 362px`; document and body scroll width both measured `362px`, with no horizontal overflow. Exact 360/390/430 runs, tablet/desktop runs, reduced-motion emulation, and full signature-visual QA were not available in this environment and are not claimed.
+- Remote CI for the new stabilization head is pending until the authorized feature-branch push; the earlier remote PR result for `7ee62bd` does not validate this local head.
+
+### Remaining concrete limitations
+
+- No live weather, routing, traffic, venue-status, pricing, booking, GPS, or family-tracking provider is connected; local/demo boundaries are labeled in the active UI.
+- Full per-member Tingo onboarding is not implemented; unassessed members are explicitly labelled and do not inherit Mei’s profile.
+- Exact 390/430, representative tablet/desktop, reduced-motion runtime emulation, and broader signature interaction visual QA remain unverified in this environment.
