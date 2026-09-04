@@ -484,4 +484,4 @@ This final bounded audit covers presentation/accessibility QA for the completed 
 
 - No tablet viewport profile or reduced-motion emulation was available; neither is claimed.
 - The active shell begins these page views with `h2` headings and exposes no `h1` in the audited DOM. Drawer/Court overlays exposed labeled close controls, but the audited Court overlay did not expose `role=dialog`/`aria-modal`.
-- The PR description still needs the final post-push summary synchronized by the parent-controlled handoff; the verified remote CI state above is for `435b371`.
+- The PR description was synchronized after the feature-branch push; PR #1 remains open and unmerged. The verified CI state above records the product-code handoff at `68ecae2`.
