@@ -244,6 +244,6 @@ The approved framework slices are now complete through the exact validation stat
 
 ### Exact CI state and remaining limitations
 
-- Remote GitHub exact-head CI was not queried in this session, so no remote CI-green claim is made. Local exact-head validation is green as recorded above.
+- Remote PR #1 remains open and unmerged at remote head `7ee62bd30b24e624da3bb3867c1f8192205e5b32`; its CI run #129 completed successfully. The final local head `ea497255479fe6276c513b530e0075ae090dcdec` was not pushed, so that remote result does not validate the final local commits and no final-SHA remote CI-green claim is made. Local exact-head validation is green as recorded above.
 - Live destination providers, routing, traffic, weather, inventory/pricing, and full per-member Tingo onboarding remain intentionally unavailable or prototype-scoped.
 - PR #1 remains open and unmerged. No push to `main` was performed.
