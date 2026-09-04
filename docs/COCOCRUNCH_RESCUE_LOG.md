@@ -224,7 +224,7 @@ The approved framework slices are now complete through the exact validation stat
 
 ### Regression tested
 
-- Exact-head local `npm run check` at `f2a195eaad3ea481cc928cb1a19007130a559a21`: TypeScript passed, 11 Vitest files passed, 58 tests passed, and Vite production build passed.
+- Exact-head local `npm run check` at final local head `213596f9869c4281da082c768c07d4977652be4e`: TypeScript passed, 11 Vitest files passed, 58 tests passed, and Vite production build passed. The final validation-head change after the Task 5 code commit was documentation-only.
 - Focused learning/framework suite at the same Task 5 state: 4 files passed, 27 tests passed.
 - Existing P0 regression coverage remains green for Group DNA conflicts/non-projection, Must-Go protection, deterministic itinerary evidence, Plan Health sensitivity, Court-to-Backup filtering, tie-only Gacha, minimum-loss repair, exact impacts, and Group confirmation gating.
 
@@ -244,6 +244,7 @@ The approved framework slices are now complete through the exact validation stat
 
 ### Exact CI state and remaining limitations
 
-- Remote PR #1 remains open and unmerged at remote head `7ee62bd30b24e624da3bb3867c1f8192205e5b32`; its CI run #129 completed successfully. The final local head `ea497255479fe6276c513b530e0075ae090dcdec` was not pushed, so that remote result does not validate the final local commits and no final-SHA remote CI-green claim is made. Local exact-head validation is green as recorded above.
+- Remote PR #1 remains open and unmerged at remote head `7ee62bd30b24e624da3bb3867c1f8192205e5b32`; its CI run #129 completed successfully. The final local code head `f2a195eaad3ea481cc928cb1a19007130a559a21` and subsequent rescue-log-only commits were not pushed, so that remote result does not validate the final local commits and no final-SHA remote CI-green claim is made. Local exact-head validation is green as recorded above.
 - Live destination providers, routing, traffic, weather, inventory/pricing, and full per-member Tingo onboarding remain intentionally unavailable or prototype-scoped.
+- Runtime follow-up: after starting a Solo trip from the existing Group-seeded local state, Plan Health can still surface a stale Group DNA conflict even though the Solo workspace renders and exposes no Group Court mutation. This should be resolved before merge.
 - PR #1 remains open and unmerged. No push to `main` was performed.
