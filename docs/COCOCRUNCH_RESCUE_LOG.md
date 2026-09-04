@@ -205,3 +205,45 @@ This automated suite covers pure/domain and compile/build invariants. It does no
 ## Current risk posture
 
 The requested #23 / #28 / #50 / #51 rescue targets, active Group mutation governance, Memory Trunk tactile behavior, and contextual Coco behavior are now implemented in code and protected by a stronger CI regression gate. The branch is substantially healthier, but it is still **not safe to merge yet** until browser persistence replay, rendered 360/390/430 mobile QA, signature-interaction visual QA, and the remaining #1–#53 audit are completed.
+
+## Framework execution and final validation checkpoint
+
+The approved framework slices are now complete through the exact validation state below. The full 53-feature reconciliation remains in `docs/superpowers/specs/2026-09-04-full-product-framework-design.md`; this checkpoint does not narrow that source of truth.
+
+### Implemented in code
+
+- Journey/data contracts preserve trip-owned intent, persistent answer-source Tingo, deterministic Group DNA, lifecycle state, spatial honesty, and explicit retrospective learning.
+- Workspace composition keeps Home / Trips / Explore / Memories / Me, with Trip Workspace as the planning → traveling → completed journey spine and contextual Map.
+- Completed learning uses actual outcome → Worth It/reflection → typed proposal → explicit Confirm or Dismiss. Confirmed questionnaire changes are re-derived into Tingo dimensions; dismissed proposals leave Tingo unchanged; confirmed history is retained separately.
+- Tingo can be intentionally retaken from Me. Retaking resets the questionnaire answer source and leaves confirmed learning history intact.
+
+### Wired into active app
+
+- `src/App.tsx` continues to export `AppRescued`; the active app renders `TripJourneyStatus`, `TripWorkspace`, `TripSpatialView`, `TripRetrospective`, Group DNA, deterministic plan/health, Court/Backup/repair, and the Me-owned Tingo handoff.
+- The duplicate legacy Worth It control was removed from Memories so reflection cannot bypass actual-outcome gating or the explicit proposal state machine.
+
+### Regression tested
+
+- Exact-head local `npm run check` at `f2a195eaad3ea481cc928cb1a19007130a559a21`: TypeScript passed, 11 Vitest files passed, 58 tests passed, and Vite production build passed.
+- Focused learning/framework suite at the same Task 5 state: 4 files passed, 27 tests passed.
+- Existing P0 regression coverage remains green for Group DNA conflicts/non-projection, Must-Go protection, deterministic itinerary evidence, Plan Health sensitivity, Court-to-Backup filtering, tie-only Gacha, minimum-loss repair, exact impacts, and Group confirmation gating.
+
+### Browser/runtime verified
+
+- Verified with the active local Vite app in the Codex in-app browser at `http://127.0.0.1:5174/`.
+- Group planning, traveling, and completed lifecycle states rendered; spatial copy remained local/schematic and did not claim live location, routing, traffic, travel time, weather, or provider data.
+- Dismissed learning survived reload with its dismissed message; confirmed learning did not regenerate after reload and confirmed history remained visible in Me.
+- Tingo retake reset the answer source to `0% COMPLETE` and that state survived reload while confirmed history remained visible.
+- Solo planning, traveling, and completed workspace states rendered; privacy stayed opt-in and Community remained private by default with explicit Publish control.
+- Browser console error check returned an empty list after these flows.
+
+### Visually/mobile verified
+
+- A real screenshot was inspected at the available narrow browser viewport (`innerWidth` 362px; document client/scroll width 347px). Bottom navigation remained visible and no horizontal overflow was detected.
+- Exact 360 / 390 / 430px viewport runs, reduced-motion interaction pass, and broader signature-interaction visual QA were not available in this session; source/CSS inspection is not being counted as those checks.
+
+### Exact CI state and remaining limitations
+
+- Remote GitHub exact-head CI was not queried in this session, so no remote CI-green claim is made. Local exact-head validation is green as recorded above.
+- Live destination providers, routing, traffic, weather, inventory/pricing, and full per-member Tingo onboarding remain intentionally unavailable or prototype-scoped.
+- PR #1 remains open and unmerged. No push to `main` was performed.
