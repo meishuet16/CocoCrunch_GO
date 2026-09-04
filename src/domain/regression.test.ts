@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
+import { actualBudget, budgetVariance, remainingBudget, updateBudget } from './budget';
 import { canUseGacha, courtTally, type CourtVote } from './court';
 import { discoverPlaces } from './discovery';
 import { reconcileTripLearning, type TravelProfile } from './preferences';
 import { normalizeBudgetActuals, rateDecision, updateBudgetActual } from './retrospective';
 import { defaultTingoDimensions, deriveTingoBehavior, scoreTingo } from './tingo';
+import { applyResponsibilitySuggestions, defaultMembers, suggestResponsibilities } from './trip';
 import type { DecisionRecord } from '../persistence';
 
 const profile: TravelProfile = {
@@ -68,14 +70,50 @@ describe('Tingo downstream rules', () => {
     expect(ranked[0].why).toContain('Tingo also boosts it');
     expect(ranked[0].match).toBeGreaterThanOrEqual(96);
   });
+
+  it('keeps responsibility suggestions advisory until explicitly applied', () => {
+    const members = defaultMembers.map(member => ({ ...member }));
+    const beforeRoles = members.map(member => member.role);
+    const behavior = deriveTingoBehavior({ ...defaultTingoDimensions, social: 3 });
+    const suggestions = suggestResponsibilities(members, behavior);
+
+    expect(members.map(member => member.role)).toEqual(beforeRoles);
+    expect(suggestions[0].suggestedRole).toBe('Group connector');
+
+    const applied = applyResponsibilitySuggestions(members, suggestions);
+    expect(applied[0].role).toBe('Group connector');
+    expect(members.map(member => member.role)).toEqual(beforeRoles);
+    expect(applied.find(member => member.inviteStatus === 'pending')?.role).toBe('Transit buddy');
+  });
 });
 
 describe('post-trip learning', () => {
   it('combines trip-level and stop-level review signals without changing Must-Go', () => {
-    const next = reconcileTripLearning(profile, 'yes', { open: 'skip', dinner: 'worth' });
+    const next = reconcileTripLearning(profile, 'yes', { cafe: 'skip', dinner: 'worth' });
     expect(next.mustGo).toBe(profile.mustGo);
     expect(next.vibe).toBe('Slower pace + fewer scheduled stops');
     expect(next.preference).toBe('Food-led neighbourhood stops + scenic cafés');
+  });
+});
+
+describe('budget boundaries', () => {
+  it('keeps planned and actual category records separate', () => {
+    const plan = { food: 100, transport: 80, stay: 200, activities: 50 };
+    const actuals = { food: 130, transport: 70, stay: 200, activities: 40 };
+    const changedPlan = updateBudget(plan, 'food', 110);
+    const changedActuals = updateBudgetActual(actuals, 'food', 145);
+
+    expect(plan.food).toBe(100);
+    expect(actuals.food).toBe(130);
+    expect(changedPlan.food).toBe(110);
+    expect(changedActuals.food).toBe(145);
+    expect(actualBudget(changedActuals)).toBe(455);
+    expect(budgetVariance(changedPlan, changedActuals).find(item => item.category === 'food')?.status).toBe('over');
+  });
+
+  it('never reports a negative remaining budget', () => {
+    expect(remainingBudget(500, 490, 30)).toBe(0);
+    expect(remainingBudget(500, 300, 20)).toBe(180);
   });
 });
 
