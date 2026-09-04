@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { loadPersisted } from '../persistence';
+import { derivePersistedTripState, loadPersisted } from '../persistence';
 import { defaultTingoDimensions, scoreTingo } from './tingo';
 import { emptyTripIntent, tripIntentFromLegacyState, tripIntentIsReviewable } from './trip-intent';
 
@@ -76,6 +76,57 @@ describe('persistence compatibility', () => {
 
     expect(loaded.tripIntent).toEqual(persisted.tripIntent);
     expect(loaded.tingoDimensions).toEqual(scoreTingo(answers));
+  });
+
+  it('keeps Mei profile hydration separate from trip intent hydration when both are stored', () => {
+    const persisted = {
+      version: 1,
+      destination: 'Kyoto',
+      mode: 'group',
+      profile: {
+        vibe: 'Slow temple mornings',
+        mustGo: 'Nishiki Market habit',
+        veto: 'overnight buses',
+        preference: 'quiet tea breaks',
+        flexible: 'leave dinners open',
+      },
+      plannerTurn: 'Mei',
+      courtVotes: [],
+      courtConfirmed: false,
+      courtDecision: null,
+      groupBudgetTotal: 1200,
+      soloBudgetTotal: 800,
+      groupBudgetPlan: { stay: 0, food: 0, transport: 0, activities: 0 },
+      soloBudgetPlan: { stay: 0, food: 0, transport: 0, activities: 0 },
+      privacy: 'status',
+      continuousLocation: false,
+      recommendations: [],
+      worthIt: null,
+      profileLearned: false,
+      tripIntent: {
+        destination: 'Osaka',
+        dates: null,
+        mode: 'solo',
+        tripVibe: 'Late-night snacks',
+        mustGo: 'Dotonbori walk',
+        dealBreaker: 'formal tasting menu',
+        preference: 'arcade stop',
+        flexible: 'hotel can move',
+        budget: 650,
+      },
+    };
+    vi.stubGlobal('localStorage', {
+      getItem: (key: string) => key === 'cococrunch:v1' ? JSON.stringify(persisted) : null,
+      setItem: () => undefined,
+      removeItem: () => undefined,
+    });
+
+    const loaded = derivePersistedTripState(loadPersisted());
+
+    expect(loaded.profile).toEqual(persisted.profile);
+    expect(loaded.tripIntent).toEqual(persisted.tripIntent);
+    expect(loaded.profile.mustGo).toBe('Nishiki Market habit');
+    expect(loaded.tripIntent.mustGo).toBe('Dotonbori walk');
   });
 });
 

@@ -1,7 +1,7 @@
 import type { BudgetActuals, BudgetPlan } from './domain/budget';
 import type { CourtVote } from './domain/court';
 import type { TravelProfile, TripReview } from './domain/preferences';
-import type { TripIntent } from './domain/trip-intent';
+import { tripIntentFromLegacyState, type TripIntent } from './domain/trip-intent';
 import { scoreTingo, type TingoAnswer, type TingoDimensions } from './domain/tingo';
 import type { HumanCommitment, ReunionAgreement, TripConstraint, TripMember, TripReminder } from './domain/trip';
 import type { MemberPreferenceProfile } from './domain/group-dna';
@@ -86,9 +86,35 @@ export type PersistedState = {
   itemReviews?: Record<string, 'worth' | 'mixed' | 'skip'>;
 };
 
+export type PersistedTripState = {
+  mode: 'group' | 'solo';
+  tripBudget: number;
+  profile?: TravelProfile;
+  tripIntent: TripIntent;
+};
+
 function normalizePersistedState(parsed: Partial<PersistedState>): Partial<PersistedState> {
   if (!Array.isArray(parsed.tingoAnswers)) return parsed;
   return { ...parsed, tingoDimensions: scoreTingo(parsed.tingoAnswers) };
+}
+
+export function derivePersistedTripState(parsed: Partial<PersistedState>): PersistedTripState {
+  const mode = parsed.tripIntent?.mode ?? parsed.mode ?? 'group';
+  const tripBudget = parsed.tripIntent?.budget
+    ?? (mode === 'group' ? parsed.groupBudgetTotal : parsed.soloBudgetTotal)
+    ?? (mode === 'group' ? 2400 : 1200);
+
+  return {
+    mode,
+    tripBudget,
+    profile: parsed.profile,
+    tripIntent: parsed.tripIntent ?? tripIntentFromLegacyState({
+      destination: parsed.destination,
+      mode,
+      profile: parsed.profile,
+      budget: tripBudget,
+    }),
+  };
 }
 
 export function loadPersisted(): Partial<PersistedState> {
