@@ -215,10 +215,10 @@ select:focus-visible {
 .repair-impact-head span { color: var(--sangria); font-size: 9px; font-weight: 950; letter-spacing: .1em; }
 .trip-conditions-head h3 { margin: 0; font-size: 17px; letter-spacing: -.02em; }
 .trip-conditions-head small { max-width: 150px; color: var(--muted); font-size: 9px; line-height: 1.35; text-align: right; }
-.trip-conditions > p { margin: 12px 0 0; color: var(--ink-soft); font-size: 11px; line-height: 1.45; }
+.trip-conditions > p { max-width: 56ch; margin: 12px 0 0; color: var(--ink-soft); font-size: 11px; line-height: 1.5; }
 .trip-condition-alert { margin-top: 12px; display: grid; gap: 4px; padding: 11px 12px; border-left: 3px solid var(--sangria); background: rgba(255,255,255,.52); }
-.trip-condition-alert b { font-size: 11px; }
-.trip-condition-alert small { color: var(--muted); font-size: 9px; line-height: 1.4; }
+.trip-condition-alert b { font-size: 11px; line-height: 1.35; }
+.trip-condition-alert small { max-width: 62ch; color: var(--ink-soft); font-size: 9px; line-height: 1.5; }
 .trip-conditions .event-button { margin-bottom: 0; }
 .arrival-check { margin-top: var(--space-4); display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 12px; align-items: center; padding: 13px 14px; border-top: 1px solid rgba(147,5,0,.1); border-bottom: 1px solid rgba(147,5,0,.1); background: rgba(255,255,255,.34); }
 .arrival-check > div { display: grid; gap: 4px; min-width: 0; }
