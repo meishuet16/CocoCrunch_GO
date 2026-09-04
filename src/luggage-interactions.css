@@ -22,7 +22,6 @@
 .trunk-button:hover { transform: translateY(-2px); }
 .trunk-button:active { transform: scale(.994); }
 
-/* leather carry handle */
 .trunk-button::before {
   content: '';
   position: absolute;
@@ -57,7 +56,6 @@
 }
 .trunk-button.open::after { content: 'tap the trunk to close'; }
 
-/* upright lid: warm leather rim + muted blue fabric lining */
 .trunk-lid {
   position: absolute !important;
   z-index: 2;
@@ -106,7 +104,6 @@
   letter-spacing: .05em;
 }
 
-/* suitcase base */
 .trunk-body {
   position: absolute !important;
   z-index: 5;
@@ -143,7 +140,6 @@
 .trunk-body::before { left: 24%; }
 .trunk-body::after { right: 24%; }
 
-/* Existing labels become layered paper ephemera instead of suitcase decoration. */
 .trunk-body .postcard,
 .trunk-body .ticket {
   z-index: 7;
@@ -163,7 +159,6 @@
 .trunk-body .ticket { left: 44% !important; bottom: 16px !important; transform: rotate(-3deg); }
 .trunk-body .coco { z-index: 8; right: 8px !important; bottom: -4px !important; }
 
-/* Open state: the lid stands tall and the base tilts toward the player. */
 .trunk-button.open .trunk-lid {
   top: 3px !important;
   transform: perspective(900px) rotateX(-9deg) translateY(-2px) !important;
@@ -180,7 +175,6 @@
 .trunk-button.open .ticket { transform: translateY(-16px) rotate(4deg) !important; }
 .trunk-button.open .trunk-body .coco { transform: translateY(-7px) rotate(4deg); }
 
-/* Keepsakes are layered INSIDE the leather trunk, like the supplied reference. */
 .trunk-contents { display: none; }
 .trunk-button.open + .trunk-contents {
   position: relative;
@@ -194,6 +188,7 @@
   display: block;
   overflow: visible;
   pointer-events: auto;
+  perspective: 700px;
 }
 .trunk-button.open + .trunk-contents > b {
   position: absolute;
@@ -211,10 +206,12 @@
   letter-spacing: .06em;
   transform: rotate(-5deg);
 }
-.trunk-button.open + .trunk-contents > span {
+.trunk-keepsake {
   position: absolute;
   display: grid;
   place-items: end start;
+  min-width: 44px;
+  min-height: 44px;
   padding: 7px;
   border: 1px solid rgba(98,65,43,.30);
   border-radius: 2px;
@@ -224,25 +221,37 @@
   font-family: Georgia, serif;
   font-size: 9px;
   line-height: 1.15;
+  text-align: left;
   overflow: hidden;
+  transform-style: preserve-3d;
+  transition: transform .26s cubic-bezier(.18,.82,.22,1), box-shadow .26s ease, filter .26s ease;
   animation: keepsakeFan .58s cubic-bezier(.18,.82,.22,1) both;
+  cursor: pointer;
+  touch-action: manipulation;
 }
-.trunk-button.open + .trunk-contents > span:nth-of-type(1) {
+.trunk-keepsake:focus-visible { outline: 3px solid rgba(149,187,234,.7); outline-offset: 3px; }
+.trunk-keepsake:active { filter: brightness(.98); }
+.trunk-keepsake.active {
+  z-index: 30 !important;
+  transform: translate3d(0,-34px,44px) rotate(0deg) scale(1.14) !important;
+  box-shadow: 0 18px 28px rgba(52,31,20,.28);
+}
+.trunk-keepsake:nth-of-type(1) {
   z-index: 3; left: 0; top: 2px; width: 35%; height: 74px;
   transform: rotate(-8deg); background: linear-gradient(150deg,#8faebd 0 46%,#efe0c0 46%);
   animation-delay: .04s;
 }
-.trunk-button.open + .trunk-contents > span:nth-of-type(2) {
+.trunk-keepsake:nth-of-type(2) {
   z-index: 6; left: 25%; top: 18px; width: 39%; height: 68px;
   transform: rotate(3deg); background: repeating-linear-gradient(180deg,#f9edda 0 8px,#ead7b9 9px 10px);
   animation-delay: .09s;
 }
-.trunk-button.open + .trunk-contents > span:nth-of-type(3) {
+.trunk-keepsake:nth-of-type(3) {
   z-index: 4; right: 7%; top: 0; width: 34%; height: 75px;
   transform: rotate(8deg); background: linear-gradient(145deg,#bd6f52 0 42%,#f4e2bd 42%);
   animation-delay: .14s;
 }
-.trunk-button.open + .trunk-contents > span:nth-of-type(4) {
+.trunk-keepsake:nth-of-type(4) {
   z-index: 8; right: 1%; top: 39px; width: 43%; height: 51px;
   transform: rotate(-3deg); background: #e8c991;
   animation-delay: .19s;
@@ -257,7 +266,7 @@
 @media (max-width: 370px) {
   .trunk-button { height: 310px; }
   .trunk-button.open + .trunk-contents { margin-inline: 43px; }
-  .trunk-button.open + .trunk-contents > span { font-size: 8px; }
+  .trunk-keepsake { font-size: 8px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -266,8 +275,9 @@
   .trunk-body .postcard,
   .trunk-body .ticket,
   .trunk-body .coco,
-  .trunk-button.open + .trunk-contents > span {
+  .trunk-keepsake {
     animation: none !important;
     transition: none !important;
   }
+  .trunk-keepsake.active { transform: translateY(-12px) scale(1.04) !important; }
 }
