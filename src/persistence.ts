@@ -47,6 +47,7 @@ export type PersistedState = {
   version: 1;
   mode: 'group' | 'solo';
   destination: string;
+  readyConfirmed?: boolean;
   profile: TravelProfile;
   plannerTurn: string;
   courtVotes: CourtVote[];
