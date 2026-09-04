@@ -7,7 +7,9 @@ import {
 import { emitExperience } from './experience';
 import { GlobalNav, type GlobalTab } from './components/GlobalNav';
 import { TripJourneyStatus } from './components/TripJourneyStatus';
+import { JourneyProgress } from './components/JourneyProgress';
 import { TripSpatialView } from './components/TripSpatialView';
+import { TodayTimeline } from './components/TodayTimeline';
 import { TripConditions } from './components/TripConditions';
 import { FamilyWindowPanel, LocationPrivacyPanel } from './components/SharingBoundaryPanels';
 import { ContextualToolList, type ContextualTool } from './components/ContextualToolList';
@@ -728,6 +730,7 @@ export default function AppRescued() {
     return <div className="home-orientation">
       <SectionTitle kicker="HOME · ACTIVE TRIP" title={`${destination} stays in view.`} copy="Follow the next meaningful action first, then inspect the rest of the trip as needed."/>
       <TripJourneyStatus state={journeyState} destination={destination} onAction={handleJourneyAction} />
+      <JourneyProgress destination={destination} currentPhase={tripPhase} nextActionLabel={journeyState.nextAction?.label} />
       <section className="status-strip status-strip--home"><div><span>Current Phase</span><b>{tripPhase === 'planning' ? 'Planning' : tripPhase === 'traveling' ? 'Traveling' : 'Completed'}</b></div><div><span>Plan Health</span><b>{planHealth.overall}/100</b></div><div><span>Budget Remaining</span><b>RM {remaining}</b></div><div><span>Group Status</span><b>{groupStatus}</b></div></section>
     </div>;
   }
@@ -802,6 +805,7 @@ export default function AppRescued() {
       <TripLifecycleTabs phase={tripPhase} onChange={setTripPhase} />
       <TripWorkspaceContext phase={tripPhase} onExit={openTripsIndex} />
       <TripJourneyStatus state={journeyState} destination={destination} onAction={handleJourneyAction} />
+      <JourneyProgress destination={destination} currentPhase={tripPhase} nextActionLabel={journeyState.nextAction?.label} />
       {tripPhase === 'planning' ? renderPlan() : tripPhase === 'traveling' ? renderDuring() : renderMemories()}
     </>;
   }
@@ -845,6 +849,7 @@ export default function AppRescued() {
     const floatingItem = visibleTripPlan.items.find(item => item.kind === 'floating');
     return <>
       <SectionTitle kicker="DURING · LIVE TRIP" title={delay ? 'Reality changed.' : 'The trip is moving.'} copy="Coco watches the plan, not your every step."/>
+      <TodayTimeline items={visibleTripPlan.items} delay={delay} arrivalChecked={arrivalChecked} appliedRepair={replanApplied} />
       <TripSpatialView
         mode="traveling"
         destination={destination}
