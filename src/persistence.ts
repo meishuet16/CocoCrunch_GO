@@ -1,5 +1,6 @@
 import type { BudgetActuals, BudgetPlan } from './domain/budget';
 import type { CourtVote } from './domain/court';
+import type { LearningProposal } from './domain/learning';
 import type { TravelProfile, TripReview } from './domain/preferences';
 import { tripIntentFromLegacyState, type TripIntent } from './domain/trip-intent';
 import { scoreTingo, type TingoAnswer, type TingoDimensions } from './domain/tingo';
@@ -43,6 +44,14 @@ export type CompletedPaceEvidence = {
   arrivalChecked: boolean;
 };
 
+export type ConfirmedLearningRecord = {
+  id: string;
+  proposalId: string;
+  confirmedAt: string;
+  sourceTripReview: TripReview;
+  changes: LearningProposal['changes'];
+};
+
 export type PersistedState = {
   version: 1;
   mode: 'group' | 'solo';
@@ -69,6 +78,8 @@ export type PersistedState = {
   worthIt: TripReview | null;
   profileLearned: boolean;
   tripIntent?: TripIntent;
+  learningProposal?: LearningProposal;
+  confirmedLearningHistory?: ConfirmedLearningRecord[];
   tingoAnswers?: TingoAnswer[];
   tingoDimensions?: TingoDimensions;
   basePackingPreferences?: string[];
