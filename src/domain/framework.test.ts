@@ -4,8 +4,16 @@ import { deriveJourneyState } from './journey-state';
 
 describe('Tingo source of truth', () => {
   it('re-derives dimensions from answers instead of trusting a separately edited snapshot', () => {
-    const answers = [{ questionId: 'food', optionId: 'hunt' }];
-    expect(scoreTingo(answers).food).toBe(3);
+    const answers = [
+      { questionId: 'morning', optionId: 'slow' },
+      { questionId: 'food', optionId: 'hunt' },
+    ];
+
+    expect(scoreTingo(answers)).toMatchObject({ pace: -2, food: 3, flexibility: 1 });
+    expect(scoreTingo([
+      { questionId: 'morning', optionId: 'map' },
+      { questionId: 'food', optionId: 'hunt' },
+    ])).toMatchObject({ pace: 2, food: 3, flexibility: 0 });
   });
 });
 
@@ -33,5 +41,6 @@ describe('journey state', () => {
       worthItRecorded: false, learningProposalPending: false, learningConfirmed: false,
     });
     expect(state.nextAction?.id).toBe('approve-repair');
+    expect(state.canInspectOtherSections).toBe(true);
   });
 });
