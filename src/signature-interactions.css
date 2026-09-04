@@ -1,6 +1,29 @@
 /* CocoCrunch signature interaction layer.
    Everyday planning stays quiet; only memorable actions become tactile rituals. */
 .signature-lab { display:grid; gap:14px; margin-top:18px; }
+.everyday-gacha-machine,.lucky-draw-reveal { display:grid; gap:14px; margin-top:14px; }
+.everyday-gacha-machine__header,.lucky-draw-reveal__header { display:grid; gap:4px; }
+.everyday-gacha-machine__header span,.lucky-draw-reveal__header span { color:var(--sangria); font-size:9px; font-weight:950; letter-spacing:.12em; }
+.everyday-gacha-machine__header h3,.lucky-draw-reveal__header h3 { margin:0; font-family:Georgia,serif; font-size:20px; }
+.everyday-gacha-machine__stage { min-height:132px; display:grid; place-items:center; align-content:center; gap:7px; border-radius:20px; background:rgba(149,187,234,.13); overflow:hidden; }
+.everyday-gacha-machine__stage > span { color:var(--muted); font-size:9px; font-weight:850; letter-spacing:.08em; text-transform:uppercase; }
+.everyday-gacha-machine__capsule { width:76px; height:76px; position:relative; border:3px solid var(--ink); border-radius:50%; background:linear-gradient(to bottom,var(--sangria) 0 46%,var(--ink) 46% 53%,var(--cream) 53%); box-shadow:0 7px 0 rgba(147,5,0,.09); }
+.everyday-gacha-machine__capsule::after { content:''; position:absolute; left:24px; top:25px; width:21px; height:21px; border:3px solid var(--ink); border-radius:50%; background:var(--cream); }
+.everyday-gacha-machine__capsule i { position:absolute; right:-12px; bottom:9px; width:20px; height:20px; border:3px solid var(--ink); border-radius:50%; background:var(--cream); }
+.everyday-gacha-machine p,.lucky-draw-reveal p { margin:0; color:var(--muted); font-size:11px; line-height:1.5; }
+.everyday-gacha-machine__options { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 12px; border-radius:14px; background:rgba(149,187,234,.1); color:var(--ink); font-size:10px; font-weight:850; }
+.everyday-gacha-machine__options i { flex:1; border-top:1px dashed rgba(147,5,0,.24); }
+.everyday-gacha-machine__boundary { padding-top:10px; border-top:1px dashed rgba(147,5,0,.2); }
+.everyday-gacha-machine__button { margin-top:2px; }
+.everyday-gacha-machine__result,.lucky-draw-reveal__result { display:grid; gap:4px; padding:13px; border-radius:16px; background:#fff8e7; color:var(--ink); animation:gachaResultIn 260ms cubic-bezier(.16,1,.3,1) both; }
+.everyday-gacha-machine__result span,.lucky-draw-reveal__result span { color:var(--sangria); font-size:8px; font-weight:950; letter-spacing:.12em; }
+.everyday-gacha-machine__result b,.lucky-draw-reveal__result b { font-family:Georgia,serif; font-size:17px; }
+.lucky-draw-reveal__note { min-height:124px; display:grid; place-items:center; align-content:center; gap:7px; border:1px dashed rgba(147,5,0,.3); border-radius:18px; background:#f7edd8; color:var(--sangria); transform:rotate(-1deg); box-shadow:5px 7px 0 rgba(147,5,0,.06); }
+.lucky-draw-reveal__note::before { content:'✦'; font-size:22px; }
+.lucky-draw-reveal__note span { font-size:9px; font-weight:950; letter-spacing:.16em; }
+.lucky-draw-reveal__note b { font-family:Georgia,serif; font-size:19px; }
+.lucky-draw-reveal__button { min-height:48px; border:1px solid rgba(147,5,0,.26); border-radius:15px; background:var(--cream); color:var(--sangria); font-weight:900; }
+.lucky-draw-reveal__button:active { transform:translateY(2px); }
 .signature-lab > header { display:grid; gap:4px; }
 .signature-lab > header span { color:var(--sangria); font-size:10px; font-weight:950; letter-spacing:.12em; }
 .signature-lab > header b { font-family:Georgia,serif; font-size:22px; }
