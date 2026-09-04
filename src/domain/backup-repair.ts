@@ -1,4 +1,5 @@
-import type { RecommendationEvidence, ItineraryItem, TripPlan } from './itinerary';
+import type { RecommendationEvidence } from './evidence';
+import type { ItineraryItem, TripPlan } from './itinerary';
 
 export type BackupCandidate = {
   id: string;
@@ -73,7 +74,13 @@ export function promoteCourtLosers(options: CourtBackupOption[], winnerId: strin
       dealBreakerSafe: true,
       lossReason: option.lossReason ?? 'Lost the Court vote.',
       source: 'court-loss' as const,
-      evidence: [{ source: 'group-consensus', label: `${option.support} vote${option.support === 1 ? '' : 's'} retained`, detail: 'This alternative stayed in the Backup pool after losing the confirmed Court decision.' }],
+      evidence: [{
+        source: 'group-consensus',
+        inputId: option.id,
+        strength: 'strong',
+        effect: 'supports',
+        value: option.label.trim(),
+      }],
     }));
 }
 
@@ -130,7 +137,13 @@ export function applyRepairToPlan(plan: TripPlan, repair: RepairResult, groupCon
   if (repair.requiresGroupConfirmation && !groupConfirmed) return { applied: false, plan, reason: 'Group confirmation is required before applying this repair.' };
   const items = plan.items.map(item => {
     if (item.id === repair.failedItemId) {
-      const repairEvidence: RecommendationEvidence = { source: 'constraint', label: 'Disruption repair', detail: repair.replacement!.lossReason };
+      const repairEvidence: RecommendationEvidence = {
+        source: 'constraint',
+        inputId: repair.failedItemId,
+        strength: 'supporting',
+        effect: 'warns',
+        value: repair.replacement!.lossReason,
+      };
       return { ...item, name: repair.replacement!.name, estimatedCost: item.estimatedCost + repair.impact.costDelta, evidence: [...item.evidence, ...repair.replacement!.evidence, repairEvidence] };
     }
     return repair.movedItems.reduce(updateMovedItem, item);

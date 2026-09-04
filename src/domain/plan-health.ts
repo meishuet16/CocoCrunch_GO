@@ -69,9 +69,9 @@ export function calculatePlanHealth(input: PlanHealthInput): PlanHealth {
   const budgetOverrun = Math.max(0, Math.round(input.plan.totalEstimatedCost - Math.max(0, input.budget)));
   const budgetDeduction = clamp(round((budgetOverrun / Math.max(1, input.budget)) * 40), 0, 24);
   const preferenceEvidence = input.plan.items.flatMap(item => item.evidence).filter(item => item.source === 'constraint' || item.source === 'member-preference' || item.source === 'group-consensus');
-  const optionalMisses = input.groupDNA.optionalPreferences.filter(signal => !preferenceEvidence.some(item => item.detail.toLocaleLowerCase().includes(signal.label.toLocaleLowerCase()))).length;
+  const optionalMisses = input.groupDNA.optionalPreferences.filter(signal => !preferenceEvidence.some(item => item.value.toLocaleLowerCase().includes(signal.label.toLocaleLowerCase()))).length;
   const selectedFloating = input.plan.items.find(item => item.kind === 'floating');
-  const noFloatingPreference = selectedFloating && !selectedFloating.evidence.some(item => item.label.toLocaleLowerCase().includes('preference')) ? 1 : 0;
+  const noFloatingPreference = selectedFloating && !selectedFloating.evidence.some(item => item.source === 'member-preference' || item.inputId === 'preference') ? 1 : 0;
   const preferenceMisses = optionalMisses + noFloatingPreference;
   const preferenceDeduction = clamp(preferenceMisses * 8, 0, 16);
   const transferMinutes = Math.max(0, Math.round(input.plan.transferMinutes));

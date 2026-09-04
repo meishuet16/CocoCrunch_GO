@@ -1,4 +1,5 @@
 import type { GroupDNA } from './group-dna';
+import type { RecommendationEvidence } from './evidence';
 import type { TingoBehavior } from './tingo';
 import type { TripMember } from './trip';
 
@@ -14,12 +15,6 @@ export type DestinationCandidate = {
   indoor: boolean;
   why: string;
   source: 'prototype-catalog' | 'fallback';
-};
-
-export type RecommendationEvidence = {
-  source: 'tingo' | 'trip-vibe' | 'constraint' | 'member-preference' | 'group-consensus' | 'budget' | 'candidate';
-  label: string;
-  detail: string;
 };
 
 export type ItineraryItem = {
@@ -124,8 +119,14 @@ function findAnchor(candidates: DestinationCandidate[], mustGo: string): Destina
   return candidates.find(candidate => query.some(token => normalize(candidate.name).includes(token)));
 }
 
-function evidence(source: RecommendationEvidence['source'], label: string, detail: string): RecommendationEvidence {
-  return { source, label, detail };
+function evidence(
+  source: RecommendationEvidence['source'],
+  value: string,
+  effect: RecommendationEvidence['effect'],
+  strength: RecommendationEvidence['strength'],
+  inputId?: string,
+): RecommendationEvidence {
+  return { source, value, effect, strength, ...(inputId ? { inputId } : {}) };
 }
 
 export function candidateFromDiscovery(place: {
@@ -167,8 +168,10 @@ export function generateTripPlan(input: GenerateTripPlanInput): TripPlan {
   const anchorTransfer = anchorCandidate?.transferMinutes ?? 0;
   const anchorWalking = anchorCandidate?.walkingKm ?? 0;
   const anchorEvidence = [
-    evidence('constraint', 'Must-Go anchor', 'This item came directly from the trip Must-Go input and is protected.'),
-    ...(anchorCandidate ? [evidence('candidate', anchorCandidate.source, anchorCandidate.why)] : [evidence('constraint', 'Candidate detail missing', 'No matching destination candidate was supplied; cost and route load remain conservative defaults.')]),
+    evidence('constraint', input.mustGo, 'protects', 'required', 'must-go'),
+    ...(anchorCandidate
+      ? [evidence('candidate', anchorCandidate.why, 'supports', 'context', anchorCandidate.id)]
+      : [evidence('adapter', 'candidate detail missing', 'warns', 'context', anchorId)]),
   ];
   const anchor: ItineraryItem = {
     id: anchorId,
@@ -209,10 +212,11 @@ export function generateTripPlan(input: GenerateTripPlanInput): TripPlan {
     transferMinutes: 0,
     walkingKm: 0,
     protected: false,
-    evidence: [evidence('tingo', 'Tingo pace', `${input.tingoBehavior.bufferMinutes} minutes of buffer follow the current long-term pace behavior.`)],
+    evidence: [evidence('tingo', `${input.tingoBehavior.bufferMinutes} min buffer`, 'supports', 'supporting', 'buffer-minutes')],
   };
   const floatingStart = input.floatingStartMinutes ?? bufferEnd + (selected?.transferMinutes ?? 0);
   const floatingDuration = selected?.durationMinutes ?? 60;
+  const filteredByDealBreaker = input.candidates.filter(candidate => candidate.id !== anchorCandidate?.id && violatesDealBreaker(candidate, input.dealBreaker));
   const floating: ItineraryItem = {
     id: 'floating-discovery',
     name: selected?.name ?? 'Open discovery block',
@@ -226,18 +230,20 @@ export function generateTripPlan(input: GenerateTripPlanInput): TripPlan {
     protected: false,
     candidateId: selected?.id,
     evidence: selected ? [
-      evidence('candidate', selected.source, selected.why),
-      evidence('trip-vibe', 'Trip Vibe', `The ${input.tripVibe || 'current'} trip goal contributed to this candidate ranking.`),
-      evidence('constraint', 'Preference', input.preference || 'No optional preference was supplied.'),
-      evidence('tingo', 'Tingo behavior', `${input.tingoBehavior.recommendationBias} recommendations and ${input.tingoBehavior.itineraryDensity} density influenced the ranking.`),
-      evidence('budget', 'Budget fit', input.groupDNA.budgetRange.max > 0
-        ? `RM${selected.estimatedCost} fits the observed member range of RM${input.groupDNA.budgetRange.min}–RM${input.groupDNA.budgetRange.max}; ${input.groupDNA.budgetSensitivity} sensitivity was included in ranking.`
-        : `RM${selected.estimatedCost} fits the trip budget of RM${input.budget}.`),
+      evidence('candidate', selected.why, 'supports', 'context', selected.id),
+      evidence('trip-vibe', input.tripVibe || 'current trip vibe', 'supports', 'supporting', 'trip-vibe'),
+      evidence('constraint', input.preference || 'No optional preference', 'supports', 'strong', 'preference'),
+      evidence('tingo', input.tingoBehavior.recommendationBias, 'supports', 'supporting', 'tingo-ranking'),
+      evidence('budget', `RM${selected.estimatedCost}`, 'constrains', 'supporting', 'budget'),
+      ...(input.dealBreaker ? [evidence('constraint', input.dealBreaker, 'excludes', 'required', 'deal-breaker')] : []),
       ...input.members.flatMap(member => (member.preferenceProfile?.preferences ?? [])
         .filter(preference => preference.kind !== 'strongly-avoid' && overlapsText(selected, preference.label))
-        .map(preference => evidence('member-preference', `${member.name} preference`, preference.label))),
-      ...input.groupDNA.sharedPriorities.filter(signal => overlapsText(selected, signal.label)).map(signal => evidence('group-consensus', `${signal.support} member supports`, signal.label)),
-    ] : [evidence('constraint', 'Flexible fallback', input.flexible || 'This block stays open because no safe candidate matched.')],
+        .map(preference => evidence('member-preference', preference.label, 'supports', 'strong', preference.id))),
+      ...input.groupDNA.sharedPriorities
+        .filter(signal => overlapsText(selected, signal.label))
+        .map(signal => evidence('group-consensus', signal.label, 'supports', 'strong')),
+      ...(filteredByDealBreaker.length > 0 ? filteredByDealBreaker.map(candidate => evidence('constraint', candidate.name, 'excludes', 'required', 'deal-breaker')) : []),
+    ] : [evidence('constraint', input.flexible || 'Open discovery block', 'supports', 'context', 'flexible')],
   };
   const openStart = floating.endMinutes + (selected?.transferMinutes ?? 0);
   const open: ItineraryItem = {
@@ -251,7 +257,7 @@ export function generateTripPlan(input: GenerateTripPlanInput): TripPlan {
     transferMinutes: 0,
     walkingKm: 0,
     protected: false,
-    evidence: [evidence('constraint', 'Flexible input', input.flexible || 'This time remains intentionally open.')],
+    evidence: [evidence('constraint', input.flexible || 'Open flexible window', 'supports', 'context', 'flexible')],
   };
   const items = [anchor, buffer, floating, open];
   const sharedPromise = input.groupDNA.sharedPriorities.slice(0, 2).map(signal => signal.label).join(' + ');

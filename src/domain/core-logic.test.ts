@@ -67,10 +67,22 @@ describe('deterministic itinerary generation', () => {
   it('returns stable time blocks, a buffer, and evidence tied to real inputs', () => {
     const first = generateTripPlan(itineraryInput);
     const second = generateTripPlan(itineraryInput);
+    const anchor = first.items.find(item => item.kind === 'anchor');
+    const floating = first.items.find(item => item.kind === 'floating');
 
     expect(first).toEqual(second);
     expect(first.items.map(item => item.kind)).toEqual(expect.arrayContaining(['anchor', 'floating', 'buffer', 'open']));
     expect(first.items.flatMap(item => item.evidence).map(item => item.source)).toEqual(expect.arrayContaining(['tingo', 'trip-vibe', 'constraint', 'candidate']));
+    expect(anchor?.evidence).toEqual(expect.arrayContaining([
+      expect.objectContaining({ source: 'constraint', effect: 'protects', strength: 'required', value: 'Harbour walk' }),
+      expect.objectContaining({ source: 'candidate', effect: 'supports', strength: 'context', value: 'Explicit candidate' }),
+    ]));
+    expect(floating?.evidence).toEqual(expect.arrayContaining([
+      expect.objectContaining({ source: 'trip-vibe', effect: 'supports', value: 'Food' }),
+      expect.objectContaining({ source: 'tingo', effect: 'supports', strength: 'supporting', value: tingoBehavior.recommendationBias }),
+      expect.objectContaining({ source: 'budget', effect: 'constrains', strength: 'supporting', value: 'RM30' }),
+      expect.objectContaining({ source: 'constraint', effect: 'excludes', strength: 'required', value: 'No raw-only dinner' }),
+    ]));
   });
 
   it('includes evidence for explicit member preferences without using them as Tingo data', () => {
@@ -93,6 +105,9 @@ describe('deterministic itinerary generation', () => {
     expect(floating?.evidence.some(entry => entry.source === 'member-preference')).toBe(true);
     expect(floating?.evidence.some(entry => entry.source === 'tingo')).toBe(true);
     expect(floating?.evidence.some(entry => entry.source === 'budget')).toBe(true);
+    expect(floating?.evidence).toEqual(expect.arrayContaining([
+      expect.objectContaining({ source: 'member-preference', effect: 'supports', strength: 'strong', value: 'Scenic café' }),
+    ]));
   });
 
   it('removes a Court-resolved conflict from generated operational risks', () => {
