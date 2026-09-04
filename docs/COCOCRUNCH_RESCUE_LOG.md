@@ -438,3 +438,50 @@ Slice 4 closes the approved visual-refinement pass through accessibility semanti
 
 - PR #1 remains open and unmerged; no push to main was performed.
 - PR description was synchronized after pushing feat/p0-foundation. GitHub reports PR #1 open and unmerged; exact pushed head b1250b6668665cf892628207da49d6184df0d1f2 passed CI run #131.
+
+## Signature Travel UX Task 7 final audit (2026-09-05)
+
+This final bounded audit covers presentation/accessibility QA for the completed Signature Travel journey. The full prior 53-feature reconciliation remains preserved in the preceding rescue-log sections; Tasks 1–6 were not reopened.
+
+### Implemented in code
+
+- `src/v2-polish.css` now gives interactive controls a shared 44px minimum height/width, including compact back/more controls, section affordances, repair/check-in actions, and member/postcard controls.
+- `src/styles.css` now gives drawer close controls a 44px square target.
+- `src/v2-polish.test.ts` records the presentation touch-target contract without changing runtime/domain logic.
+- `src/AppRescued.tsx` exact diff: empty. Exact `src/domain` diff: empty. Canonical sprite status: clean; working-tree and `HEAD` blob hash both `28e2f79df756634861b0fad6b9c5d78409cb397c`.
+
+### Wired into active app
+
+- The CSS changes are loaded by the active AppRescued/Vite shell and were observed on Home, Trips, Planning, Traveling, Completed, Memories, Me, Explore, Everyday Gacha, Lucky Draw, and Court surfaces.
+- Existing lifecycle `aria-selected` and global navigation `aria-current` semantics remained active; no navigation, provider, or domain wiring changed.
+
+### Regression tested
+
+- Focused presentation suite: 15 files, 36 tests passed.
+- `npm run check`: passed TypeScript, 20 Vitest files/83 tests, and Vite production build.
+- `npm test`: 20 Vitest files/83 tests passed.
+- `npm run build`: passed; 1,872 modules transformed.
+- `git diff --check`: passed; Git emitted only the existing LF-to-CRLF working-copy warnings for the two edited CSS files.
+
+### Exact-head CI green
+
+- Not claimed. No push, PR update, merge, or remote CI run was performed in this task. The branch was `feat/p0-foundation`, with the local pre-commit head ahead of `origin/feat/p0-foundation`; `gh`/GitHub integration was unavailable in the workspace. Parent owns remote PR/CI synchronization.
+
+### Browser/runtime verified
+
+- Browser: Codex In-app Browser, active Vite URL `http://127.0.0.1:5177/`.
+- Exact observed viewports: 360x720, 390x720, 430x720, and the available default wide viewport 1280x720 CSS pixels. Narrow runs showed no horizontal overflow and no interactive target below 44px after the fixes.
+- Verified states: Home, Trips, Planning, Traveling calm, Traveling affected/repair/applied, Completed learning, Memories, Me, Explore, Everyday Gacha result, Court tie/Gacha proposal, Court majority, and Lucky Draw result.
+- Qualifying Pray state: unavailable in the active app. Source search found only the optional ritual implementation; no active AppRescued entry exposed it, so it was not invented or claimed.
+
+### Visually verified
+
+- Final screenshots were inspected at 360x720 Home and 430x720 Traveling. The rendered hierarchy, lifecycle tabs, journey progress, primary check-in action, and bottom navigation remained readable and contained.
+- Console error/warning logs were empty in the audited states. Initial page-load informational messages were limited to Vite connection/debug output and React DevTools guidance.
+- Keyboard focus produced a visible 2.4px solid focus ring on the lifecycle tab at 430x720. Close controls exposed accessible labels. Reduced-motion CSS is present; browser reduced-motion emulation was unavailable and the default media query was false.
+
+### Known limitations
+
+- No tablet viewport profile or reduced-motion emulation was available; neither is claimed.
+- The active shell begins these page views with `h2` headings and exposes no `h1` in the audited DOM. Drawer/Court overlays exposed labeled close controls, but the audited Court overlay did not expose `role=dialog`/`aria-modal`.
+- Remote PR description synchronization and exact-head CI green status remain pending parent-controlled push/CI work; this local audit does not imply remote status.

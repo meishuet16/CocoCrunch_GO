@@ -40,6 +40,10 @@
 .brand-companion { display: block; width: 40px; height: auto; flex: 0 0 40px; }
 
 /* Touch and keyboard ergonomics. */
+button {
+  min-height: 44px;
+  min-width: 44px;
+}
 .bottom-nav button,
 .lifecycle-tabs button,
 .primary,
@@ -56,6 +60,11 @@
   min-height: 44px;
 }
 .brand-lockup { min-height: 44px; }
+.back-link,
+.workspace-more { min-width: 44px; }
+.ghost-wish-row button,
+.sealed-postcard button,
+.member-votes button { min-height: 44px; }
 .brand-lockup:focus-visible { outline: 3px solid rgba(149,187,234,.72); outline-offset: 3px; border-radius: 12px; }
 .bell { min-width: 44px; min-height: 44px; }
 textarea:focus-visible,
@@ -201,9 +210,9 @@ select:focus-visible {
 .contextual-tool-list { margin-top: var(--space-4); }
 .ready-to-go-card { margin-top: var(--space-4); padding: 17px; border-radius: 16px; background: var(--surface-raised); }
 .section-rule,
-.explore-section-heading { min-height: 34px; margin: 24px 0 10px; letter-spacing: .08em; }
+.explore-section-heading { min-height: 44px; margin: 24px 0 10px; letter-spacing: .08em; }
 .section-rule button,
-.explore-section-heading button { min-height: 34px; }
+.explore-section-heading button { min-height: 44px; }
 .primary,
 .secondary { border-radius: 11px; }
 .itinerary-row:focus-visible,
@@ -232,7 +241,7 @@ select:focus-visible {
 .arrival-check span { color: var(--sangria); font-size: 8px; font-weight: 950; letter-spacing: .1em; }
 .arrival-check b { font-size: 11px; line-height: 1.3; }
 .arrival-check small { color: var(--muted); font-size: 9px; line-height: 1.35; }
-.arrival-check button { min-height: 40px; border: 0; border-radius: 10px; padding: 9px 11px; background: var(--sangria); color: #fff9ef; font-size: 10px; font-weight: 850; }
+.arrival-check button { min-height: 44px; border: 0; border-radius: 10px; padding: 9px 11px; background: var(--sangria); color: #fff9ef; font-size: 10px; font-weight: 850; }
 .disruption-head small { color: var(--muted); font-size: 9px; line-height: 1.35; }
 .repair-impact-head { display: grid; gap: 4px; margin-bottom: 10px; }
 .repair-impact-head b { font-size: 13px; }
