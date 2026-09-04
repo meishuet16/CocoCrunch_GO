@@ -75,9 +75,10 @@ describe('deterministic itinerary generation', () => {
     expect(first.items.flatMap(item => item.evidence).map(item => item.source)).toEqual(expect.arrayContaining(['tingo', 'trip-vibe', 'constraint', 'candidate']));
     expect(anchor?.evidence).toEqual(expect.arrayContaining([
       expect.objectContaining({ source: 'constraint', effect: 'protects', strength: 'required', value: 'Harbour walk' }),
-      expect.objectContaining({ source: 'candidate', effect: 'supports', strength: 'context', value: 'Explicit candidate' }),
+      expect.objectContaining({ source: 'candidate', effect: 'supports', strength: 'context', value: 'Explicit candidate', provenance: 'prototype-catalog' }),
     ]));
     expect(floating?.evidence).toEqual(expect.arrayContaining([
+      expect.objectContaining({ source: 'candidate', effect: 'supports', strength: 'context', value: 'Candidate detail', provenance: 'prototype-catalog' }),
       expect.objectContaining({ source: 'trip-vibe', effect: 'supports', value: 'Food' }),
       expect.objectContaining({ source: 'tingo', effect: 'supports', strength: 'supporting', value: tingoBehavior.recommendationBias }),
       expect.objectContaining({ source: 'budget', effect: 'constrains', strength: 'supporting', value: 'RM30' }),
@@ -170,6 +171,27 @@ describe('Plan Health', () => {
     expect(resolved.metrics.unresolvedConflicts).toBe(0);
     expect(resolved.overall).toBeGreaterThan(unresolved.overall);
   });
+
+  it('counts structured floating preference evidence after the recommendation-evidence migration', () => {
+    const preferenceDNA = deriveGroupDNA([
+      { id: 'a', name: 'A', tingoAssessed: false, preferences: [{ id: 'a1', label: 'Scenic café', kind: 'preference', strength: 'optional', source: 'member' }] },
+      { id: 'b', name: 'B', tingoAssessed: false, preferences: [{ id: 'b1', label: 'Scenic café', kind: 'preference', strength: 'optional', source: 'member' }] },
+    ]);
+    const supportedPlan = generateTripPlan({ ...itineraryInput, groupDNA: preferenceDNA });
+    const unsupportedPlan = {
+      ...supportedPlan,
+      items: supportedPlan.items.map(item => item.kind === 'floating'
+        ? { ...item, evidence: item.evidence.filter(entry => entry.inputId !== 'preference') }
+        : item),
+    };
+    const supported = calculatePlanHealth({ plan: supportedPlan, budget: 300, groupDNA: preferenceDNA, tingoBehavior, dealBreaker: '' });
+    const unsupported = calculatePlanHealth({ plan: unsupportedPlan, budget: 300, groupDNA: preferenceDNA, tingoBehavior, dealBreaker: '' });
+
+    expect(supported.metrics.preferenceMisses).toBe(0);
+    expect(supported.metrics.preferenceDeduction).toBe(0);
+    expect(unsupported.metrics.preferenceMisses).toBe(2);
+    expect(unsupported.metrics.preferenceDeduction).toBe(16);
+  });
 });
 
 describe('Backup Plan and minimum-loss repair', () => {
@@ -219,5 +241,39 @@ describe('Backup Plan and minimum-loss repair', () => {
     expect(repair.requiresGroupConfirmation).toBe(true);
     expect(applyRepairToPlan(repairPlan, repair, false).applied).toBe(false);
     expect(applyRepairToPlan(repairPlan, repair, true).applied).toBe(true);
+  });
+
+  it('appends typed repair evidence to the repaired floating item', () => {
+    const sourcePlan: TripPlan = {
+      ...repairPlan,
+      items: repairPlan.items.map(item => item.id === 'outdoor'
+        ? {
+            ...item,
+            evidence: [{ source: 'candidate', inputId: 'outdoor-source', strength: 'context', effect: 'supports', value: 'Original outdoor choice', provenance: 'prototype-catalog' }],
+          }
+        : item),
+    };
+    const backup: BackupCandidate = {
+      id: 'high-support',
+      name: 'Higher support',
+      support: 3,
+      costDelta: 8,
+      timeDeltaMinutes: 12,
+      viable: true,
+      dealBreakerSafe: true,
+      lossReason: 'Lost the Court vote.',
+      source: 'court-loss',
+      evidence: [{ source: 'group-consensus', inputId: 'high-support', strength: 'strong', effect: 'supports', value: 'Higher support' }],
+    };
+    const repair = buildMinimumLossRepair({ plan: sourcePlan, failedItemId: 'outdoor', backups: [backup], budgetRemaining: 100, mode: 'solo' });
+    const applied = applyRepairToPlan(sourcePlan, repair, true);
+    const repairedItem = applied.plan.items.find(item => item.id === 'outdoor');
+
+    expect(repairedItem?.evidence).toEqual(expect.arrayContaining([
+      expect.objectContaining({ source: 'candidate', inputId: 'outdoor-source', strength: 'context', effect: 'supports', value: 'Original outdoor choice', provenance: 'prototype-catalog' }),
+      expect.objectContaining({ source: 'group-consensus', inputId: 'high-support', strength: 'strong', effect: 'supports', value: 'Higher support' }),
+      expect.objectContaining({ source: 'constraint', inputId: 'outdoor', strength: 'supporting', effect: 'warns', value: 'Lost the Court vote.' }),
+    ]));
+    expect(repairedItem?.evidence.at(-1)).toMatchObject({ source: 'constraint', inputId: 'outdoor', strength: 'supporting', effect: 'warns', value: 'Lost the Court vote.' });
   });
 });

@@ -125,8 +125,9 @@ function evidence(
   effect: RecommendationEvidence['effect'],
   strength: RecommendationEvidence['strength'],
   inputId?: string,
+  provenance?: RecommendationEvidence['provenance'],
 ): RecommendationEvidence {
-  return { source, value, effect, strength, ...(inputId ? { inputId } : {}) };
+  return { source, value, effect, strength, ...(inputId ? { inputId } : {}), ...(provenance ? { provenance } : {}) };
 }
 
 export function candidateFromDiscovery(place: {
@@ -170,7 +171,7 @@ export function generateTripPlan(input: GenerateTripPlanInput): TripPlan {
   const anchorEvidence = [
     evidence('constraint', input.mustGo, 'protects', 'required', 'must-go'),
     ...(anchorCandidate
-      ? [evidence('candidate', anchorCandidate.why, 'supports', 'context', anchorCandidate.id)]
+      ? [evidence('candidate', anchorCandidate.why, 'supports', 'context', anchorCandidate.id, anchorCandidate.source)]
       : [evidence('adapter', 'candidate detail missing', 'warns', 'context', anchorId)]),
   ];
   const anchor: ItineraryItem = {
@@ -230,7 +231,7 @@ export function generateTripPlan(input: GenerateTripPlanInput): TripPlan {
     protected: false,
     candidateId: selected?.id,
     evidence: selected ? [
-      evidence('candidate', selected.why, 'supports', 'context', selected.id),
+      evidence('candidate', selected.why, 'supports', 'context', selected.id, selected.source),
       evidence('trip-vibe', input.tripVibe || 'current trip vibe', 'supports', 'supporting', 'trip-vibe'),
       evidence('constraint', input.preference || 'No optional preference', 'supports', 'strong', 'preference'),
       evidence('tingo', input.tingoBehavior.recommendationBias, 'supports', 'supporting', 'tingo-ranking'),
