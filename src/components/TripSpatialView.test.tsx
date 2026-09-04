@@ -135,6 +135,26 @@ describe('TripSpatialView', () => {
     expect(html).toContain('Saved current · next · reunion context');
   });
 
+  it('describes only supplied traveling context in the saved-context cue', async () => {
+    const mod = await loadTripSpatialView();
+
+    expect(mod).not.toBeNull();
+
+    const { TripSpatialView } = mod!;
+    const html = renderToStaticMarkup(
+      <TripSpatialView
+        mode="traveling"
+        destination="Tokyo"
+        source="local-schematic"
+        plan={samplePlan}
+        currentItem={{ name: 'Tsukiji food walk', timeLabel: '10:00' }}
+      />,
+    );
+
+    expect(html).toContain('Saved current context');
+    expect(html).not.toContain('Saved current · next · reunion context');
+  });
+
   it('renders completed travelled stops with imported photo metadata boundaries', async () => {
     const mod = await loadTripSpatialView();
 
@@ -156,7 +176,8 @@ describe('TripSpatialView', () => {
     expect(html).toContain('18 photos indexed');
     expect(html).toContain('4 areas grouped');
     expect(html).toContain('Closure');
-    expect(html).toContain('18 photos saved · 4 areas grouped');
+    expect(html).toContain('18 imported photos indexed · 4 areas grouped');
+    expect(html).not.toContain('18 photos saved · 4 areas grouped');
     expect(html).toContain('Photo Map shows imported metadata only; it does not infer the route between stops.');
   });
 

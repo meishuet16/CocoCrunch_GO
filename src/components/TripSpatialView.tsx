@@ -80,6 +80,11 @@ export function TripSpatialView({
 }: TripSpatialViewProps) {
   const visibleStops = plan.items.filter(item => item.kind !== 'buffer').slice(0, stopPositions.length);
   const privacyLabel = privacy ? `Sharing: ${privacy === 'exact' ? 'exact location' : privacy === 'area' ? 'approx. area' : 'status only'}` : null;
+  const travelingContextParts = [
+    currentItem ? 'current' : null,
+    nextItem ? 'next' : null,
+    reunionLabel ? 'reunion' : null,
+  ].filter((value): value is string => value !== null);
 
   return (
     <section className={`trip-spatial-view paper-sheet spatial-secondary spatial-${mode} spatial-source-${source}`}>
@@ -183,7 +188,9 @@ export function TripSpatialView({
               </article>
             )}
           </div>
-          <small className="spatial-detail spatial-detail--saved">Saved current · next · reunion context</small>
+          {travelingContextParts.length > 0 && (
+            <small className="spatial-detail spatial-detail--saved">Saved {travelingContextParts.join(' · ')} context</small>
+          )}
           <div className="adapter-note">
             <b>Travel context only</b>
             <small>Current and next stops come from saved trip state and manual check-ins only.</small>
@@ -208,7 +215,7 @@ export function TripSpatialView({
           {photoSummary && (
             <div className="spatial-closure-cue">
               <span>Closure</span>
-              <b>{photoSummary.imported} photos saved · {photoSummary.grouped} areas grouped</b>
+              <b>{photoSummary.imported} imported photos indexed · {photoSummary.grouped} areas grouped</b>
               <small>Imported memory closes this kept trip context without inferring the route.</small>
             </div>
           )}

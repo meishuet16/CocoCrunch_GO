@@ -81,3 +81,41 @@ The connected in-app browser exposed `1280 × 720` CSS pixels at `devicePixelRat
 ## Concerns
 
 Narrow viewport verification could not be performed because the available browser surface exposed only its default 1280 × 720 viewport; the report records the exact viewport observed instead.
+
+## Important finding correction
+
+- `src/components/TripSpatialView.tsx` — changed the Completed closure from `photos saved` to imported/indexed metadata wording: `{imported} imported photos indexed · {grouped} areas grouped`, matching the `importPhotoMetadata` provenance and making no upload or save claim.
+- `src/components/TripSpatialView.tsx` — made the Traveling saved-context cue derive from the supplied `currentItem`, `nextItem`, and `reunionLabel` values. The cue is omitted when none are supplied and no longer claims all three when they are absent.
+- `src/components/TripSpatialView.test.tsx` — added regression coverage for the imported/indexed closure wording and a current-only Traveling context case that rejects the old all-three cue.
+
+RED focused command:
+
+```text
+npx vitest run src/components/TripSpatialView.test.tsx
+```
+
+Result: expected failure — 1 file failed, 2 tests failed, and 3 existing tests passed. The failures were the new current-only traveling cue and imported/indexed Completed closure expectation.
+
+GREEN and covering command:
+
+```text
+npx vitest run src/components/TripSpatialView.test.tsx
+```
+
+Result: 1 file passed, 5 tests passed.
+
+Full verification:
+
+```text
+npm run check
+```
+
+Result: exit 0; TypeScript passed, 17 test files passed with 75 tests, and the Vite production build passed.
+
+```text
+git diff --check
+```
+
+Result: exit 0; Git emitted only the existing LF-to-CRLF working-copy warnings.
+
+Scope check: no changes were made to `AppRescued`, `src/domain/*`, CSS, navigation, or assets.
