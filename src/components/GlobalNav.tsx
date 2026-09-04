@@ -26,6 +26,7 @@ export function GlobalNav({ tab, onChange, onOpenTrips }: GlobalNavProps) {
           <button
             key={item.id}
             className={tab === item.id ? 'active' : ''}
+            aria-current={tab === item.id ? 'page' : undefined}
             onClick={() => {
               if (item.id === 'trips') onOpenTrips();
               onChange(item.id);

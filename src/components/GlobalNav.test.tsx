@@ -41,6 +41,7 @@ describe('GlobalNav', () => {
     expect(html).toContain('Explore');
     expect(html).toContain('Memories');
     expect(html).toContain('Me');
+    expect(html).toContain('aria-current="page"');
     expect(buttons.map(button => button.props.className ?? '')).toEqual(['', '', '', 'active', '']);
   });
 

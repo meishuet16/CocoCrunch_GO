@@ -55,6 +55,8 @@
 .signature-primary {
   min-height: 44px;
 }
+.brand-lockup { min-height: 44px; }
+.bell { min-width: 44px; min-height: 44px; }
 textarea:focus-visible,
 select:focus-visible {
   outline: 3px solid rgba(149,187,234,.72);

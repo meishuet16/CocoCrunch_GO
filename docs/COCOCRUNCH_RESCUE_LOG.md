@@ -340,3 +340,101 @@ Slice 1 is complete through shared presentation primitives, Home orientation, an
 - `f6aa552` — Planning decision hierarchy.
 - `4bd1674` — Slice 1 implementation plan.
 - `90dff11` — visual-refinement design.
+
+## Visual refinement Slice 2 checkpoint
+
+Slice 2 is complete through Traveling hierarchy, provenance-honest Trip Conditions, repair presentation, and the Family Window / Location Privacy boundary.
+
+### Implemented in code
+
+- Added Trip Conditions as a calm current-state surface: simulated disruption is explicitly labelled as demo condition, and no live weather, traffic, routing, GPS, or provider evidence is fabricated.
+- Reframed disruption presentation in traveler language around what stays, what changes, and the generated time/cost impact. Open Recovery remains distinct from direct Backup replacement.
+- Added separate FamilyWindowPanel and LocationPrivacyPanel surfaces. Family Window owns intentional family reassurance sharing; Location Privacy owns what location data CocoCrunch may use. Family Window does not enable location.
+- Added narrow-layout treatment for Trip Conditions, arrival check-in, repair impact, drawers, and sharing panels. Domain behavior and validated repair/privacy contracts were unchanged.
+
+### Wired into active app
+
+- AppRescued renders TripConditions in Traveling, dynamic repair preview values from the domain result, and separate Family Window / Location Privacy drawers.
+- Map remains contextual to the active trip and no new top-level navigation destination was introduced.
+
+### Regression tested
+
+- Focused Slice 2 component tests passed: 4 files, 10 tests.
+- Full local check passed: TypeScript, 13 Vitest files, 65 tests, and Vite production build.
+- git diff --check passed.
+
+### Browser/runtime and visual evidence
+
+- The active Vite app was inspected at http://127.0.0.1:5176/ in the Codex in-app browser.
+- Narrow viewport evidence was the available 362 by 702 CSS-pixel viewport; document and body scroll width were 347px with no horizontal overflow. Traveling normal/delay/repair and both sharing drawers were screenshot-inspected.
+- Wide drawer evidence was inspected at the available 1280 by 720 CSS-pixel browser viewport. Browser logs contained no runtime errors.
+- The agent-browser CLI was unavailable in this environment; Codex CUA browser inspection was used instead.
+
+### Slice 2 commit
+
+- c8c504d — style: clarify traveling conditions and sharing boundaries.
+
+## Visual refinement Slice 3 checkpoint
+
+Slice 3 is complete through Completed, Memories, Me, Explore, and contextual feature hierarchy.
+
+### Implemented in code
+
+- Added JourneyPhaseGuide presentation components that keep Completed learning explicit: actual outcome first, then Worth It/reflection, then proposed learning, with Confirm/Dismiss remaining explicit.
+- Memories now leads with a retrospective doorway before expressive archive/keepsake content.
+- Me now explicitly owns persistent, editable long-term Tingo identity while Trip Vibe and trip-specific constraints remain trip-owned.
+- Explore now states Save idea / Suggest to group as the planning handoff and labels discovery as a lens rather than an alternate official itinerary.
+- No canonical Coco sprite-sheet file was changed.
+
+### Wired into active app
+
+- AppRescued renders the guides in the active global Memories, Completed, Me, and Explore surfaces. The five-tab navigation remains Home, Trips, Explore, Memories, Me.
+- Contextual Map and existing random/signature feature ownership remain unchanged.
+
+### Regression tested
+
+- Focused Slice 3 tests passed: 3 files, 10 tests.
+- Full local check passed: TypeScript, 14 Vitest files, 69 tests, and Vite production build.
+- git diff --check passed.
+
+### Browser/runtime and visual evidence
+
+- Global Memories, Completed, Me, and Explore were screenshot-inspected in the active Vite app at the available narrow viewport: innerWidth 362px, innerHeight 702px, document/body width 347px, with no horizontal overflow.
+- The retrospective-first order, Tingo ownership handoff, and Explore active-trip/group-governance handoff were visible in the rendered output. Browser logs contained no errors.
+- Exact 360/390/430 runs, reduced-motion emulation, and broader signature-interaction visual QA were not available and are not claimed.
+
+### Slice 3 commit
+
+- 1a2d57f — style: strengthen completed memories and exploration hierarchy.
+
+## Visual refinement Slice 4 checkpoint
+
+Slice 4 closes the approved visual-refinement pass through accessibility semantics, narrow responsive verification, regression validation, and rescue-log consolidation.
+
+### Implemented in code
+
+- Global navigation now exposes aria-current=page for the active Home / Trips / Explore / Memories / Me destination while preserving the existing five-tab behavior.
+- The brand-home and notification controls now meet the shared 44px minimum touch-target convention at the presentation layer.
+- No AppRescued domain/business logic was reopened in Slice 4; no canonical Coco sprite-sheet asset was changed.
+
+### Wired into active app
+
+- The accessibility semantics render in the active AppRescued shell through GlobalNav. Trip Workspace remains the lifecycle spine and Map remains contextual.
+
+### Regression tested
+
+- Focused final suite passed: 5 files, 45 tests, covering core logic, framework contracts, regressions, learning, and GlobalNav accessibility.
+- Full local npm run check passed: TypeScript, 14 Vitest files, 69 tests, and Vite production build.
+- git diff --check passed.
+
+### Browser/runtime and visual evidence
+
+- The active Vite app was rendered at http://127.0.0.1:5176/ in the Codex in-app browser. A temporary explicit viewport of 362 by 702 CSS pixels was used for narrow verification and reset afterward.
+- At 362 by 702, document client/scroll width and body scroll width were all 362px, with no horizontal overflow. Home, active navigation state, 44px header targets, and bottom navigation were screenshot-inspected.
+- The available default wide viewport was also inspected at 1280 by 720 CSS pixels with no horizontal overflow. Browser error/warning logs were empty.
+- Exact 360/390/430 device runs, reduced-motion emulation, tablet coverage, and broader signature-interaction visual QA remain unavailable in this environment and are not claimed.
+
+### PR and checkpoint state
+
+- PR #1 remains open and unmerged; no push to main was performed.
+- PR description sync is pending the final feature-branch push and is handled as a separate metadata update after the bounded Slice 4 commit.
