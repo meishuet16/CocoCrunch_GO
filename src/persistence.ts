@@ -28,6 +28,12 @@ export type DecisionRecord = {
   createdAt: string;
 };
 
+export type CompletedPaceEvidence = {
+  delayed: boolean;
+  mood: 'great' | 'okay' | 'tired' | null;
+  arrivalChecked: boolean;
+};
+
 export type PersistedState = {
   version: 1;
   mode: 'group' | 'solo';
@@ -46,6 +52,7 @@ export type PersistedState = {
   soloBudgetPlan: BudgetPlan;
   groupBudgetActuals?: BudgetActuals;
   soloBudgetActuals?: BudgetActuals;
+  completedPaceEvidence?: CompletedPaceEvidence;
   privacy: 'status' | 'area' | 'exact';
   continuousLocation: boolean;
   recommendations: PersistedRecommendation[];
