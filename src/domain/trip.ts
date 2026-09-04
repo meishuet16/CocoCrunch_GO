@@ -1,7 +1,8 @@
 import type { TingoBehavior } from './tingo';
+import type { MemberPreferenceProfile } from './group-dna';
 
 export type TripConstraint = { id: string; type: 'must-go' | 'deal-breaker' | 'preference' | 'flexible'; value: string; source: 'member' | 'ai'; };
-export type TripMember = { id: string; name: string; role: string; inviteStatus: 'joined' | 'pending'; pace: 'slow' | 'steady' | 'fast'; };
+export type TripMember = { id: string; name: string; role: string; inviteStatus: 'joined' | 'pending'; pace: 'slow' | 'steady' | 'fast'; preferenceProfile?: MemberPreferenceProfile; };
 export type TripReminder = { id: string; label: string; date: string; kind: 'deposit' | 'cancel' | 'arrival' | 'custom'; done: boolean; };
 export type HumanCommitment = { id: string; label: string; time: string; owner: string; fixed: boolean; };
 export type ReunionAgreement = { time: string; place: string; tolerance: number; };
