@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Bell, BookOpen, Box, CalendarDays, Check, ChevronRight, CircleDollarSign, CloudRain,
-  Compass, Gavel, Heart, Home, Link2, Map, MapPin, PackageCheck, ReceiptText,
+  Bell, BookOpen, Box, Check, ChevronRight, CircleDollarSign, CloudRain,
+  Gavel, Heart, Link2, Map, MapPin, PackageCheck, ReceiptText,
   Send, Sparkles, Users, X
 } from 'lucide-react';
 import { emitExperience } from './experience';
+import { GlobalNav, type GlobalTab } from './components/GlobalNav';
 import { courtTally, type CourtOption, type CourtVote } from './domain/court';
 import { attachCourtConcession, withdrawCourtConcession, type CourtConcession } from './domain/concession';
 import { gatePlanMutation } from './domain/governance';
@@ -39,7 +40,7 @@ import {
 } from './domain/trip';
 import cocoCanonicalSheet from './assets/coco/coco-idle.png';
 
-type Tab = 'home' | 'trips' | 'explore' | 'memories' | 'me';
+type Tab = GlobalTab;
 type TripMode = 'group' | 'solo';
 type Mood = 'great' | 'okay' | 'tired' | null;
 type Privacy = 'status' | 'area' | 'exact';
@@ -69,14 +70,6 @@ const defaultVotes: CourtVote[] = [
   { member: 'JH', pick: 'sushi' },
   { member: 'Zi Shan', pick: 'ramen' },
   { member: 'Alex', pick: 'sushi' },
-];
-
-const tabs: { id: Tab; label: string; icon: React.ComponentType<{ size?: number }> }[] = [
-  { id: 'home', label: 'Home', icon: Home },
-  { id: 'trips', label: 'Trips', icon: CalendarDays },
-  { id: 'explore', label: 'Explore', icon: Compass },
-  { id: 'memories', label: 'Memories', icon: Box },
-  { id: 'me', label: 'Me', icon: Heart },
 ];
 
 function makeRecommendations(
@@ -737,7 +730,7 @@ export default function AppRescued() {
   return <div className="app-shell">
     <header className="topbar"><button className="brand-lockup" onClick={() => { setTripWorkspaceOpen(false); setTab('home'); }} aria-label="Go to Home"><span className="brand-mark">c</span><span className="wordmark"><b>COCOCRUNCH</b><small>travel, with room to breathe</small></span></button><div className="topbar-actions"><span className="tiny-avatar">M</span><button className="bell" aria-label="Notifications"><Bell size={19}/><i/></button></div></header>
     <main>{tab === 'home' ? renderHome() : tab === 'trips' ? (tripWorkspaceOpen ? renderTripWorkspace() : renderTrips()) : tab === 'explore' ? renderExplore() : tab === 'memories' ? renderGlobalMemories() : renderMe()}</main>
-    <nav className="bottom-nav">{tabs.map(item => { const Icon = item.icon; return <button key={item.id} className={tab === item.id ? 'active' : ''} onClick={() => { if (item.id === 'trips') setTripWorkspaceOpen(false); setTab(item.id); }}><Icon size={20}/><span>{item.label}</span></button>; })}</nav>
+    <GlobalNav tab={tab} onChange={setTab} onOpenTrips={() => setTripWorkspaceOpen(false)} />
     {renderCourt()}
     {renderDrawer()}
   </div>;
