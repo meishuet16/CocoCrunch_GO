@@ -89,7 +89,7 @@ describe('Tingo downstream rules', () => {
 
 describe('post-trip learning', () => {
   it('combines trip-level and stop-level review signals without changing Must-Go', () => {
-    const next = reconcileTripLearning(profile, 'yes', { cafe: 'skip', dinner: 'worth' });
+    const next = reconcileTripLearning(profile, 'yes', { cafe: 'skip', dinner: 'worth', market: 'worth' });
     expect(next.mustGo).toBe(profile.mustGo);
     expect(next.vibe).toBe('Slower pace + fewer scheduled stops');
     expect(next.preference).toBe('Food-led neighbourhood stops + scenic cafés');
