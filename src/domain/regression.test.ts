@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { actualBudget, budgetVariance, remainingBudget, updateBudget } from './budget';
 import { canUseGacha, courtTally, type CourtVote } from './court';
 import { discoverPlaces } from './discovery';
+import { gatePlanMutation } from './governance';
 import { reconcileTripLearning, type TravelProfile } from './preferences';
 import { normalizeBudgetActuals, rateDecision, updateBudgetActual } from './retrospective';
 import { defaultTingoDimensions, deriveTingoBehavior, scoreTingo } from './tingo';
@@ -40,6 +41,14 @@ describe('Group Court governance', () => {
     ]);
     expect(result.counts).toEqual({ shinjuku: 2, asakusa: 1 });
     expect(result.majority).toBe('shinjuku');
+  });
+
+  it('blocks one-person official group writes while allowing ideas and solo confirmation', () => {
+    expect(gatePlanMutation('group', 'official-itinerary').allowed).toBe(false);
+    expect(gatePlanMutation('group', 'official-itinerary').requiresGroupConfirmation).toBe(true);
+    expect(gatePlanMutation('group', 'official-itinerary', true).allowed).toBe(true);
+    expect(gatePlanMutation('group', 'idea-save').allowed).toBe(true);
+    expect(gatePlanMutation('solo', 'official-itinerary').allowed).toBe(true);
   });
 });
 
