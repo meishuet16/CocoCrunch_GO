@@ -89,16 +89,23 @@ Build-green was not enough for the remaining invariant work, so the CI gate now 
 
 `tsc --noEmit && vitest run && vite build`
 
-The first regression suite covers:
+The regression suite covers:
 - official Court Gacha eligibility only on a real tie;
 - generic proposal IDs rather than food-demo IDs;
 - Tingo assessment → concrete planning behavior;
 - Tingo-aware discovery explanation/ranking path;
 - trip-level + stop-level learning while preserving Must-Go;
 - category actual normalization/update without source mutation;
-- satisfaction updates only the requested Decision Record while preserving its official verdict.
+- satisfaction updates only the requested Decision Record while preserving its official verdict;
+- planned and actual budget records remain independent and remaining budget cannot become negative;
+- responsibility suggestions remain advisory until explicitly applied;
+- official Group itinerary mutations are blocked without group confirmation while idea-save/personal draft and explicit Solo writes remain allowed.
 
 Package/test gate landed across `8269cc0152f658b47e46ad522b9f57266aaf22f3` and `83be6ea4945ae137130dcdfdf5d5c274694088bd`. Exact-head CI run #109 for `83be6ea4945ae137130dcdfdf5d5c274694088bd` completed successfully, including the new Vitest step through `npm run check`.
+
+The post-trip fixture was corrected at `d6c8c20488c41129f26ee5d67e017b671655c001`: a previous test expected a food-positive result from one positive and one negative food signal, which correctly failed. The replacement fixture has an unambiguous net-positive food signal rather than weakening production logic to satisfy the test.
+
+The centralized group mutation guard was added in `src/domain/governance.ts` at `9cf868b6919bfafe47f7440b5475495f5cd575af`; regression coverage landed at `509394dccfb1635c4c532de2161531ae2fa2b482`. This is currently a domain guard and regression contract; active `AppRescued` call sites still need to route all official Group writes through it before the governance invariant can be called end-to-end closed.
 
 This automated suite covers pure domain invariants only. It does not prove browser orchestration, modal/drawer interaction, persistence reload, or rendered mobile behavior.
 
@@ -108,7 +115,7 @@ This automated suite covers pure domain invariants only. It does not prove brows
 2. Concession rollback (#23) — **prototype rollback implemented**; still needs interaction/browser QA because it is component state rather than a pure-domain transaction.
 3. Personality/Tingo role suggestions (#28) — **visible + explicit apply**, still Partial because member-level personality data is not individually assessed.
 4. Per-stop Worth It (#49) — **wired into confirmed learning**; pure reconciliation has regression coverage, persistence reload still needs browser replay.
-5. Preference/planned-vs-actual retrospective (#50) — **derived from active prototype state instead of fixed copy**; runtime pace signals are not all persisted yet.
+5. Preference/planned-vs-actual retrospective (#50) — **derived from active prototype state instead of fixed copy**; persistence schema now has `CompletedPaceEvidence`, but active App wiring is still outstanding.
 6. Category planned-vs-actual budget (#51) — **editable + persisted local prototype implementation wired**; actual-state helpers now have regression coverage, browser replay remains.
 7. Decision satisfaction / Decision History (#30 extension) — **specific-record UI + persistence wiring implemented**; specific-record mutation now has regression coverage, browser replay remains.
 
@@ -126,14 +133,17 @@ This automated suite covers pure domain invariants only. It does not prove brows
 - Decision satisfaction updates one existing Decision Record rather than creating/replacing the official decision.
 - Pure-domain versions of several of these rules now fail CI if regressed.
 
-## Newly identified replay gap
+## Newly identified replay and governance gaps
 
-The #50 pace retrospective currently derives `actualPaceCopy` from runtime-only `delay`, `mood`, and `arrivalChecked`. Those signals are not persisted today, so a reload can lose the actual-pace evidence even though category spend and decision satisfaction survive. Treat #50 as Partial until the minimum retrospective runtime signals needed for Completed are replayable or an explicit completed-trip actual record replaces them.
+The #50 pace retrospective derives `actualPaceCopy` from `delay`, `mood`, and `arrivalChecked`. `persistence.ts` now defines optional `CompletedPaceEvidence`, but the active App still initializes those three values as runtime-only state and does not save the new record yet. Treat #50 as Partial until that App wiring is completed and replay-tested.
+
+The invariant sweep also found active Group-mode paths that can currently mutate shared-looking plan state without going through Court/group confirmation: Discover's `Add to plan`, Ask Coco's confirmed café-time move, and Smart Split creation. `gatePlanMutation()` now codifies the boundary and has regression coverage, but these call sites must be routed through proposal/group-confirmation semantics before the Group governance invariant is end-to-end closed. Do not relabel those buttons as safe merely because the domain guard exists.
 
 ## Still open / do not call merge-ready yet
 
-- Close the #50 replay gap for actual pace / completed-trip signals.
-- Replay persistence in a real browser: edit actual category values, rate a decision, reload, confirm both survive and computed retrospective remains correct.
+- Wire `CompletedPaceEvidence` into active App initialization/save and browser-replay it.
+- Route every official Group itinerary mutation through the new governance gate / explicit group confirmation; especially Discover Add-to-plan, Ask Coco plan apply, and Smart Split.
+- Replay persistence in a real browser: edit actual category values, rate a decision, set pace evidence, reload, confirm all survive and computed retrospective remains correct.
 - Independently audit all #1–#53 requirements against active `AppRescued`; do not inherit Codex labels.
 - Extend regression coverage to the remaining pure business rules where practical; keep UI-only rules for browser QA rather than faking unit coverage.
 - Continue contextual canonical Coco extraction/usage beyond the current minimal idle asset.
@@ -143,4 +153,4 @@ The #50 pace retrospective currently derives `actualPaceCopy` from runtime-only 
 
 ## Current risk posture
 
-The branch now has an automated pure-domain regression gate in addition to type/build CI, and the major retrospective state paths are wired. It is still **not safe to merge yet** because the #50 replay gap, browser persistence replay, rendered mobile/signature QA, contextual Coco coverage, and full #1–#53 audit remain outstanding.
+The branch now has an automated pure-domain regression gate plus a centralized Group plan-mutation contract, and the major retrospective state paths are mostly wired. It is still **not safe to merge yet** because the active App does not yet consume the new pace-evidence record or governance gate at all relevant call sites, browser persistence replay/rendered mobile/signature QA remain outstanding, contextual Coco coverage is incomplete, and the full #1–#53 audit is not finished.
