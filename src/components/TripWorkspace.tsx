@@ -4,16 +4,17 @@ export type TripPhase = 'planning' | 'traveling' | 'completed';
 
 type HeaderProps = {
   destination: string;
+  mode: 'solo' | 'group';
   travellerCount: number;
   planHealth: number;
   onBack: () => void;
 };
 
-export function TripWorkspaceHeader({ destination, travellerCount, planHealth, onBack }: HeaderProps) {
+export function TripWorkspaceHeader({ destination, mode, travellerCount, planHealth, onBack }: HeaderProps) {
   return <section className="trip-workspace-head">
     <button className="back-link" onClick={onBack}>‹ Trips</button>
     <div className="workspace-title">
-      <span>{destination.toUpperCase()} · GROUP TRIP</span>
+      <span>{destination.toUpperCase()} · {mode === 'group' ? 'GROUP' : 'SOLO'} TRIP</span>
       <h2>Slow food, small discoveries.</h2>
       <p>Oct 12–21 · {travellerCount} travellers · <b>{planHealth}/100 plan health</b></p>
     </div>
