@@ -133,6 +133,62 @@ select:focus-visible {
 .group-signal-summary:focus-within,
 .ready-to-go-card:focus-within { outline: 2px solid rgba(149,187,234,.72); outline-offset: 3px; }
 
+/* Slice 2: travelling is a current-state surface before it becomes a tool shelf. */
+.trip-conditions { margin-top: var(--space-4); padding: 16px; border-top: 1px solid rgba(147,5,0,.12); border-bottom: 1px solid rgba(147,5,0,.12); background: var(--surface-quiet); }
+.trip-conditions.is-affected { background: rgba(255,241,218,.72); border-color: rgba(147,5,0,.16); }
+.trip-conditions-head { display: flex; justify-content: space-between; gap: 12px; align-items: start; }
+.trip-conditions-head > div { display: grid; gap: 4px; }
+.trip-conditions-head span,
+.contextual-section-heading span,
+.tool-group-label,
+.repair-impact-head span { color: var(--sangria); font-size: 9px; font-weight: 950; letter-spacing: .1em; }
+.trip-conditions-head h3 { margin: 0; font-size: 17px; letter-spacing: -.02em; }
+.trip-conditions-head small { max-width: 150px; color: var(--muted); font-size: 9px; line-height: 1.35; text-align: right; }
+.trip-conditions > p { margin: 12px 0 0; color: var(--ink-soft); font-size: 11px; line-height: 1.45; }
+.trip-condition-alert { margin-top: 12px; display: grid; gap: 4px; padding: 11px 12px; border-left: 3px solid var(--sangria); background: rgba(255,255,255,.52); }
+.trip-condition-alert b { font-size: 11px; }
+.trip-condition-alert small { color: var(--muted); font-size: 9px; line-height: 1.4; }
+.trip-conditions .event-button { margin-bottom: 0; }
+.arrival-check { margin-top: var(--space-4); display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 12px; align-items: center; padding: 13px 14px; border-top: 1px solid rgba(147,5,0,.1); border-bottom: 1px solid rgba(147,5,0,.1); background: rgba(255,255,255,.34); }
+.arrival-check > div { display: grid; gap: 4px; min-width: 0; }
+.arrival-check span { color: var(--sangria); font-size: 8px; font-weight: 950; letter-spacing: .1em; }
+.arrival-check b { font-size: 11px; line-height: 1.3; }
+.arrival-check small { color: var(--muted); font-size: 9px; line-height: 1.35; }
+.arrival-check button { min-height: 40px; border: 0; border-radius: 10px; padding: 9px 11px; background: var(--sangria); color: #fff9ef; font-size: 10px; font-weight: 850; }
+.disruption-head small { color: var(--muted); font-size: 9px; line-height: 1.35; }
+.repair-impact-head { display: grid; gap: 4px; margin-bottom: 10px; }
+.repair-impact-head b { font-size: 13px; }
+.repair-diff { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+.repair-diff > div { min-width: 0; padding: 10px; border: 1px solid rgba(147,5,0,.1); border-radius: 11px; background: rgba(255,255,255,.55); display: grid; gap: 4px; align-content: start; }
+.repair-diff span { color: var(--sangria); font-size: 8px; font-weight: 950; letter-spacing: .07em; }
+.repair-diff b { font-size: 10px; line-height: 1.3; overflow-wrap: anywhere; }
+.repair-diff small { color: var(--muted); font-size: 8px; line-height: 1.35; }
+.during-tools { display: grid; gap: 13px; padding-top: 16px; }
+.contextual-section-heading { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.contextual-section-heading small { color: var(--muted); font-size: 9px; line-height: 1.35; text-align: right; }
+.during-tool-group { display: grid; gap: 0; padding: 0 11px; border: 1px solid rgba(147,5,0,.09); border-radius: 14px; background: rgba(255,255,255,.34); }
+.tool-group-label { padding-top: 10px; font-size: 8px; }
+.during-tool-group .mini-tool:first-of-type { border-top: 0; }
+.sharing-panel { display: grid; gap: 0; }
+.sharing-panel > h3 { margin-bottom: 10px; }
+.family-preview { display: grid; gap: 9px; margin-top: 13px; padding: 13px; border: 1px solid rgba(147,5,0,.12); border-radius: 15px; background: rgba(255,255,255,.54); }
+.family-preview > span { color: var(--sangria); font-size: 8px; font-weight: 950; letter-spacing: .1em; }
+.family-preview > div { display: grid; gap: 3px; padding-top: 8px; border-top: 1px solid rgba(147,5,0,.08); }
+.family-preview b { font-size: 10px; }
+.family-preview small { color: var(--muted); font-size: 9px; line-height: 1.35; }
+.family-location-boundary { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(147,5,0,.18); }
+.family-location-boundary > div { display: grid; gap: 3px; }
+.family-location-boundary b { font-size: 10px; }
+.family-location-boundary small { color: var(--muted); font-size: 8px; line-height: 1.3; }
+.family-location-boundary .secondary { width: auto; flex: 0 0 auto; padding: 8px 10px; font-size: 9px; }
+.location-provider-note { display: grid; gap: 4px; margin-top: 13px; padding: 11px 12px; border-left: 3px solid var(--blue); background: rgba(149,187,234,.14); }
+.location-provider-note b { font-size: 10px; }
+.location-provider-note small { color: var(--muted); font-size: 9px; line-height: 1.4; }
+.privacy-grid button.unavailable { color: var(--muted); border-style: dashed; cursor: not-allowed; }
+.privacy-grid button.unavailable.saved { background: rgba(147,5,0,.07); border-color: rgba(147,5,0,.22); }
+.location-unavailable { margin-top: 13px; padding-top: 12px; border-top: 1px dashed rgba(147,5,0,.18); }
+.status-pill { flex: 0 0 auto; padding: 6px 8px; border-radius: 999px; background: rgba(147,5,0,.08); color: var(--muted); font-size: 8px; font-weight: 850; }
+
 /* Narrow-phone resilience. */
 @media (max-width: 390px) {
   .app-shell { padding-inline: 15px; }
@@ -141,6 +197,15 @@ select:focus-visible {
   .lifecycle-tabs button { min-width: 0; padding-inline: 6px; }
   .lifecycle-tabs small { white-space: normal; }
   .page-title h2 { font-size: 26px; }
+  .trip-conditions-head { display: grid; gap: 8px; }
+  .trip-conditions-head small { max-width: none; text-align: left; }
+  .arrival-check { grid-template-columns: 1fr; }
+  .arrival-check button { width: 100%; }
+  .repair-diff { grid-template-columns: 1fr; }
+  .contextual-section-heading { display: grid; gap: 4px; }
+  .contextual-section-heading small { text-align: left; }
+  .family-location-boundary { align-items: start; flex-direction: column; }
+  .family-location-boundary .secondary { width: 100%; }
 }
 @media (max-width: 360px) {
   .app-shell { padding-inline: 13px; }
