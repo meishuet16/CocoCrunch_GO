@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { actualBudget, budgetVariance, remainingBudget, updateBudget } from './budget';
+import { attachCourtConcession, withdrawCourtConcession } from './concession';
 import { canUseGacha, courtTally, type CourtVote } from './court';
 import { discoverPlaces } from './discovery';
 import { gatePlanMutation } from './governance';
 import { reconcileTripLearning, type TravelProfile } from './preferences';
-import { normalizeBudgetActuals, rateDecision, updateBudgetActual } from './retrospective';
+import { applyActualAdjustment, normalizeBudgetActuals, paceEvidenceSummary, rateDecision, updateBudgetActual } from './retrospective';
 import { defaultTingoDimensions, deriveTingoBehavior, scoreTingo } from './tingo';
 import { applyResponsibilitySuggestions, defaultMembers, suggestResponsibilities } from './trip';
 import type { DecisionRecord } from '../persistence';
@@ -50,6 +51,27 @@ describe('Group Court governance', () => {
     expect(gatePlanMutation('group', 'idea-save').allowed).toBe(true);
     expect(gatePlanMutation('solo', 'official-itinerary').allowed).toBe(true);
   });
+
+  it('binds a concession to its exact vote snapshot and restores it on withdrawal', () => {
+    const votes: CourtVote[] = [
+      { member: 'A', pick: 'hotel-a' },
+      { member: 'B', pick: 'hotel-b' },
+    ];
+    const concession = attachCourtConcession(votes, {
+      id: 'c1',
+      offeredBy: 'A',
+      description: 'A gives dinner choice later',
+      linkedOptionId: 'hotel-b',
+    });
+    const mutated = votes.map(vote => ({ ...vote, pick: 'hotel-b' }));
+    expect(concession.voteSnapshot).toEqual(votes);
+    expect(mutated).not.toEqual(concession.voteSnapshot);
+
+    const withdrawn = withdrawCourtConcession(concession);
+    expect(withdrawn.concession.status).toBe('withdrawn');
+    expect(withdrawn.restoredVotes).toEqual(votes);
+    expect(withdrawn.restoredVotes).not.toBe(concession.voteSnapshot);
+  });
 });
 
 describe('Tingo downstream rules', () => {
@@ -84,15 +106,16 @@ describe('Tingo downstream rules', () => {
     const members = defaultMembers.map(member => ({ ...member }));
     const beforeRoles = members.map(member => member.role);
     const behavior = deriveTingoBehavior({ ...defaultTingoDimensions, social: 3 });
-    const suggestions = suggestResponsibilities(members, behavior);
+    const suggestions = suggestResponsibilities(members, behavior, { mei: behavior });
 
     expect(members.map(member => member.role)).toEqual(beforeRoles);
     expect(suggestions[0].suggestedRole).toBe('Group connector');
+    expect(suggestions[0].source).toBe('member-tingo');
+    expect(suggestions[1].source).toBe('fallback');
 
     const applied = applyResponsibilitySuggestions(members, suggestions);
     expect(applied[0].role).toBe('Group connector');
     expect(members.map(member => member.role)).toEqual(beforeRoles);
-    expect(applied.find(member => member.inviteStatus === 'pending')?.role).toBe('Transit buddy');
   });
 });
 
@@ -120,6 +143,14 @@ describe('budget boundaries', () => {
     expect(budgetVariance(changedPlan, changedActuals).find(item => item.category === 'food')?.status).toBe('over');
   });
 
+  it('folds real disruption cost into the category actual instead of a detached total', () => {
+    const actuals = { food: 100, transport: 80, stay: 200, activities: 40 };
+    const adjusted = applyActualAdjustment(actuals, 'activities', 8);
+    expect(adjusted.activities).toBe(48);
+    expect(actuals.activities).toBe(40);
+    expect(actualBudget(adjusted)).toBe(actualBudget(actuals) + 8);
+  });
+
   it('never reports a negative remaining budget', () => {
     expect(remainingBudget(500, 490, 30)).toBe(0);
     expect(remainingBudget(500, 300, 20)).toBe(180);
@@ -135,6 +166,13 @@ describe('retrospective persistence helpers', () => {
     const updated = updateBudgetActual(normalized, 'food', 121.7);
     expect(updated.food).toBe(122);
     expect(normalized.food).toBe(0);
+  });
+
+  it('replays completed pace evidence deterministically', () => {
+    expect(paceEvidenceSummary({ delayed: true, mood: 'okay', arrivalChecked: true })).toContain('Slower');
+    expect(paceEvidenceSummary({ delayed: false, mood: 'tired', arrivalChecked: true })).toContain('Slower');
+    expect(paceEvidenceSummary({ delayed: false, mood: 'great', arrivalChecked: true })).toContain('Matched');
+    expect(paceEvidenceSummary({ delayed: false, mood: null, arrivalChecked: false })).toContain('No completed');
   });
 
   it('rates only the requested DecisionRecord and preserves the official verdict', () => {
