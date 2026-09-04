@@ -42,6 +42,8 @@ export function TripRetrospective({
   onOpenMemory,
 }: TripRetrospectiveProps) {
   const outcomeRecorded = hasOutcomeEvidence(actualSummary);
+  const learningTerminal = learningConfirmed || proposal?.status === 'confirmed' || proposal?.status === 'dismissed';
+  const memoryAvailable = outcomeRecorded && Boolean(worthIt) && learningTerminal;
   return <section className="trip-retrospective" aria-label="Trip retrospective">
     <div className="retrospective-step">
       <span>1 · ACTUAL OUTCOME</span>
@@ -70,6 +72,7 @@ export function TripRetrospective({
         {proposal.status === 'dismissed' && <small>Dismissed. Long-term Tingo was not changed.</small>}
       </> : learningConfirmed ? <small>Learning was confirmed explicitly; current Tingo is derived from its answer source.</small> : worthIt ? <button type="button" className="secondary" onClick={onBuildProposal}>Show what Coco learned</button> : <small>Choose Worth It before learning can be proposed.</small>}
     </div>
-    <button type="button" className="secondary retrospective-memory" onClick={onOpenMemory}>Keep the memory</button>
+    <button type="button" className="secondary retrospective-memory" disabled={!memoryAvailable} onClick={onOpenMemory}>Keep the memory</button>
+    {!memoryAvailable && <small className="retrospective-memory-note">Keep the memory after the learning handoff is confirmed or dismissed.</small>}
   </section>;
 }

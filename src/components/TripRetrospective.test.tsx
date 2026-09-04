@@ -38,6 +38,37 @@ describe('TripRetrospective', () => {
     expect(html).toContain('Slower than planned · RM 480 spent · 2 decisions');
     expect(html).toContain('Confirm this learning');
     expect(html).toContain('Keep the memory');
+    expect(html).toContain('disabled=""');
+  });
+
+  it('keeps expressive memory closed until the learning handoff is terminal', () => {
+    const pending = renderToStaticMarkup(
+      <TripRetrospective
+        actualSummary={{ pace: 'Matched the plan', spent: 300, decisions: 1 }}
+        worthIt="yes"
+        proposal={proposal}
+        onRecordReflection={() => undefined}
+        onBuildProposal={() => undefined}
+        onConfirmLearning={() => undefined}
+        onDismissLearning={() => undefined}
+        onOpenMemory={() => undefined}
+      />,
+    );
+    const dismissed = renderToStaticMarkup(
+      <TripRetrospective
+        actualSummary={{ pace: 'Matched the plan', spent: 300, decisions: 1 }}
+        worthIt="yes"
+        proposal={{ ...proposal, status: 'dismissed' }}
+        onRecordReflection={() => undefined}
+        onBuildProposal={() => undefined}
+        onConfirmLearning={() => undefined}
+        onDismissLearning={() => undefined}
+        onOpenMemory={() => undefined}
+      />,
+    );
+
+    expect(pending.match(/class="secondary retrospective-memory" disabled=""/)).not.toBeNull();
+    expect(dismissed.match(/class="secondary retrospective-memory" disabled=""/)).toBeNull();
   });
 
   it('keeps confirmation unavailable until a proposal exists', () => {
