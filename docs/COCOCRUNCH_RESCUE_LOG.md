@@ -25,7 +25,8 @@ Living handoff for the V2 rescue pass on `feat/p0-foundation` / PR #1. Update th
 - Conflict text such as `A vs B` can create actual Court proposals.
 - Confirmed Court and emergency decisions write persisted structured decision records.
 - Official unresolved-tie Gacha, everyday indecision Gacha, and entertainment Lucky Draw remain separate contexts.
-- Added a concession snapshot path: attaching a concession captures the pre-concession vote state; withdrawing restores that snapshot. This remains a prototype rollback model pending rendered interaction QA.
+- `src/domain/concession.ts` now owns an explicit `CourtConcession` record with linked option, offered-by, status, description, and an immutable copied vote snapshot.
+- Active Court uses that domain model: attaching captures the exact vote state, withdrawing restores cloned votes from the binding, and any new vote invalidates the stale binding so a later withdrawal cannot erase intentional newer votes.
 - Removed the legacy `ramen` / `sushi` compatibility counters from `CourtResult`; active UI reads the generic `counts` map.
 
 ### Tingo → visible downstream behavior
@@ -38,7 +39,9 @@ Living handoff for the V2 rescue pass on `feat/p0-foundation` / PR #1. Update th
 ### Group responsibility suggestions
 - Group DNA previews responsibility suggestions derived from current Tingo behavior.
 - Suggestions require explicit `Confirm & apply suggested roles`; they do not silently overwrite roles.
-- #28 remains Partial because the prototype has one persisted Tingo profile rather than a separate assessment for every member.
+- `suggestResponsibilities()` accepts a per-member behavior map so one traveller's personality is not projected onto everybody.
+- The active prototype marks Mei as Tingo-assessed and labels unassessed members as explicit fallback suggestions rather than fake personality inference.
+- Member-specific Tingo onboarding for every traveller is still a product-expansion item, not a hidden assumption in the role engine.
 
 ### Post-trip learning
 - Per-stop `worth / mixed / skip` reviews are consumed by `reconcileTripLearning()` together with trip-level Worth It.
@@ -47,23 +50,38 @@ Living handoff for the V2 rescue pass on `feat/p0-foundation` / PR #1. Update th
 
 ### Planned vs actual / budget retrospective
 - Category-level planned-vs-actual variance and learning guidance are domain-backed.
-- Planned pace is derived from Tingo; actual pace copy is derived from runtime disruption / energy / arrival state.
+- Planned pace is derived from Tingo.
+- Active App now initializes `delay`, `mood`, and `arrivalChecked` from persisted `CompletedPaceEvidence`, saves that evidence through normal persistence, and computes Completed pace through `paceEvidenceSummary()`.
 - `persistence.ts` stores optional group and solo category actuals while remaining backward-compatible with existing `cococrunch:v1` saves.
-- `domain/retrospective.ts` normalizes/updates actual spend and rates specific Decision Records.
-- Active App owns `groupBudgetActuals` / `soloBudgetActuals` state, initializes them from persisted values with deterministic defaults only as first-run fallback, exposes editable Actual inputs by category, and saves them through normal app persistence.
-- Completed retrospective reads the same live/persisted actual state, so #51 is no longer just a deterministic display. It remains local prototype data rather than bank/receipt/import integration.
+- Active App owns `groupBudgetActuals` / `soloBudgetActuals`, exposes editable Actual inputs by category, and saves them through normal app persistence.
+- Real disruption cost is no longer a detached `+RM8` total. Applying the rain repair folds RM8 into `activities` actual spend through `applyActualAdjustment()`; undo reverses that adjustment.
+- Completed retrospective reads the same live/persisted actual state, so #50 and #51 are code-wired closed for the local prototype. Browser reload replay remains a QA task, not an unwired implementation gap.
 
 ### Decision History satisfaction
 - Completed renders each persisted Decision Record as a specific review item.
 - `Worth it / Mixed / Skip next time` writes satisfaction back to that exact record ID through the retrospective domain helper.
 - Decision satisfaction is part of the existing `decisionHistory` persistence payload, so it follows the normal local replay path instead of transient UI state.
 
+### Group plan-mutation governance closure
+- `gatePlanMutation()` is now consumed by the active App rather than existing only as a domain contract.
+- Group Discover no longer says an individual can directly `Add to plan`; the same persisted flag is explicitly presented as `Save to group shortlist`, and copy states the official itinerary is unchanged.
+- Ask Coco still provides reason + preview/diff, but Group mode now routes the proposed café-time change into Group Court instead of directly mutating `cafeTime`.
+- Smart Split creation and reunion requests now route through Group Court rather than toggling shared state from one person's button.
+- Solo mode retains direct explicit confirmation for these official changes.
+- The generic Court remains the single confirmation surface; the result is still a proposal until `Confirm result`.
+
 ### Signature interaction rescue
 - Canonical Coco PNG is authoritative where integrated; CSS anatomy is fallback.
 - Packing uses the tactile suitcase experience.
 - Memory Trunk has CSS perspective, layered keepsakes, reduced-motion handling and a real open/close state.
+- Memory Trunk keepsakes are now semantic buttons with 44px minimum targets, keyboard focus, `aria-pressed`, and tap-to-lift / depth interaction instead of inert spans.
 - Gacha has a tactile cream / Sangria / cornflower presentation layer with chamber / capsule / handle cues, press depth and result reveal.
 - Three.js remains optional; physical feedback is the requirement.
+
+### Contextual Coco
+- Active Coco calls now expose context (`travel`, `court`, `memory`) without redrawing or overlaying fake CSS anatomy/costumes.
+- Context changes purposeful motion and shadow behavior using the canonical sprite, with reduced-motion fallbacks.
+- This closes contextual behavior wiring. Distinct canonical pose PNG extraction from the source sheet remains optional visual-asset polish, not a requirement for the current behavior contract.
 
 ### UI / accessibility polish
 - Preserved CocoCrunch cream notebook language rather than replacing it with generic SaaS styling.
@@ -85,7 +103,7 @@ Living handoff for the V2 rescue pass on `feat/p0-foundation` / PR #1. Update th
 
 ## Automated domain regression gate
 
-Build-green was not enough for the remaining invariant work, so the CI gate now runs domain tests as part of `npm run check`:
+Build-green was not enough for the remaining invariant work, so the CI gate runs domain tests as part of `npm run check`:
 
 `tsc --noEmit && vitest run && vite build`
 
@@ -99,25 +117,35 @@ The regression suite covers:
 - satisfaction updates only the requested Decision Record while preserving its official verdict;
 - planned and actual budget records remain independent and remaining budget cannot become negative;
 - responsibility suggestions remain advisory until explicitly applied;
-- official Group itinerary mutations are blocked without group confirmation while idea-save/personal draft and explicit Solo writes remain allowed.
+- official Group itinerary mutations are blocked without group confirmation while idea-save/personal draft and explicit Solo writes remain allowed;
+- concession binding restores the exact cloned vote snapshot on withdrawal;
+- real disruption cost is folded into the affected actual-spend category;
+- completed pace evidence maps deterministically to the retrospective summary.
 
-Package/test gate landed across `8269cc0152f658b47e46ad522b9f57266aaf22f3` and `83be6ea4945ae137130dcdfdf5d5c274694088bd`. Exact-head CI run #109 for `83be6ea4945ae137130dcdfdf5d5c274694088bd` completed successfully, including the new Vitest step through `npm run check`.
+Package/test gate landed across `8269cc0152f658b47e46ad522b9f57266aaf22f3` and `83be6ea4945ae137130dcdfdf5d5c274694088bd`. Exact-head CI run #109 for `83be6ea4945ae137130dcdfdf5d5c274694088bd` completed successfully.
 
 The post-trip fixture was corrected at `d6c8c20488c41129f26ee5d67e017b671655c001`: a previous test expected a food-positive result from one positive and one negative food signal, which correctly failed. The replacement fixture has an unambiguous net-positive food signal rather than weakening production logic to satisfy the test.
 
-The centralized group mutation guard was added in `src/domain/governance.ts` at `9cf868b6919bfafe47f7440b5475495f5cd575af`; regression coverage landed at `509394dccfb1635c4c532de2161531ae2fa2b482`. This is currently a domain guard and regression contract; active `AppRescued` call sites still need to route all official Group writes through it before the governance invariant can be called end-to-end closed.
+The centralized group mutation guard was added at `9cf868b6919bfafe47f7440b5475495f5cd575af`; regression coverage landed at `509394dccfb1635c4c532de2161531ae2fa2b482`.
 
-This automated suite covers pure domain invariants only. It does not prove browser orchestration, modal/drawer interaction, persistence reload, or rendered mobile behavior.
+The main active-App closure landed at `44e87ea6fa60985957ea82a095ae76517f016b8b`.
+Memory Trunk tactile keepsakes landed at `1ab88880d916b2cf18a79bcff77869e3970f3643`.
+Contextual Coco motion states landed at `f74f870eca6be556b10296e240a3a4e1a3dc27a5`.
+Expanded concession / role / retrospective regression coverage landed at `d3da1d5d893606d1b1a6fbb294e127ad9231d31e`, which passed exact-head CI run #128 including TypeScript, Vitest and Vite production build.
+
+This automated suite covers pure/domain and compile/build invariants. It does not prove rendered mobile behavior.
 
 ## Current status by previously-open item
 
-1. Tingo downstream wiring — **materially implemented in visible local prototype flow**; pure behavior now has regression coverage, rendered per-question behavior QA remains.
-2. Concession rollback (#23) — **prototype rollback implemented**; still needs interaction/browser QA because it is component state rather than a pure-domain transaction.
-3. Personality/Tingo role suggestions (#28) — **visible + explicit apply**, still Partial because member-level personality data is not individually assessed.
-4. Per-stop Worth It (#49) — **wired into confirmed learning**; pure reconciliation has regression coverage, persistence reload still needs browser replay.
-5. Preference/planned-vs-actual retrospective (#50) — **derived from active prototype state instead of fixed copy**; persistence schema now has `CompletedPaceEvidence`, but active App wiring is still outstanding.
-6. Category planned-vs-actual budget (#51) — **editable + persisted local prototype implementation wired**; actual-state helpers now have regression coverage, browser replay remains.
-7. Decision satisfaction / Decision History (#30 extension) — **specific-record UI + persistence wiring implemented**; specific-record mutation now has regression coverage, browser replay remains.
+1. Tingo downstream wiring — **materially implemented in visible local prototype flow**; rendered per-question behavior QA remains.
+2. Concession rollback (#23) — **code-wired closed**: explicit binding + exact snapshot withdrawal + stale-binding invalidation; rendered interaction QA remains.
+3. Personality/Tingo role suggestions (#28) — **code-wired closed for available assessment data**: assessed members use their own behavior source, unassessed members are truthfully labelled fallback, and apply remains explicit. Full per-member assessment onboarding is a future expansion rather than fake inference.
+4. Per-stop Worth It (#49) — **wired into confirmed learning**; browser persistence replay remains.
+5. Preference/planned-vs-actual retrospective (#50) — **code-wired closed** with persisted CompletedPaceEvidence + deterministic summary; browser reload replay remains.
+6. Category planned-vs-actual budget (#51) — **code-wired closed** with editable/persisted actuals and disruption-cost category reconciliation; browser reload replay remains.
+7. Decision satisfaction / Decision History (#30 extension) — **specific-record UI + persistence wiring implemented**; browser replay remains.
+8. Memory Trunk tactile interaction — **implemented** as open/close + semantic tap-to-lift keepsakes with focus/reduced-motion support; rendered visual QA remains.
+9. Contextual Coco behavior — **implemented** for travel/Court/memory contexts using the canonical sprite and context-specific purposeful motion; distinct source-sheet pose extraction remains optional visual polish.
 
 ## Invariant sweep observations
 
@@ -131,26 +159,18 @@ This automated suite covers pure domain invariants only. It does not prove brows
 - Court result calculation is fully proposal-ID agnostic.
 - Editing retrospective actual spend does not mutate the planned budget; plan and actual remain separate records.
 - Decision satisfaction updates one existing Decision Record rather than creating/replacing the official decision.
-- Pure-domain versions of several of these rules now fail CI if regressed.
-
-## Newly identified replay and governance gaps
-
-The #50 pace retrospective derives `actualPaceCopy` from `delay`, `mood`, and `arrivalChecked`. `persistence.ts` now defines optional `CompletedPaceEvidence`, but the active App still initializes those three values as runtime-only state and does not save the new record yet. Treat #50 as Partial until that App wiring is completed and replay-tested.
-
-The invariant sweep also found active Group-mode paths that can currently mutate shared-looking plan state without going through Court/group confirmation: Discover's `Add to plan`, Ask Coco's confirmed café-time move, and Smart Split creation. `gatePlanMutation()` now codifies the boundary and has regression coverage, but these call sites must be routed through proposal/group-confirmation semantics before the Group governance invariant is end-to-end closed. Do not relabel those buttons as safe merely because the domain guard exists.
+- Ask Coco and Smart Split no longer bypass Group Court in Group mode.
+- Discover group addition is explicitly a shortlist/draft action rather than an official plan write.
+- Pure-domain versions of several of these rules fail CI if regressed.
 
 ## Still open / do not call merge-ready yet
 
-- Wire `CompletedPaceEvidence` into active App initialization/save and browser-replay it.
-- Route every official Group itinerary mutation through the new governance gate / explicit group confirmation; especially Discover Add-to-plan, Ask Coco plan apply, and Smart Split.
 - Replay persistence in a real browser: edit actual category values, rate a decision, set pace evidence, reload, confirm all survive and computed retrospective remains correct.
-- Independently audit all #1–#53 requirements against active `AppRescued`; do not inherit Codex labels.
-- Extend regression coverage to the remaining pure business rules where practical; keep UI-only rules for browser QA rather than faking unit coverage.
-- Continue contextual canonical Coco extraction/usage beyond the current minimal idle asset.
 - Perform rendered mobile QA at 360 / 390 / 430 px: overflow, safe-area nav, touch targets, Court, Gacha, Packing, Memory Trunk, retrospective controls, drawers/modals, reduced motion.
-- Verify signature interaction quality in a real browser; source/CSS inspection is not visual validation.
+- Verify signature interaction feel in a real browser; source/CSS inspection is not visual validation.
+- Continue the independent #1–#53 audit before final merge recommendation.
 - Keep PR #1 open and unmerged until the final audit is complete.
 
 ## Current risk posture
 
-The branch now has an automated pure-domain regression gate plus a centralized Group plan-mutation contract, and the major retrospective state paths are mostly wired. It is still **not safe to merge yet** because the active App does not yet consume the new pace-evidence record or governance gate at all relevant call sites, browser persistence replay/rendered mobile/signature QA remain outstanding, contextual Coco coverage is incomplete, and the full #1–#53 audit is not finished.
+The requested #23 / #28 / #50 / #51 rescue targets, active Group mutation governance, Memory Trunk tactile behavior, and contextual Coco behavior are now implemented in code and protected by a stronger CI regression gate. The branch is substantially healthier, but it is still **not safe to merge yet** until browser persistence replay, rendered 360/390/430 mobile QA, signature-interaction visual QA, and the remaining #1–#53 audit are completed.
