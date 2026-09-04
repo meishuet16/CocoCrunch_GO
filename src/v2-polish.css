@@ -2,6 +2,18 @@
    Loaded last so the reference-led consumer UI can override legacy V1/editorial treatments
    without rewriting the existing stylesheet wholesale. */
 
+/* Slice 1 shared presentation vocabulary: use rhythm and contrast before decoration. */
+:root {
+  --space-1: 6px;
+  --space-2: 10px;
+  --space-3: 14px;
+  --space-4: 18px;
+  --space-5: 24px;
+  --ink-soft: #665852;
+  --surface-quiet: rgba(255,255,255,.44);
+  --surface-raised: rgba(255,255,255,.72);
+}
+
 /* Typography: keep the product friendly and contemporary, not editorial/Georgia-heavy. */
 .page-title h2,
 .home-hero h2,
@@ -77,7 +89,42 @@ select:focus-visible {
 .during-tools,
 .me-tools { border-top-color: rgba(147,5,0,.08); }
 .mini-tool { min-height: 60px; padding-block: 12px; }
-.paper-sheet { box-shadow: 0 8px 24px rgba(86,52,36,.04); }
+.paper-sheet { background: var(--surface-raised); box-shadow: 0 8px 24px rgba(86,52,36,.035); }
+
+/* Slice 1 hierarchy: calm status first, then the plan, then contextual detail. */
+.page-title { margin-bottom: var(--space-5); }
+.page-title h2 { margin-top: var(--space-2); letter-spacing: -.035em; }
+.page-title p { color: var(--ink-soft); }
+.journey-status { margin-bottom: var(--space-4); padding: 20px; gap: 16px; border-radius: 22px; background: var(--surface-raised); box-shadow: 0 10px 26px rgba(86,52,36,.045); }
+.journey-status h3 { letter-spacing: -.025em; }
+.status-strip--home { gap: 0; margin-bottom: var(--space-3); border-top: 1px solid rgba(147,5,0,.1); border-bottom: 1px solid rgba(147,5,0,.1); }
+.status-strip--home div { min-width: 0; padding: 12px 8px; border: 0; }
+.status-strip--home div:nth-child(odd) { border-right: 1px solid rgba(147,5,0,.08); }
+.status-strip--home div:nth-child(n + 3) { border-top: 1px solid rgba(147,5,0,.08); }
+.status-strip span { color: var(--ink-soft); }
+.trip-plan-overview { gap: var(--space-4); }
+.trip-intent-summary,
+.group-signal-summary { margin: 0; padding: 16px; border: 0; border-top: 1px solid rgba(147,5,0,.1); border-bottom: 1px solid rgba(147,5,0,.1); border-radius: 0; background: var(--surface-quiet); }
+.trip-intent-summary h3,
+.group-signal-summary h3 { letter-spacing: -.02em; }
+.itinerary-sheet { border-radius: 16px; background: var(--surface-raised); }
+.sheet-heading { min-height: 68px; padding: 16px 15px; background: linear-gradient(180deg, rgba(149,187,234,.12), transparent); }
+.itinerary-row { padding: 16px 14px; }
+.itinerary-row b { letter-spacing: -.01em; }
+.trip-plan-overview .plan-health { padding-top: 16px; }
+.plan-health--overview { margin-top: 0; }
+.contextual-tool-list { margin-top: var(--space-4); }
+.ready-to-go-card { margin-top: var(--space-4); padding: 17px; border-radius: 16px; background: var(--surface-raised); }
+.section-rule,
+.explore-section-heading { min-height: 34px; margin: 24px 0 10px; letter-spacing: .08em; }
+.section-rule button,
+.explore-section-heading button { min-height: 34px; }
+.primary,
+.secondary { border-radius: 11px; }
+.itinerary-row:focus-visible,
+.trip-intent-summary:focus-within,
+.group-signal-summary:focus-within,
+.ready-to-go-card:focus-within { outline: 2px solid rgba(149,187,234,.72); outline-offset: 3px; }
 
 /* Narrow-phone resilience. */
 @media (max-width: 390px) {
