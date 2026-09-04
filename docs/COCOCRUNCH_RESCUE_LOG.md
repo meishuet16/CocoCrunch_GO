@@ -437,4 +437,4 @@ Slice 4 closes the approved visual-refinement pass through accessibility semanti
 ### PR and checkpoint state
 
 - PR #1 remains open and unmerged; no push to main was performed.
-- PR description sync is pending the final feature-branch push and is handled as a separate metadata update after the bounded Slice 4 commit.
+- PR description was synchronized after pushing feat/p0-foundation. GitHub reports PR #1 open and unmerged; exact pushed head b1250b6668665cf892628207da49d6184df0d1f2 passed CI run #131.
