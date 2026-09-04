@@ -1,5 +1,5 @@
-import { sanitizeAmount, type BudgetActuals, type BudgetCategory } from './budget';
-import type { DecisionRecord } from '../persistence';
+import { sanitizeAmount, type BudgetActuals, type BudgetCategory, type BudgetPlan } from './budget';
+import type { CompletedPaceEvidence, DecisionRecord } from '../persistence';
 
 export type DecisionSatisfaction = NonNullable<DecisionRecord['satisfaction']>;
 
@@ -14,6 +14,26 @@ export function normalizeBudgetActuals(actuals: Partial<BudgetActuals> | undefin
 
 export function updateBudgetActual(actuals: BudgetActuals, category: BudgetCategory, value: number): BudgetActuals {
   return { ...actuals, [category]: sanitizeAmount(value) };
+}
+
+/** Fold a real disruption cost into the category where it was incurred, so total and category retrospective agree. */
+export function applyActualAdjustment(actuals: BudgetActuals, category: BudgetCategory, amount: number): BudgetActuals {
+  return updateBudgetActual(actuals, category, actuals[category] + sanitizeAmount(amount));
+}
+
+export function paceEvidenceSummary(evidence: CompletedPaceEvidence | undefined): string {
+  if (!evidence) return 'No completed pace signal yet';
+  if (evidence.delayed || evidence.mood === 'tired') return 'Slower than planned after disruption / energy change';
+  if (evidence.arrivalChecked) return 'Matched the planned rhythm';
+  return 'No completed pace signal yet';
+}
+
+export function plannedVsActualSummary(plan: BudgetPlan, actuals: BudgetActuals): string[] {
+  return (Object.keys(plan) as BudgetCategory[]).map(category => {
+    const delta = actuals[category] - plan[category];
+    if (delta === 0) return `${category}: on plan`;
+    return `${category}: RM ${Math.abs(delta)} ${delta > 0 ? 'over' : 'under'} plan`;
+  });
 }
 
 export function rateDecision(history: DecisionRecord[], id: string, satisfaction: DecisionSatisfaction): DecisionRecord[] {
