@@ -13,7 +13,8 @@ describe('journey phase guides', () => {
 
     expect(html.indexOf('Actual outcome')).toBeLessThan(html.indexOf('Worth It / reflection'));
     expect(html.indexOf('Worth It / reflection')).toBeLessThan(html.indexOf('Proposed learning'));
-    expect(html).toContain('do not replace it');
+    expect(html.indexOf('Proposed learning')).toBeLessThan(html.indexOf('Explicit confirmation'));
+    expect(html).toContain('Only after explicit confirmation can Memory Trunk, Photo Map, Ghost Wish, Future Postcard, or sharing become expressive.');
   });
 
   it('keeps Memories as a doorway back to retrospective', () => {
@@ -21,14 +22,14 @@ describe('journey phase guides', () => {
 
     expect(html).toContain('RETROSPECTIVE FIRST');
     expect(html).toContain('Review active trip');
-    expect(html).toContain('explicit confirmation');
+    expect(html).toContain('Review first, then keep the memory.');
   });
 
   it('keeps Explore governed by the active trip', () => {
     const html = renderToStaticMarkup(<ExplorePlanningGuide onOpenTrip={() => undefined} />);
 
     expect(html).toContain('FEED THE ACTIVE TRIP');
-    expect(html).toContain('Save an idea');
+    expect(html).toContain('Save idea → Suggest to group');
     expect(html).toContain('never edits the official itinerary');
   });
 
@@ -37,6 +38,6 @@ describe('journey phase guides', () => {
 
     expect(html).toContain('LONG-TERM IDENTITY');
     expect(html).toContain('separate from this trip’s Vibe and constraints');
-    expect(html).toContain('never silently overwrites it');
+    expect(html).toContain('Review, retake, or update your Tingo Card intentionally.');
   });
 });
