@@ -34,7 +34,7 @@ import {
 } from './domain/tingo';
 import { tripIntentIsReviewable, type TripIntent } from './domain/trip-intent';
 import { checkFeasibility, comparisonOptions, importPhotoMetadata } from './domain/adapters';
-import { deriveGroupDNA, type MemberPreferenceProfile } from './domain/group-dna';
+import { deriveGroupDNA, scopeGroupDNAForMode, type MemberPreferenceProfile } from './domain/group-dna';
 import { candidateFromDiscovery, generateTripPlan } from './domain/itinerary';
 import { deriveJourneyState, transitionReadyConfirmation } from './domain/journey-state';
 import { calculatePlanHealth } from './domain/plan-health';
@@ -254,7 +254,8 @@ export default function AppRescued() {
     preferences: memberPreferenceProfiles[member.id]?.preferences ?? [],
     budget: memberPreferenceProfiles[member.id]?.budget,
   })), [members, memberPreferenceProfiles]);
-  const groupDNA = useMemo(() => deriveGroupDNA(groupMemberInputs), [groupMemberInputs]);
+  const derivedGroupDNA = useMemo(() => deriveGroupDNA(groupMemberInputs), [groupMemberInputs]);
+  const groupDNA = useMemo(() => scopeGroupDNAForMode(mode, derivedGroupDNA), [mode, derivedGroupDNA]);
   const budgetPlan = mode === 'group' ? groupBudgetPlan : soloBudgetPlan;
   const budgetActuals = mode === 'group' ? groupBudgetActuals : soloBudgetActuals;
   const budgetTotal = mode === 'group' ? groupBudgetTotal : soloBudgetTotal;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { deriveGroupDNA, type GroupMemberInput } from './group-dna';
+import { deriveGroupDNA, scopeGroupDNAForMode, type GroupMemberInput } from './group-dna';
 import { defaultTingoDimensions, deriveTingoBehavior } from './tingo';
 import { generateTripPlan, type DestinationCandidate } from './itinerary';
 import type { GroupDNA } from './group-dna';
@@ -41,6 +41,23 @@ describe('Group Travel DNA', () => {
     expect(dna.sharedPriorities).toHaveLength(0);
     expect(dna.evidence.join(' ')).toContain('JH');
     expect(dna.evidence.join(' ')).toContain('not assessed');
+  });
+
+  it('does not carry Group DNA conflicts into the active Solo operational state', () => {
+    const groupDNA = deriveGroupDNA([
+      { id: 'mei', name: 'Mei', tingoAssessed: true, preferences: [{ id: 'm', label: 'Night market', kind: 'must-go', strength: 'strong', source: 'member' }] },
+      { id: 'jh', name: 'JH', tingoAssessed: false, preferences: [{ id: 'j', label: 'Night market', kind: 'strongly-avoid', strength: 'strong', source: 'member' }] },
+    ]);
+
+    const soloDNA = scopeGroupDNAForMode('solo', groupDNA);
+    const soloPlan = generateTripPlan({ ...itineraryInput, groupDNA: soloDNA });
+    const soloHealth = calculatePlanHealth({ plan: soloPlan, budget: 300, groupDNA: soloDNA, tingoBehavior, dealBreaker: '' });
+
+    expect(groupDNA.conflicts).toHaveLength(1);
+    expect(soloDNA.conflicts).toHaveLength(0);
+    expect(soloDNA.sharedPriorities).toHaveLength(0);
+    expect(soloHealth.metrics.unresolvedConflicts).toBe(0);
+    expect(soloPlan.unresolvedRisks.some(risk => risk.includes('Group DNA conflict'))).toBe(false);
   });
 
   it('retains optional support and the observed budget range', () => {

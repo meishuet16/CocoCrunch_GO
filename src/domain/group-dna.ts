@@ -140,3 +140,19 @@ export function deriveGroupDNA(members: GroupMemberInput[]): GroupDNA {
 
   return { sharedPriorities, optionalPreferences, budgetRange, budgetSensitivity, conflicts, evidence };
 }
+
+/**
+ * Scope derived Group DNA to the active trip mode. Group member data remains available
+ * for returning to a Group trip, but Solo operations must not inherit group signals.
+ */
+export function scopeGroupDNAForMode(mode: 'group' | 'solo', groupDNA: GroupDNA): GroupDNA {
+  if (mode === 'group') return groupDNA;
+  return {
+    sharedPriorities: [],
+    optionalPreferences: [],
+    budgetRange: { min: 0, max: 0 },
+    budgetSensitivity: 'low',
+    conflicts: [],
+    evidence: [],
+  };
+}
