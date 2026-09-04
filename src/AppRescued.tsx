@@ -10,6 +10,7 @@ import { TripJourneyStatus } from './components/TripJourneyStatus';
 import { TripSpatialView } from './components/TripSpatialView';
 import { ContextualToolList, type ContextualTool } from './components/ContextualToolList';
 import { TripPlanOverview } from './components/TripPlanOverview';
+import { TripRetrospective } from './components/TripRetrospective';
 import { courtTally, type CourtOption, type CourtVote } from './domain/court';
 import { attachCourtConcession, withdrawCourtConcession, type CourtConcession } from './domain/concession';
 import { gatePlanMutation } from './domain/governance';
@@ -20,11 +21,11 @@ import {
 } from './domain/budget';
 import { discoverPlaces, type DiscoveryPlace } from './domain/discovery';
 import {
-  learningSummary, reconcileTripLearning, reviewLearningSummary,
   type TravelProfile, type TripReview,
 } from './domain/preferences';
+import { buildLearningProposal, confirmLearningProposal, type LearningProposal } from './domain/learning';
 import { normalizeBudgetActuals, paceEvidenceSummary, rateDecision, updateBudgetActual } from './domain/retrospective';
-import { derivePersistedTripState, loadPersisted, savePersisted, type CompletedPaceEvidence, type CourtOptionState, type DecisionRecord } from './persistence';
+import { derivePersistedTripState, loadPersisted, savePersisted, type CompletedPaceEvidence, type ConfirmedLearningRecord, type CourtOptionState, type DecisionRecord } from './persistence';
 import { RecommendationEvidenceText } from './components/RecommendationEvidenceText';
 import { TripLifecycleTabs, TripWorkspaceContext, TripWorkspaceHeader, type TripPhase } from './components/TripWorkspace';
 import {
@@ -175,7 +176,8 @@ export default function AppRescued() {
   const [receiptPrinted, setReceiptPrinted] = useState(false);
   const [worthIt, setWorthIt] = useState<TripReview | null>(stored.worthIt ?? null);
   const [profileLearned, setProfileLearned] = useState(Boolean(stored.profileLearned));
-  const [learningChanges, setLearningChanges] = useState<string[]>([]);
+  const [learningProposal, setLearningProposal] = useState<LearningProposal | null>(stored.learningProposal ?? null);
+  const [confirmedLearningHistory, setConfirmedLearningHistory] = useState<ConfirmedLearningRecord[]>(stored.confirmedLearningHistory ?? []);
   const [tingoAnswers, setTingoAnswers] = useState<TingoAnswer[]>(stored.tingoAnswers ?? []);
   const [tingoStep, setTingoStep] = useState(0);
   const [basePackingPreferences, setBasePackingPreferences] = useState<string[]>(stored.basePackingPreferences ?? ['comfortable walking shoes', 'portable charger', 'light rain layer']);
@@ -301,6 +303,7 @@ export default function AppRescued() {
   const completedPaceEvidence: CompletedPaceEvidence = { delayed: delay, mood, arrivalChecked };
   const actualPaceCopy = paceEvidenceSummary(completedPaceEvidence);
   const tingoComplete = tingoCompletion(tingoAnswers) === 100;
+  const outcomeReviewed = actualPaceCopy !== 'No completed pace signal yet' || Boolean(photoImport || journalGenerated || Object.keys(itemReviews).length > 0);
   const journeyState = useMemo(() => deriveJourneyState({
     phase: tripPhase,
     tripCreated,
@@ -317,9 +320,9 @@ export default function AppRescued() {
     repairAvailable: Boolean(repairPreview?.applicable),
     repairRequiresGroupConfirmation: Boolean(repairPreview?.requiresGroupConfirmation),
     currentStopNeedsCheckIn: tripPhase === 'traveling' && !arrivalChecked,
-    outcomeReviewed: Boolean(photoImport || journalGenerated || Object.keys(itemReviews).length > 0),
+    outcomeReviewed,
     worthItRecorded: Boolean(worthIt),
-    learningProposalPending: Boolean(worthIt && !profileLearned),
+    learningProposalPending: Boolean(worthIt && !profileLearned && learningProposal?.status !== 'dismissed'),
     learningConfirmed: profileLearned,
   }), [
     arrivalChecked,
@@ -332,6 +335,8 @@ export default function AppRescued() {
     planHealth.metrics.unresolvedConflicts,
     planHealth.overall,
     profileLearned,
+    learningProposal,
+    outcomeReviewed,
     readyConfirmed,
     replanApplied,
     repairPreview?.applicable,
@@ -353,15 +358,14 @@ export default function AppRescued() {
       privacy, continuousLocation,
       recommendations: recommendations.map(({ name, saved, added }) => ({ name, saved, added })),
       tripIntent,
-      worthIt, profileLearned, tingoAnswers, tingoDimensions, basePackingPreferences, tripCreated,
+      worthIt, profileLearned, learningProposal: learningProposal?.status === 'confirmed' ? undefined : learningProposal ?? undefined, confirmedLearningHistory, tingoAnswers, tingoDimensions, basePackingPreferences, tripCreated,
       members, memberPreferenceProfiles, backupCandidates, appliedRepair: appliedRepair ?? undefined, constraints, reminders, commitments, reunion, published, memoryNote, memoryPublic, itemReviews,
     });
-  }, [mode, destination, readyConfirmed, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals, delay, mood, arrivalChecked, privacy, continuousLocation, recommendations, tripIntent, worthIt, profileLearned, tingoAnswers, tingoDimensions, basePackingPreferences, tripCreated, members, memberPreferenceProfiles, backupCandidates, appliedRepair, constraints, reminders, commitments, reunion, published, memoryNote, memoryPublic, itemReviews]);
+  }, [mode, destination, readyConfirmed, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals, delay, mood, arrivalChecked, privacy, continuousLocation, recommendations, tripIntent, worthIt, profileLearned, learningProposal, confirmedLearningHistory, tingoAnswers, tingoDimensions, basePackingPreferences, tripCreated, members, memberPreferenceProfiles, backupCandidates, appliedRepair, constraints, reminders, commitments, reunion, published, memoryNote, memoryPublic, itemReviews]);
 
   function setProfileField(field: keyof TravelProfile, value: string) {
     setProfile(current => ({ ...current, [field]: value }));
     setProfileLearned(false);
-    setLearningChanges([]);
   }
 
   function setTripInputField(field: keyof TripScopedInputs, value: string) {
@@ -489,11 +493,37 @@ export default function AppRescued() {
     emitExperience({ type: 'send-family-reassurance', destination, privacy, delayed: delay });
   }
 
+  function buildCurrentLearningProposal(review: TripReview) {
+    const proposal = buildLearningProposal({ answers: tingoAnswers, tripReview: review, itemReviews, actualPace: actualPaceCopy });
+    setLearningProposal(proposal);
+  }
+
+  function recordWorthIt(value: TripReview) {
+    if (!outcomeReviewed) return;
+    setWorthIt(value);
+    setProfileLearned(false);
+    buildCurrentLearningProposal(value);
+  }
+
+  function dismissLearning() {
+    if (!learningProposal) return;
+    setLearningProposal({ ...learningProposal, status: 'dismissed' });
+    setProfileLearned(false);
+  }
+
   function confirmLearning() {
-    if (!worthIt) return;
-    const next = reconcileTripLearning(profile, worthIt, itemReviews);
-    setLearningChanges([...learningSummary(profile, next), ...reviewLearningSummary(itemReviews)]);
-    setProfile(next);
+    if (!learningProposal || learningProposal.status !== 'proposed') return;
+    const nextAnswers = confirmLearningProposal(tingoAnswers, learningProposal);
+    const record: ConfirmedLearningRecord = {
+      id: `confirmed-${learningProposal.id}`,
+      proposalId: learningProposal.id,
+      confirmedAt: new Date().toISOString(),
+      sourceTripReview: learningProposal.source.tripReview,
+      changes: learningProposal.changes,
+    };
+    setTingoAnswers(nextAnswers);
+    setConfirmedLearningHistory(history => [record, ...history.filter(item => item.proposalId !== record.proposalId)]);
+    setLearningProposal({ ...learningProposal, status: 'confirmed' });
     setProfileLearned(true);
   }
 
@@ -604,7 +634,12 @@ export default function AppRescued() {
   function finishTingo() {
     const dimensions = scoreTingo(tingoAnswers);
     setRecommendations(current => makeRecommendations(destination, dimensions, current));
-    setProfile(current => ({ ...current, vibe: dimensions.food >= 2 ? 'Relax + Food' : dimensions.adventure >= 2 ? 'Culture + Adventure' : 'Slow + Flexible', flexible: dimensions.flexibility >= 2 ? 'Evening activity can move' : 'Explain changes before moving anything' }));
+  }
+
+  function retakeTingo() {
+    setTingoAnswers([]);
+    setTingoStep(0);
+    setDrawer('tingo');
   }
 
   function updateConstraint(type: TripConstraint['type'], value: string) {
@@ -801,6 +836,7 @@ export default function AppRescued() {
     const photoMetadata = photoImport ? importPhotoMetadata() : null;
     return <>
       <SectionTitle kicker="AFTER · MEMORY TRUNK" title="Keep what the trip taught you." copy="Photos, choices, little failures, and the things you would do again."/>
+      <TripRetrospective actualSummary={{ pace: actualPaceCopy, spent, decisions: decisionHistory.length, outcomeRecorded: outcomeReviewed }} worthIt={worthIt} proposal={learningProposal} learningConfirmed={profileLearned} onRecordReflection={recordWorthIt} onBuildProposal={() => { if (worthIt) buildCurrentLearningProposal(worthIt); }} onConfirmLearning={confirmLearning} onDismissLearning={dismissLearning} onOpenMemory={() => { setTrunkOpen(true); setSelectedKeepsake(null); }} />
       <button className={`trunk-hero trunk-button ${trunkOpen ? 'open' : ''}`} aria-expanded={trunkOpen} onClick={() => { setTrunkOpen(open => !open); setSelectedKeepsake(null); }}><div className="trunk-lid"/><div className="trunk-body"><span className="postcard p1">{destination.toUpperCase()}</span><span className="postcard p2">雨の日</span><span className="ticket">10.13</span><Coco tiny mood="happy" context="memory"/></div><small>{trunkOpen ? 'Tap to close the trunk' : 'Tap to open the trunk'}</small></button>
       {trunkOpen && <section className="trunk-contents paper-sheet"><b>Trip keepsakes · tap to lift</b>{keepsakes.map(item => <button key={item.id} className={`trunk-keepsake ${selectedKeepsake === item.id ? 'active' : ''}`} aria-pressed={selectedKeepsake === item.id} onClick={() => setSelectedKeepsake(current => current === item.id ? null : item.id)}>{item.label}</button>)}</section>}
       <section className="memory-actions"><button onClick={() => { setPhotoIndexed(true); setPhotoImport(true); }}><Map size={20}/><span><b>Photo Map</b><small>{photoIndexed ? `${importPhotoMetadata().imported} photos indexed · ${importPhotoMetadata().grouped} areas` : 'Index local photo metadata'}</small></span></button><button onClick={() => setJournalGenerated(true)}><BookOpen size={20}/><span><b>Travel journal</b><small>{journalGenerated ? 'Draft generated' : 'Generate from timeline + photos'}</small></span></button></section>
@@ -822,7 +858,6 @@ export default function AppRescued() {
       {journalGenerated && <section className="postcard-note"><span>OCT 13 · {destination.toUpperCase()}</span><p>Rain changed the evening, but the group kept the one thing everyone cared about. We ended up underground, warmer, later, and somehow happier.</p><small>Prototype draft · editable before saving</small></section>}
       <section className="ghost-wish"><span>GHOST WISH CEMETERY</span><h3>Trips that didn’t make it.</h3>{ghostWishes.map(wish => <div className={`ghost-wish-row ${wish.status}`} key={wish.id}><div><b>{wish.name}</b><small>{wish.reason}</small><em>{wish.status === 'resting' ? 'Still remembered' : wish.status === 'revived' ? 'Revived into Backup Plan' : 'Released, history kept'}</em></div>{wish.status === 'resting' && <div><button onClick={() => setGhostWishes(items => items.map(item => item.id === wish.id ? { ...item, status: 'revived' } : item))}>Revive</button><button onClick={() => setGhostWishes(items => items.map(item => item.id === wish.id ? { ...item, status: 'released' } : item))}>超度行程</button></div>}</div>)}</section>
       <section className="future-postcard"><span>FUTURE POSTCARD</span><h3>To your next-trip self.</h3>{postcardSealed ? <div className="sealed-postcard"><b>✉ Sealed for the next trip</b><button onClick={() => setPostcardSealed(false)}>Reopen</button></div> : <><textarea value={futurePostcard} onChange={e => setFuturePostcard(e.target.value)}/><button className="primary" onClick={() => setPostcardSealed(true)}>Seal postcard</button></>}</section>
-      <section className="worth-card"><span>WORTH IT?</span><h3>Would you choose this kind of day again?</h3><div>{(['yes','mixed','no'] as const).map(value => <button key={value} className={worthIt === value ? 'active' : ''} onClick={() => { setWorthIt(value); setProfileLearned(false); setLearningChanges([]); }}>{value === 'yes' ? 'Worth it' : value === 'mixed' ? 'Mixed' : 'Not really'}</button>)}</div>{worthIt && <p>Coco combines your overall review with stop-level reviews, but only after you confirm it.</p>}{worthIt && <button className="secondary" onClick={confirmLearning}>{profileLearned ? '✓ Profile updated' : 'Confirm this learning'}</button>}{learningChanges.length > 0 && <div className="learning-changes">{learningChanges.map(change => <small key={change}>{change}</small>)}</div>}</section>
       <section className="review-ledger paper-sheet"><div><span>Budget vs actual</span><b>RM {spent} spent</b><small>RM {remaining} remaining</small></div><div><span>Decisions</span><b>{decisionHistory.length} recorded</b><small>{decisionHistory[0] ? `${decisionHistory[0].topic} · ${decisionHistory[0].decision}` : 'No Court history yet'}</small></div></section>
       {decisionHistory.length > 0 && <section className="review-items"><div className="section-rule"><span>DECISION HISTORY · SATISFACTION</span><span className="quiet-note">Saved to the exact decision</span></div>{decisionHistory.map(record => <div className="review-item" key={record.id}><div><b>{record.topic}</b><small>{record.decision} · {record.usedGacha ? 'Gacha tie-break' : record.kind === 'court' ? 'Court decision' : 'Emergency decision'}</small></div><div className="rating-row">{(['worth','mixed','skip'] as const).map(value => <button key={value} className={record.satisfaction === value ? 'active' : ''} onClick={() => rateDecisionRecord(record.id, value)}>{value === 'worth' ? 'Worth it' : value === 'mixed' ? 'Mixed' : 'Skip next time'}</button>)}</div></div>)}</section>}
       <section className="compare-ledger"><span>CATEGORY BUDGET · PLANNED VS ACTUAL</span>{categoryVariance.map(item => <div key={item.category}><b>{item.category}</b><i className={item.status === 'over' ? 'actual' : ''}/><small>RM {item.planned} planned · RM {item.actual} actual · {item.status}</small></div>)}{budgetLearningNotes.length > 0 && <p>{budgetLearningNotes.join(' ')}</p>}</section>
@@ -836,6 +871,8 @@ export default function AppRescued() {
       <SectionTitle kicker="ME · COCO PROFILE" title="How do you actually like to travel?" copy="Private preferences first. Group DNA comes after."/>
       <section className="profile-hero paper-sheet"><Coco mood="happy" context="travel"/><div><span>MEI · LONG-TERM TINGO IDENTITY</span><h3>{tingoCompletion(tingoAnswers) === 100 ? describeTingo(tingoDimensions).slice(0, 2).join(' · ') : 'Your travel rhythm is still forming.'}</h3><p>{tingoBehavior.recommendationBias}-leaning · {tingoBehavior.budgetMode} · {tingoBehavior.changeStyle}</p></div></section>
       <section className="tingo-summary paper-sheet"><div><span>TINGO CARD</span><h3>{tingoCompletion(tingoAnswers) === 100 ? 'A profile Coco can explain.' : 'Let Coco learn your travel rhythm.'}</h3><p>{describeTingo(tingoDimensions).join(' · ')}</p></div><button className="primary" onClick={() => setDrawer('tingo')}>{tingoCompletion(tingoAnswers) === 100 ? 'Review Card' : 'Take assessment'} <ChevronRight size={15}/></button></section>
+      {learningProposal?.status === 'proposed' && <section className="learning-handoff paper-sheet"><div><span>TRIP LEARNING · REVIEW BEFORE APPLY</span><h3>{destination} has a proposal for your long-term Tingo.</h3><p>These changes came from this trip’s actual outcome and will not apply until you confirm them.</p>{learningProposal.changes.map(change => <small key={change.questionId}>{change.questionId}: {change.beforeOptionId ?? 'none'} → {change.afterOptionId} · {change.reason}</small>)}</div><div className="learning-handoff-actions"><button className="secondary" onClick={() => openTrip('completed')}>Review in Completed</button><button className="primary" onClick={confirmLearning}>Confirm this learning</button><button className="secondary" onClick={dismissLearning}>Dismiss</button></div></section>}
+      {confirmedLearningHistory.length > 0 && <section className="learning-history paper-sheet"><span>CONFIRMED TINGO LEARNING</span><h3>What you chose to carry forward</h3>{confirmedLearningHistory.slice(0, 3).map(record => <div key={record.id}><b>{record.sourceTripReview === 'yes' ? 'Worth it' : record.sourceTripReview === 'mixed' ? 'Mixed' : 'Not really'} · {new Date(record.confirmedAt).toLocaleDateString()}</b>{record.changes.map(change => <small key={change.questionId}>{change.questionId}: {change.beforeOptionId ?? 'none'} → {change.afterOptionId}</small>)}</div>)}</section>}
       <section className="trip-owned-note paper-sheet"><span>TRIP-OWNED INTENT</span><b>Vibe, Must-Go, Deal Breaker, Preference, and Flexible belong to the active trip.</b><small>Open Trips to review this journey’s choices without changing your long-term Tingo Card.</small><button className="secondary" onClick={() => openTrip('planning')}>Open active trip <ChevronRight size={14}/></button></section>
       <section className="base-packing"><div><span>BASE PACKING HABITS</span><b>Inherited by every new checklist</b></div><div className="packing-preferences">{basePackingPreferences.map(item => <button key={item} onClick={() => setBasePackingPreferences(current => current.filter(value => value !== item))}>{item} ×</button>)}<button className="add-preference" onClick={() => setBasePackingPreferences(current => current.includes('medication pouch') ? current : [...current, 'medication pouch'])}>+ medication pouch</button></div></section>
       <section className="me-tools"><MiniTool icon={PackageCheck} label="Packing ownership" note="Shared items have one clear owner" onClick={openPacking}/><MiniTool icon={Heart} label="Profile history" note={profileLearned ? 'Confirmed learning is saved' : 'No new learning confirmed'} onClick={() => setDrawer('tingo')}/></section>
@@ -846,7 +883,7 @@ export default function AppRescued() {
     if (!drawer) return null;
     return <div className="overlay" onMouseDown={() => setDrawer(null)}><section className="drawer" onMouseDown={e => e.stopPropagation()}><button className="close" onClick={() => setDrawer(null)}><X size={20}/></button>
       {drawer === 'discover' && <><span className="drawer-kicker">DISCOVER · COCO PICKS</span><h3>Where are we going?</h3><p className="drawer-copy">Search Tokyo, Kyoto or Osaka for destination-aware prototype data. Unknown destinations are explicitly marked as fallback examples. Ranking uses your current Tingo dimensions.</p><div className="discover-search"><input className="big-input" value={destination} onChange={e => { setDestination(e.target.value); setDestinationSearched(false); }} placeholder="Tokyo, Kyoto, Osaka…"/><button className="primary" onClick={searchDestination}>Search</button></div>{destinationSearched && <div className="discover-results"><span className="drawer-kicker">FOR YOUR {destination.toUpperCase()} TRIP · {tingoBehavior.recommendationBias.toUpperCase()} BIAS</span>{recommendations.map(place => <article className="community-row discover-row" key={place.id}><div><b>{place.name}</b><small>{place.match}% Tingo-adjusted match · {place.type}</small><small>{place.cost} · {place.duration}</small><small><strong>Why Coco picked this:</strong> {place.why}</small><small>{place.source === 'prototype-catalog' ? 'Local prototype catalog' : 'Fallback example · not live destination data'}</small><div className="inline-actions"><button onClick={() => toggleRecommendation(place.id, 'save')}>{place.saved ? '✓ Saved' : 'Save idea'}</button><button onClick={() => toggleRecommendation(place.id, 'add')}>{mode === 'group' ? (place.added ? '✓ Suggested to group' : 'Suggest to group') : (place.added ? '✓ In plan' : 'Add to plan')}</button></div>{mode === 'group' && <small>Suggestion only · the official Group itinerary changes only after group confirmation.</small>}</div></article>)}</div>}</>}
-      {drawer === 'tingo' && <><span className="drawer-kicker">TINGO CARD · {tingoCompletion(tingoAnswers)}% COMPLETE</span><h3>Tell Coco what a good trip feels like.</h3><p className="drawer-copy">Six small choices become a persistent, explainable profile — not a personality label.</p>{tingoCompletion(tingoAnswers) < 100 ? <><div className="assessment-progress"><i style={{ width: `${tingoCompletion(tingoAnswers)}%` }}/></div><div className="assessment-question"><span>QUESTION {tingoStep + 1} / {tingoQuestions.length}</span><b>{tingoQuestions[tingoStep].prompt}</b></div><div className="assessment-options">{tingoQuestions[tingoStep].options.map(option => <button key={option.id} className={tingoAnswers.some(answer => answer.questionId === tingoQuestions[tingoStep].id && answer.optionId === option.id) ? 'active' : ''} onClick={() => answerTingo(option.id)}><b>{option.label}</b><small>{option.hint}</small></button>)}</div></> : <><div className="tingo-result"><span>YOUR TRAVEL DNA</span><b>{describeTingo(tingoDimensions).join(' · ')}</b><small>{tingoPlanGuidance.itineraryGuidance} {tingoPlanGuidance.accommodationGuidance}</small></div><button className="primary" onClick={finishTingo}>Refresh profile + recommendations</button></>}</>}
+      {drawer === 'tingo' && <><span className="drawer-kicker">TINGO CARD · {tingoCompletion(tingoAnswers)}% COMPLETE</span><h3>Tell Coco what a good trip feels like.</h3><p className="drawer-copy">Six small choices become a persistent, explainable profile — not a personality label.</p>{tingoCompletion(tingoAnswers) < 100 ? <><div className="assessment-progress"><i style={{ width: `${tingoCompletion(tingoAnswers)}%` }}/></div><div className="assessment-question"><span>QUESTION {tingoStep + 1} / {tingoQuestions.length}</span><b>{tingoQuestions[tingoStep].prompt}</b></div><div className="assessment-options">{tingoQuestions[tingoStep].options.map(option => <button key={option.id} className={tingoAnswers.some(answer => answer.questionId === tingoQuestions[tingoStep].id && answer.optionId === option.id) ? 'active' : ''} onClick={() => answerTingo(option.id)}><b>{option.label}</b><small>{option.hint}</small></button>)}</div></> : <><div className="tingo-result"><span>YOUR TRAVEL DNA</span><b>{describeTingo(tingoDimensions).join(' · ')}</b><small>{tingoPlanGuidance.itineraryGuidance} {tingoPlanGuidance.accommodationGuidance}</small></div><button className="primary" onClick={finishTingo}>Refresh profile + recommendations</button><button className="secondary" onClick={retakeTingo}>Retake Tingo Card</button></>}</>}
       {drawer === 'tripSetup' && <><span className="drawer-kicker">NEW TRIP · BEFORE</span><h3>Give this journey a shape.</h3><label className="setup-field"><span>Destination</span><input className="big-input" value={destination} onChange={e => { setDestination(e.target.value); setDestinationSearched(false); }}/></label><div className="mode-toggle"><button className={mode === 'group' ? 'active' : ''} onClick={() => setMode('group')}>Group</button><button className={mode === 'solo' ? 'active' : ''} onClick={() => setMode('solo')}>Solo</button></div><div className="setup-fields"><label><span>Trip vibe / goal</span><input value={tripInputs.tripVibe} onChange={e => setTripInputField('tripVibe', e.target.value)}/></label><label><span>Must-Go anchor</span><input value={tripInputs.mustGo} onChange={e => setTripInputField('mustGo', e.target.value)}/></label><label><span>Deal breaker</span><input value={tripInputs.dealBreaker} onChange={e => setTripInputField('dealBreaker', e.target.value)}/></label><label><span>Preference</span><input value={tripInputs.preference} onChange={e => setTripInputField('preference', e.target.value)}/></label><label><span>Flexible</span><input value={tripInputs.flexible} onChange={e => setTripInputField('flexible', e.target.value)}/></label></div><div className="constraint-row"><button onClick={() => updateConstraint('must-go', tripInputs.mustGo)}>Save Must-Go</button><button onClick={() => updateConstraint('deal-breaker', tripInputs.dealBreaker)}>Save Deal Breaker</button><button onClick={() => updateConstraint('preference', tripInputs.preference)}>Save Preference</button><button onClick={() => updateConstraint('flexible', tripInputs.flexible)}>Save Flexible</button></div><div className="adapter-note"><b>Coco plan adapter</b><small>{tingoPlanGuidance.itineraryGuidance} {tingoPlanGuidance.budgetGuidance} No live weather, map, or pricing service is connected.</small></div><button className="primary" onClick={() => { setReadyConfirmed(current => transitionReadyConfirmation(current, 'confirm-trip-setup')); setTripCreated(true); setDrawer(null); openTrip('planning'); }}>Confirm inputs & open plan <ChevronRight size={15}/></button></>}
       {drawer === 'group' && <><span className="drawer-kicker">GROUP DNA</span><h3>{groupDNA.conflicts.length ? `${groupDNA.conflicts.length} conflict${groupDNA.conflicts.length === 1 ? '' : 's'} stay visible until the group decides.` : 'Shared signals are explicit, not averaged from Mei.'}</h3><div className="dna-grid"><div><span>Trip Vibe</span><b>{tripInputs.tripVibe}</b></div><div><span>Shared priority</span><b>{groupDNA.sharedPriorities[0]?.label ?? 'None yet'}</b></div><div><span>Budget range</span><b>{groupDNA.budgetRange.max ? `RM${groupDNA.budgetRange.min}–${groupDNA.budgetRange.max}` : 'No ranges yet'}</b></div><div><span>Budget sensitivity</span><b>{groupDNA.budgetSensitivity}</b></div></div><div className="member-list">{members.map(member => <div key={member.id}><div><b>{member.name}</b><small>{member.inviteStatus === 'pending' ? 'Invite pending' : member.role} · {member.pace} pace · {memberPreferenceProfiles[member.id]?.tingoAssessed ? 'Tingo assessed' : 'Tingo not assessed'}</small></div><button onClick={() => setMembers(current => current.map(item => item.id === member.id ? { ...item, role: item.role === 'Trip lead' ? 'Food scout' : item.role === 'Food scout' ? 'Memory keeper' : 'Trip lead' } : item))}>Rotate role</button></div>)}</div><div className="adapter-note"><b>Coco responsibility preview</b>{responsibilitySuggestions.map(item => <small key={item.memberId}><strong>{item.source === 'member-tingo' ? 'Tingo-assessed' : 'Fallback'} · </strong>{item.memberName}: {item.suggestedRole} — {item.reason}</small>)}<button className="secondary" onClick={() => setMembers(current => applyResponsibilitySuggestions(current, responsibilitySuggestions))}>Confirm & apply suggested roles</button></div><button className="secondary" onClick={inviteMember}>+ Invite a traveller</button><div className="conflict-mini"><span>GROUP DNA SIGNALS</span>{groupDNA.conflicts.length ? groupDNA.conflicts.map(conflict => <div key={`${conflict.kind}-${conflict.label}`}><b>{conflict.label}</b><small>{conflict.reason}</small></div>) : <b>No strong conflict detected from explicit member inputs.</b>}<small>{groupDNA.evidence.join(' ')}</small><small>{tingoPlanGuidance.courtGuidance} AI can explain options, but cannot silently choose for the group.</small></div><label className="setup-field"><span>Mark another uncertainty</span><input className="big-input" value={draftConflict} onChange={e => setDraftConflict(e.target.value)} placeholder="e.g. Shinjuku hotel vs Asakusa hotel"/></label><button className="secondary" onClick={markConflict}>{conflictMarked ? 'Send another conflict to Court' : 'Mark conflict & open Court'}</button><div className="planner-turn"><span>Editing turn</span><b>{plannerTurn}</b><button onClick={() => setPlannerTurn(plannerTurn === 'Mei' ? 'JH' : plannerTurn === 'JH' ? 'Zi Shan' : plannerTurn === 'Zi Shan' ? 'Alex' : 'Mei')}>Pass turn</button></div><button className="secondary" onClick={() => setDrawer('reminders')}>Reminders & human commitments</button></>}
       {drawer === 'backup' && <><span className="drawer-kicker">BACKUP PLAN POOL</span><h3>Only viable, Deal-Breaker-safe alternatives are repair candidates.</h3>{backupPool.map(item => <div className={`backup-row ${item.viable && item.dealBreakerSafe ? '' : 'off'}`} key={item.id}><b>{item.name}</b><small>{item.support} supporters · {item.costDelta >= 0 ? '+' : ''}RM{item.costDelta} · {item.timeDeltaMinutes >= 0 ? '+' : ''}{item.timeDeltaMinutes} min · {item.viable && item.dealBreakerSafe ? 'viable' : 'blocked'}</small><small>{item.source} · {item.lossReason}</small></div>)}{backupPool.length === 0 && <div className="adapter-note">No Backup candidate has been retained yet. A confirmed Court loser appears here only when it is viable and Deal-Breaker-safe.</div>}{ghostWishes.filter(wish => wish.status === 'revived').map(wish => <div className="backup-row" key={`ghost-${wish.id}`}><b>👻 {wish.name}</b><small>Revived from Ghost Wish · preserved with original reason</small></div>)}</>}

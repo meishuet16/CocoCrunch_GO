@@ -12,6 +12,7 @@ export type TripRetrospectiveProps = {
   actualSummary: RetrospectiveSummary;
   worthIt: TripReview | null;
   proposal: LearningProposal | null;
+  learningConfirmed?: boolean;
   onRecordReflection: (value: TripReview) => void;
   onBuildProposal: () => void;
   onConfirmLearning: () => void;
@@ -33,6 +34,7 @@ export function TripRetrospective({
   actualSummary,
   worthIt,
   proposal,
+  learningConfirmed = false,
   onRecordReflection,
   onBuildProposal,
   onConfirmLearning,
@@ -66,7 +68,7 @@ export function TripRetrospective({
         {proposal.status === 'proposed' && <div className="retrospective-actions"><button type="button" className="primary" onClick={onConfirmLearning}>Confirm this learning</button><button type="button" className="secondary" onClick={onDismissLearning}>Dismiss</button></div>}
         {proposal.status === 'confirmed' && <small>Confirmed explicitly. Current Tingo dimensions are re-derived from the updated answers.</small>}
         {proposal.status === 'dismissed' && <small>Dismissed. Long-term Tingo was not changed.</small>}
-      </> : worthIt ? <button type="button" className="secondary" onClick={onBuildProposal}>Show what Coco learned</button> : <small>Choose Worth It before learning can be proposed.</small>}
+      </> : learningConfirmed ? <small>Learning was confirmed explicitly; current Tingo is derived from its answer source.</small> : worthIt ? <button type="button" className="secondary" onClick={onBuildProposal}>Show what Coco learned</button> : <small>Choose Worth It before learning can be proposed.</small>}
     </div>
     <button type="button" className="secondary retrospective-memory" onClick={onOpenMemory}>Keep the memory</button>
   </section>;
