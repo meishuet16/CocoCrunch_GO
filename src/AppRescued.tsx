@@ -13,6 +13,7 @@ import { FamilyWindowPanel, LocationPrivacyPanel } from './components/SharingBou
 import { ContextualToolList, type ContextualTool } from './components/ContextualToolList';
 import { TripPlanOverview } from './components/TripPlanOverview';
 import { TripRetrospective } from './components/TripRetrospective';
+import { CompletedLearningGuide, ExplorePlanningGuide, MemoryArchiveGuide, TingoOwnershipGuide } from './components/JourneyPhaseGuide';
 import { courtTally, type CourtOption, type CourtVote } from './domain/court';
 import { attachCourtConcession, withdrawCourtConcession, type CourtConcession } from './domain/concession';
 import { gatePlanMutation } from './domain/governance';
@@ -775,22 +776,24 @@ export default function AppRescued() {
   }
 
   function renderExplore() {
-    return <>
-      <SectionTitle kicker="EXPLORE · COCO PICKS" title="Borrow a feeling, make it yours." copy="Prototype places and openly shared trips, ranked against your Tingo pace, budget, and must-go."/>
+    return <div className="explore-screen">
+      <SectionTitle kicker="EXPLORE · COCO PICKS" title="Borrow a feeling, make it yours." copy="Save ideas for the active trip, ranked against your Tingo pace and budget. Group suggestions still need group governance."/>
       <section className="explore-hero paper-sheet"><div><span>YOUR NEXT LITTLE YES</span><h3>Rain-proof Tokyo, still full of flavour.</h3><p>{tingoBehavior.recommendationBias} discovery · {tingoBehavior.itineraryDensity} pace · {tingoBehavior.budgetMode} budget</p><button className="primary" onClick={() => setDrawer('discover')}>Explore places <ChevronRight size={16}/></button></div><div className="explore-orbit" aria-hidden="true"><span>✦</span><span>○</span><span>✧</span></div></section>
+      <ExplorePlanningGuide onOpenTrip={() => openTrip('planning')}/>
       <div className="explore-section-heading"><span>COMMUNITY NOTEBOOKS</span><button onClick={() => setDrawer('community')}>See all <ChevronRight size={14}/></button></div>
       <section className="explore-community">{communityTrips.map(trip => <article className="explore-community-card" key={trip.id}><div className={trip.id === 1 ? 'community-photo street-photo' : 'community-photo rain-photo'}><span>{trip.match}% fit</span></div><div><b>{trip.title}</b><small>By {trip.author} · explicitly shared</small><button onClick={() => setCommunityTrips(items => items.map(item => item.id === trip.id ? { ...item, saved: !item.saved } : item))}>{trip.saved ? 'Saved to ideas' : 'Save idea'}</button></div></article>)}</section>
-      <div className="explore-section-heading"><span>TRIP VIBES</span><span className="quiet-note">Driven by Tingo profile</span></div><section className="vibe-row"><button className="vibe-chip active">{tingoBehavior.recommendationBias} first</button><button className="vibe-chip">{tingoBehavior.itineraryDensity} days</button><button className="vibe-chip">{tingoBehavior.accommodationBias} stay</button><button className="vibe-chip">{tingoBehavior.changeStyle} changes</button></section>
-    </>;
+      <div className="explore-section-heading"><span>DISCOVERY LENS</span><span className="quiet-note">Tingo shapes ideas; Trip Vibe stays in Trips</span></div><section className="vibe-row"><button className="vibe-chip active">{tingoBehavior.recommendationBias} first</button><button className="vibe-chip">{tingoBehavior.itineraryDensity} days</button><button className="vibe-chip">{tingoBehavior.accommodationBias} stay</button><button className="vibe-chip">{tingoBehavior.changeStyle} changes</button></section>
+    </div>;
   }
 
   function renderGlobalMemories() {
-    return <>
-      <SectionTitle kicker="MEMORIES · YOUR ARCHIVE" title="The trips that stayed with you." copy="Private by default. Keep the decisions, detours, and tiny wins close."/>
+    return <div className="memories-screen">
+      <SectionTitle kicker="MEMORIES · YOUR ARCHIVE" title="The trips that stayed with you." copy="Private by default. Start with the review, then keep the decisions, detours, and tiny wins close."/>
+      <MemoryArchiveGuide onOpenTrip={() => openTrip('completed')}/>
       <section className="memory-archive-feature paper-sheet"><div className="archive-photo"><span>OCT 2026</span><b>{destination}</b></div><div><span>LAST TRIP · 4.2 / 5</span><h3>Rain changed the evening. The group kept the promise.</h3><p>18 photos · {decisionHistory.length} decisions · RM {spent} actual</p><button className="primary" onClick={() => openTrip('completed')}>Open Memory Trunk <ChevronRight size={16}/></button></div></section>
       <div className="explore-section-heading"><span>KEEPSAKE SHELF</span><span className="quiet-note">Only you can see these</span></div><section className="keepsake-grid"><article><span>PHOTO MAP</span><b>4 places</b><small>Tsukiji · café · underground · hotel</small></article><article><span>FUTURE POSTCARD</span><b>1 sealed</b><small>Waiting for your next trip</small></article><article><span>GHOST WISHES</span><b>{ghostWishes.length} remembered</b><small>Some plans can come back</small></article></section>
       <section className="community-entry"><div><span>COMMUNITY</span><b>{published ? 'Published with consent' : 'Private by default'}</b><small>Nothing becomes public without an explicit action.</small></div><button onClick={() => setDrawer('community')}>Manage</button></section>
-    </>;
+    </div>;
   }
 
   function renderTripWorkspace() {
@@ -873,8 +876,9 @@ export default function AppRescued() {
       { id: 'court', label: `⚖️ ${courtDecision ?? 'No Court verdict saved yet'}` },
     ];
     const photoMetadata = photoImport ? importPhotoMetadata() : null;
-    return <>
+    return <div className="completed-screen">
       <SectionTitle kicker="AFTER · MEMORY TRUNK" title="Keep what the trip taught you." copy="Photos, choices, little failures, and the things you would do again."/>
+      <CompletedLearningGuide/>
       <TripRetrospective actualSummary={{ pace: actualPaceCopy, spent, decisions: decisionHistory.length, outcomeRecorded: outcomeReviewed }} worthIt={worthIt} proposal={learningProposal} learningConfirmed={profileLearned} onRecordReflection={recordWorthIt} onBuildProposal={() => { if (worthIt) buildCurrentLearningProposal(worthIt); }} onConfirmLearning={confirmLearning} onDismissLearning={dismissLearning} onOpenMemory={() => { setTrunkOpen(true); setSelectedKeepsake(null); }} />
       <button className={`trunk-hero trunk-button ${trunkOpen ? 'open' : ''}`} aria-expanded={trunkOpen} onClick={() => { setTrunkOpen(open => !open); setSelectedKeepsake(null); }}><div className="trunk-lid"/><div className="trunk-body"><span className="postcard p1">{destination.toUpperCase()}</span><span className="postcard p2">雨の日</span><span className="ticket">10.13</span><Coco tiny mood="happy" context="memory"/></div><small>{trunkOpen ? 'Tap to close the trunk' : 'Tap to open the trunk'}</small></button>
       {trunkOpen && <section className="trunk-contents paper-sheet"><b>Trip keepsakes · tap to lift</b>{keepsakes.map(item => <button key={item.id} className={`trunk-keepsake ${selectedKeepsake === item.id ? 'active' : ''}`} aria-pressed={selectedKeepsake === item.id} onClick={() => setSelectedKeepsake(current => current === item.id ? null : item.id)}>{item.label}</button>)}</section>}
@@ -902,20 +906,21 @@ export default function AppRescued() {
       <section className="compare-ledger"><span>CATEGORY BUDGET · PLANNED VS ACTUAL</span>{categoryVariance.map(item => <div key={item.category}><b>{item.category}</b><i className={item.status === 'over' ? 'actual' : ''}/><small>RM {item.planned} planned · RM {item.actual} actual · {item.status}</small></div>)}{budgetLearningNotes.length > 0 && <p>{budgetLearningNotes.join(' ')}</p>}</section>
       <section className="compare-ledger"><span>PACE · PLANNED VS ACTUAL</span><div><b>Planned</b><i/><small>{tingoBehavior.itineraryDensity} · {tingoBehavior.dailyStops} stops/day · {tingoBehavior.bufferMinutes} min buffers</small></div><div><b>Actual</b><i className="actual"/><small>{actualPaceCopy}</small></div><p>{profileLearned ? 'Confirmed learning can now shape future ranking and pacing.' : 'Review data stays observational until you confirm learning.'}</p></section>
       <section className="community-entry"><div><span>COMMUNITY</span><b>{published ? 'Published with consent' : 'Private by default'}</b><small>Nothing becomes public without an explicit action.</small></div><button onClick={() => setDrawer('community')}>Open</button></section>
-    </>;
+    </div>;
   }
 
   function renderMe() {
-    return <>
-      <SectionTitle kicker="ME · COCO PROFILE" title="How do you actually like to travel?" copy="Private preferences first. Group DNA comes after."/>
+    return <div className="me-screen">
+      <SectionTitle kicker="ME · COCO PROFILE" title="How do you actually like to travel?" copy="Private preferences first. Group DNA comes after. Trip Vibe and constraints stay with each trip."/>
       <section className="profile-hero paper-sheet"><Coco mood="happy" context="travel"/><div><span>MEI · LONG-TERM TINGO IDENTITY</span><h3>{tingoCompletion(tingoAnswers) === 100 ? describeTingo(tingoDimensions).slice(0, 2).join(' · ') : 'Your travel rhythm is still forming.'}</h3><p>{tingoBehavior.recommendationBias}-leaning · {tingoBehavior.budgetMode} · {tingoBehavior.changeStyle}</p></div></section>
+      <TingoOwnershipGuide/>
       <section className="tingo-summary paper-sheet"><div><span>TINGO CARD</span><h3>{tingoCompletion(tingoAnswers) === 100 ? 'A profile Coco can explain.' : 'Let Coco learn your travel rhythm.'}</h3><p>{describeTingo(tingoDimensions).join(' · ')}</p></div><button className="primary" onClick={() => setDrawer('tingo')}>{tingoCompletion(tingoAnswers) === 100 ? 'Review Card' : 'Take assessment'} <ChevronRight size={15}/></button></section>
       {learningProposal?.status === 'proposed' && <section className="learning-handoff paper-sheet"><div><span>TRIP LEARNING · REVIEW BEFORE APPLY</span><h3>{destination} has a proposal for your long-term Tingo.</h3><p>These changes came from this trip’s actual outcome and will not apply until you confirm them.</p>{learningProposal.changes.map(change => <small key={change.questionId}>{change.questionId}: {change.beforeOptionId ?? 'none'} → {change.afterOptionId} · {change.reason}</small>)}</div><div className="learning-handoff-actions"><button className="secondary" onClick={() => openTrip('completed')}>Review in Completed</button><button className="primary" onClick={confirmLearning}>Confirm this learning</button><button className="secondary" onClick={dismissLearning}>Dismiss</button></div></section>}
       {confirmedLearningHistory.length > 0 && <section className="learning-history paper-sheet"><span>CONFIRMED TINGO LEARNING</span><h3>What you chose to carry forward</h3>{confirmedLearningHistory.slice(0, 3).map(record => <div key={record.id}><b>{record.sourceTripReview === 'yes' ? 'Worth it' : record.sourceTripReview === 'mixed' ? 'Mixed' : 'Not really'} · {new Date(record.confirmedAt).toLocaleDateString()}</b>{record.changes.map(change => <small key={change.questionId}>{change.questionId}: {change.beforeOptionId ?? 'none'} → {change.afterOptionId}</small>)}</div>)}</section>}
       <section className="trip-owned-note paper-sheet"><span>TRIP-OWNED INTENT</span><b>Vibe, Must-Go, Deal Breaker, Preference, and Flexible belong to the active trip.</b><small>Open Trips to review this journey’s choices without changing your long-term Tingo Card.</small><button className="secondary" onClick={() => openTrip('planning')}>Open active trip <ChevronRight size={14}/></button></section>
       <section className="base-packing"><div><span>BASE PACKING HABITS</span><b>Inherited by every new checklist</b></div><div className="packing-preferences">{basePackingPreferences.map(item => <button key={item} onClick={() => setBasePackingPreferences(current => current.filter(value => value !== item))}>{item} ×</button>)}<button className="add-preference" onClick={() => setBasePackingPreferences(current => current.includes('medication pouch') ? current : [...current, 'medication pouch'])}>+ medication pouch</button></div></section>
       <section className="me-tools"><MiniTool icon={PackageCheck} label="Packing ownership" note="Shared items have one clear owner" onClick={openPacking}/><MiniTool icon={Heart} label="Profile history" note={profileLearned ? 'Confirmed learning is saved' : 'No new learning confirmed'} onClick={() => setDrawer('tingo')}/></section>
-    </>;
+    </div>;
   }
 
   function renderDrawer() {

@@ -189,6 +189,44 @@ select:focus-visible {
 .location-unavailable { margin-top: 13px; padding-top: 12px; border-top: 1px dashed rgba(147,5,0,.18); }
 .status-pill { flex: 0 0 auto; padding: 6px 8px; border-radius: 999px; background: rgba(147,5,0,.08); color: var(--muted); font-size: 8px; font-weight: 850; }
 
+/* Slice 3: the After archive, long-term identity, and Explore all point back to the journey. */
+.completed-screen,
+.memories-screen,
+.me-screen,
+.explore-screen { display: grid; gap: var(--space-3); }
+.completed-guide,
+.memory-loop-card,
+.explore-planning-note,
+.tingo-ownership-note { padding: 15px; border: 1px solid rgba(147,5,0,.1); border-radius: 17px; background: var(--surface-raised); box-shadow: 0 8px 24px rgba(86,52,36,.035); }
+.completed-guide { display: grid; gap: 8px; border-left: 4px solid var(--sangria); background: rgba(255,241,218,.46); }
+.completed-guide > span,
+.memory-loop-card span,
+.explore-planning-note span,
+.tingo-ownership-note > span { color: var(--sangria); font-size: 8px; font-weight: 950; letter-spacing: .1em; }
+.completed-guide h3,
+.memory-loop-card h3,
+.explore-planning-note h3 { margin: 0; font-size: 16px; line-height: 1.15; letter-spacing: -.015em; }
+.completed-guide small,
+.memory-loop-card p,
+.explore-planning-note small,
+.tingo-ownership-note small { margin: 0; color: var(--muted); font-size: 9px; line-height: 1.45; }
+.completed-guide-steps { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.completed-guide-steps span { display: inline-flex; align-items: center; gap: 5px; color: var(--ink); font-size: 9px; font-weight: 800; }
+.completed-guide-steps b { display: grid; width: 19px; height: 19px; place-items: center; border-radius: 50%; background: var(--sangria); color: #fff9ef; font-size: 9px; }
+.completed-guide-steps i { color: var(--muted); font-style: normal; }
+.completed-screen .trip-retrospective { margin-top: 0; }
+.memory-loop-card,
+.explore-planning-note { display: flex; justify-content: space-between; gap: 14px; align-items: center; background: rgba(149,187,234,.13); }
+.memory-loop-card > div,
+.explore-planning-note > div { display: grid; gap: 6px; min-width: 0; }
+.memory-loop-card p { max-width: 510px; }
+.memory-loop-card .primary,
+.explore-planning-note .secondary { flex: 0 0 auto; white-space: nowrap; }
+.tingo-ownership-note { display: grid; gap: 6px; background: rgba(149,187,234,.1); }
+.tingo-ownership-note > b { font-size: 11px; line-height: 1.4; }
+.explore-planning-note { margin-top: 0; }
+.explore-screen .explore-hero { margin-bottom: 0; }
+
 /* Narrow-phone resilience. */
 @media (max-width: 390px) {
   .app-shell { padding-inline: 15px; }
@@ -206,6 +244,12 @@ select:focus-visible {
   .contextual-section-heading small { text-align: left; }
   .family-location-boundary { align-items: start; flex-direction: column; }
   .family-location-boundary .secondary { width: 100%; }
+  .memory-loop-card,
+  .explore-planning-note { display: grid; align-items: start; }
+  .memory-loop-card .primary,
+  .explore-planning-note .secondary { width: 100%; }
+  .completed-guide-steps { display: grid; grid-template-columns: 1fr auto; }
+  .completed-guide-steps i { display: none; }
 }
 @media (max-width: 360px) {
   .app-shell { padding-inline: 13px; }
