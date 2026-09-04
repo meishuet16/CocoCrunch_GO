@@ -4,6 +4,8 @@ import { defaultTingoDimensions, deriveTingoBehavior } from './tingo';
 import { generateTripPlan, type DestinationCandidate } from './itinerary';
 import type { GroupDNA } from './group-dna';
 import { calculatePlanHealth } from './plan-health';
+import { applyRepairToPlan, buildMinimumLossRepair, promoteCourtLosers, type BackupCandidate } from './backup-repair';
+import type { TripPlan } from './itinerary';
 
 const tingoBehavior = deriveTingoBehavior(defaultTingoDimensions);
 const emptyDNA: GroupDNA = { sharedPriorities: [], optionalPreferences: [], budgetRange: { min: 0, max: 0 }, budgetSensitivity: 'low', conflicts: [], evidence: [] };
@@ -94,5 +96,54 @@ describe('Plan Health', () => {
     expect(result.metrics.budgetOverrun).toBe(150);
     expect(result.metrics.unresolvedConflicts).toBe(1);
     expect(result.deductions.map(item => item.component)).toEqual(expect.arrayContaining(['budget', 'conflicts']));
+  });
+});
+
+describe('Backup Plan and minimum-loss repair', () => {
+  const repairPlan: TripPlan = {
+    destination: 'Test',
+    items: [
+      { id: 'anchor', name: 'Harbour walk', kind: 'anchor', startMinutes: 600, endMinutes: 690, timeLabel: '10:00', estimatedCost: 40, transferMinutes: 15, walkingKm: 1.2, protected: true, evidence: [] },
+      { id: 'outdoor', name: 'Outdoor block', kind: 'floating', startMinutes: 780, endMinutes: 870, timeLabel: '13:00', estimatedCost: 30, transferMinutes: 10, walkingKm: 1, protected: false, evidence: [] },
+      { id: 'open', name: 'Open pocket', kind: 'open', startMinutes: 1020, endMinutes: 1080, timeLabel: '17:00', estimatedCost: 0, transferMinutes: 0, walkingKm: 0, protected: false, evidence: [] },
+    ],
+    tripPromise: 'Food with room to breathe',
+    totalEstimatedCost: 70,
+    walkingKm: 2.2,
+    transferMinutes: 25,
+    protectedAnchorIds: ['anchor'],
+    unresolvedRisks: [],
+  };
+
+  it('keeps only useful viable Court losers and rejects Deal-Breaker-invalid options', () => {
+    const backups = promoteCourtLosers([
+      { id: 'winner', label: 'Indoor hall', support: 3 },
+      { id: 'good', label: 'Kissaten', support: 2, viable: true, dealBreakerSafe: true, costDelta: 6, timeDeltaMinutes: 8 },
+      { id: 'bad', label: 'Raw-only dinner', support: 1, viable: true, dealBreakerSafe: false },
+      { id: 'blocked', label: 'Closed market', support: 1, viable: false },
+    ], 'winner', 'No raw-only dinner');
+
+    expect(backups).toHaveLength(1);
+    expect(backups[0]).toMatchObject({ id: 'good', support: 2, lossReason: 'Lost the Court vote.' });
+  });
+
+  it('protects anchors and prefers the highest-support viable backup', () => {
+    const lowSupportBackup: BackupCandidate = { id: 'low-support', name: 'Lower support', support: 1, costDelta: 2, timeDeltaMinutes: 4, viable: true, dealBreakerSafe: true, lossReason: 'Lost the Court vote.', source: 'court-loss', evidence: [] };
+    const highSupportBackup: BackupCandidate = { id: 'high-support', name: 'Higher support', support: 3, costDelta: 4, timeDeltaMinutes: 6, viable: true, dealBreakerSafe: true, lossReason: 'Lost the Court vote.', source: 'court-loss', evidence: [] };
+    const repair = buildMinimumLossRepair({ plan: repairPlan, failedItemId: 'outdoor', backups: [lowSupportBackup, highSupportBackup], budgetRemaining: 100, mode: 'solo' });
+
+    expect(repair.replacement?.id).toBe('high-support');
+    expect(repair.protectedAnchorIds).toContain('anchor');
+    expect(repair.preview.join(' ')).toContain('KEEP');
+  });
+
+  it('reports exact cost/time impacts and blocks unconfirmed Group apply', () => {
+    const highSupportBackup: BackupCandidate = { id: 'high-support', name: 'Higher support', support: 3, costDelta: 8, timeDeltaMinutes: 12, viable: true, dealBreakerSafe: true, lossReason: 'Lost the Court vote.', source: 'court-loss', evidence: [] };
+    const repair = buildMinimumLossRepair({ plan: repairPlan, failedItemId: 'outdoor', backups: [highSupportBackup], budgetRemaining: 100, mode: 'group' });
+
+    expect(repair.impact).toMatchObject({ costDelta: 8, timeDeltaMinutes: 12 });
+    expect(repair.requiresGroupConfirmation).toBe(true);
+    expect(applyRepairToPlan(repairPlan, repair, false).applied).toBe(false);
+    expect(applyRepairToPlan(repairPlan, repair, true).applied).toBe(true);
   });
 });
