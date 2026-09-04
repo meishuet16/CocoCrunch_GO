@@ -7,6 +7,7 @@ import {
 import { emitExperience } from './experience';
 import { GlobalNav, type GlobalTab } from './components/GlobalNav';
 import { TripJourneyStatus } from './components/TripJourneyStatus';
+import { TripSpatialView } from './components/TripSpatialView';
 import { courtTally, type CourtOption, type CourtVote } from './domain/court';
 import { attachCourtConcession, withdrawCourtConcession, type CourtConcession } from './domain/concession';
 import { gatePlanMutation } from './domain/governance';
@@ -738,6 +739,17 @@ export default function AppRescued() {
       <section className="plan-intake"><MiniTool icon={Heart} label="Tingo Card" note={`${tingoCompletion(tingoAnswers)}% complete · ${describeTingo(tingoDimensions).slice(0, 2).join(' · ')}`} onClick={() => setDrawer('tingo')}/><MiniTool icon={Users} label="Know us" note={`${members.filter(member => member.inviteStatus === 'joined').length}/${members.length} travellers · DNA + roles`} onClick={() => setDrawer('group')}/><MiniTool icon={MapPin} label="Trip inputs" note={`${constraints.length || 4} constraints · ${destination}`} onClick={() => setDrawer('tripSetup')}/><MiniTool icon={CircleDollarSign} label="Compare options" note="Deterministic price + deal adapter" onClick={() => setDrawer('compare')}/></section>
       <button className="mini-tool" onClick={() => setDrawer('discover')}><MapPin size={18}/><span><b>Find places in {destination}</b><small>Tingo-ranked for {tingoBehavior.recommendationBias} · {tingoBehavior.budgetMode}</small></span><ChevronRight size={16}/></button>
       <section className="itinerary-sheet paper-sheet"><div className="sheet-heading"><div><span>DAY 2</span><h3>{destination} · city wandering</h3></div><div className="score-stamp">{planHealth.overall}</div></div>{visibleTripPlan.items.map(item => <div className={`itinerary-row ${item.kind === 'anchor' ? 'anchor' : item.kind === 'open' ? 'mystery' : ''}`} key={item.id}><time>{item.timeLabel}</time><div><b>{item.name}</b><small>{item.kind === 'anchor' ? 'Must-Go · cannot be AI-replaced' : <><span>{`${item.kind[0].toUpperCase()}${item.kind.slice(1)} · `}</span><RecommendationEvidenceText evidence={item.evidence.slice(0, 1)}/></>}</small><small><strong>Why this?</strong> <RecommendationEvidenceText evidence={item.evidence}/></small></div><em>{item.kind.toUpperCase()}</em></div>)}</section>
+      <TripSpatialView
+        mode="planning"
+        destination={destination}
+        source={recommendations.some(place => place.source === 'prototype-catalog') ? 'prototype-catalog' : 'unavailable'}
+        plan={visibleTripPlan}
+        candidates={recommendations.slice(0, 4).map(place => ({
+          id: `recommendation-${place.id}`,
+          name: place.name,
+          source: place.source,
+        }))}
+      />
       <section className="why-note"><Sparkles size={19}/><div><b>Why this plan?</b><p>{tingoPlanGuidance.itineraryGuidance} {tingoPlanGuidance.budgetGuidance} {visibleTripPlan.unresolvedRisks.length ? `Watch: ${visibleTripPlan.unresolvedRisks.join(' ')}` : 'No unresolved plan risks.'}</p></div></section>
       <section className="plan-health"><div className="section-rule"><span>PLAN HEALTH · EXPLAINED</span><button onClick={() => setDrawer('feasibility')}>Run checks <ChevronRight size={14}/></button></div><div className="health-score"><b>{planHealth.overall}</b><span><strong>{planHealth.overall >= 80 ? 'Healthy with watch items shown' : planHealth.overall >= 60 ? 'Usable with meaningful watch items' : 'Needs a planning decision'}</strong><small>{planHealth.reasons[0] ?? 'No current risk deductions; inputs fit the generated structure.'}</small></span></div><div className="health-metrics"><span>Walk <b>{planHealth.metrics.walkingKm.toFixed(1)} km</b></span><span>Pressure <b>{planHealth.metrics.timePressureMinutes} min</b></span><span>Budget <b>{planHealth.metrics.budgetOverrun ? `RM ${planHealth.metrics.budgetOverrun} over` : 'Within cap'}</b></span><span>Transfer <b>{planHealth.metrics.transferMinutes} min</b></span><span>Anchors <b>{planHealth.metrics.protectedAnchors} protected</b></span><span>Risks <b>{planHealth.metrics.unresolvedRisks}</b></span></div></section>
       <section className="plan-toolbox"><MiniTool icon={Users} label="Group workspace" note={`Editing turn: ${plannerTurn}`} onClick={() => setDrawer('group')}/><MiniTool icon={Box} label="Backup Plan pool" note={`${backupPool.filter(item => item.viable && item.dealBreakerSafe).length} viable · ${backupPool.filter(item => !item.viable || !item.dealBreakerSafe).length} blocked`} onClick={() => setDrawer('backup')}/><MiniTool icon={CircleDollarSign} label="Budget planner" note={`RM ${planned} planned of RM ${budgetTotal}`} onClick={() => setDrawer('budget')}/><MiniTool icon={Link2} label="Import inspiration" note="Source parser demo" onClick={() => setDrawer('import')}/></section>
@@ -750,7 +762,18 @@ export default function AppRescued() {
     const floatingItem = visibleTripPlan.items.find(item => item.kind === 'floating');
     return <>
       <SectionTitle kicker="DURING · LIVE TRIP" title={delay ? 'Reality changed.' : 'The trip is moving.'} copy="Coco watches the plan, not your every step."/>
-      <section className={`live-map ${delay ? 'rain' : ''}`}><div className="map-top"><span><MapPin size={15}/> {destination} area</span><b>{delay ? 'Delay needs review' : 'On schedule'}</b></div><svg viewBox="0 0 340 180" role="img" aria-label="Schematic route map"><path d="M25 135 C78 64 132 126 185 85 S265 52 315 42"/><circle cx="25" cy="135" r="6"/><circle cx="185" cy="85" r="6"/><circle cx="315" cy="42" r="7"/></svg><div className="ride-coco"><Coco tiny mood={delay ? 'panic' : 'happy'} context="travel"/></div><div className="next-stop"><span>Next</span><b>{delay ? 'Replan needed' : `${floatingItem?.name ?? 'Open block'} · ${floatingItem?.timeLabel ?? 'time pending'}`}</b></div></section>
+      <TripSpatialView
+        mode="traveling"
+        destination={destination}
+        source="local-schematic"
+        plan={visibleTripPlan}
+        currentItem={anchorItem ? { name: anchorItem.name, timeLabel: anchorItem.timeLabel } : undefined}
+        nextItem={!delay && floatingItem ? { name: floatingItem.name, timeLabel: floatingItem.timeLabel } : undefined}
+        reunionLabel={mode === 'group' ? `${reunion.place} · ${reunion.time} · ±${reunion.tolerance} min` : undefined}
+        privacy={privacy}
+        disruptionLabel={delay ? 'Floating block needs repair review.' : undefined}
+        overlay={<Coco tiny mood={delay ? 'panic' : 'happy'} context="travel"/>}
+      />
       <section className="arrival-check"><div><span>PROGRESS CHECK</span><b>{arrivalChecked ? `Arrived at ${anchorItem?.name ?? 'the anchor'}.` : `Has the group reached ${anchorItem?.name ?? 'the morning anchor'}?`}</b><small>Manual check-in is always available; location permission is not required.</small></div><button onClick={() => setArrivalChecked(!arrivalChecked)}>{arrivalChecked ? 'Undo check-in' : 'Mark arrived'}</button></section>
       {!delay && <button className="event-button" onClick={() => { setDelay(true); setReplanPreview(false); setAppliedRepair(null); setReplanApplied(false); setEmergencyApproved(false); }}><CloudRain size={20}/> Simulate heavy rain disruption</button>}
       {delay && !replanApplied && <section className="disruption-stage"><div className="disruption-head"><CloudRain size={26}/><div><span>FLOATING BLOCK FAILED</span><b>{failedPlanItem?.timeLabel ?? 'Current'} {failedPlanItem?.name ?? 'item'} is no longer viable.</b></div></div>{!replanPreview ? <><div className="ghost-suggestion"><span>MINIMUM-LOSS CANDIDATE</span><b>{repairPreview?.replacement?.name ?? 'No viable Backup candidate'}</b><small>{repairPreview?.replacement ? `${repairPreview.replacement.support} supporters · ${repairPreview.impact.costDelta >= 0 ? '+' : ''}RM${repairPreview.impact.costDelta} · ${repairPreview.impact.timeDeltaMinutes >= 0 ? '+' : ''}${repairPreview.impact.timeDeltaMinutes} min` : repairPreview?.reasons[repairPreview.reasons.length - 1] ?? 'No repair result available.'}</small></div><button className="primary" disabled={!repairPreview?.applicable} onClick={() => setReplanPreview(true)}>Preview minimum-loss repair</button></> : <><div className="change-ticket">{repairPreview?.preview.map(line => <div key={line}><span>REPAIR</span><b>{line}</b></div>)}</div>{repairPreview?.reasons.map(reason => <small className="adapter-note" key={reason}>{reason}</small>)}{mode === 'group' && repairPreview?.requiresGroupConfirmation && <div className="emergency-court"><span>EMERGENCY COURT · 90 SEC</span><b>{emergencyApproved ? 'Approved for this repair' : 'Group approval required'}</b><button onClick={() => setEmergencyApproved(true)}>{emergencyApproved ? '✓ Approved' : 'Simulate group approval'}</button></div>}<div className="action-row"><button className="secondary" onClick={() => setReplanPreview(false)}>Not now</button><button className="primary" disabled={!repairPreview?.applicable || (repairPreview.requiresGroupConfirmation && !emergencyApproved)} onClick={applyRepair}>Apply repair</button></div></>}</section>}
@@ -769,12 +792,24 @@ export default function AppRescued() {
       { id: 'detour', label: '📸 Rainy underground detour' },
       { id: 'court', label: `⚖️ ${courtDecision ?? 'No Court verdict saved yet'}` },
     ];
+    const photoMetadata = photoImport ? importPhotoMetadata() : null;
     return <>
       <SectionTitle kicker="AFTER · MEMORY TRUNK" title="Keep what the trip taught you." copy="Photos, choices, little failures, and the things you would do again."/>
       <button className={`trunk-hero trunk-button ${trunkOpen ? 'open' : ''}`} aria-expanded={trunkOpen} onClick={() => { setTrunkOpen(open => !open); setSelectedKeepsake(null); }}><div className="trunk-lid"/><div className="trunk-body"><span className="postcard p1">{destination.toUpperCase()}</span><span className="postcard p2">雨の日</span><span className="ticket">10.13</span><Coco tiny mood="happy" context="memory"/></div><small>{trunkOpen ? 'Tap to close the trunk' : 'Tap to open the trunk'}</small></button>
       {trunkOpen && <section className="trunk-contents paper-sheet"><b>Trip keepsakes · tap to lift</b>{keepsakes.map(item => <button key={item.id} className={`trunk-keepsake ${selectedKeepsake === item.id ? 'active' : ''}`} aria-pressed={selectedKeepsake === item.id} onClick={() => setSelectedKeepsake(current => current === item.id ? null : item.id)}>{item.label}</button>)}</section>}
       <section className="memory-actions"><button onClick={() => { setPhotoIndexed(true); setPhotoImport(true); }}><Map size={20}/><span><b>Photo Map</b><small>{photoIndexed ? `${importPhotoMetadata().imported} photos indexed · ${importPhotoMetadata().grouped} areas` : 'Index local photo metadata'}</small></span></button><button onClick={() => setJournalGenerated(true)}><BookOpen size={20}/><span><b>Travel journal</b><small>{journalGenerated ? 'Draft generated' : 'Generate from timeline + photos'}</small></span></button></section>
-      {photoImport && <section className="adapter-note"><b>Metadata adapter complete.</b><small>{importPhotoMetadata().note}</small></section>}
+      {photoImport && <section className="adapter-note"><b>Metadata adapter complete.</b><small>{photoMetadata?.note}</small></section>}
+      <TripSpatialView
+        mode="completed"
+        destination={destination}
+        source={photoMetadata ? 'photo-metadata' : 'local-schematic'}
+        plan={visibleTripPlan}
+        photoSummary={photoMetadata ? {
+          imported: photoMetadata.imported,
+          grouped: photoMetadata.grouped,
+          note: photoMetadata.note,
+        } : undefined}
+      />
       <section className="memory-note-card"><div><span>MEMORY NOTE</span><b>Leave one thought with the photo.</b></div><textarea value={memoryNote} onChange={e => setMemoryNote(e.target.value)} aria-label="Memory note"/><label><input type="checkbox" checked={memoryPublic} onChange={e => setMemoryPublic(e.target.checked)}/> Public only if I explicitly choose it</label><small>{memoryPublic ? 'Ready for Community after confirmation.' : 'Private in your archive.'}</small></section>
       <button className="memory-card-trigger" onClick={() => setDrawer('memoryCard')}><span>MEMORY STICKER CARD</span><b>Make one moment collectible <ChevronRight size={15}/></b></button>
       <section className="review-items"><div className="section-rule"><span>HOW EACH STOP FELT</span><span className="quiet-note">Feeds future recommendations</span></div><div className="review-item"><div><b>{tripInputs.mustGo}</b><small>Must-Go anchor · actual visit</small></div><div className="rating-row"><button className={itemReviews.anchor === 'worth' ? 'active' : ''} onClick={() => setItemReviews(current => ({ ...current, anchor: 'worth' }))}>Worth it</button><button className={itemReviews.anchor === 'mixed' ? 'active' : ''} onClick={() => setItemReviews(current => ({ ...current, anchor: 'mixed' }))}>Mixed</button><button className={itemReviews.anchor === 'skip' ? 'active' : ''} onClick={() => setItemReviews(current => ({ ...current, anchor: 'skip' }))}>Skip next time</button></div></div><div className="review-item"><div><b>Scenic café block</b><small>Preference · stayed flexible</small></div><div className="rating-row"><button className={itemReviews.cafe === 'worth' ? 'active' : ''} onClick={() => setItemReviews(current => ({ ...current, cafe: 'worth' }))}>Worth it</button><button className={itemReviews.cafe === 'mixed' ? 'active' : ''} onClick={() => setItemReviews(current => ({ ...current, cafe: 'mixed' }))}>Mixed</button><button className={itemReviews.cafe === 'skip' ? 'active' : ''} onClick={() => setItemReviews(current => ({ ...current, cafe: 'skip' }))}>Skip next time</button></div></div></section>
