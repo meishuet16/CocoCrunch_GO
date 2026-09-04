@@ -300,3 +300,43 @@ This section supersedes the earlier open-risk note about Group-to-Solo stale Gro
 - No live weather, routing, traffic, venue-status, pricing, booking, GPS, or family-tracking provider is connected; local/demo boundaries are labeled in the active UI.
 - Full per-member Tingo onboarding is not implemented; unassessed members are explicitly labelled and do not inherit Mei’s profile.
 - Exact 390/430, representative tablet/desktop, reduced-motion runtime emulation, and broader signature interaction visual QA remain unverified in this environment.
+
+## Visual refinement Slice 1 checkpoint
+
+Slice 1 is complete through shared presentation primitives, Home orientation, and Planning hierarchy. The approved source-of-truth order and full 53-feature reconciliation remain unchanged in the framework design document.
+
+### Implemented in code
+
+- Shared presentation tokens and hierarchy rules were added in `src/v2-polish.css`: spacing vocabulary, quiet/raised surfaces, calmer paper treatment, section rhythm, status summaries, itinerary readability, focus treatment, and contextual tool spacing.
+- Home now has an explicit `home-orientation` presentation boundary around active-trip status and secondary phase/health/budget/Group metrics. Journey State content and action targets are unchanged.
+- Planning now has `planning-screen`, `planning-brief`, and `planning-plan` presentation boundaries. The existing unresolved Group decision appears before the generated plan; Trip Intent, Group DNA, Trip Promise, generated itinerary, spatial context, Plan Health, contextual tools, and Ready-to-Go remain the same data and callbacks.
+- No domain file, canonical Coco sprite, provider integration, governance rule, persistence contract, or business calculation changed.
+
+### Wired into active app
+
+- `src/App.tsx` still activates `AppRescued`; the new Home and Planning classes render in the active Trip Workspace.
+- Home remains active-trip-first. Planning remains a lifecycle workspace and Map remains contextual.
+
+### Regression tested
+
+- Focused Home composition tests passed: 2 files, 5 tests.
+- Focused Planning and invariant tests passed: 3 files, 30 tests.
+- Full local gate passed at the Slice 1 code state: TypeScript, 11 Vitest files, 61 tests, and Vite production build.
+- Invariant suite passed: 4 files, 43 tests.
+- `git diff --check` passed.
+
+### Browser/runtime and visual evidence
+
+- Active Vite app was exercised through Home → Trips → active Planning workspace in the Codex in-app browser at `http://127.0.0.1:5175/`.
+- Home, Trips, and Planning rendered with meaningful content; the Planning order showed Journey Status, Trip Intent, generated plan, Trip Promise, protected Must-Go, Plan Health, contextual tools, and Ready-to-Go.
+- Browser console errors were empty.
+- Screenshot inspection was performed at the genuinely available narrow viewport: `innerWidth 362px`, `innerHeight 702px`, `document.clientWidth 347px`, `document.scrollWidth 347px`, and `body.scrollWidth 347px`. No horizontal overflow was detected; bottom navigation remained visible.
+- Exact 360/390/430px, tablet/desktop, reduced-motion runtime, Traveling, Family Window/Location Privacy, Completed, and signature interaction visual checks remain Slice 2–4 work and are not claimed here.
+
+### Slice 1 commits
+
+- `9415129` — shared presentation primitives.
+- `e684a62` — Home active-trip orientation.
+- `f6aa552` — Planning decision hierarchy.
+- `4bd1674` — Slice 1 implementation plan.
+- `90dff11` — visual-refinement design.
