@@ -2,7 +2,7 @@
 
 Status: complete
 
-Commit(s): `e9d5f68` (`test: define journey data contracts`)
+Commit(s): `e9d5f68` (`test: define journey data contracts`), `a1ae904` (`test: strengthen journey data contracts`)
 
 Test summary: `npx vitest run src/domain/framework.test.ts` fails as expected with `Cannot find module './journey-state'`.
 
@@ -20,3 +20,6 @@ Follow-up fixes:
 
 Evidence after fixes:
 - `npx vitest run src/domain/framework.test.ts` still fails in the intended RED state with `Cannot find module './journey-state' imported from D:/dunno/codenection26/CocoCrunch_GO/src/domain/framework.test.ts`.
+
+Report correction evidence:
+- Updated the report metadata to include both test commits after the re-review finding.
