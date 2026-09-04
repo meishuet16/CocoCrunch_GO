@@ -234,7 +234,8 @@ export default function AppRescued() {
   const budgetLearningNotes = budgetLearning(budgetActuals, budgetPlan);
   const travellerCount = mode === 'group' ? members.filter(member => member.inviteStatus === 'joined').length : 1;
   const destinationCandidates = useMemo(() => recommendations.map((place, index) => candidateFromDiscovery(place, index)), [recommendations]);
-  const baseTripPlan = useMemo(() => generateTripPlan({ destination, tingoBehavior, tripVibe: profile.vibe, mustGo: profile.mustGo, dealBreaker: profile.veto, preference: profile.preference, flexible: profile.flexible, budget: budgetTotal, members, groupDNA, candidates: destinationCandidates, floatingStartMinutes: floatingStartOverride ?? undefined }), [destination, tingoBehavior, profile, budgetTotal, members, groupDNA, destinationCandidates, floatingStartOverride]);
+  const resolvedConflictLabels = useMemo(() => courtConfirmed ? [activeConflict] : [], [courtConfirmed, activeConflict]);
+  const baseTripPlan = useMemo(() => generateTripPlan({ destination, tingoBehavior, tripVibe: profile.vibe, mustGo: profile.mustGo, dealBreaker: profile.veto, preference: profile.preference, flexible: profile.flexible, budget: budgetTotal, members, groupDNA, candidates: destinationCandidates, floatingStartMinutes: floatingStartOverride ?? undefined, resolvedConflictLabels }), [destination, tingoBehavior, profile, budgetTotal, members, groupDNA, destinationCandidates, floatingStartOverride, resolvedConflictLabels]);
   const failedPlanItem = baseTripPlan.items.find(item => item.kind === 'floating');
   const backupPool = backupCandidates;
   const repairSourcePlan = useMemo(() => delay && !replanApplied && failedPlanItem
@@ -242,7 +243,7 @@ export default function AppRescued() {
     : baseTripPlan, [baseTripPlan, delay, failedPlanItem, replanApplied]);
   const repairPreview = useMemo(() => failedPlanItem ? buildMinimumLossRepair({ plan: repairSourcePlan, failedItemId: failedPlanItem.id, backups: backupPool, budgetRemaining: remaining, mode }) : null, [backupPool, failedPlanItem, mode, remaining, repairSourcePlan]);
   const visibleTripPlan = useMemo(() => appliedRepair ? applyRepairToPlan(repairSourcePlan, appliedRepair, true).plan : repairSourcePlan, [appliedRepair, repairSourcePlan]);
-  const planHealth = calculatePlanHealth({ plan: visibleTripPlan, budget: budgetTotal, groupDNA, tingoBehavior, dealBreaker: profile.veto });
+  const planHealth = calculatePlanHealth({ plan: visibleTripPlan, budget: budgetTotal, groupDNA, tingoBehavior, dealBreaker: profile.veto, resolvedConflictLabels });
   const optionLabel = (id: string | null) => courtOptions.find(option => option.id === id)?.label ?? id ?? '';
   const majorityDecision = tally.majority ? optionLabel(tally.majority) : null;
   const proposedDecision = gacha ?? majorityDecision;

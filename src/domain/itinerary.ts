@@ -61,6 +61,7 @@ export type GenerateTripPlanInput = {
   groupDNA: GroupDNA;
   candidates: DestinationCandidate[];
   floatingStartMinutes?: number;
+  resolvedConflictLabels?: string[];
 };
 
 function normalize(value: string): string {
@@ -189,7 +190,10 @@ export function generateTripPlan(input: GenerateTripPlanInput): TripPlan {
     .map(candidate => ({ candidate, score: candidateScore(candidate, input) }))
     .sort((left, right) => right.score - left.score || left.candidate.name.localeCompare(right.candidate.name));
   const selected = ranked[0]?.candidate;
-  const risks = input.groupDNA.conflicts.map(conflict => `Preference conflict: ${conflict.label}. Group Court is required before a substantive change.`);
+  const resolvedConflicts = new Set((input.resolvedConflictLabels ?? []).map(normalize));
+  const risks = input.groupDNA.conflicts
+    .filter(conflict => !resolvedConflicts.has(normalize(conflict.label)))
+    .map(conflict => `Preference conflict: ${conflict.label}. Group Court is required before a substantive change.`);
   if (!selected) risks.push('No Deal-Breaker-safe floating candidate was supplied.');
 
   const bufferStart = anchor.endMinutes;

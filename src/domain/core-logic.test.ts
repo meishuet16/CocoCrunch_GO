@@ -94,6 +94,18 @@ describe('deterministic itinerary generation', () => {
     expect(floating?.evidence.some(entry => entry.source === 'tingo')).toBe(true);
     expect(floating?.evidence.some(entry => entry.source === 'budget')).toBe(true);
   });
+
+  it('removes a Court-resolved conflict from generated operational risks', () => {
+    const conflictDNA = {
+      ...emptyDNA,
+      conflicts: [{ kind: 'strong-disagreement' as const, label: 'Dinner', members: ['A', 'B'], reason: 'Strong preferences disagree.' }],
+    };
+    const unresolved = generateTripPlan({ ...itineraryInput, groupDNA: conflictDNA });
+    const resolved = generateTripPlan({ ...itineraryInput, groupDNA: conflictDNA, resolvedConflictLabels: ['Dinner'] });
+
+    expect(unresolved.unresolvedRisks).toContain('Preference conflict: Dinner. Group Court is required before a substantive change.');
+    expect(resolved.unresolvedRisks).not.toContain('Preference conflict: Dinner. Group Court is required before a substantive change.');
+  });
 });
 
 describe('Plan Health', () => {
@@ -133,6 +145,15 @@ describe('Plan Health', () => {
     expect(disrupted.overall).toBeLessThan(healthy.overall);
     expect(disrupted.metrics.unresolvedRisks).toBe(1);
     expect(disrupted.deductions.some(reason => reason.component === 'risks')).toBe(true);
+  });
+
+  it('stops penalizing a Group DNA conflict after its matching Court resolution', () => {
+    const conflictDNA = { ...emptyDNA, conflicts: [{ kind: 'strong-disagreement' as const, label: 'Dinner', members: ['A', 'B'], reason: 'Strong preferences disagree.' }] };
+    const unresolved = calculatePlanHealth({ plan, budget: 300, groupDNA: conflictDNA, tingoBehavior, dealBreaker: '' });
+    const resolved = calculatePlanHealth({ plan, budget: 300, groupDNA: conflictDNA, tingoBehavior, dealBreaker: '', resolvedConflictLabels: ['Dinner'] });
+
+    expect(resolved.metrics.unresolvedConflicts).toBe(0);
+    expect(resolved.overall).toBeGreaterThan(unresolved.overall);
   });
 });
 

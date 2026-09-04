@@ -32,6 +32,7 @@ export type PlanHealthInput = {
   groupDNA: GroupDNA;
   tingoBehavior: TingoBehavior;
   dealBreaker: string;
+  resolvedConflictLabels?: string[];
 };
 
 function clamp(value: number, min: number, max: number): number {
@@ -78,7 +79,8 @@ export function calculatePlanHealth(input: PlanHealthInput): PlanHealth {
   const protectedAnchors = input.plan.items.filter(item => item.kind === 'anchor' && item.protected).length;
   const unprotectedAnchors = input.plan.items.filter(item => item.kind === 'anchor' && !item.protected).length;
   const anchorDeduction = clamp(unprotectedAnchors * 25, 0, 25);
-  const unresolvedConflicts = input.groupDNA.conflicts.length;
+  const resolvedConflicts = new Set((input.resolvedConflictLabels ?? []).map(label => label.trim().toLocaleLowerCase()));
+  const unresolvedConflicts = input.groupDNA.conflicts.filter(conflict => !resolvedConflicts.has(conflict.label.trim().toLocaleLowerCase())).length;
   const conflictDeduction = clamp(unresolvedConflicts * 10, 0, 20);
   const unresolvedRisks = input.plan.unresolvedRisks.filter(risk => !risk.toLocaleLowerCase().includes('preference conflict')).length;
   const riskDeduction = clamp(unresolvedRisks * 6, 0, 18);
