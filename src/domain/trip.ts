@@ -5,7 +5,7 @@ export type TripMember = { id: string; name: string; role: string; inviteStatus:
 export type TripReminder = { id: string; label: string; date: string; kind: 'deposit' | 'cancel' | 'arrival' | 'custom'; done: boolean; };
 export type HumanCommitment = { id: string; label: string; time: string; owner: string; fixed: boolean; };
 export type ReunionAgreement = { time: string; place: string; tolerance: number; };
-export type ResponsibilitySuggestion = { memberId: string; memberName: string; suggestedRole: string; reason: string };
+export type ResponsibilitySuggestion = { memberId: string; memberName: string; suggestedRole: string; reason: string; source?: 'member-tingo' | 'fallback' };
 
 export const defaultMembers: TripMember[] = [
   { id: 'mei', name: 'Mei', role: 'Trip lead', inviteStatus: 'joined', pace: 'steady' },
@@ -31,27 +31,31 @@ export function slowestMemberMinutes(members: TripMember[]): number {
   return members.reduce((max, member) => Math.max(max, member.pace === 'slow' ? 1.35 : member.pace === 'fast' ? .9 : 1), 1);
 }
 
-/**
- * Responsibility suggestions are advisory. They never silently overwrite a member's role;
- * the UI must preview them and require confirmation before applying.
- */
-export function suggestResponsibilities(members: TripMember[], behavior: TingoBehavior): ResponsibilitySuggestion[] {
+const roleByBehavior: Record<TingoBehavior['groupRole'], [string, string]> = {
+  connector: ['Group connector', 'This member’s Tingo profile is strongest at keeping everyone included.'],
+  scout: ['Discovery scout', 'This member’s Tingo profile leans toward finding the next good idea.'],
+  planner: ['Plan keeper', 'This member’s Tingo profile prefers context, structure, and protected commitments.'],
+  independent: ['Flex keeper', 'This member’s Tingo profile values breathing room and can protect optional time.'],
+};
+
+const fallbackRoles: [string, string][] = [
+  ['Food scout', 'No individual Tingo assessment is available yet, so Coco keeps this as an explicit fallback suggestion.'],
+  ['Transit buddy', 'No individual Tingo assessment is available yet; this fallback keeps travel-time ownership visible.'],
+  ['Memory keeper', 'No individual Tingo assessment is available yet; this fallback does not pretend to infer personality.'],
+  ['Budget buddy', 'No individual Tingo assessment is available yet; this fallback only assigns a practical responsibility.'],
+];
+
+/** Advisory only. The optional member map prevents one traveller's personality from being projected onto everyone. */
+export function suggestResponsibilities(members: TripMember[], behavior: TingoBehavior, memberBehaviors: Partial<Record<string, TingoBehavior>> = {}): ResponsibilitySuggestion[] {
   const joined = members.filter(member => member.inviteStatus === 'joined');
-  const primaryByBehavior: Record<TingoBehavior['groupRole'], [string, string]> = {
-    connector: ['Group connector', 'Your Tingo profile is strongest at keeping everyone included.'],
-    scout: ['Discovery scout', 'Your Tingo profile leans toward finding the next good idea.'],
-    planner: ['Plan keeper', 'Your Tingo profile prefers context, structure, and protected commitments.'],
-    independent: ['Flex keeper', 'Your Tingo profile values breathing room and can protect optional time.'],
-  };
-  const fallbackRoles: [string, string][] = [
-    ['Food scout', 'A focused category makes group ownership visible without giving one person control of the itinerary.'],
-    ['Transit buddy', 'Travel-time ownership helps the group respect the slowest member and reunion agreement.'],
-    ['Memory keeper', 'One person can capture moments without changing official planning decisions.'],
-    ['Budget buddy', 'A second pair of eyes can surface budget drift before it becomes a conflict.'],
-  ];
   return joined.map((member, index) => {
-    const [suggestedRole, reason] = index === 0 ? primaryByBehavior[behavior.groupRole] : fallbackRoles[(index - 1) % fallbackRoles.length];
-    return { memberId: member.id, memberName: member.name, suggestedRole, reason };
+    const assessed = memberBehaviors[member.id] ?? (index === 0 ? behavior : undefined);
+    if (assessed) {
+      const [suggestedRole, reason] = roleByBehavior[assessed.groupRole];
+      return { memberId: member.id, memberName: member.name, suggestedRole, reason, source: 'member-tingo' };
+    }
+    const [suggestedRole, reason] = fallbackRoles[(index - 1 + fallbackRoles.length) % fallbackRoles.length];
+    return { memberId: member.id, memberName: member.name, suggestedRole, reason, source: 'fallback' };
   });
 }
 
