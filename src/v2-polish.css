@@ -37,7 +37,7 @@
 .brand-lockup { border: 0; background: transparent; color: inherit; padding: 0; display: flex; align-items: center; gap: 9px; text-align: left; }
 .wordmark b { color: var(--sangria); font-size: 14px; font-weight: 950; letter-spacing: .08em; }
 .wordmark small { color: #826c64; font-size: 9px; font-weight: 700; letter-spacing: .06em; }
-.brand-mark { width: 28px; height: 28px; border-radius: 10px 10px 8px 12px; display: grid; place-items: center; background: var(--sangria); color: var(--cream); font-weight: 950; transform: rotate(-4deg); }
+.brand-companion { display: block; width: 40px; height: auto; flex: 0 0 40px; }
 
 /* Touch and keyboard ergonomics. */
 .bottom-nav button,
@@ -56,6 +56,7 @@
   min-height: 44px;
 }
 .brand-lockup { min-height: 44px; }
+.brand-lockup:focus-visible { outline: 3px solid rgba(149,187,234,.72); outline-offset: 3px; border-radius: 12px; }
 .bell { min-width: 44px; min-height: 44px; }
 textarea:focus-visible,
 select:focus-visible {

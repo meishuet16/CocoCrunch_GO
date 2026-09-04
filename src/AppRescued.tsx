@@ -49,7 +49,7 @@ import {
   defaultReunion, suggestResponsibilities, type HumanCommitment,
   type ReunionAgreement, type TripConstraint, type TripMember, type TripReminder,
 } from './domain/trip';
-import cocoCanonicalSheet from './assets/coco/coco-idle.png';
+import cocoIdle from './assets/coco/coco-idle.png';
 
 type Tab = GlobalTab;
 type TripMode = 'group' | 'solo';
@@ -107,7 +107,7 @@ function parseConflictOptions(conflict: string): CourtOptionState[] | null {
 
 function Coco({ mood = 'idle', tiny = false, context = 'default' }: { mood?: 'idle' | 'happy' | 'panic'; tiny?: boolean; context?: 'default' | 'court' | 'memory' | 'travel' }) {
   return <div className={`coco ${mood} context-${context} ${tiny ? 'tiny' : ''}`} aria-label={`Coco ${mood} · ${context}`}>
-    <span className="coco-canonical" aria-hidden="true"><img src={cocoCanonicalSheet} alt=""/></span>
+    <span className="coco-canonical" aria-hidden="true"><img src={cocoIdle} alt=""/></span>
     <span className="antenna a1"/><span className="antenna a2"/>
     <span className="coco-shell"><i className="eye e1"/><i className="eye e2"/><i className="mouth"/></span>
     <span className="leg l1"/><span className="leg l2"/><span className="leg l3"/>
@@ -976,7 +976,7 @@ export default function AppRescued() {
   };
 
   return <div className="app-shell">
-    <header className="topbar"><button className="brand-lockup" onClick={() => { setTripWorkspaceOpen(false); setTab('home'); }} aria-label="Go to Home"><span className="brand-mark">c</span><span className="wordmark"><b>COCOCRUNCH</b><small>travel, with room to breathe</small></span></button><div className="topbar-actions"><span className="tiny-avatar">M</span><button className="bell" aria-label="Notifications"><Bell size={19}/><i/></button></div></header>
+    <header className="topbar"><button className="brand-lockup" onClick={() => { setTripWorkspaceOpen(false); setTab('home'); }} aria-label="Go to Home"><img className="brand-companion" src={cocoIdle} alt="Coco, your travel companion"/><span className="wordmark"><b>COCOCRUNCH</b><small>travel, with room to breathe</small></span></button><div className="topbar-actions"><span className="tiny-avatar">M</span><button className="bell" aria-label="Notifications"><Bell size={19}/><i/></button></div></header>
     <main>{tab === 'home' ? renderHome() : tab === 'trips' ? (tripWorkspaceOpen ? renderTripWorkspace() : renderTrips()) : tab === 'explore' ? renderExplore() : tab === 'memories' ? renderGlobalMemories() : renderMe()}</main>
     <GlobalNav tab={tab} onChange={setTab} onOpenTrips={() => setTripWorkspaceOpen(false)} />
     {renderCourt()}
