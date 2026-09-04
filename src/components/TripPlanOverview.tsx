@@ -12,6 +12,13 @@ type TripPlanOverviewProps = {
 };
 
 export function TripPlanOverview({ plan, planHealth, tripIntent, onOpenWhy, onOpenHealth }: TripPlanOverviewProps) {
+  const itemLabels = {
+    anchor: 'Must-Go anchor',
+    floating: 'Floating time',
+    buffer: 'Buffer / breathing room',
+    open: 'Open time',
+  } as const;
+
   return (
     <section className="trip-plan-overview">
       <div className="trip-promise paper-strip">
@@ -23,17 +30,20 @@ export function TripPlanOverview({ plan, planHealth, tripIntent, onOpenWhy, onOp
           <div><span>GENERATED PLAN</span><h3>{plan.destination} · reviewable timeline</h3></div>
           <div className="score-stamp">{planHealth.overall}</div>
         </div>
-        {plan.items.map(item => (
-          <button className={`itinerary-row ${item.kind}`} key={item.id} onClick={() => onOpenWhy(item.id)}>
-            <time>{item.timeLabel}</time>
-            <span>
-              <b>{item.name}</b>
-              <small>{item.kind === 'anchor' ? 'Must-Go · protected · cannot be AI-replaced' : `${item.kind} · ${tripIntent.flexible || 'flexible time'}`}</small>
-              <small><strong>Why this?</strong> <RecommendationEvidenceText evidence={item.evidence} /></small>
-            </span>
-            <em>{item.kind}</em>
-          </button>
-        ))}
+        <div className="itinerary-timeline" aria-label="Trip timeline">
+          {plan.items.map(item => (
+            <button className={`itinerary-row ${item.kind}`} key={item.id} onClick={() => onOpenWhy(item.id)}>
+              <time>{item.timeLabel}</time>
+              <span className="itinerary-row-content">
+                <small className="itinerary-row-label">{itemLabels[item.kind]}</small>
+                <b>{item.name}</b>
+                <small>{item.kind === 'anchor' ? 'Must-Go · protected · cannot be AI-replaced' : `${item.kind} · ${tripIntent.flexible || 'flexible time'}`}</small>
+                <small><strong>Why this?</strong> <RecommendationEvidenceText evidence={item.evidence} /></small>
+              </span>
+              <em>{itemLabels[item.kind]}</em>
+            </button>
+          ))}
+        </div>
       </section>
       <section className="plan-health plan-health--overview">
         <button className="section-rule" onClick={onOpenHealth}>

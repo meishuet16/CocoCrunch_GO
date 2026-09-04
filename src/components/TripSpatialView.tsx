@@ -82,7 +82,7 @@ export function TripSpatialView({
   const privacyLabel = privacy ? `Sharing: ${privacy === 'exact' ? 'exact location' : privacy === 'area' ? 'approx. area' : 'status only'}` : null;
 
   return (
-    <section className={`trip-spatial-view paper-sheet spatial-${mode} spatial-source-${source}`}>
+    <section className={`trip-spatial-view paper-sheet spatial-secondary spatial-${mode} spatial-source-${source}`}>
       <div className="section-rule spatial-rule">
         <span>
           {modeLabels[mode]} · {destination.toUpperCase()}
@@ -183,6 +183,7 @@ export function TripSpatialView({
               </article>
             )}
           </div>
+          <small className="spatial-detail spatial-detail--saved">Saved current · next · reunion context</small>
           <div className="adapter-note">
             <b>Travel context only</b>
             <small>Current and next stops come from saved trip state and manual check-ins only.</small>
@@ -204,6 +205,13 @@ export function TripSpatialView({
               <small>{photoSummary ? `${photoSummary.grouped} areas grouped` : 'Import metadata to place photos on this view.'}</small>
             </article>
           </div>
+          {photoSummary && (
+            <div className="spatial-closure-cue">
+              <span>Closure</span>
+              <b>{photoSummary.imported} photos saved · {photoSummary.grouped} areas grouped</b>
+              <small>Imported memory closes this kept trip context without inferring the route.</small>
+            </div>
+          )}
           {photoSummary?.note && <small className="spatial-detail">{photoSummary.note}</small>}
           <div className="adapter-note">
             <b>Retrospective map boundary</b>

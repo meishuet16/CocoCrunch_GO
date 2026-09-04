@@ -95,6 +95,7 @@ describe('TripSpatialView', () => {
     );
 
     expect(html).toContain('MAP · TOKYO');
+    expect(html).toContain('spatial-secondary');
     expect(html).toContain('Prototype catalog candidates · planning context only');
     expect(html).toContain('Tsukiji food walk');
     expect(html).toContain('Scenic cafe block');
@@ -131,6 +132,7 @@ describe('TripSpatialView', () => {
     expect(html).toContain('Shibuya crossing · 19:30 · ±15 min');
     expect(html).toContain('Sharing: status only');
     expect(html).toContain('Current and next stops come from saved trip state and manual check-ins only.');
+    expect(html).toContain('Saved current · next · reunion context');
   });
 
   it('renders completed travelled stops with imported photo metadata boundaries', async () => {
@@ -153,6 +155,8 @@ describe('TripSpatialView', () => {
     expect(html).toContain('Travelled');
     expect(html).toContain('18 photos indexed');
     expect(html).toContain('4 areas grouped');
+    expect(html).toContain('Closure');
+    expect(html).toContain('18 photos saved · 4 areas grouped');
     expect(html).toContain('Photo Map shows imported metadata only; it does not infer the route between stops.');
   });
 
