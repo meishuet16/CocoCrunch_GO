@@ -53,6 +53,9 @@ describe('AppRescued journey status integration', () => {
     expect(html).toContain('Your trip can be shaped now; Tingo is not complete.');
     expect(html).toContain('Review Tingo Card');
     expect(html).toContain('Plan Health');
+    expect(html).toMatch(/Current Phase/i);
+    expect(html).toMatch(/Group Status/i);
+    expect(html).toContain('home-orientation');
     expect(html).not.toContain('Discover places');
   });
 

@@ -722,11 +722,11 @@ export default function AppRescued() {
         : `${travellerCount} travellers aligned`
       : 'Solo trip';
 
-    return <>
+    return <div className="home-orientation">
       <SectionTitle kicker="HOME · ACTIVE TRIP" title={`${destination} stays in view.`} copy="Follow the next meaningful action first, then inspect the rest of the trip as needed."/>
       <TripJourneyStatus state={journeyState} destination={destination} onAction={handleJourneyAction} />
       <section className="status-strip status-strip--home"><div><span>Current Phase</span><b>{tripPhase === 'planning' ? 'Planning' : tripPhase === 'traveling' ? 'Traveling' : 'Completed'}</b></div><div><span>Plan Health</span><b>{planHealth.overall}/100</b></div><div><span>Budget Remaining</span><b>RM {remaining}</b></div><div><span>Group Status</span><b>{groupStatus}</b></div></section>
-    </>;
+    </div>;
   }
 
   function startNewTrip() {
