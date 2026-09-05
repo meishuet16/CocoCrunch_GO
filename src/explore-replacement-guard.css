@@ -1,0 +1,11 @@
+/* Explore replacement guard
+   The new Explore experience is portalled directly into .explore-screen.
+   Keep the legacy renderExplore() DOM mounted for app/state stability, but never
+   render its visual UI alongside the approved Explore replica. */
+.explore-screen > :not(.x2-root):not(.x3-root) {
+  display: none !important;
+}
+
+.explore-screen {
+  overflow-x: hidden !important;
+}
