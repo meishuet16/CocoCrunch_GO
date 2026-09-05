@@ -13,6 +13,7 @@ export type TripRetrospectiveProps = {
   worthIt: TripReview | null;
   proposal: LearningProposal | null;
   learningConfirmed?: boolean;
+  showMemoryAction?: boolean;
   onRecordReflection: (value: TripReview) => void;
   onBuildProposal: () => void;
   onConfirmLearning: () => void;
@@ -35,6 +36,7 @@ export function TripRetrospective({
   worthIt,
   proposal,
   learningConfirmed = false,
+  showMemoryAction = true,
   onRecordReflection,
   onBuildProposal,
   onConfirmLearning,
@@ -66,13 +68,13 @@ export function TripRetrospective({
     <div className="retrospective-step">
       <span>3 · PROPOSED LEARNING</span>
       {proposal ? <>
-        {proposal.changes.length > 0 ? proposal.changes.map(change => <p key={change.questionId}><b>{change.questionId}</b>: {change.beforeOptionId ?? 'none'} → {change.afterOptionId} · {change.reason}</p>) : <p>Coco found no answer change to propose from this reflection.</p>}
+        <b>{proposal.changes.length > 0 ? proposal.changes[0].reason : 'Coco found no answer change to propose from this reflection.'}</b>
+        {proposal.changes.length > 0 && <details className="retrospective-evidence"><summary>Learning evidence</summary>{proposal.changes.map(change => <p key={change.questionId}><b>{change.questionId}</b>: {change.beforeOptionId ?? 'none'} → {change.afterOptionId} · {change.reason}</p>)}</details>}
         {proposal.status === 'proposed' && <div className="retrospective-actions"><button type="button" className="primary" onClick={onConfirmLearning}>Confirm this learning</button><button type="button" className="secondary" onClick={onDismissLearning}>Dismiss</button></div>}
         {proposal.status === 'confirmed' && <small>Confirmed explicitly. Current Tingo dimensions are re-derived from the updated answers.</small>}
         {proposal.status === 'dismissed' && <small>Dismissed. Long-term Tingo was not changed.</small>}
       </> : learningConfirmed ? <small>Learning was confirmed explicitly; current Tingo is derived from its answer source.</small> : worthIt ? <button type="button" className="secondary" onClick={onBuildProposal}>Show what Coco learned</button> : <small>Choose Worth It before learning can be proposed.</small>}
     </div>
-    <button type="button" className="secondary retrospective-memory" disabled={!memoryAvailable} onClick={onOpenMemory}>Keep the memory</button>
-    {!memoryAvailable && <small className="retrospective-memory-note">Keep the memory after the learning handoff is confirmed or dismissed.</small>}
+    {showMemoryAction && <><button type="button" className="secondary retrospective-memory" disabled={!memoryAvailable} onClick={onOpenMemory}>Keep the memory</button>{!memoryAvailable && <small className="retrospective-memory-note">Keep the memory after the learning handoff is confirmed or dismissed.</small>}</>}
   </section>;
 }

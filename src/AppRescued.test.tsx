@@ -90,7 +90,7 @@ describe('AppRescued journey status integration', () => {
 
     expect(html).toContain('aria-label="Go to Home"');
     expect(html).toContain(`class="brand-companion"`);
-    expect(html).toContain(`src="${cocoAsset('scene-home')}"`);
+    expect(html).toContain(`src="${cocoAsset('expression-normal')}"`);
     expect(html).toContain('alt="Coco, your travel companion"');
   });
 });

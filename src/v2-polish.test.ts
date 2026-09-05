@@ -15,4 +15,8 @@ describe('presentation touch targets', () => {
     expect(polishCss).toMatch(/\.section-rule button,\s*\.explore-section-heading button\s*\{\s*min-height:\s*44px;/);
     expect(stylesCss).toMatch(/\.close\s*\{[^}]*width:\s*44px;[^}]*height:\s*44px;/);
   });
+
+  it('keeps the tightly cropped header Coco at the corrected visible size', () => {
+    expect(polishCss).toMatch(/\.brand-companion\s*\{[^}]*width:\s*58px;[^}]*height:\s*58px;[^}]*flex:\s*0 0 58px;[^}]*object-fit:\s*contain;/);
+  });
 });

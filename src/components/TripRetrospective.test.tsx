@@ -37,6 +37,7 @@ describe('TripRetrospective', () => {
     expect(html.indexOf('WORTH IT?')).toBeLessThan(html.indexOf('PROPOSED LEARNING'));
     expect(html).toContain('Slower than planned · RM 480 spent · 2 decisions');
     expect(html).toContain('Confirm this learning');
+    expect(html).toContain('Learning evidence');
     expect(html).toContain('Keep the memory');
     expect(html).toContain('disabled=""');
   });
@@ -106,5 +107,10 @@ describe('TripRetrospective', () => {
     expect(html).toContain('Record a check-in, stop review, or other actual outcome');
     expect(html).toContain('Reflection stays closed until actual outcome evidence exists.');
     expect(html).toContain('disabled=""');
+  });
+
+  it('can omit the duplicate memory action in the compressed Completed flow', () => {
+    const html = renderToStaticMarkup(<TripRetrospective actualSummary={{ pace: 'Matched the plan', spent: 300, decisions: 1 }} worthIt="yes" proposal={{ ...proposal, status: 'dismissed' }} showMemoryAction={false} onRecordReflection={() => undefined} onBuildProposal={() => undefined} onConfirmLearning={() => undefined} onDismissLearning={() => undefined} onOpenMemory={() => undefined}/>);
+    expect(html).not.toContain('Keep the memory');
   });
 });
