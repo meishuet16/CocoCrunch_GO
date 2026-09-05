@@ -1,0 +1,90 @@
+/* Explore content semantics: visually separate system place recommendations from public community trip posts. */
+
+/* Community items are published trip posts, not place recommendations. */
+.explore-screen .explore-community-card .community-photo::after {
+  content: 'TRIP POST';
+  position: absolute;
+  top: 9px;
+  left: 9px;
+  z-index: 3;
+  padding: 5px 7px;
+  border-radius: 999px;
+  background: rgba(255,250,239,.93);
+  color: #6b5144;
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: .08em;
+  box-shadow: 0 2px 8px rgba(40,34,30,.07);
+}
+
+.explore-screen .explore-community-card > div:last-child::before {
+  content: 'Shared by a traveller';
+  color: #6c8290;
+  font-size: 7px;
+  font-weight: 850;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+/* Place recommendations stay destination-first and action-first. */
+.drawer .discover-row::after {
+  content: 'PLACE';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: rgba(255,250,239,.94);
+  color: #527084;
+  font-size: 7px;
+  font-weight: 950;
+  letter-spacing: .08em;
+  box-shadow: 0 2px 8px rgba(40,34,30,.06);
+}
+
+/* Make the two content types feel intentionally related, but not identical. */
+.explore-screen .explore-community-card {
+  border-color: rgba(75,102,126,.10);
+}
+
+.drawer .discover-row {
+  border-color: rgba(147,5,0,.08);
+}
+
+.explore-screen .explore-community-card button {
+  background: rgba(82,112,132,.09);
+  color: #527084;
+}
+
+.drawer .discover-row .inline-actions button:first-child {
+  background: rgba(255,255,255,.82);
+  color: var(--sangria);
+}
+
+.drawer .discover-row .inline-actions button:last-child {
+  background: var(--sangria);
+  color: #fff9ed;
+}
+
+/* Editorial cue: Explore contains both places to visit and trips to borrow from. */
+.explore-screen .explore-section-heading:has(+ .explore-community)::after {
+  content: 'Public completed trips · inspiration, not the official plan';
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 7.5px;
+  line-height: 1.35;
+}
+
+.drawer .discover-results > .drawer-kicker::after {
+  content: ' · PLACES';
+  color: var(--sangria);
+}
+
+@media (max-width: 370px) {
+  .explore-screen .explore-community-card .community-photo::after,
+  .drawer .discover-row::after {
+    font-size: 6.5px;
+  }
+}
