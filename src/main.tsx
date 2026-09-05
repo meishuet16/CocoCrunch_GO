@@ -10,7 +10,6 @@ import './v2-polish.css';
 import './gacha-interactions.css';
 import './explore-redesign.css';
 import './explore-content-semantics.css';
-import './explore-home-fix.css';
 import './explore-replica.css';
 
 createRoot(document.getElementById('root')!).render(
