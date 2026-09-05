@@ -485,3 +485,25 @@ This final bounded audit covers presentation/accessibility QA for the completed 
 - No tablet viewport profile or reduced-motion emulation was available; neither is claimed.
 - The active shell begins these page views with `h2` headings and exposes no `h1` in the audited DOM. Drawer/Court overlays exposed labeled close controls, but the audited Court overlay did not expose `role=dialog`/`aria-modal`.
 - The PR description was synchronized after the feature-branch push; PR #1 remains open and unmerged. The verified CI state above records the product-code handoff at `68ecae2`.
+
+## Canonical Coco V2 stabilization checkpoint · 2026-09-05
+
+Recovered from `9f9709e152232bad1245bfa45f1184da8faf4e24` on `feat/p0-foundation`. The active tree now contains the canonical semantic Coco asset manifest and extraction provenance, shared motion sequencing with reduced-motion handling, actual movement/path preview, and bounded ritual implementations for Everyday Gacha, Lucky Draw, Court tie-only reveal, Memory Trunk, capture, release, Pray, family reassurance, and prepared split-bill receipt.
+
+Implemented in code: per-context canonical Coco assets; deterministic stage runners with cancellation/hold semantics; explicit ritual persistence for saved ideas, released/revived wishes, and authored memory notes; lifecycle phase persistence; truthful completed-state gating; ghost-wish release/revival persistence; dynamic Ask Coco floating-block proposal; privacy normalization; Plan Health Deal-Breaker metric; and a favicon used to eliminate the browser’s missing-resource noise.
+
+Wired into active app: `AppRescued.tsx`, `AppExperience.tsx`, `SignatureRituals.tsx`, `TripConditions.tsx`, `TripSpatialView.tsx`, and `PackingReplica.tsx` consume the new assets, ritual callbacks, persistence seams, and lifecycle presentation. `src/domain` remains unchanged except for the additive Plan Health metric.
+
+Regression tested: the recovered suite currently passes 32 Vitest files / 162 tests, TypeScript, Vite build, and `git diff --check` (only LF-to-CRLF warnings). Focused random-ritual tests pass 10/10. Actual Playwright Chrome smoke pass exercised Home → Trips → Traveling → Everyday Gacha at 360×720 with screenshots for rolling, dropping, held, and revealed states; the narrow drawer was then compacted so its physical machine, Coco, close control, and hold state remain visible.
+
+Not yet claimed: full all-ritual browser motion coverage across every requested viewport, reduced-motion browser emulation, exact-head CI, feature-branch push, PR description synchronization, and final QA readiness. Those remain release checkpoints rather than inferred from the unit/build pass.
+
+## Authoritative product pass checkpoint · 2026-09-05
+
+Recovered from the existing `feat/p0-foundation` working tree without resetting prior motion or persistence work.
+
+Implemented and wired: a provider-backed, no-secret Open-Meteo weather adapter with explicit loading/unavailable provenance on Home, Planning, and Traveling; compressed Home/Planning/Traveling hierarchy; a persistent draggable keyboard-accessible global Coco companion; globally reachable non-mutating Pray with optional intentions; context-derived Everyday Gacha with honest empty state; and generalized Court option parsing/UI for 2+ options while retaining tie-only Gacha and explicit confirmation.
+
+Truthfulness boundaries preserved: weather is observational and never mutates the itinerary; map, traffic, venue availability, and family tracking remain unavailable/local boundaries; Gacha does not mutate source trip data; Pray does not mutate weather, itinerary, Backup, repair, Plan Health, Court, Tingo, or preference evidence.
+
+Automated validation performed: `npm run check` passed with 33 Vitest files / 164 tests, TypeScript, and Vite production build. Browser/device visual QA was intentionally not run under the authoritative override and remains for the user’s manual QA.

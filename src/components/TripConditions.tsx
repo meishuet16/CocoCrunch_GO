@@ -1,4 +1,5 @@
 import { CloudRain } from 'lucide-react';
+import { CocoCompanion } from './coco/CocoCompanion';
 
 export type TripConditionsProps = {
   delay: boolean;
@@ -17,6 +18,7 @@ export function TripConditions({ delay, failedItemName, repairAvailable, repairS
       : 'No safe repair is available. Choose another manual adjustment.';
 
   return <section className={`trip-conditions ${delay ? 'is-affected' : ''}`}>
+    <CocoCompanion context={delay ? 'weather' : 'conditions'} size={80}/>
     <div className="trip-conditions-head">
       <div><span>TRIP CONDITIONS</span><h3>{delay ? 'Something changed today.' : 'Today’s conditions are clear.'}</h3></div>
       <small>{delay ? 'Demo condition · not live weather' : 'No live weather or traffic provider is connected.'}</small>

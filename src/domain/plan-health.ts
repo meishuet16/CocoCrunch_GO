@@ -21,6 +21,8 @@ export type PlanHealthMetrics = {
   conflictDeduction: number;
   unresolvedRisks: number;
   riskDeduction: number;
+  dealBreakerViolations?: number;
+  dealBreakerDeduction?: number;
 };
 
 export type PlanHealthDeduction = { component: string; points: number; reason: string };
@@ -84,6 +86,11 @@ export function calculatePlanHealth(input: PlanHealthInput): PlanHealth {
   const conflictDeduction = clamp(unresolvedConflicts * 10, 0, 20);
   const unresolvedRisks = input.plan.unresolvedRisks.filter(risk => !risk.toLocaleLowerCase().includes('preference conflict')).length;
   const riskDeduction = clamp(unresolvedRisks * 6, 0, 18);
+  const dealBreakerNeedle = input.dealBreaker.trim().toLocaleLowerCase();
+  const dealBreakerViolations = dealBreakerNeedle
+    ? input.plan.unresolvedRisks.filter(risk => risk.toLocaleLowerCase().includes(dealBreakerNeedle)).length
+    : 0;
+  const dealBreakerDeduction = clamp(dealBreakerViolations * 25, 0, 25);
 
   const deductions: PlanHealthDeduction[] = [];
   if (walkingDeduction > 0) deductions.push({ component: 'walking', points: walkingDeduction, reason: `Walking load is ${walkingKm.toFixed(1)} km, above the 5 km comfort threshold.` });
@@ -94,7 +101,8 @@ export function calculatePlanHealth(input: PlanHealthInput): PlanHealth {
   if (anchorDeduction > 0) deductions.push({ component: 'anchors', points: anchorDeduction, reason: `${unprotectedAnchors} anchor${unprotectedAnchors === 1 ? '' : 's'} is not protected.` });
   if (conflictDeduction > 0) deductions.push({ component: 'conflicts', points: conflictDeduction, reason: `${unresolvedConflicts} unresolved Group DNA conflict${unresolvedConflicts === 1 ? '' : 's'} still needs Court.` });
   if (riskDeduction > 0) deductions.push({ component: 'risks', points: riskDeduction, reason: `${unresolvedRisks} unresolved operational risk${unresolvedRisks === 1 ? '' : 's'} still needs attention.` });
+  if (dealBreakerDeduction > 0) deductions.push({ component: 'deal-breaker', points: dealBreakerDeduction, reason: `${dealBreakerViolations} generated item${dealBreakerViolations === 1 ? '' : 's'} still conflicts with the Deal Breaker: ${input.dealBreaker}.` });
 
   const overall = clamp(100 - deductions.reduce((total, deduction) => total + deduction.points, 0), 0, 100);
-  return { overall, metrics: { walkingKm, walkingDeduction, availableBufferMinutes, timePressureMinutes, timeDeduction, budgetOverrun, budgetDeduction, preferenceMisses, preferenceDeduction, transferMinutes, transferDeduction, protectedAnchors, unprotectedAnchors, anchorDeduction, unresolvedConflicts, conflictDeduction, unresolvedRisks, riskDeduction }, deductions, reasons: deductions.map(deduction => deduction.reason) };
+  return { overall, metrics: { walkingKm, walkingDeduction, availableBufferMinutes, timePressureMinutes, timeDeduction, budgetOverrun, budgetDeduction, preferenceMisses, preferenceDeduction, transferMinutes, transferDeduction, protectedAnchors, unprotectedAnchors, anchorDeduction, unresolvedConflicts, conflictDeduction, unresolvedRisks, riskDeduction, dealBreakerViolations, dealBreakerDeduction }, deductions, reasons: deductions.map(deduction => deduction.reason) };
 }

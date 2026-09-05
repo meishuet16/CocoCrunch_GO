@@ -84,6 +84,7 @@ export type PersistedState = {
   tingoDimensions?: TingoDimensions;
   basePackingPreferences?: string[];
   tripCreated?: boolean;
+  tripPhase?: 'planning' | 'traveling' | 'completed';
   members?: TripMember[];
   memberPreferenceProfiles?: Record<string, MemberPreferenceProfile>;
   backupCandidates?: BackupCandidate[];
@@ -96,6 +97,7 @@ export type PersistedState = {
   memoryNote?: string;
   memoryPublic?: boolean;
   itemReviews?: Record<string, 'worth' | 'mixed' | 'skip'>;
+  revivedWishIds?: number[];
 };
 
 export type PersistedTripState = {
@@ -110,8 +112,10 @@ export function resetTripScopedSharing(): Pick<PersistedState, 'privacy' | 'cont
 }
 
 function normalizePersistedState(parsed: Partial<PersistedState>): Partial<PersistedState> {
-  if (!Array.isArray(parsed.tingoAnswers)) return parsed;
-  return { ...parsed, tingoDimensions: scoreTingo(parsed.tingoAnswers) };
+  const normalizedPrivacy = parsed.privacy === 'exact' ? 'status' : parsed.privacy;
+  const normalized = normalizedPrivacy ? { ...parsed, privacy: normalizedPrivacy, continuousLocation: false } : parsed;
+  if (!Array.isArray(parsed.tingoAnswers)) return normalized;
+  return { ...normalized, tingoDimensions: scoreTingo(parsed.tingoAnswers) };
 }
 
 export function derivePersistedTripState(parsed: Partial<PersistedState>): PersistedTripState {

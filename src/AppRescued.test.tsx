@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import AppRescued from './AppRescued';
-import cocoIdle from './assets/coco/coco-idle.png';
+import { cocoAsset } from './components/coco/assets';
 
 const completeTingoAnswers = [
   { questionId: 'morning', optionId: 'mix' },
@@ -79,7 +79,7 @@ describe('AppRescued journey status integration', () => {
     expect(html).not.toContain('Confirm Ready to Go');
   });
 
-  it('uses the idle Coco asset in the accessible Home brand lockup', () => {
+  it('uses canonical Home Coco in the accessible Home brand lockup', () => {
     vi.stubGlobal('localStorage', {
       getItem: () => null,
       setItem: () => undefined,
@@ -90,7 +90,7 @@ describe('AppRescued journey status integration', () => {
 
     expect(html).toContain('aria-label="Go to Home"');
     expect(html).toContain(`class="brand-companion"`);
-    expect(html).toContain(`src="${cocoIdle}"`);
+    expect(html).toContain(`src="${cocoAsset('scene-home')}"`);
     expect(html).toContain('alt="Coco, your travel companion"');
   });
 });

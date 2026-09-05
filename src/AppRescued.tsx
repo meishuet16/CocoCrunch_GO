@@ -46,12 +46,19 @@ import { candidateFromDiscovery, generateTripPlan } from './domain/itinerary';
 import { deriveJourneyState, transitionReadyConfirmation } from './domain/journey-state';
 import { calculatePlanHealth } from './domain/plan-health';
 import { applyRepairToPlan, buildMinimumLossRepair, promoteCourtLosers, type BackupCandidate, type RepairResult } from './domain/backup-repair';
+import { deriveEverydayDrawPool } from './domain/random-pool';
 import {
   applyResponsibilitySuggestions, defaultCommitments, defaultMembers, defaultReminders,
   defaultReunion, suggestResponsibilities, type HumanCommitment,
   type ReunionAgreement, type TripConstraint, type TripMember, type TripReminder,
 } from './domain/trip';
-import cocoIdle from './assets/coco/coco-idle.png';
+import { CocoCompanion } from './components/coco/CocoCompanion';
+import { cocoAsset } from './components/coco/assets';
+import { commitRitualState, loadRitualState, memoryEligible } from './ritualState';
+import { MemoryTrunk } from './components/MemoryTrunk';
+import { CourtTieRitual } from './components/CourtTieRitual';
+import { WeatherGlance } from './components/WeatherGlance';
+import { GlobalCocoCompanion } from './components/GlobalCocoCompanion';
 
 type Tab = GlobalTab;
 type TripMode = 'group' | 'solo';
@@ -62,7 +69,6 @@ type CommunityTrip = { id: number; title: string; author: string; match: number;
 type PlaceRecommendation = DiscoveryPlace & { id: number; saved: boolean; added: boolean };
 type GhostWish = { id: number; name: string; reason: string; status: 'resting' | 'revived' | 'released' };
 type GovernedAction = 'assistant-move' | 'split-on' | 'split-off' | null;
-type KeepsakeId = 'transit' | 'receipt' | 'detour' | 'court' | null;
 type TripScopedInputs = Pick<TripIntent, 'tripVibe' | 'mustGo' | 'dealBreaker' | 'preference' | 'flexible'>;
 
 const defaultProfile: TravelProfile = {
@@ -103,18 +109,18 @@ function optionSlug(label: string, index: number): string {
 
 function parseConflictOptions(conflict: string): CourtOptionState[] | null {
   const parts = conflict.split(/\s+(?:vs\.?|versus|or)\s+|\s*\/\s*/i).map(value => value.trim()).filter(Boolean);
-  if (parts.length !== 2) return null;
+  if (parts.length < 2) return null;
   return parts.map((label, index) => ({ id: optionSlug(label, index), label }));
 }
 
 function Coco({ mood = 'idle', tiny = false, context = 'default' }: { mood?: 'idle' | 'happy' | 'panic'; tiny?: boolean; context?: 'default' | 'court' | 'memory' | 'travel' }) {
-  return <div className={`coco ${mood} context-${context} ${tiny ? 'tiny' : ''}`} aria-label={`Coco ${mood} · ${context}`}>
-    <span className="coco-canonical" aria-hidden="true"><img src={cocoIdle} alt=""/></span>
-    <span className="antenna a1"/><span className="antenna a2"/>
-    <span className="coco-shell"><i className="eye e1"/><i className="eye e2"/><i className="mouth"/></span>
-    <span className="leg l1"/><span className="leg l2"/><span className="leg l3"/>
-    <span className="leg r1"/><span className="leg r2"/><span className="leg r3"/>
-  </div>;
+  return <CocoCompanion context={context === 'default' ? 'home' : context === 'travel' ? 'traveling' : context} pose={mood === 'panic' ? 'expression-worried' : undefined} size={tiny ? 72 : 128}/>;
+}
+
+function formatPlanTime(minutes: number): string {
+  const hour = Math.floor(minutes / 60) % 24;
+  const minute = minutes % 60;
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
 }
 
 function SectionTitle({ kicker, title, copy }: { kicker: string; title: string; copy?: string }) {
@@ -127,6 +133,7 @@ function MiniTool({ icon: Icon, label, note, onClick }: { icon: React.ComponentT
 
 export default function AppRescued() {
   const [stored] = useState(() => loadPersisted());
+  const [ritualRecords, setRitualRecords] = useState(() => loadRitualState());
   const storedPace = stored.completedPaceEvidence;
   const { mode: storedMode, tripBudget: storedTripBudget, profile: storedProfile, tripIntent: storedTripIntent } = derivePersistedTripState(stored);
   const initialTripIntent = stored.tripIntent
@@ -144,7 +151,7 @@ export default function AppRescued() {
   const storedTingoDimensions = stored.tingoDimensions ?? defaultTingoDimensions;
   const [tab, setTab] = useState<Tab>('home');
   const [tripWorkspaceOpen, setTripWorkspaceOpen] = useState(false);
-  const [tripPhase, setTripPhase] = useState<TripPhase>('planning');
+  const [tripPhase, setTripPhase] = useState<TripPhase>(stored.tripPhase ?? 'planning');
   const [readyConfirmed, setReadyConfirmed] = useState(Boolean(stored.readyConfirmed));
   const [drawer, setDrawer] = useState<Drawer>(null);
   const [mode, setMode] = useState<TripMode>(storedMode);
@@ -164,9 +171,11 @@ export default function AppRescued() {
   });
   const [plannerTurn, setPlannerTurn] = useState(stored.plannerTurn ?? 'Mei');
   const [courtOpen, setCourtOpen] = useState(false);
-  const [courtOptions, setCourtOptions] = useState<CourtOptionState[]>(stored.courtOptions?.length === 2 ? stored.courtOptions : defaultCourtOptions);
+  const [courtOptions, setCourtOptions] = useState<CourtOptionState[]>(stored.courtOptions && stored.courtOptions.length >= 2 ? stored.courtOptions : defaultCourtOptions);
+  const [draftCourtOption, setDraftCourtOption] = useState('');
   const [courtVotes, setCourtVotes] = useState<CourtVote[]>(stored.courtVotes?.length ? stored.courtVotes : defaultVotes);
   const [gacha, setGacha] = useState<string | null>(null);
+  const [courtDrawRevealed, setCourtDrawRevealed] = useState(false);
   const [planWhyItemId, setPlanWhyItemId] = useState<string | null>(null);
   const [courtDecision, setCourtDecision] = useState<string | null>(stored.courtDecision ?? null);
   const [courtConfirmed, setCourtConfirmed] = useState(Boolean(stored.courtConfirmed));
@@ -214,7 +223,8 @@ export default function AppRescued() {
   const [activeConflict, setActiveConflict] = useState(stored.activeConflict ?? 'Ramen tonight vs Sushi tonight');
   const [pendingGovernedAction, setPendingGovernedAction] = useState<GovernedAction>(null);
   const [luckyDraw, setLuckyDraw] = useState<string | null>(null);
-  const [memoryNote, setMemoryNote] = useState(stored.memoryNote ?? 'The rain made us choose slower, and that was the best part.');
+  const [memoryNote, setMemoryNote] = useState(ritualRecords.authoredMemoryNote ?? '');
+  const [memorySaveError, setMemorySaveError] = useState(false);
   const [memoryPublic, setMemoryPublic] = useState(Boolean(stored.memoryPublic));
   const [photoImport, setPhotoImport] = useState(false);
   const [arrivalChecked, setArrivalChecked] = useState(Boolean(storedPace?.arrivalChecked));
@@ -226,7 +236,7 @@ export default function AppRescued() {
   const [linkAnalyzed, setLinkAnalyzed] = useState(false);
   const [destination, setDestination] = useState(initialTripIntent.destination);
   const [destinationSearched, setDestinationSearched] = useState(true);
-  const [recommendations, setRecommendations] = useState<PlaceRecommendation[]>(() => makeRecommendations(initialTripIntent.destination, storedTingoDimensions, stored.recommendations));
+  const [recommendations, setRecommendations] = useState<PlaceRecommendation[]>(() => makeRecommendations(initialTripIntent.destination, storedTingoDimensions, [...(stored.recommendations ?? []), ...(ritualRecords.savedIdeas ?? []).map(item => ({ name: item.name, saved: true, added: false }))]));
   const [backupCandidates, setBackupCandidates] = useState<BackupCandidate[]>(stored.backupCandidates ?? []);
   const [appliedRepair, setAppliedRepair] = useState<RepairResult | null>(stored.appliedRepair ?? null);
   const [groupBudgetTotal, setGroupBudgetTotal] = useState(storedMode === 'group' ? storedTripBudget : stored.groupBudgetTotal ?? 2400);
@@ -239,11 +249,10 @@ export default function AppRescued() {
     { id: 1, title: 'Tokyo: slow food + vintage streets', author: 'Aki', match: 92, saved: false },
     { id: 2, title: 'Rain-proof Tokyo weekend', author: 'Mina', match: 86, saved: false },
   ]);
-  const [trunkOpen, setTrunkOpen] = useState(false);
-  const [selectedKeepsake, setSelectedKeepsake] = useState<KeepsakeId>(null);
+  const [trunkRequest, setTrunkRequest] = useState(0);
   const [ghostWishes, setGhostWishes] = useState<GhostWish[]>([
-    { id: 1, name: 'Riverside night market', reason: 'Rain made the route unreliable.', status: 'resting' },
-    { id: 2, name: 'Late-night observation deck', reason: 'Group energy dropped below the planned pace.', status: 'resting' },
+    { id: 1, name: 'Riverside night market', reason: 'Rain made the route unreliable.', status: ritualRecords.releasedWishIds?.includes(1) ? 'released' : ritualRecords.revivedWishIds?.includes(1) ? 'revived' : 'resting' },
+    { id: 2, name: 'Late-night observation deck', reason: 'Group energy dropped below the planned pace.', status: ritualRecords.releasedWishIds?.includes(2) ? 'released' : ritualRecords.revivedWishIds?.includes(2) ? 'revived' : 'resting' },
   ]);
   const [futurePostcard, setFuturePostcard] = useState('Leave one evening unplanned. You liked the surprise more than the perfect schedule.');
   const [postcardSealed, setPostcardSealed] = useState(false);
@@ -297,6 +306,8 @@ export default function AppRescued() {
     floatingStartMinutes: floatingStartOverride ?? undefined,
     resolvedConflictLabels,
   }), [tripIntent, tingoBehavior, members, groupDNA, destinationCandidates, floatingStartOverride, resolvedConflictLabels]);
+  const suggestedFloatingStart = (baseTripPlan.items.find(item => item.kind === 'floating')?.startMinutes ?? 15 * 60) + 30;
+  const suggestedFloatingLabel = formatPlanTime(suggestedFloatingStart);
   const failedPlanItem = baseTripPlan.items.find(item => item.kind === 'floating');
   const backupPool = backupCandidates;
   const repairSourcePlan = useMemo(() => delay && !replanApplied && failedPlanItem
@@ -304,6 +315,11 @@ export default function AppRescued() {
     : baseTripPlan, [baseTripPlan, delay, failedPlanItem, replanApplied]);
   const repairPreview = useMemo(() => failedPlanItem ? buildMinimumLossRepair({ plan: repairSourcePlan, failedItemId: failedPlanItem.id, backups: backupPool, budgetRemaining: remaining, mode }) : null, [backupPool, failedPlanItem, mode, remaining, repairSourcePlan]);
   const visibleTripPlan = useMemo(() => appliedRepair ? applyRepairToPlan(repairSourcePlan, appliedRepair, true).plan : repairSourcePlan, [appliedRepair, repairSourcePlan]);
+  const everydayCandidates = useMemo(() => deriveEverydayDrawPool([
+    ...visibleTripPlan.items.filter(item => item.kind === 'floating').map(item => ({ name: item.name, source: 'floating-itinerary' as const })),
+    ...recommendations.filter(place => place.saved).map(place => ({ name: place.name, source: 'saved-idea' as const })),
+    ...backupPool.map(item => ({ name: item.name, source: 'backup' as const, viable: item.viable, dealBreakerSafe: item.dealBreakerSafe })),
+  ]), [backupPool, recommendations, visibleTripPlan.items]);
   const planHealth = calculatePlanHealth({ plan: visibleTripPlan, budget: budgetTotal, groupDNA, tingoBehavior, dealBreaker: tripInputs.dealBreaker, resolvedConflictLabels });
   const optionLabel = (id: string | null) => courtOptions.find(option => option.id === id)?.label ?? id ?? '';
   const majorityDecision = tally.majority ? optionLabel(tally.majority) : null;
@@ -311,7 +327,8 @@ export default function AppRescued() {
   const completedPaceEvidence: CompletedPaceEvidence = { delayed: delay, mood, arrivalChecked };
   const actualPaceCopy = paceEvidenceSummary(completedPaceEvidence);
   const tingoComplete = tingoCompletion(tingoAnswers) === 100;
-  const outcomeReviewed = actualPaceCopy !== 'No completed pace signal yet' || Boolean(photoImport || journalGenerated || Object.keys(itemReviews).length > 0);
+  const outcomeReviewed = actualPaceCopy !== 'No completed pace signal yet' || Object.keys(itemReviews).length > 0;
+  const expressiveAvailable = memoryEligible(outcomeReviewed, worthIt, profileLearned, learningProposal?.status);
   const journeyState = useMemo(() => deriveJourneyState({
     phase: tripPhase,
     tripCreated,
@@ -366,10 +383,10 @@ export default function AppRescued() {
       privacy, continuousLocation,
       recommendations: recommendations.map(({ name, saved, added }) => ({ name, saved, added })),
       tripIntent,
-      worthIt, profileLearned, learningProposal: learningProposal?.status === 'confirmed' ? undefined : learningProposal ?? undefined, confirmedLearningHistory, tingoAnswers, tingoDimensions, basePackingPreferences, tripCreated,
-      members, memberPreferenceProfiles, backupCandidates, appliedRepair: appliedRepair ?? undefined, constraints, reminders, commitments, reunion, published, memoryNote, memoryPublic, itemReviews,
+      worthIt, profileLearned, learningProposal: learningProposal?.status === 'confirmed' ? undefined : learningProposal ?? undefined, confirmedLearningHistory, tingoAnswers, tingoDimensions, basePackingPreferences, tripCreated, tripPhase,
+      members, memberPreferenceProfiles, backupCandidates, appliedRepair: appliedRepair ?? undefined, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, revivedWishIds: ghostWishes.filter(wish => wish.status === 'revived').map(wish => wish.id),
     });
-  }, [mode, destination, readyConfirmed, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals, delay, mood, arrivalChecked, privacy, continuousLocation, recommendations, tripIntent, worthIt, profileLearned, learningProposal, confirmedLearningHistory, tingoAnswers, tingoDimensions, basePackingPreferences, tripCreated, members, memberPreferenceProfiles, backupCandidates, appliedRepair, constraints, reminders, commitments, reunion, published, memoryNote, memoryPublic, itemReviews]);
+  }, [mode, destination, readyConfirmed, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals, delay, mood, arrivalChecked, privacy, continuousLocation, recommendations, tripIntent, worthIt, profileLearned, learningProposal, confirmedLearningHistory, tingoAnswers, tingoDimensions, basePackingPreferences, tripCreated, tripPhase, members, memberPreferenceProfiles, backupCandidates, appliedRepair, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, ghostWishes]);
 
   function setProfileField(field: keyof TravelProfile, value: string) {
     setProfile(current => ({ ...current, [field]: value }));
@@ -388,12 +405,22 @@ export default function AppRescued() {
   function toggleRecommendation(id: number, action: 'save' | 'add') {
     const place = recommendations.find(item => item.id === id);
     if (!place) return;
-    if (action === 'save' && !place.saved) emitExperience({ type: 'capture-place', place: place.name });
+    if (action === 'save') {
+      emitExperience({ type: 'capture-place', place: place.name, save: () => {
+        const current = loadRitualState();
+        const savedIdeas = [...(current.savedIdeas ?? []).filter(item => item.name !== place.name), { name: place.name, source: place.source }];
+        if (!commitRitualState({ savedIdeas })) return false;
+        setRitualRecords(loadRitualState());
+        setRecommendations(items => items.map(item => item.name === place.name ? { ...item, saved: true } : item));
+        return true;
+      } });
+      return;
+    }
     if (action === 'add') {
       const gate = gatePlanMutation(mode, mode === 'group' ? 'idea-save' : 'personal-draft');
       if (!gate.allowed) return;
     }
-    setRecommendations(items => items.map(item => item.id === id ? { ...item, [action === 'save' ? 'saved' : 'added']: !item[action === 'save' ? 'saved' : 'added'] } : item));
+    setRecommendations(items => items.map(item => item.id === id ? { ...item, added: !item.added } : item));
   }
 
   function castVote(member: string, pick: CourtOption) {
@@ -437,8 +464,8 @@ export default function AppRescued() {
   }
 
   function applyPendingGovernedDecision(decision: string) {
-    if (pendingGovernedAction === 'assistant-move' && decision === 'Move café to 15:00') {
-      setFloatingStartOverride(15 * 60);
+    if (pendingGovernedAction === 'assistant-move' && decision === `Move floating block to ${suggestedFloatingLabel}`) {
+      setFloatingStartOverride(suggestedFloatingStart);
       setAssistantApplied(true);
       setAssistantPreview(false);
       setAssistantUndone(false);
@@ -492,7 +519,7 @@ export default function AppRescued() {
 
   function printReceipt() {
     setReceiptPrinted(true);
-    emitExperience({ type: 'print-receipt' });
+    emitExperience({ type: 'print-receipt', total: spent, participants: mode === 'group' ? members.filter(member => member.inviteStatus === 'joined').map(member => member.name) : ['Mei'] });
   }
 
   function sendFamilyReassurance() {
@@ -664,8 +691,8 @@ export default function AppRescued() {
   }
 
   function runEverydayGacha() {
-    const options = ['Take the café route', 'Follow the riverside route'];
-    setEverydayGacha(options[Math.floor(Math.random() * options.length)]);
+    if (everydayCandidates.length === 0) { setEverydayGacha(null); return; }
+    setEverydayGacha(everydayCandidates[Math.floor(Math.random() * everydayCandidates.length)]);
   }
 
   function openGovernedAction(action: Exclude<GovernedAction, null>) {
@@ -681,7 +708,7 @@ export default function AppRescued() {
       return;
     }
     const proposal = action === 'assistant-move'
-      ? { topic: 'Coco café timing', options: [{ id: 'keep-cafe', label: `Keep floating block at ${baseTripPlan.items.find(item => item.kind === 'floating')?.timeLabel ?? 'current time'}` }, { id: 'move-cafe', label: 'Move café to 15:00' }] }
+      ? { topic: 'Coco timing suggestion', options: [{ id: 'keep-cafe', label: `Keep floating block at ${baseTripPlan.items.find(item => item.kind === 'floating')?.timeLabel ?? 'current time'}` }, { id: 'move-cafe', label: `Move floating block to ${suggestedFloatingLabel}` }] }
       : action === 'split-on'
         ? { topic: 'Smart Split', options: [{ id: 'stay-together', label: 'Stay together' }, { id: 'create-split', label: 'Create Smart Split' }] }
         : { topic: 'Smart Split reunion', options: [{ id: 'keep-split', label: 'Keep Smart Split' }, { id: 'reunite', label: 'Reunite group' }] };
@@ -715,7 +742,7 @@ export default function AppRescued() {
     setCourtConcession(null);
     if (parsedOptions) {
       setCourtOptions(parsedOptions);
-      setCourtVotes(members.filter(member => member.inviteStatus === 'joined').map((member, index) => ({ member: member.name, pick: parsedOptions[index % 2].id })));
+      setCourtVotes(members.filter(member => member.inviteStatus === 'joined').map((member, index) => ({ member: member.name, pick: parsedOptions[index % parsedOptions.length].id })));
     }
     setDraftConflict('');
     setDrawer(null);
@@ -731,6 +758,7 @@ export default function AppRescued() {
 
     return <div className="home-orientation">
       <SectionTitle kicker="HOME · ACTIVE TRIP" title={`${destination} stays in view.`} copy="Follow the next meaningful action first, then inspect the rest of the trip as needed."/>
+      <section className="home-trip-glance paper-sheet"><div><span>{destination} · {tripIntent.dates ? `${tripIntent.dates.start}–${tripIntent.dates.end}` : 'dates to be confirmed'}</span><b>{tripPhase === 'planning' ? 'Before · shaping the trip' : tripPhase === 'traveling' ? 'During · stay with today' : 'After · keep what mattered'}</b></div><WeatherGlance destination={destination} compact/></section>
       <TripJourneyStatus state={journeyState} destination={destination} onAction={handleJourneyAction} />
       <JourneyProgress destination={destination} currentPhase={tripPhase} nextActionLabel={journeyState.nextAction?.label} />
       <section className="status-strip status-strip--home"><div><span>Current Phase</span><b>{tripPhase === 'planning' ? 'Planning' : tripPhase === 'traveling' ? 'Traveling' : 'Completed'}</b></div><div><span>Plan Health</span><b>{planHealth.overall}/100</b></div><div><span>Budget Remaining</span><b>RM {remaining}</b></div><div><span>Group Status</span><b>{groupStatus}</b></div></section>
@@ -784,6 +812,7 @@ export default function AppRescued() {
     return <div className="explore-screen">
       <SectionTitle kicker="EXPLORE · COCO PICKS" title="Borrow a feeling, make it yours." copy="Save ideas for the active trip, ranked against your Tingo pace and budget. Group suggestions still need group governance."/>
       <ExplorePlanningGuide onOpenTrip={() => openTrip('planning')}/>
+      {(ritualRecords.savedIdeas?.length ?? 0) > 0 && <section className="paper-sheet"><h3>Saved trip ideas</h3>{ritualRecords.savedIdeas?.map(idea => <p key={idea.name}><b>{idea.name}</b> · {idea.source}</p>)}</section>}
       <section className="explore-hero paper-sheet"><div><span>YOUR NEXT LITTLE YES</span><h3>Rain-proof Tokyo, still full of flavour.</h3><p>{tingoBehavior.recommendationBias} discovery · {tingoBehavior.itineraryDensity} pace · {tingoBehavior.budgetMode} budget</p><button className="primary" onClick={() => setDrawer('discover')}>Explore places <ChevronRight size={16}/></button></div><div className="explore-orbit" aria-hidden="true"><span>✦</span><span>○</span><span>✧</span></div></section>
       <div className="explore-section-heading"><span>COMMUNITY NOTEBOOKS</span><button onClick={() => setDrawer('community')}>See all <ChevronRight size={14}/></button></div>
       <section className="explore-community">{communityTrips.map(trip => <article className="explore-community-card" key={trip.id}><div className={trip.id === 1 ? 'community-photo street-photo' : 'community-photo rain-photo'}><span>{trip.match}% fit</span></div><div><b>{trip.title}</b><small>By {trip.author} · explicitly shared</small><button onClick={() => setCommunityTrips(items => items.map(item => item.id === trip.id ? { ...item, saved: !item.saved } : item))}>{trip.saved ? 'Saved to ideas' : 'Save idea'}</button></div></article>)}</section>
@@ -795,8 +824,8 @@ export default function AppRescued() {
     return <div className="memories-screen">
       <SectionTitle kicker="MEMORIES · YOUR ARCHIVE" title="The trips that stayed with you." copy="Private by default. Start with the review, then keep the decisions, detours, and tiny wins close."/>
       <MemoryArchiveGuide onOpenTrip={() => openTrip('completed')}/>
-      <section className="memory-archive-feature paper-sheet"><div className="archive-photo"><span>OCT 2026</span><b>{destination}</b></div><div><span>LAST TRIP · 4.2 / 5</span><h3>Rain changed the evening. The group kept the promise.</h3><p>18 photos · {decisionHistory.length} decisions · RM {spent} actual</p><button className="primary" onClick={() => openTrip('completed')}>Open Memory Trunk <ChevronRight size={16}/></button></div></section>
-      <div className="explore-section-heading"><span>KEEPSAKE SHELF</span><span className="quiet-note">Only you can see these</span></div><section className="keepsake-grid"><article><span>PHOTO MAP</span><b>4 places</b><small>Tsukiji · café · underground · hotel</small></article><article><span>FUTURE POSTCARD</span><b>1 sealed</b><small>Waiting for your next trip</small></article><article><span>GHOST WISHES</span><b>{ghostWishes.length} remembered</b><small>Some plans can come back</small></article></section>
+      <section className="memory-archive-feature paper-sheet"><div className="archive-photo"><span>OCT 2026</span><b>{destination}</b></div><div><span>LAST TRIP · {worthIt ? (worthIt === 'yes' ? 'Worth it' : worthIt === 'mixed' ? 'Mixed' : 'Not really') : 'Not reviewed'}</span><h3>{outcomeReviewed ? 'Your recorded outcome is ready to revisit.' : 'The retrospective starts with what actually happened.'}</h3><p>{photoImport ? `${importPhotoMetadata().imported} local metadata entries` : 'No photo metadata recorded'} · {decisionHistory.length} decisions · RM {spent} actual</p><button className="primary" onClick={() => openTrip('completed')}>Open Memory Trunk <ChevronRight size={16}/></button></div></section>
+      <div className="explore-section-heading"><span>KEEPSAKE SHELF</span><span className="quiet-note">Only you can see these</span></div><section className="keepsake-grid"><article><span>PHOTO MAP</span><b>{photoImport ? `${importPhotoMetadata().grouped} areas` : 'Not indexed'}</b><small>{photoImport ? 'Local metadata only' : 'Available after explicit review'}</small></article><article><span>FUTURE POSTCARD</span><b>{postcardSealed ? '1 sealed' : 'Not sealed'}</b><small>{postcardSealed ? 'Waiting for your next trip' : 'Write after the review loop'}</small></article><article><span>GHOST WISHES</span><b>{ghostWishes.length} remembered</b><small>Some plans can come back</small></article></section>
       <section className="community-entry"><div><span>COMMUNITY</span><b>{published ? 'Published with consent' : 'Private by default'}</b><small>Nothing becomes public without an explicit action.</small></div><button onClick={() => setDrawer('community')}>Manage</button></section>
     </div>;
   }
@@ -829,6 +858,7 @@ export default function AppRescued() {
     ];
     return <div className="planning-screen">
       <SectionTitle kicker="PLAN · TRAVEL NOTEBOOK" title="Build a plan that can bend." copy="Keep the important things firm. Let the rest breathe."/>
+      <WeatherGlance destination={destination} compact/>
       {!tripCreated && <section className="setup-banner"><div><span>NEW TRIP</span><b>Give this journey a home before Coco plans it.</b><small>Destination, people, vibe, constraints, then a reviewable plan.</small></div><button className="primary" onClick={() => setDrawer('tripSetup')}>Set up trip <ChevronRight size={15}/></button></section>}
       <section className="planning-brief">
       <section className="trip-intent-summary paper-sheet"><div><span>TRIP INTENT · THIS JOURNEY ONLY</span><h3>{tripInputs.tripVibe || 'A shape is still forming.'}</h3><p>Must-Go: {tripInputs.mustGo || 'not set'} · Deal breaker: {tripInputs.dealBreaker || 'not set'}</p><small>Preference: {tripInputs.preference || 'optional'} · Flexible: {tripInputs.flexible || 'not set'} · Budget: RM {budgetTotal}</small></div><button className="secondary" onClick={() => setDrawer('tripSetup')}>Review inputs <ChevronRight size={14}/></button></section>
@@ -845,7 +875,7 @@ export default function AppRescued() {
       </div>
       <section className="plan-health"><div className="section-rule"><span>PLAN HEALTH · EXPLAINED</span><button onClick={() => setDrawer('feasibility')}>Run checks <ChevronRight size={14}/></button></div><div className="health-score"><b>{planHealth.overall}</b><span><strong>{planHealth.overall >= 80 ? 'Healthy with watch items shown' : planHealth.overall >= 60 ? 'Usable with meaningful watch items' : 'Needs a planning decision'}</strong><small>{planHealth.reasons[0] ?? 'No current risk deductions; inputs fit the generated structure.'}</small></span></div><div className="health-metrics"><span>Walk <b>{planHealth.metrics.walkingKm.toFixed(1)} km</b></span><span>Pressure <b>{planHealth.metrics.timePressureMinutes} min</b></span><span>Budget <b>{planHealth.metrics.budgetOverrun ? `RM ${planHealth.metrics.budgetOverrun} over` : 'Within cap'}</b></span><span>Transfer <b>{planHealth.metrics.transferMinutes} min</b></span><span>Anchors <b>{planHealth.metrics.protectedAnchors} protected</b></span><span>Risks <b>{planHealth.metrics.unresolvedRisks}</b></span></div></section>
       </div>
-      <ContextualToolList tools={planTools} />
+      <details className="secondary-launcher"><summary>Plan details & tools</summary><ContextualToolList tools={planTools} /></details>
       <section className="ready-to-go-card paper-sheet"><div><span>READY TO GO</span><h3>{readyConfirmed ? 'This plan is ready to continue.' : 'Review the joins before you go.'}</h3><p>{readyConfirmed ? 'You can still inspect the workspace and change course when reality changes.' : 'Coco will show the current risks; confirmation stays yours.'}</p></div><button className="primary" onClick={() => setDrawer('feasibility')}>{readyConfirmed ? 'Review readiness' : 'Confirm Ready to Go'} <ChevronRight size={15}/></button></section>
     </div>;
   }
@@ -855,6 +885,7 @@ export default function AppRescued() {
       const floatingItem = visibleTripPlan.items.find(item => item.kind === 'floating');
       return <>
         <SectionTitle kicker="DURING · LIVE TRIP" title={delay ? 'Reality changed.' : 'The trip is moving.'} copy="Coco watches the plan, not your every step."/>
+        <WeatherGlance destination={destination} compact/>
         <TodayTimeline items={visibleTripPlan.items} delay={delay} arrivalChecked={arrivalChecked} appliedRepair={replanApplied} />
         <TripConditions delay={delay} failedItemName={failedPlanItem?.name} repairAvailable={Boolean(repairPreview?.applicable)} repairStrategy={repairPreview?.strategy} onSimulateDisruption={() => { setDelay(true); setReplanPreview(false); setAppliedRepair(null); setReplanApplied(false); setEmergencyApproved(false); }}/>
       {delay && !replanApplied && <section className="disruption-stage"><div className="disruption-head"><CloudRain size={26}/><div><span>TRIP CHANGE</span><b>{failedPlanItem?.timeLabel ?? 'Current'} {failedPlanItem?.name ?? 'item'} no longer fits today.</b><small>Demo condition · not a live weather alert.</small></div></div>{!replanPreview ? <><div className="ghost-suggestion"><span>SAFEST ADJUSTMENT</span><b>{repairPreview?.replacement?.name ?? (repairPreview?.strategy === 'open-recovery' ? 'Leave this time open for recovery' : 'No safe repair available')}</b><small>{repairPreview?.replacement ? `${repairPreview.replacement.support} supporters · ${repairPreview.impact.costDelta >= 0 ? '+' : ''}RM${repairPreview.impact.costDelta} · ${repairPreview.impact.timeDeltaMinutes >= 0 ? '+' : ''}${repairPreview.impact.timeDeltaMinutes} min` : repairPreview?.strategy === 'open-recovery' ? 'No direct Backup candidate; recovery time can protect the anchor.' : repairPreview?.reasons[repairPreview.reasons.length - 1] ?? 'No repair result available.'}</small></div><button className="primary" disabled={!repairPreview?.applicable} onClick={() => setReplanPreview(true)}>See the safest adjustment</button></> : <><div className="repair-impact-head"><span>REVIEW BEFORE APPLY</span><b>Protect what matters, soften the rest.</b></div><div className="repair-diff"><div><span>WHAT STAYS</span><b>{tripInputs.mustGo || anchorItem?.name || 'Must-Go anchor'}</b><small>Protected before flexible blocks move.</small></div><div><span>WHAT CHANGES</span><b>{repairPreview?.replacement?.name ?? (repairPreview?.strategy === 'open-recovery' ? 'Recovery time' : 'No replacement')}</b><small>{repairPreview?.replacement ? `${repairPreview.replacement.support} supporters` : 'No direct Backup candidate is required for recovery time.'}</small></div><div><span>IMPACT</span><b>{repairPreview ? `${repairPreview.impact.costDelta >= 0 ? '+' : ''}RM${repairPreview.impact.costDelta} · ${repairPreview.impact.timeDeltaMinutes >= 0 ? '+' : ''}${repairPreview.impact.timeDeltaMinutes} min` : 'No computed impact'}</b><small>Calculated from the repair result.</small></div></div><div className="change-ticket">{repairPreview?.preview.map(line => <div key={line}><span>PLAN CHANGE</span><b>{line}</b></div>)}</div>{repairPreview?.reasons.map(reason => <small className="adapter-note" key={reason}>{reason}</small>)}{mode === 'group' && repairPreview?.requiresGroupConfirmation && <div className="emergency-court"><span>EMERGENCY COURT · 90 SEC</span><b>{emergencyApproved ? 'Approved for this repair' : 'Group approval required'}</b><button onClick={() => setEmergencyApproved(true)}>{emergencyApproved ? '✓ Approved' : 'Simulate group approval'}</button></div>}<div className="action-row"><button className="secondary" onClick={() => setReplanPreview(false)}>Not now</button><button className="primary" disabled={!repairPreview?.applicable || (repairPreview.requiresGroupConfirmation && !emergencyApproved)} onClick={applyRepair}>Apply repair</button></div></>}</section>}
@@ -863,7 +894,7 @@ export default function AppRescued() {
       <section className="energy-check"><span>HOW’S THE GROUP?</span><div>{(['great','okay','tired'] as const).map(value => <button key={value} className={mood === value ? 'active' : ''} onClick={() => setMood(value)}>{value === 'great' ? '⚡ Great' : value === 'okay' ? '🙂 Okay' : '🥱 Tired'}</button>)}</div>{mood === 'tired' && <small>Coco suggests dropping one floating item and adding 45 min rest. Anchors stay untouched.</small>}</section>
       {mode === 'group' && <section className="heartbeat"><span>GROUP HEARTBEAT</span><b>{delay ? 'Needs a decision' : split ? 'Can reunite on time' : arrivalChecked ? 'Together at the anchor' : 'Status check pending'}</b><small>Only shared status is shown. Exact group coordinates stay hidden by default.</small></section>}
       {mode === 'group' && <section className="split-note"><div><span>SMART SPLIT</span><b>{split ? '2 café · 2 shopping' : 'Different energy levels?'}</b><small>{split ? 'Reunion · 19:30 · ±15 min · official shared state' : 'Preview is harmless; creating the official split requires Group Court.'}</small>{split && <div className="split-timelines"><span>Mei + Zi Shan · café · {floatingItem?.timeLabel ?? 'time pending'}</span><span>JH + Alex · shopping · {floatingItem?.timeLabel ?? 'time pending'}</span></div>}</div><button onClick={() => openGovernedAction(split ? 'split-off' : 'split-on')}>{split ? 'Request reunion' : 'Propose split'}</button></section>}
-      <section className="during-tools"><div className="contextual-section-heading"><span>WHEN YOU NEED A HAND</span><small>Contextual tools stay below today’s condition and repair decision.</small></div><div className="during-tool-group"><span className="tool-group-label">SHARE & SAFETY</span><MiniTool icon={Send} label="Family Window" note={reported ? 'Latest reassurance sent' : 'Reassurance, not surveillance'} onClick={() => setDrawer('family')}/><MiniTool icon={MapPin} label="Location privacy" note="Permission and provider boundary" onClick={() => setDrawer('location')}/><MiniTool icon={Users} label="Reunion agreement" note={`${reunion.place} · ${reunion.time} · ±${reunion.tolerance} min`} onClick={() => setDrawer('commitments')}/><MiniTool icon={Heart} label="Safety + local help" note="Prototype contact and nearby useful info" onClick={() => setDrawer('safety')}/></div><div className="during-tool-group"><span className="tool-group-label">EXPLAIN & PLAY</span><MiniTool icon={Sparkles} label="Ask Coco" note={assistantApplied ? 'Suggestion applied · undo available' : 'Read-only until you confirm'} onClick={() => setDrawer('assistant')}/><MiniTool icon={Sparkles} label="Everyday Gacha" note="Real choice · never governance" onClick={() => setDrawer('gacha')}/><MiniTool icon={Sparkles} label="Lucky Draw" note="Entertainment only · isolated from decisions" onClick={() => setDrawer('lucky')}/></div></section>
+      <details className="during-tools secondary-launcher"><summary>More tools · sharing, reunion, safety & play</summary><div className="contextual-section-heading"><span>WHEN YOU NEED A HAND</span><small>These tools stay secondary to Today, conditions, and repair.</small></div><div className="during-tool-group"><span className="tool-group-label">SHARE & SAFETY</span><MiniTool icon={Send} label="Family Window" note={reported ? 'Latest reassurance sent' : 'Reassurance, not surveillance'} onClick={() => setDrawer('family')}/><MiniTool icon={MapPin} label="Location privacy" note="Permission and provider boundary" onClick={() => setDrawer('location')}/><MiniTool icon={Users} label="Reunion agreement" note={`${reunion.place} · ${reunion.time} · ±${reunion.tolerance} min`} onClick={() => setDrawer('commitments')}/><MiniTool icon={Heart} label="Safety + local help" note="Prototype contact and nearby useful info" onClick={() => setDrawer('safety')}/></div><div className="during-tool-group"><span className="tool-group-label">EXPLAIN & PLAY</span><MiniTool icon={Sparkles} label="Ask Coco" note={assistantApplied ? 'Suggestion applied · undo available' : 'Read-only until you confirm'} onClick={() => setDrawer('assistant')}/><MiniTool icon={Sparkles} label="Everyday Gacha" note="Real choice · never governance" onClick={() => setDrawer('gacha')}/><MiniTool icon={Sparkles} label="Lucky Draw" note="Entertainment only · isolated from decisions" onClick={() => setDrawer('lucky')}/></div></details>
       <TripSpatialView
         mode="traveling"
         destination={destination}
@@ -880,23 +911,22 @@ export default function AppRescued() {
   }
 
   function renderMemories() {
-    const keepsakes: { id: Exclude<KeepsakeId, null>; label: string }[] = [
-      { id: 'transit', label: '🎫 Day 2 transit stub' },
-      { id: 'receipt', label: '🧾 Dinner split receipt' },
-      { id: 'detour', label: '📸 Rainy underground detour' },
-      { id: 'court', label: `⚖️ ${courtDecision ?? 'No Court verdict saved yet'}` },
+    const keepsakes = [
+      ...decisionHistory.map(record => ({ id: record.id, title: record.topic, body: record.decision, source: `Recorded ${record.kind} decision · ${record.createdAt}` })),
+      ...(ritualRecords.authoredMemoryNote ? [{ id: 'authored-note', title: 'My memory note', body: ritualRecords.authoredMemoryNote, source: 'Explicitly saved personal note' }] : []),
     ];
     const photoMetadata = photoImport ? importPhotoMetadata() : null;
     return <div className="completed-screen">
       <SectionTitle kicker="AFTER · MEMORY TRUNK" title="Keep what the trip taught you." copy="Photos, choices, little failures, and the things you would do again."/>
       <section className="completed-learning-loop">
         <CompletedLearningGuide/>
-        <TripRetrospective actualSummary={{ pace: actualPaceCopy, spent, decisions: decisionHistory.length, outcomeRecorded: outcomeReviewed }} worthIt={worthIt} proposal={learningProposal} learningConfirmed={profileLearned} onRecordReflection={recordWorthIt} onBuildProposal={() => { if (worthIt) buildCurrentLearningProposal(worthIt); }} onConfirmLearning={confirmLearning} onDismissLearning={dismissLearning} onOpenMemory={() => { setTrunkOpen(true); setSelectedKeepsake(null); }} />
+        <TripRetrospective actualSummary={{ pace: actualPaceCopy, spent, decisions: decisionHistory.length, outcomeRecorded: outcomeReviewed }} worthIt={worthIt} proposal={learningProposal} learningConfirmed={profileLearned} onRecordReflection={recordWorthIt} onBuildProposal={() => { if (worthIt) buildCurrentLearningProposal(worthIt); }} onConfirmLearning={confirmLearning} onDismissLearning={dismissLearning} onOpenMemory={() => { if (expressiveAvailable) setTrunkRequest(value => value + 1); }} />
       </section>
       <section className="completed-expressive-shelf" aria-label="Expressive memory shelf">
         <div className="expressive-shelf-heading"><span>EXPRESSIVE MEMORY SHELF</span><h3>Keep the moments that made the trip yours.</h3><small>Review outcome, reflection, learning, and confirmation first; this shelf stays after that handoff.</small></div>
-      <button className={`trunk-hero trunk-button ${trunkOpen ? 'open' : ''}`} aria-expanded={trunkOpen} onClick={() => { setTrunkOpen(open => !open); setSelectedKeepsake(null); }}><div className="trunk-lid"/><div className="trunk-body"><span className="postcard p1">{destination.toUpperCase()}</span><span className="postcard p2">雨の日</span><span className="ticket">10.13</span><Coco tiny mood="happy" context="memory"/></div><small>{trunkOpen ? 'Tap to close the trunk' : 'Tap to open the trunk'}</small></button>
-      {trunkOpen && <section className="trunk-contents paper-sheet"><b>Trip keepsakes · tap to lift</b>{keepsakes.map(item => <button key={item.id} className={`trunk-keepsake ${selectedKeepsake === item.id ? 'active' : ''}`} aria-pressed={selectedKeepsake === item.id} onClick={() => setSelectedKeepsake(current => current === item.id ? null : item.id)}>{item.label}</button>)}</section>}
+      <MemoryTrunk artifacts={keepsakes} available={expressiveAvailable} openRequested={trunkRequest}/>
+      {expressiveAvailable && <>
+
       <section className="memory-actions"><button onClick={() => { setPhotoIndexed(true); setPhotoImport(true); }}><Map size={20}/><span><b>Photo Map</b><small>{photoIndexed ? `${importPhotoMetadata().imported} photos indexed · ${importPhotoMetadata().grouped} areas` : 'Index local photo metadata'}</small></span></button><button onClick={() => setJournalGenerated(true)}><BookOpen size={20}/><span><b>Travel journal</b><small>{journalGenerated ? 'Draft generated' : 'Generate from timeline + photos'}</small></span></button></section>
       {photoImport && <section className="adapter-note"><b>Metadata adapter complete.</b><small>{photoMetadata?.note}</small></section>}
       <div className="spatial-secondary-panel">
@@ -912,12 +942,15 @@ export default function AppRescued() {
           } : undefined}
         />
       </div>
-      <section className="memory-note-card"><div><span>MEMORY NOTE</span><b>Leave one thought with the photo.</b></div><textarea value={memoryNote} onChange={e => setMemoryNote(e.target.value)} aria-label="Memory note"/><label><input type="checkbox" checked={memoryPublic} onChange={e => setMemoryPublic(e.target.checked)}/> Public only if I explicitly choose it</label><small>{memoryPublic ? 'Ready for Community after confirmation.' : 'Private in your archive.'}</small></section>
+      <section className="memory-note-card"><div><span>MEMORY NOTE</span><b>Keep your own words.</b></div><textarea value={memoryNote} onChange={e => setMemoryNote(e.target.value)} aria-label="Memory note"/><button onClick={() => { const ok = commitRitualState({ authoredMemoryNote: memoryNote }); setMemorySaveError(!ok); if (ok) setRitualRecords(loadRitualState()); }}>Save note to trunk</button>{memorySaveError && <p role="alert">Could not save this note. Please retry.</p>}<small>Private, explicitly authored memory. No generated travel story.</small></section>
       <button className="memory-card-trigger" onClick={() => setDrawer('memoryCard')}><span>MEMORY STICKER CARD</span><b>Make one moment collectible <ChevronRight size={15}/></b></button>
+      </>}
       <section className="review-items"><div className="section-rule"><span>HOW EACH STOP FELT</span><span className="quiet-note">Feeds future recommendations</span></div><div className="review-item"><div><b>{tripInputs.mustGo}</b><small>Must-Go anchor · actual visit</small></div><div className="rating-row"><button className={itemReviews.anchor === 'worth' ? 'active' : ''} onClick={() => setItemReviews(current => ({ ...current, anchor: 'worth' }))}>Worth it</button><button className={itemReviews.anchor === 'mixed' ? 'active' : ''} onClick={() => setItemReviews(current => ({ ...current, anchor: 'mixed' }))}>Mixed</button><button className={itemReviews.anchor === 'skip' ? 'active' : ''} onClick={() => setItemReviews(current => ({ ...current, anchor: 'skip' }))}>Skip next time</button></div></div><div className="review-item"><div><b>Scenic café block</b><small>Preference · stayed flexible</small></div><div className="rating-row"><button className={itemReviews.cafe === 'worth' ? 'active' : ''} onClick={() => setItemReviews(current => ({ ...current, cafe: 'worth' }))}>Worth it</button><button className={itemReviews.cafe === 'mixed' ? 'active' : ''} onClick={() => setItemReviews(current => ({ ...current, cafe: 'mixed' }))}>Mixed</button><button className={itemReviews.cafe === 'skip' ? 'active' : ''} onClick={() => setItemReviews(current => ({ ...current, cafe: 'skip' }))}>Skip next time</button></div></div></section>
+      {expressiveAvailable && <>
       {journalGenerated && <section className="postcard-note"><span>OCT 13 · {destination.toUpperCase()}</span><p>Rain changed the evening, but the group kept the one thing everyone cared about. We ended up underground, warmer, later, and somehow happier.</p><small>Prototype draft · editable before saving</small></section>}
-      <section className="ghost-wish"><span>GHOST WISH CEMETERY</span><h3>Trips that didn’t make it.</h3>{ghostWishes.map(wish => <div className={`ghost-wish-row ${wish.status}`} key={wish.id}><div><b>{wish.name}</b><small>{wish.reason}</small><em>{wish.status === 'resting' ? 'Still remembered' : wish.status === 'revived' ? 'Revived into Backup Plan' : 'Released, history kept'}</em></div>{wish.status === 'resting' && <div><button onClick={() => setGhostWishes(items => items.map(item => item.id === wish.id ? { ...item, status: 'revived' } : item))}>Revive</button><button onClick={() => setGhostWishes(items => items.map(item => item.id === wish.id ? { ...item, status: 'released' } : item))}>超度行程</button></div>}</div>)}</section>
+      <section className="ghost-wish"><span>GHOST WISH CEMETERY</span><h3>Retained prototype Ghost Wishes.</h3>{ghostWishes.map(wish => <div className={`ghost-wish-row ${wish.status}`} key={wish.id}><div><b>{wish.name}</b><small>{wish.reason}</small><em>{wish.status === 'resting' ? 'Still remembered' : wish.status === 'revived' ? 'Revived for review · viability not assessed' : 'Released, history kept'}</em></div>{wish.status !== 'released' && <div>{wish.status === 'resting' && <button onClick={() => { const next = ghostWishes.filter(item => item.status === 'revived').map(item => item.id); if (commitRitualState({ revivedWishIds: [...new Set([...next, wish.id])] })) { setRitualRecords(loadRitualState()); setGhostWishes(items => items.map(item => item.id === wish.id ? { ...item, status: 'revived' } : item)); } }}>Revive</button>}<button onClick={() => emitExperience({ type: 'release-wish', name: wish.name, reason: wish.reason, commit: () => { const current = loadRitualState(); if (!commitRitualState({ releasedWishIds: [...new Set([...(current.releasedWishIds ?? []), wish.id])], revivedWishIds: (current.revivedWishIds ?? []).filter(id => id !== wish.id) })) return false; setRitualRecords(loadRitualState()); setGhostWishes(items => items.map(item => item.id === wish.id ? { ...item, status: 'released' } : item)); return true; } })}>超度行程</button></div>}</div>)}</section>
       <section className="future-postcard"><span>FUTURE POSTCARD</span><h3>To your next-trip self.</h3>{postcardSealed ? <div className="sealed-postcard"><b>✉ Sealed for the next trip</b><button onClick={() => setPostcardSealed(false)}>Reopen</button></div> : <><textarea value={futurePostcard} onChange={e => setFuturePostcard(e.target.value)}/><button className="primary" onClick={() => setPostcardSealed(true)}>Seal postcard</button></>}</section>
+      </>}
       <section className="review-ledger paper-sheet"><div><span>Budget vs actual</span><b>RM {spent} spent</b><small>RM {remaining} remaining</small></div><div><span>Decisions</span><b>{decisionHistory.length} recorded</b><small>{decisionHistory[0] ? `${decisionHistory[0].topic} · ${decisionHistory[0].decision}` : 'No Court history yet'}</small></div></section>
       {decisionHistory.length > 0 && <section className="review-items"><div className="section-rule"><span>DECISION HISTORY · SATISFACTION</span><span className="quiet-note">Saved to the exact decision</span></div>{decisionHistory.map(record => <div className="review-item" key={record.id}><div><b>{record.topic}</b><small>{record.decision} · {record.usedGacha ? 'Gacha tie-break' : record.kind === 'court' ? 'Court decision' : 'Emergency decision'}</small></div><div className="rating-row">{(['worth','mixed','skip'] as const).map(value => <button key={value} className={record.satisfaction === value ? 'active' : ''} onClick={() => rateDecisionRecord(record.id, value)}>{value === 'worth' ? 'Worth it' : value === 'mixed' ? 'Mixed' : 'Skip next time'}</button>)}</div></div>)}</section>}
       <section className="compare-ledger"><span>CATEGORY BUDGET · PLANNED VS ACTUAL</span>{categoryVariance.map(item => <div key={item.category}><b>{item.category}</b><i className={item.status === 'over' ? 'actual' : ''}/><small>RM {item.planned} planned · RM {item.actual} actual · {item.status}</small></div>)}{budgetLearningNotes.length > 0 && <p>{budgetLearningNotes.join(' ')}</p>}</section>
@@ -946,7 +979,7 @@ export default function AppRescued() {
     return <div className="overlay" onMouseDown={() => setDrawer(null)}><section className="drawer" onMouseDown={e => e.stopPropagation()}><button className="close" aria-label="Close drawer" onClick={() => setDrawer(null)}><X size={20}/></button>
       {drawer === 'discover' && <><span className="drawer-kicker">DISCOVER · COCO PICKS</span><h3>Where are we going?</h3><p className="drawer-copy">Search Tokyo, Kyoto or Osaka for destination-aware prototype data. Unknown destinations are explicitly marked as fallback examples. Ranking uses your current Tingo dimensions.</p><div className="discover-search"><input className="big-input" value={destination} onChange={e => { setDestination(e.target.value); setDestinationSearched(false); }} placeholder="Tokyo, Kyoto, Osaka…"/><button className="primary" onClick={searchDestination}>Search</button></div>{destinationSearched && <div className="discover-results"><span className="drawer-kicker">FOR YOUR {destination.toUpperCase()} TRIP · {tingoBehavior.recommendationBias.toUpperCase()} BIAS</span>{recommendations.map(place => <article className="community-row discover-row" key={place.id}><div><b>{place.name}</b><small>{place.match}% Tingo-adjusted match · {place.type}</small><small>{place.cost} · {place.duration}</small><small><strong>Why Coco picked this:</strong> {place.why}</small><small>{place.source === 'prototype-catalog' ? 'Local prototype catalog' : 'Fallback example · not live destination data'}</small><div className="inline-actions"><button onClick={() => toggleRecommendation(place.id, 'save')}>{place.saved ? '✓ Saved' : 'Save idea'}</button><button onClick={() => toggleRecommendation(place.id, 'add')}>{mode === 'group' ? (place.added ? '✓ Suggested to group' : 'Suggest to group') : (place.added ? '✓ In plan' : 'Add to plan')}</button></div>{mode === 'group' && <small>Suggestion only · the official Group itinerary changes only after group confirmation.</small>}</div></article>)}</div>}</>}
       {drawer === 'tingo' && <><span className="drawer-kicker">TINGO CARD · {tingoCompletion(tingoAnswers)}% COMPLETE</span><h3>Tell Coco what a good trip feels like.</h3><p className="drawer-copy">Six small choices become a persistent, explainable profile — not a personality label.</p>{tingoCompletion(tingoAnswers) < 100 ? <><div className="assessment-progress"><i style={{ width: `${tingoCompletion(tingoAnswers)}%` }}/></div><div className="assessment-question"><span>QUESTION {tingoStep + 1} / {tingoQuestions.length}</span><b>{tingoQuestions[tingoStep].prompt}</b></div><div className="assessment-options">{tingoQuestions[tingoStep].options.map(option => <button key={option.id} className={tingoAnswers.some(answer => answer.questionId === tingoQuestions[tingoStep].id && answer.optionId === option.id) ? 'active' : ''} onClick={() => answerTingo(option.id)}><b>{option.label}</b><small>{option.hint}</small></button>)}</div></> : <><div className="tingo-result"><span>YOUR TRAVEL DNA</span><b>{describeTingo(tingoDimensions).join(' · ')}</b><small>{tingoPlanGuidance.itineraryGuidance} {tingoPlanGuidance.accommodationGuidance}</small></div><button className="primary" onClick={finishTingo}>Refresh profile + recommendations</button><button className="secondary" onClick={retakeTingo}>Retake Tingo Card</button></>}</>}
-      {drawer === 'tripSetup' && <><span className="drawer-kicker">NEW TRIP · BEFORE</span><h3>Give this journey a shape.</h3><label className="setup-field"><span>Destination</span><input className="big-input" value={destination} onChange={e => { setDestination(e.target.value); setDestinationSearched(false); }}/></label><div className="mode-toggle"><button className={mode === 'group' ? 'active' : ''} onClick={() => setMode('group')}>Group</button><button className={mode === 'solo' ? 'active' : ''} onClick={() => setMode('solo')}>Solo</button></div><div className="setup-fields"><label><span>Trip vibe / goal</span><input value={tripInputs.tripVibe} onChange={e => setTripInputField('tripVibe', e.target.value)}/></label><label><span>Must-Go anchor</span><input value={tripInputs.mustGo} onChange={e => setTripInputField('mustGo', e.target.value)}/></label><label><span>Deal breaker</span><input value={tripInputs.dealBreaker} onChange={e => setTripInputField('dealBreaker', e.target.value)}/></label><label><span>Preference</span><input value={tripInputs.preference} onChange={e => setTripInputField('preference', e.target.value)}/></label><label><span>Flexible</span><input value={tripInputs.flexible} onChange={e => setTripInputField('flexible', e.target.value)}/></label></div><div className="constraint-row"><button onClick={() => updateConstraint('must-go', tripInputs.mustGo)}>Save Must-Go</button><button onClick={() => updateConstraint('deal-breaker', tripInputs.dealBreaker)}>Save Deal Breaker</button><button onClick={() => updateConstraint('preference', tripInputs.preference)}>Save Preference</button><button onClick={() => updateConstraint('flexible', tripInputs.flexible)}>Save Flexible</button></div><div className="adapter-note"><b>Coco plan adapter</b><small>{tingoPlanGuidance.itineraryGuidance} {tingoPlanGuidance.budgetGuidance} No live weather, map, or pricing service is connected.</small></div><button className="primary" onClick={() => { setReadyConfirmed(current => transitionReadyConfirmation(current, 'confirm-trip-setup')); setTripCreated(true); setDrawer(null); openTrip('planning'); }}>Confirm inputs & open plan <ChevronRight size={15}/></button></>}
+      {drawer === 'tripSetup' && <><span className="drawer-kicker">NEW TRIP · BEFORE</span><h3>Give this journey a shape.</h3><label className="setup-field"><span>Destination</span><input className="big-input" value={destination} onChange={e => { setDestination(e.target.value); setDestinationSearched(false); }}/></label><div className="mode-toggle"><button className={mode === 'group' ? 'active' : ''} onClick={() => setMode('group')}>Group</button><button className={mode === 'solo' ? 'active' : ''} onClick={() => setMode('solo')}>Solo</button></div><div className="setup-fields"><label><span>Trip vibe / goal</span><input value={tripInputs.tripVibe} onChange={e => setTripInputField('tripVibe', e.target.value)}/></label><label><span>Must-Go anchor</span><input value={tripInputs.mustGo} onChange={e => setTripInputField('mustGo', e.target.value)}/></label><label><span>Deal breaker</span><input value={tripInputs.dealBreaker} onChange={e => setTripInputField('dealBreaker', e.target.value)}/></label><label><span>Preference</span><input value={tripInputs.preference} onChange={e => setTripInputField('preference', e.target.value)}/></label><label><span>Flexible</span><input value={tripInputs.flexible} onChange={e => setTripInputField('flexible', e.target.value)}/></label></div><div className="constraint-row"><button onClick={() => updateConstraint('must-go', tripInputs.mustGo)}>Save Must-Go</button><button onClick={() => updateConstraint('deal-breaker', tripInputs.dealBreaker)}>Save Deal Breaker</button><button onClick={() => updateConstraint('preference', tripInputs.preference)}>Save Preference</button><button onClick={() => updateConstraint('flexible', tripInputs.flexible)}>Save Flexible</button></div><div className="adapter-note"><b>Coco plan adapter</b><small>{tingoPlanGuidance.itineraryGuidance} {tingoPlanGuidance.budgetGuidance} Weather is provider-backed when available; map, traffic, and pricing remain local/prototype boundaries.</small></div><button className="primary" onClick={() => { setReadyConfirmed(current => transitionReadyConfirmation(current, 'confirm-trip-setup')); setTripCreated(true); setDrawer(null); openTrip('planning'); }}>Confirm inputs & open plan <ChevronRight size={15}/></button></>}
       {drawer === 'group' && <><span className="drawer-kicker">GROUP DNA</span><h3>{groupDNA.conflicts.length ? `${groupDNA.conflicts.length} conflict${groupDNA.conflicts.length === 1 ? '' : 's'} stay visible until the group decides.` : 'Shared signals are explicit, not averaged from Mei.'}</h3><div className="dna-grid"><div><span>Trip Vibe</span><b>{tripInputs.tripVibe}</b></div><div><span>Shared priority</span><b>{groupDNA.sharedPriorities[0]?.label ?? 'None yet'}</b></div><div><span>Budget range</span><b>{groupDNA.budgetRange.max ? `RM${groupDNA.budgetRange.min}–${groupDNA.budgetRange.max}` : 'No ranges yet'}</b></div><div><span>Budget sensitivity</span><b>{groupDNA.budgetSensitivity}</b></div></div><div className="member-list">{members.map(member => <div key={member.id}><div><b>{member.name}</b><small>{member.inviteStatus === 'pending' ? 'Invite pending' : member.role} · {member.pace} pace · {memberPreferenceProfiles[member.id]?.tingoAssessed ? 'Tingo assessed' : 'Tingo not assessed'}</small></div><button onClick={() => setMembers(current => current.map(item => item.id === member.id ? { ...item, role: item.role === 'Trip lead' ? 'Food scout' : item.role === 'Food scout' ? 'Memory keeper' : 'Trip lead' } : item))}>Rotate role</button></div>)}</div><div className="adapter-note"><b>Coco responsibility preview</b>{responsibilitySuggestions.map(item => <small key={item.memberId}><strong>{item.source === 'member-tingo' ? 'Tingo-assessed' : 'Fallback'} · </strong>{item.memberName}: {item.suggestedRole} — {item.reason}</small>)}<button className="secondary" onClick={() => setMembers(current => applyResponsibilitySuggestions(current, responsibilitySuggestions))}>Confirm & apply suggested roles</button></div><button className="secondary" onClick={inviteMember}>+ Invite a traveller</button><div className="conflict-mini"><span>GROUP DNA SIGNALS</span>{groupDNA.conflicts.length ? groupDNA.conflicts.map(conflict => <div key={`${conflict.kind}-${conflict.label}`}><b>{conflict.label}</b><small>{conflict.reason}</small></div>) : <b>No strong conflict detected from explicit member inputs.</b>}<small>{groupDNA.evidence.join(' ')}</small><small>{tingoPlanGuidance.courtGuidance} AI can explain options, but cannot silently choose for the group.</small></div><label className="setup-field"><span>Mark another uncertainty</span><input className="big-input" value={draftConflict} onChange={e => setDraftConflict(e.target.value)} placeholder="e.g. Shinjuku hotel vs Asakusa hotel"/></label><button className="secondary" onClick={markConflict}>{conflictMarked ? 'Send another conflict to Court' : 'Mark conflict & open Court'}</button><div className="planner-turn"><span>Editing turn</span><b>{plannerTurn}</b><button onClick={() => setPlannerTurn(plannerTurn === 'Mei' ? 'JH' : plannerTurn === 'JH' ? 'Zi Shan' : plannerTurn === 'Zi Shan' ? 'Alex' : 'Mei')}>Pass turn</button></div><button className="secondary" onClick={() => setDrawer('reminders')}>Reminders & human commitments</button></>}
       {drawer === 'backup' && <><span className="drawer-kicker">BACKUP PLAN POOL</span><h3>Only viable, Deal-Breaker-safe alternatives are repair candidates.</h3>{backupPool.map(item => <div className={`backup-row ${item.viable && item.dealBreakerSafe ? '' : 'off'}`} key={item.id}><b>{item.name}</b><small>{item.support} supporters · {item.costDelta >= 0 ? '+' : ''}RM{item.costDelta} · {item.timeDeltaMinutes >= 0 ? '+' : ''}{item.timeDeltaMinutes} min · {item.viable && item.dealBreakerSafe ? 'viable' : 'blocked'}</small><small>{item.source} · {item.lossReason}</small></div>)}{backupPool.length === 0 && <div className="adapter-note">No Backup candidate has been retained yet. A confirmed Court loser appears here only when it is viable and Deal-Breaker-safe.</div>}{ghostWishes.filter(wish => wish.status === 'revived').map(wish => <div className="backup-row" key={`ghost-${wish.id}`}><b>👻 {wish.name}</b><small>Revived from Ghost Wish · preserved with original reason</small></div>)}</>}
       {drawer === 'budget' && <><span className="drawer-kicker">TRIP BUDGET</span><h3>Editable plan and actual category spend.</h3><label className="budget-total-input"><span>{mode === 'group' ? 'Group' : 'Solo'} total</span><input type="number" min="0" value={budgetTotal} onChange={e => mode === 'group' ? setGroupBudgetTotal(sanitizeAmount(Number(e.target.value))) : setSoloBudgetTotal(sanitizeAmount(Number(e.target.value)))}/></label><div className="budget-big"><b>RM {remaining}</b><span>remaining after RM {spent} actual spend</span></div><div className="surprise-budget"><span>SPONTANEITY RESERVE</span><b>RM {mode === 'group' ? 120 : 60}</b><small>Held outside the base plan for a real little surprise.</small></div><div className="budget-lines">{(['stay','food','transport','activities'] as BudgetCategory[]).map(category => <label key={category}><span>{category === 'transport' ? 'Transit' : category[0].toUpperCase() + category.slice(1)}</span><input type="number" min="0" value={budgetPlan[category]} onChange={e => changeBudgetCategory(category, Number(e.target.value))}/><small>Planned</small><input type="number" min="0" aria-label={`${category} actual spend`} value={budgetActuals[category]} onChange={e => changeBudgetActual(category, Number(e.target.value))}/><small>Actual · persisted for this prototype trip</small></label>)}</div><div className={`budget-balance ${planned > budgetTotal ? 'over' : ''}`}><span>Planned</span><b>RM {planned} / RM {budgetTotal}</b><small>{planned > budgetTotal ? `Over plan by RM ${planned - budgetTotal}` : `RM ${budgetTotal - planned} unallocated buffer`}</small></div><button className="receipt-button" onClick={printReceipt}><ReceiptText size={18}/>{receiptPrinted ? 'Print receipt again' : 'Print split-bill receipt'}</button></>}
@@ -955,10 +988,10 @@ export default function AppRescued() {
       {drawer === 'reminders' && <><span className="drawer-kicker">REMINDERS · PEOPLE COUNT TOO</span><h3>Important dates and human plans belong on the timeline.</h3><div className="reminder-list">{reminders.map(reminder => <button key={reminder.id} className={reminder.done ? 'done' : ''} onClick={() => setReminders(current => current.map(item => item.id === reminder.id ? { ...item, done: !item.done } : item))}><span>{reminder.done ? '✓' : '○'}</span><div><b>{reminder.label}</b><small>{reminder.date} · {reminder.kind}</small></div></button>)}</div><button className="secondary" onClick={() => setDrawer('commitments')}>Open human commitments & reunion</button></>}
       {drawer === 'commitments' && <><span className="drawer-kicker">HUMAN COMMITMENTS · REUNION</span><h3>Make the invisible parts of a day schedulable.</h3><div className="commitment-list">{commitments.map(item => <div key={item.id}><div><b>{item.label}</b><small>{item.time} · {item.owner} · {item.fixed ? 'fixed' : 'flexible'}</small></div><span>{item.fixed ? 'ANCHOR' : 'FLOATING'}</span></div>)}</div><div className="reunion-form"><span>REUNION AGREEMENT</span><label>Time<input value={reunion.time} onChange={e => setReunion(current => ({ ...current, time: e.target.value }))}/></label><label>Place<input value={reunion.place} onChange={e => setReunion(current => ({ ...current, place: e.target.value }))}/></label><label>Tolerance<input type="number" min="0" max="60" value={reunion.tolerance} onChange={e => setReunion(current => ({ ...current, tolerance: sanitizeAmount(Number(e.target.value)) }))}/></label></div><button className="primary" onClick={() => setDrawer(null)}>Save agreement</button></>}
       {drawer === 'safety' && <><span className="drawer-kicker">SAFETY · SOLO+ TOOLKIT</span><h3>Useful if the day gets uncomfortable.</h3><div className="safety-list"><div><b>Safety check-in</b><small>Share a status-only check-in with your chosen contact.</small><button className="secondary">Prepare check-in</button></div><div><b>Nearby useful places</b><small>Prototype lookup: hospital · pharmacy · luggage storage.</small><button className="secondary">View local list</button></div><div><b>Emergency contact</b><small>Stored locally for this prototype · no call or location service is connected.</small><button className="secondary">Edit contact</button></div></div></>}
-      {drawer === 'assistant' && <><span className="drawer-kicker">ASK COCO · REVIEW BEFORE APPLY</span><h3>“Can we make the afternoon gentler?”</h3><p className="drawer-copy">Coco can read the current plan and propose a reversible change. In Group mode, confirming here opens Group Court instead of changing the official itinerary.</p>{!assistantPreview && !assistantApplied && <button className="primary" onClick={() => { setAssistantPreview(true); setAssistantUndone(false); }}>Show suggestion preview</button>}{assistantPreview && !assistantApplied && <><div className="change-ticket"><div><span>KEEP</span><b>{tripInputs.mustGo} · anchor</b></div><div><span>MOVE</span><b>{visibleTripPlan.items.find(item => item.kind === 'floating')?.timeLabel ?? 'current time'} café → 15:00</b></div><div><span>WHY</span><b>Less pressure after the slowest member’s morning pace</b></div></div><div className="action-row"><button className="secondary" onClick={() => setAssistantPreview(false)}>Not now</button><button className="primary" onClick={() => openGovernedAction('assistant-move')}>{mode === 'group' ? 'Send to Group Court' : 'Confirm & apply'}</button></div></>}{assistantApplied && <><div className="success-note"><Check size={21}/><div><b>Suggestion applied.</b><small>Only the floating café block moved. Anchor and promise stayed intact.</small></div></div><button className="secondary" onClick={() => { setFloatingStartOverride(null); setAssistantApplied(false); setAssistantUndone(true); }}>Undo change</button></>}{assistantUndone && <small className="adapter-note">Change undone. No group decision was silently changed.</small>}</>}
-      {drawer === 'gacha' && <EverydayGachaMachine result={everydayGacha ?? undefined} onTurn={runEverydayGacha}/>}
+      {drawer === 'assistant' && <><span className="drawer-kicker">ASK COCO · REVIEW BEFORE APPLY</span><h3>“Can we make the afternoon gentler?”</h3><p className="drawer-copy">Coco can read the current plan and propose a reversible change. In Group mode, confirming here opens Group Court instead of changing the official itinerary.</p>{!assistantPreview && !assistantApplied && <button className="primary" onClick={() => { setAssistantPreview(true); setAssistantUndone(false); }}>Show suggestion preview</button>}{assistantPreview && !assistantApplied && <><div className="change-ticket"><div><span>KEEP</span><b>{tripInputs.mustGo} · anchor</b></div><div><span>MOVE</span><b>{visibleTripPlan.items.find(item => item.kind === 'floating')?.timeLabel ?? 'current time'} → {suggestedFloatingLabel}</b></div><div><span>WHY</span><b>Derived from the generated floating block and the current breathing-room signal.</b></div></div><div className="action-row"><button className="secondary" onClick={() => setAssistantPreview(false)}>Not now</button><button className="primary" onClick={() => openGovernedAction('assistant-move')}>{mode === 'group' ? 'Send to Group Court' : 'Confirm & apply'}</button></div></>}{assistantApplied && <><div className="success-note"><Check size={21}/><div><b>Suggestion applied.</b><small>Only the generated floating block moved. Anchor and promise stayed intact.</small></div></div><button className="secondary" onClick={() => { setFloatingStartOverride(null); setAssistantApplied(false); setAssistantUndone(true); }}>Undo change</button></>}{assistantUndone && <small className="adapter-note">Change undone. No group decision was silently changed.</small>}</>}
+      {drawer === 'gacha' && <><EverydayGachaMachine result={everydayGacha ?? undefined} onTurn={runEverydayGacha} candidates={everydayCandidates}/>{everydayCandidates.length === 0 && <div className="adapter-note"><b>No current draw candidates.</b><small>Save an idea, keep an optional activity, or add a flexible block before asking Coco for a playful suggestion. Sources remain unchanged.</small></div>}</>}
       {drawer === 'lucky' && <LuckyDrawReveal result={luckyDraw ?? undefined} onDraw={runLuckyDraw}/>}
-      {drawer === 'memoryCard' && <><span className="drawer-kicker">MEMORY STICKER CARD</span><h3>Turn one moment into a keepsake.</h3><p className="drawer-copy">Generation-ready entry point. No image-generation backend is connected, so this prototype saves the note and metadata contract only.</p><label className="setup-field"><span>Memory note</span><textarea value={memoryNote} onChange={e => setMemoryNote(e.target.value)}/></label><label className="toggle-row"><span><b>Public Community card</b><small>Private by default; explicit consent required.</small></span><input type="checkbox" checked={memoryPublic} onChange={e => setMemoryPublic(e.target.checked)}/></label><button className="primary" onClick={() => setDrawer(null)}>Save {memoryPublic ? 'public' : 'private'} card</button></>}
+      {drawer === 'memoryCard' && expressiveAvailable && <><span className="drawer-kicker">MEMORY STICKER CARD</span><h3>Turn one moment into a keepsake.</h3><p className="drawer-copy">Generation-ready entry point. No image-generation backend is connected, so this prototype saves the note and metadata contract only.</p><label className="setup-field"><span>Memory note</span><textarea value={memoryNote} onChange={e => setMemoryNote(e.target.value)}/></label><label className="toggle-row"><span><b>Public Community card</b><small>Private by default; explicit consent required.</small></span><input type="checkbox" checked={memoryPublic} onChange={e => setMemoryPublic(e.target.checked)}/></label><button className="primary" onClick={() => setDrawer(null)}>Save {memoryPublic ? 'public' : 'private'} card</button></>}
       {drawer === 'family' && <FamilyWindowPanel privacy={privacy} continuousLocation={continuousLocation} reported={reported} delayed={delay} destination={destination} onReviewLocation={() => setDrawer('location')} onSendReassurance={sendFamilyReassurance}/>}
       {drawer === 'location' && <LocationPrivacyPanel privacy={privacy} continuousLocation={continuousLocation} onOpenFamily={() => setDrawer('family')} onPrivacyChange={level => setPrivacy(level)}/>}
       {drawer === 'import' && <><span className="drawer-kicker">IMPORT INSPIRATION</span><h3>Check if an outside recommendation fits your trip.</h3><input className="big-input" value={externalLink} onChange={e => setExternalLink(e.target.value)}/><button className="primary" onClick={() => setLinkAnalyzed(true)}>{linkAnalyzed ? 'Analyze again' : 'Analyze link'}</button>{linkAnalyzed && <div className="analysis-result"><b>84% demo fit</b><small>3 ideas match your pace · 1 conflicts with the budget cap. Execution still requires your confirmation.</small></div>}</>}
@@ -971,20 +1004,23 @@ export default function AppRescued() {
     const first = courtOptions[0];
     const second = courtOptions[1];
     const gachaResult = () => {
-      const winner = Math.random() > .5 ? first : second;
+      const topCount = Math.max(...courtOptions.map(option => tally.counts[option.id] ?? 0));
+      const tiedOptions = courtOptions.filter(option => (tally.counts[option.id] ?? 0) === topCount);
+      const winner = tiedOptions[Math.floor(Math.random() * tiedOptions.length)];
       if (!winner) return;
       setGacha(winner.label);
       setCourtConfirmed(false);
       setCourtDecision(null);
     };
-    return <div className="ritual-overlay"><section className="court-stage"><button className="close light" aria-label="Close Group Court" onClick={() => setCourtOpen(false)}><X size={20}/></button><span className="ritual-kicker">GROUP COURT</span><Coco mood="happy" context="court"/><h3>{activeConflict}</h3><p>{courtOptions.map(option => `${option.label}: ${tally.counts[option.id] ?? 0}`).join(' · ')}. {tally.tied ? 'This is a true unresolved tie.' : 'There is a majority, so Gacha stays locked.'}</p><div className="member-votes">{courtVotes.map(vote => <div key={vote.member}><b>{vote.member}</b><span>{courtOptions.map(option => <button key={option.id} className={vote.pick === option.id ? 'active' : ''} onClick={() => castVote(vote.member, option.id)}>{option.label}</button>)}</span></div>)}</div><div className="trade-slip"><b>Possible exchange</b><small>{first?.label ?? 'Option A'} ↔ protect a linked concession for {second?.label ?? 'Option B'} later. The binding stores the exact pre-concession vote snapshot; any new vote invalidates the stale binding.</small><button onClick={attachConcession}>{tradeAccepted ? 'Withdraw concession & restore votes' : 'Attach concession snapshot'}</button>{courtConcession && <small>{courtConcession.status} · linked to {optionLabel(courtConcession.linkedOptionId)}</small>}</div>{tally.tied ? <button className="gacha-machine" onClick={gachaResult}>Turn Gacha for this tie</button> : <div className="majority-note"><b>Majority decides normally.</b><small>Randomness is not used when the vote already resolves the conflict.</small></div>}{proposedDecision && <div className="verdict"><span>PROPOSED VERDICT</span><b>{proposedDecision}</b><small>{gacha ? 'Random tie-break is still only a proposal.' : 'Computed from member votes.'}</small><button onClick={confirmCourt}>{courtConfirmed && courtDecision === proposedDecision ? '✓ Added to official timeline' : 'Confirm result'}</button></div>}</section></div>;
+    return <div className="ritual-overlay"><section className="court-stage"><button className="close light" aria-label="Close Group Court" onClick={() => setCourtOpen(false)}><X size={20}/></button><span className="ritual-kicker">GROUP COURT · {courtOptions.length} OPTIONS</span><Coco mood="happy" context="court"/><h3>{activeConflict}</h3><p>{courtOptions.map(option => `${option.label}: ${tally.counts[option.id] ?? 0}`).join(' · ')}. {tally.tied ? 'This is a true unresolved tie.' : 'There is a majority, so Gacha stays locked.'}</p><div className="member-votes">{courtVotes.map(vote => <div key={vote.member}><b>{vote.member}</b><span>{courtOptions.map(option => <button key={option.id} className={vote.pick === option.id ? 'active' : ''} onClick={() => castVote(vote.member, option.id)}>{option.label}</button>)}</span></div>)}</div><div className="court-add-option"><input value={draftCourtOption} onChange={event => setDraftCourtOption(event.target.value)} placeholder="Add an option"/><button onClick={() => { const label = draftCourtOption.trim(); if (!label || courtOptions.some(option => option.label.toLowerCase() === label.toLowerCase())) return; setCourtOptions(options => [...options, { id: optionSlug(label, options.length), label }]); setDraftCourtOption(''); setGacha(null); setCourtDecision(null); setCourtConfirmed(false); }}>Add option</button></div><div className="trade-slip"><b>Possible exchange</b><small>{first?.label ?? 'Option A'} ↔ protect a linked concession for {second?.label ?? 'Option B'} later. The binding stores the exact pre-concession vote snapshot; any new vote invalidates the stale binding.</small><button onClick={attachConcession}>{tradeAccepted ? 'Withdraw concession & restore votes' : 'Attach concession snapshot'}</button>{courtConcession && <small>{courtConcession.status} · linked to {optionLabel(courtConcession.linkedOptionId)}</small>}</div>{tally.tied ? <CourtTieRitual key={JSON.stringify([activeConflict, courtVotes])} tied={tally.tied} options={courtOptions.map(option => option.label)} result={gacha ?? undefined} onDraw={() => { setCourtDrawRevealed(false); gachaResult(); }} onReveal={() => setCourtDrawRevealed(true)}/> : <div className="majority-note"><b>Majority decides normally.</b><small>Randomness is not used when the vote already resolves the conflict.</small></div>}{proposedDecision && (!gacha || courtDrawRevealed) && <div className="verdict"><span>PROPOSED VERDICT</span><b>{proposedDecision}</b><small>{gacha ? 'Random tie-break is still only a proposal.' : 'Computed from member votes.'}</small><button onClick={confirmCourt}>{courtConfirmed && courtDecision === proposedDecision ? '✓ Added to official timeline' : 'Confirm result'}</button></div>}</section></div>;
   };
 
   return <div className="app-shell">
-    <header className="topbar"><button className="brand-lockup" onClick={() => { setTripWorkspaceOpen(false); setTab('home'); }} aria-label="Go to Home"><img className="brand-companion" src={cocoIdle} alt="Coco, your travel companion"/><span className="wordmark"><b>COCOCRUNCH</b><small>travel, with room to breathe</small></span></button><div className="topbar-actions"><span className="tiny-avatar">M</span><button className="bell" aria-label="Notifications"><Bell size={19}/><i/></button></div></header>
+    <header className="topbar"><button className="brand-lockup" onClick={() => { setTripWorkspaceOpen(false); setTab('home'); }} aria-label="Go to Home"><img className="brand-companion" src={cocoAsset('scene-home')} alt="Coco, your travel companion"/><span className="wordmark"><b>COCOCRUNCH</b><small>travel, with room to breathe</small></span></button><div className="topbar-actions"><button className="bell" aria-label="Notifications"><Bell size={19}/><i/></button></div></header>
     <main>{tab === 'home' ? renderHome() : tab === 'trips' ? (tripWorkspaceOpen ? renderTripWorkspace() : renderTrips()) : tab === 'explore' ? renderExplore() : tab === 'memories' ? renderGlobalMemories() : renderMe()}</main>
     <GlobalNav tab={tab} onChange={setTab} onOpenTrips={() => setTripWorkspaceOpen(false)} />
     {renderCourt()}
     {renderDrawer()}
+    <GlobalCocoCompanion onAsk={() => { setTripWorkspaceOpen(true); setTripPhase('traveling'); setTab('trips'); setDrawer('assistant'); }} onPray={() => emitExperience({ type: 'open-prayer', source: 'user-reported', uncertainty: 'Personal prayer only; no weather, itinerary, or provider claim.' })} onNext={() => handleJourneyAction(journeyState.nextAction?.target ?? 'trip')} onEveryday={() => { setTripWorkspaceOpen(true); setTripPhase('traveling'); setTab('trips'); setDrawer('gacha'); }} onLucky={() => { setTripWorkspaceOpen(true); setTripPhase('traveling'); setTab('trips'); setDrawer('lucky'); }} />
   </div>;
 }

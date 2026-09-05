@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { subscribeExperience, emitExperience } from './experience';
 import { playSound } from './sound';
-import cocoIdle from './assets/coco/coco-idle.png';
+import { cocoAsset } from './components/coco/assets';
 import './packing-replica.css';
 
 type PackItem = { id: string; name: string; packed: boolean };
@@ -182,7 +182,7 @@ export default function PackingReplica({ visible, onClose }: Props) {
               {packedItems.map(item => { const Icon = iconFor(item.name); return <button key={item.id} onClick={() => setPacked(item.id, false)} aria-label={`Take ${item.name} back out`}><Icon size={20}/><small>{item.name}</small></button>; })}
             </div>
           </div>
-          <div className="replica-coco" aria-hidden="true"><img src={cocoIdle} alt=""/></div>
+          <div className="replica-coco" aria-hidden="true"><img src={cocoAsset('scene-packing')} alt=""/></div>
         </div>
       </div>
 

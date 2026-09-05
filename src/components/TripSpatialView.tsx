@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { TripPlan } from '../domain/itinerary';
+import { CocoPathPreview } from './coco/CocoPathPreview';
 
 export type SpatialMode = 'planning' | 'traveling' | 'completed';
 export type SpatialSource = 'local-schematic' | 'prototype-catalog' | 'photo-metadata' | 'unavailable';
@@ -79,6 +80,15 @@ export function TripSpatialView({
   overlay,
 }: TripSpatialViewProps) {
   const visibleStops = plan.items.filter(item => item.kind !== 'buffer').slice(0, stopPositions.length);
+  const previewFromIndex = currentItem
+    ? visibleStops.findIndex(item => item.name === currentItem.name && item.timeLabel === currentItem.timeLabel)
+    : 0;
+  const previewToIndex = nextItem
+    ? visibleStops.findIndex(item => item.name === nextItem.name && item.timeLabel === nextItem.timeLabel)
+    : previewFromIndex + 1;
+  const canPreviewWalk = mode === 'traveling' && source === 'local-schematic'
+    && previewFromIndex >= 0 && previewToIndex >= 0 && previewFromIndex !== previewToIndex
+    && Boolean(visibleStops[previewFromIndex] && visibleStops[previewToIndex]);
   const privacyLabel = privacy ? `Sharing: ${privacy === 'exact' ? 'exact location' : privacy === 'area' ? 'approx. area' : 'status only'}` : null;
   const travelingContextParts = [
     currentItem ? 'current' : null,
@@ -162,6 +172,10 @@ export function TripSpatialView({
 
       {mode === 'traveling' && (
         <>
+          {canPreviewWalk && <CocoPathPreview
+            from={{ x: stopPositions[previewFromIndex].x / 340 * 100, y: stopPositions[previewFromIndex].y / 180 * 100, label: visibleStops[previewFromIndex].name }}
+            to={{ x: stopPositions[previewToIndex].x / 340 * 100, y: stopPositions[previewToIndex].y / 180 * 100, label: visibleStops[previewToIndex].name }}
+          />}
           <div className="spatial-context-grid">
             <article>
               <span>Current</span>
