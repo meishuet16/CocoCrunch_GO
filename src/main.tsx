@@ -1,6 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import AppExperience from './AppExperience';
+import ExploreReplica from './components/explore/ExploreReplica';
 import './styles.css';
 import './coco-character.css';
 import './signature-interactions.css';
@@ -9,10 +10,12 @@ import './v2-polish.css';
 import './gacha-interactions.css';
 import './explore-redesign.css';
 import './explore-content-semantics.css';
-import './explore-final-override.css';
+import './explore-home-fix.css';
+import './explore-replica.css';
 
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <AppExperience />
+    <ExploreReplica />
   </React.StrictMode>,
 );
