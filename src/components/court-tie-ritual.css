@@ -1,0 +1,57 @@
+.court-tie-ritual {
+  color: #352a24; background: #f5eedf; border: 1px solid #bda57a;
+  border-radius: 18px; padding: clamp(16px, 4vw, 28px); overflow: hidden;
+  box-shadow: inset 0 0 0 5px #fffcf366; text-align: center;
+}
+.court-tie-ritual__heading > span { font-size: .66rem; letter-spacing: .17em; font-weight: 800; }
+.court-tie-ritual__heading h3 { font-family: Georgia, serif; font-size: clamp(1.4rem, 4vw, 2rem); margin: 10px 0; }
+.court-tie-ritual__heading p, .court-tie-ritual__boundary { font-size: .82rem; line-height: 1.5; }
+.court-tie-ritual__chamber {
+  position: relative; height: 290px; max-width: 430px; margin: 20px auto;
+  border-radius: 110px 110px 8px 8px; border: 1px solid #cbb58e;
+  background: repeating-linear-gradient(90deg, #d7c5a6 0 12px, #e8dbc2 12px 60px);
+  overflow: hidden;
+}
+.court-tie-ritual__seal {
+  position: absolute; top: 12px; left: calc(50% - 30px); width: 60px; height: 60px;
+  border: 3px double #8c6e38; border-radius: 50%; display: grid; place-content: center;
+  font: bold 22px Georgia, serif; background: #f7e5b4;
+}
+.court-tie-ritual__seal span { font: 6px sans-serif; letter-spacing: 1px; }
+.court-tie-ritual__clerk { position: absolute; right: 0; bottom: 74px; z-index: 2; }
+.court-tie-ritual__stand {
+  position: absolute; width: 178px; height: 116px; left: calc(50% - 98px); bottom: 78px;
+  border: solid #71522b; border-width: 0 7px 9px; border-radius: 0 0 12px 12px;
+}
+.court-tie-ritual__drum {
+  position: absolute; inset: -10px 4px 14px; display: flex; flex-wrap: wrap; justify-content: center;
+  align-content: center; gap: 9px; padding: 16px; border: 7px double #967039; border-radius: 45%;
+  background: repeating-linear-gradient(90deg, #b3965644 0 2px, #fff8db99 2px 20px);
+  box-shadow: inset 0 -12px 14px #74572533; overflow: hidden;
+}
+.court-tie-ritual__slip { width: 26px; height: 17px; background: #fffcf1; border: 1px solid #aa9975; box-shadow: 2px 3px 0 #70563822; transform: rotate(-18deg); }
+.court-tie-ritual__slip:nth-child(even) { transform: rotate(24deg); }
+.court-tie-ritual__crank { position: absolute; right: -23px; top: 35px; width: 20px; height: 28px; border: 5px solid #6f4c2a; border-left: 0; border-radius: 0 7px 7px 0; }
+.court-tie-ritual__podium {
+  position: absolute; bottom: 0; width: 100%; height: 78px; border-top: 10px solid #593825;
+  background: repeating-linear-gradient(90deg, #795139 0 4px, #8e6245 4px 65px);
+}
+.court-tie-ritual__podium span { display: inline-block; padding: 5px 18px; margin-top: 12px; color: #392a19; background: #dec087; border: 3px double #765b32; font: bold 10px Georgia, serif; letter-spacing: .16em; }
+.court-tie-ritual__envelope { position: absolute; bottom: 9px; left: calc(50% - 43px); width: 86px; padding: 15px 0; background: #fff6dc; border: 1px solid #9e7945; transform: translateY(80px); font-size: 9px; letter-spacing: .1em; box-shadow: 0 5px 10px #38231944; }
+.court-tie-ritual[data-stage='selected'] .court-tie-ritual__envelope,
+.court-tie-ritual[data-stage='reveal'] .court-tie-ritual__envelope { transform: translateY(0) rotate(-4deg); }
+.court-tie-ritual[data-stage='turning'] .court-tie-ritual__drum { animation: court-drum-turn 650ms ease-in-out; }
+.court-tie-ritual[data-stage='shuffling'] .court-tie-ritual__slip { animation: court-slip-shuffle 280ms ease-in-out 3 alternate; }
+.court-tie-ritual__options { text-align: left; display: grid; gap: 6px; padding-left: 28px; font-size: .9rem; overflow-wrap: anywhere; }
+.court-tie-ritual__action { margin: 6px; padding: 12px 18px; border: 1px solid #573925; border-radius: 6px; background: #593c2d; color: #fff5df; font: inherit; cursor: pointer; }
+.court-tie-ritual__action:disabled { opacity: .5; cursor: default; }
+.court-tie-ritual__action:focus-visible { outline: 3px solid #996b12; outline-offset: 3px; }
+.court-tie-ritual__status { min-height: 45px; margin-top: 12px; font-size: .9rem; line-height: 1.5; overflow-wrap: anywhere; }
+.court-tie-ritual__status > span { display: block; font-size: .65rem; letter-spacing: .16em; }
+.court-tie-ritual__status strong { display: block; font: bold 1.3rem Georgia, serif; margin: 8px; }
+.court-tie-ritual__boundary { border-top: 1px solid #cbb58e; padding-top: 12px; margin-bottom: 0; }
+@keyframes court-drum-turn { to { transform: rotate(360deg); } }
+@keyframes court-slip-shuffle { to { transform: translate(6px, -12px) rotate(65deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .court-tie-ritual *, .court-tie-ritual *::before, .court-tie-ritual *::after { animation: none !important; transition: none !important; }
+}

@@ -1,0 +1,85 @@
+.random-ritual { --ritual-ink:#752d32; --ritual-paper:#fff5dc; text-align:center; }
+.random-ritual__companion { display:flex; justify-content:center; margin:8px auto -12px; }
+.travel-machine__drum.travel-machine__drum--candidates { display:flex; flex-wrap:wrap; justify-content:center; align-content:flex-end; gap:8px; padding:12px; height:auto; min-height:132px; }
+.travel-machine__drum--candidates .drum-ball { position:relative; flex:0 0 37px; left:auto; bottom:auto; font-style:normal; }
+.travel-machine__drum--candidates .drum-ball span { display:block; padding-top:4px; font-size:11px; font-weight:700; color:#452e32; }
+.random-ritual .everyday-gacha-machine__options { display:flex; flex-wrap:wrap; justify-content:center; gap:8px 16px; }
+.random-ritual button { min-height:44px; padding:10px 18px; touch-action:manipulation; }
+.random-ritual button:focus-visible { outline:3px solid #217976; outline-offset:4px; }
+.random-ritual button:disabled { opacity:.5; cursor:wait; }
+.random-ritual .ritual-hold { display:block; margin:12px auto; background:var(--ritual-ink); color:#fff5dc; border-radius:20px; }
+.random-ritual__status { min-height:36px; margin-top:14px; font-size:13px; }
+.random-ritual__status b { display:block; margin:8px 0; font-size:18px; }
+.travel-machine { position:relative; width:220px; max-width:100%; height:325px; margin:20px auto; color:var(--ritual-ink); }
+.travel-machine__roof { height:30px; border-radius:45% 45% 0 0; background:var(--ritual-ink); color:var(--ritual-paper); font-size:10px; padding-top:10px; letter-spacing:2px; }
+.travel-machine__drum { position:relative; height:132px; overflow:hidden; border:5px solid var(--ritual-ink); border-top:0; border-radius:0 0 35px 35px; background:linear-gradient(125deg,#fffaf0dd,#b8d9d499); box-shadow:inset 10px 0 0 #ffffff70; }
+.drum-ball { position:absolute; width:37px; height:37px; border:2px solid var(--ritual-ink); border-radius:50%; background:linear-gradient(#ddad66 48%,var(--ritual-ink) 49%,var(--ritual-ink) 53%,#fff5dc 54%); bottom:8px; left:12px; }
+.ball-1 { left:55px; bottom:3px; transform:rotate(30deg); }.ball-2 { left:100px; bottom:9px; transform:rotate(-20deg); }.ball-3 { left:145px; bottom:7px; transform:rotate(65deg); }.ball-4 { left:35px; bottom:47px; }.ball-5 { left:82px; bottom:49px; transform:rotate(40deg); }.ball-6 { left:127px; bottom:52px; }
+.drum-ball:nth-child(2n) { background:linear-gradient(#71aaa2 48%,var(--ritual-ink) 49%,var(--ritual-ink) 53%,#fff5dc 54%); }
+.travel-machine__base { position:relative; height:115px; background:#b85c58; border:4px solid var(--ritual-ink); border-radius:14px 14px 24px 24px; margin-top:-4px; }
+.travel-machine__base>span { position:absolute; left:10px; top:12px; width:80px; color:#fff5dc; font-size:9px; line-height:1.7; letter-spacing:1px; }
+.travel-machine__knob { position:absolute; right:22px; top:9px; width:42px; height:42px; border:3px solid var(--ritual-ink); border-radius:50%; background:var(--ritual-paper); }
+.travel-machine__knob::after { content:''; position:absolute; inset:15px 2px; background:var(--ritual-ink); border-radius:4px; }
+.travel-machine__slot { position:absolute; width:92px; height:42px; bottom:7px; left:50%; transform:translateX(-50%); background:#452e32; border-radius:22px 22px 8px 8px; box-shadow:inset 0 4px 0 #2b1e22; }
+.travel-capsule { position:absolute; top:226px; left:calc(50% - 23px); width:46px; height:46px; visibility:hidden; }
+.travel-capsule i,.travel-capsule b { display:block; height:23px; border:2px solid var(--ritual-ink); background:#e5b66f; border-radius:30px 30px 0 0; }
+.travel-capsule b { background:var(--ritual-paper); border-radius:0 0 30px 30px; }
+.travel-machine>small { position:absolute; bottom:0; left:0; right:0; font-size:10px; letter-spacing:2px; }
+[data-stage="turning"] .travel-machine__knob { animation:ritual-crank 420ms ease-in-out both; }
+[data-stage="rolling"] .drum-ball { animation:ritual-roll 310ms ease-in-out 2 alternate; }
+[data-stage="rolling"] .drum-ball:nth-child(2n) { animation-direction:alternate-reverse; }
+[data-stage="dropping"] .travel-capsule { visibility:visible; animation:ritual-drop 360ms ease-in both; }
+[data-stage="settling"] .travel-capsule { visibility:visible; animation:ritual-settle 280ms ease-out both; }
+.everyday-gacha-machine:is([data-stage="held"],[data-stage="opening"],[data-stage="revealed"]) .travel-capsule { visibility:visible; transform:translateY(14px); }
+[data-stage="opening"] .travel-capsule i { animation:ritual-open 480ms ease-out both; }
+[data-stage="revealed"] .travel-capsule i { transform:translate(-18px,-22px) rotate(-28deg); }
+[data-stage="opening"] .travel-capsule b,[data-stage="revealed"] .travel-capsule b { transform:translate(10px,4px) rotate(12deg); }
+.fortune-scene { position:relative; height:285px; width:240px; max-width:100%; margin:20px auto; }
+.fortune-vessel { position:absolute; width:130px; height:205px; bottom:15px; left:calc(50% - 65px); transform-origin:50% 85%; }
+.fortune-sticks { position:absolute; inset:0 14px; }
+.fortune-sticks i,.fortune-selected { position:absolute; height:126px; width:11px; border:1px solid #79512e; background:linear-gradient(90deg,#dba75e,#ffe0a0,#dba75e); border-radius:5px 5px 0 0; top:10px; left:8px; transform:rotate(-13deg); }
+.fortune-sticks i:nth-child(2) { left:23px; top:3px; transform:rotate(-8deg); }.fortune-sticks i:nth-child(3) { left:40px; top:14px; transform:rotate(-2deg); }.fortune-sticks i:nth-child(4) { left:57px; top:0; transform:rotate(7deg); }.fortune-sticks i:nth-child(5) { left:73px; top:14px; transform:rotate(13deg); }.fortune-sticks i:nth-child(6) { left:86px; top:5px; transform:rotate(18deg); }
+.fortune-selected { left:60px; top:15px; transform:none; background:#f3ca7d; border-top:14px solid #8e3836; }
+.fortune-cup { position:absolute; bottom:0; width:130px; height:128px; border:3px solid #713632; border-radius:12px 12px 42px 42px; background:repeating-linear-gradient(90deg,#993f3d 0 15px,#ac5049 16px 18px); box-shadow:inset 7px 0 0 #ffffff12,4px 8px 0 #752d3215; color:#fff0ce; padding-top:23px; }
+.fortune-cup span { font-size:32px; display:block; }.fortune-cup small { letter-spacing:5px; }
+.fortune-paper { position:absolute; left:calc(50% - 95px); top:26px; width:190px; height:165px; background:var(--ritual-paper); border:1px solid #be9567; box-shadow:5px 8px 0 #752d3215; padding:30px 14px; visibility:hidden; transform-origin:50% 0; }
+.fortune-paper span { display:block; font-size:10px; letter-spacing:2px; color:var(--ritual-ink); }.fortune-paper b { display:block; margin-top:20px; color:#bb8541; font-size:30px; }
+.fortune-paper i { position:absolute; inset:33% 0 auto; height:1px; background:#be956744; }.fortune-paper i:last-child { top:66%; }
+[data-stage="shaking"] .fortune-vessel { animation:fortune-shake 175ms ease-in-out 4; }
+[data-stage="shaking"] .fortune-sticks { animation:fortune-rattle 175ms ease-in-out 4; }
+[data-stage="emerging"] .fortune-selected { animation:fortune-emerge 450ms ease-out both; }
+.lucky-draw-reveal[data-stage="held"] .fortune-selected { transform:translateY(-48px) rotate(5deg); }
+[data-stage="drawing"] .fortune-selected { animation:fortune-draw 400ms ease-in both; }
+.lucky-draw-reveal:is([data-stage="unfolding"],[data-stage="revealed"]) .fortune-selected { visibility:hidden; }
+[data-stage="unfolding"] .fortune-paper { visibility:visible; animation:fortune-unfold 500ms ease-out both; }
+[data-stage="revealed"] .fortune-paper { visibility:visible; }
+@keyframes ritual-crank { to { transform:rotate(360deg); } }
+@keyframes ritual-roll { to { translate:8px -22px; rotate:80deg; } }
+@keyframes ritual-drop { from { opacity:0; transform:translateY(-48px) scale(.75); } to { opacity:1; transform:translateY(14px); } }
+@keyframes ritual-settle { 0%,100% { transform:translateY(14px); } 45% { transform:translateY(3px) rotate(12deg); } }
+@keyframes ritual-open { to { transform:translate(-18px,-22px) rotate(-28deg); } }
+@keyframes fortune-shake { 25% { transform:rotate(-7deg); } 75% { transform:rotate(7deg); } }
+@keyframes fortune-rattle { 50% { translate:3px -5px; } }
+@keyframes fortune-emerge { to { transform:translateY(-48px) rotate(5deg); } }
+@keyframes fortune-draw { from { transform:translateY(-48px) rotate(5deg); } to { transform:translateY(-95px) rotate(20deg); opacity:0; } }
+@keyframes fortune-unfold { from { transform:scaleY(.12) rotate(-8deg); } to { transform:scaleY(1) rotate(0); } }
+@media (prefers-reduced-motion:reduce) { .random-ritual *, .random-ritual *::after { animation:none!important; transition:none!important; } }
+@media (max-width:390px) {
+  .random-ritual { font-size:12px; }
+  .random-ritual__companion { margin:0 auto -8px; }
+  .random-ritual__companion img { width:64px; height:64px; }
+  .travel-machine { width:190px; height:190px; margin:4px auto 8px; }
+  .travel-machine__roof { height:20px; padding-top:5px; }
+  .travel-machine__drum { height:72px; min-height:72px; padding:6px; }
+  .travel-machine__base { height:70px; }
+  .travel-machine__base>span { top:8px; font-size:8px; }
+  .travel-machine__knob { width:34px; height:34px; right:16px; top:7px; }
+  .travel-machine__knob::after { inset:12px 2px; }
+  .travel-machine__slot { width:76px; height:28px; }
+  .travel-capsule { top:130px; width:38px; height:38px; left:calc(50% - 19px); }
+  .travel-capsule i,.travel-capsule b { height:19px; }
+  .travel-machine>small { font-size:8px; }
+  .random-ritual p { margin:7px 0; }
+  .random-ritual__status { min-height:28px; margin-top:8px; }
+  .fortune-scene { height:220px; margin:8px auto 12px; transform:scale(.82); transform-origin:top center; margin-bottom:-32px; }
+}

@@ -1,0 +1,8 @@
+.coco-companion{display:inline-flex;flex:none;align-items:center;justify-content:center;vertical-align:middle;pointer-events:none}
+.coco-companion img{display:block;width:100%;height:auto;object-fit:contain;filter:none;animation:coco-arrival 280ms ease-out both}
+@keyframes coco-arrival{from{transform:translateY(3px);opacity:.85}to{transform:translateY(0);opacity:1}}
+.coco-path-preview{position:relative;min-height:110px;margin:8px 0 16px;border-bottom:1px dashed #a88c65}
+.coco-path-preview .coco-companion{position:relative;left:0;transition:left 1.6s linear}
+.coco-path-preview.is-walking .coco-companion,.coco-path-preview.is-arrived .coco-companion{left:calc(100% - 88px)}
+.coco-path-preview button{min-height:44px}
+@media(prefers-reduced-motion:reduce){.coco-companion img{animation:none}.coco-path-preview .coco-companion{transition:none}}

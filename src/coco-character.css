@@ -1,0 +1,79 @@
+/* Coco character system.
+   The extracted canonical sprite is authoritative. CSS anatomy remains only as a graceful fallback
+   if the image cannot render; do not redraw costumes or identity over the supplied artwork. */
+.coco {
+  filter: drop-shadow(0 5px 0 rgba(147,5,0,.08));
+  transition: transform 180ms cubic-bezier(.2,.8,.2,1), filter 180ms ease-out;
+}
+
+.coco-canonical {
+  opacity: 1 !important;
+  overflow: visible !important;
+  filter: none !important;
+}
+.coco-canonical img {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+}
+
+.coco-canonical ~ .antenna,
+.coco-canonical ~ .coco-shell,
+.coco-canonical ~ .leg {
+  opacity: 0 !important;
+}
+.coco::before,
+.coco::after {
+  content: none !important;
+}
+
+/* Context changes behavior only. It never redraws Coco or invents a fake costume over the canonical asset. */
+.coco.context-travel { transform-origin: 50% 82%; }
+.coco.context-court { transform-origin: 50% 88%; filter: drop-shadow(0 7px 0 rgba(147,5,0,.11)); }
+.coco.context-memory { transform-origin: 50% 90%; filter: drop-shadow(0 5px 0 rgba(87,53,31,.12)); }
+.coco.context-court.happy { animation: cocoJudge 620ms cubic-bezier(.16,1,.3,1) 1; }
+.coco.context-memory.happy { animation: cocoMemoryPeek 760ms cubic-bezier(.16,1,.3,1) 1; }
+.coco.context-travel.happy { animation: cocoTravelBounce 540ms cubic-bezier(.16,1,.3,1) 1; }
+
+.coco.happy { animation: cocoHello 520ms cubic-bezier(.16,1,.3,1) 1; }
+.coco.panic { animation: cocoPanic .22s linear 3; }
+@keyframes cocoHello {
+  0% { transform: translateY(0) rotate(0); }
+  45% { transform: translateY(-5px) rotate(-3deg); }
+  72% { transform: translateY(1px) rotate(1deg); }
+  100% { transform: translateY(0) rotate(0); }
+}
+@keyframes cocoTravelBounce {
+  0% { transform: translateY(0) rotate(0); }
+  44% { transform: translateY(-6px) rotate(3deg); }
+  76% { transform: translateY(1px) rotate(-1deg); }
+  100% { transform: translateY(0) rotate(0); }
+}
+@keyframes cocoJudge {
+  0% { transform: translateY(0) rotate(0); }
+  36% { transform: translateY(-3px) rotate(-4deg); }
+  58% { transform: translateY(-3px) rotate(4deg); }
+  100% { transform: translateY(0) rotate(0); }
+}
+@keyframes cocoMemoryPeek {
+  0% { transform: translateY(5px) scale(.96); }
+  55% { transform: translateY(-5px) scale(1.02); }
+  100% { transform: translateY(0) scale(1); }
+}
+@keyframes cocoPanic {
+  0%,100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+
+button:active .coco { transform: scale(.97); }
+
+@media (prefers-reduced-motion: reduce) {
+  .coco, .coco.happy, .coco.panic,
+  .coco.context-court.happy,
+  .coco.context-memory.happy,
+  .coco.context-travel.happy {
+    animation: none !important;
+    transition: none !important;
+  }
+}
