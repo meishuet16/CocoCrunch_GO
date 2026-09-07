@@ -7,6 +7,7 @@ import './signature-interactions.css';
 import './luggage-interactions.css';
 import './v2-polish.css';
 import './gacha-interactions.css';
+import './explore-redesign.css';
 
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
