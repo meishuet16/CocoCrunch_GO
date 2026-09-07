@@ -93,4 +93,51 @@ describe('AppRescued journey status integration', () => {
     expect(html).toContain(`src="${cocoAsset('expression-normal')}"`);
     expect(html).toContain('alt="Coco, your travel companion"');
   });
+
+  it('renders Community Trip Explore screen when on explore tab without changing active trip', () => {
+    vi.stubGlobal('localStorage', {
+      getItem: (key: string) => key === 'cococrunch:v1' ? JSON.stringify({
+        version: 1,
+        mode: 'group',
+        tab: 'explore',
+        readyConfirmed: false,
+        tingoAnswers: completeTingoAnswers,
+        tripIntent: {
+          destination: 'Tokyo',
+          dates: null,
+          mode: 'group',
+          tripVibe: 'Slow food and side streets',
+          mustGo: 'Tsukiji food walk',
+          dealBreaker: 'No red-eye return',
+          preference: 'One cafe break each day',
+          flexible: 'Leave one evening open',
+          budget: 2400,
+        },
+      }) : null,
+      setItem: () => undefined,
+      removeItem: () => undefined,
+    });
+
+    const html = renderToStaticMarkup(<AppRescued />);
+
+    // Top Section (Search & Discovery)
+    expect(html).toContain('Search Tokyo, Kyoto, Osaka, cafés, vintage...');
+    expect(html).toContain('DESTINATIONS COVERED');
+    expect(html).toContain('✦ All Categories');
+
+    // Bottom Section (Community Post Feed)
+    expect(html).toContain('COMMUNITY TRIP FEED');
+    expect(html).toContain('Tokyo: slow food + vintage streets');
+    expect(html).toContain('Explicitly shared');
+    expect(html).toContain('View Full Plan');
+
+    // Place Discovery
+    expect(html).toContain('PLACES FOR YOUR TRIP');
+    expect(html).toContain('Tsukiji Outer Market');
+    expect(html).toContain('Daikanyama');
+    expect(html).toContain('Suggest to group');
+
+    // Active trip preserved
+    expect(html).toContain('Browsing <b>Tokyo</b>');
+  });
 });
