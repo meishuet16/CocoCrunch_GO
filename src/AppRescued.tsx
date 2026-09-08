@@ -64,6 +64,7 @@ import { HomeTripGlance } from './components/HomeTripGlance';
 import { CompletedKeepLauncher, type CompletedPanel } from './components/CompletedKeepLauncher';
 import { SafetyToolkit } from './components/SafetyToolkit';
 import { CocoAssistantPrompt } from './components/CocoAssistantPrompt';
+import { CommunityPublishPanel } from './components/CommunityPublishPanel';
 
 type Tab = GlobalTab;
 type TripMode = 'group' | 'solo';
@@ -987,7 +988,7 @@ export default function AppRescued() {
       {drawer === 'family' && <FamilyWindowPanel privacy={privacy} continuousLocation={continuousLocation} reported={reported} delayed={delay} destination={destination} onReviewLocation={() => setDrawer('location')} onSendReassurance={sendFamilyReassurance}/>}
       {drawer === 'location' && <LocationPrivacyPanel privacy={privacy} continuousLocation={continuousLocation} onOpenFamily={() => setDrawer('family')} onPrivacyChange={level => setPrivacy(level)}/>}
       {drawer === 'import' && <><span className="drawer-kicker">IMPORT INSPIRATION</span><h3>Check if an outside recommendation fits your trip.</h3><input className="big-input" value={externalLink} onChange={e => setExternalLink(e.target.value)}/><button className="primary" onClick={() => setLinkAnalyzed(true)}>{linkAnalyzed ? 'Analyze again' : 'Analyze link'}</button>{linkAnalyzed && <div className="analysis-result"><b>84% demo fit</b><small>3 ideas match your pace · 1 conflicts with the budget cap. Execution still requires your confirmation.</small></div>}</>}
-      {drawer === 'community' && <><span className="drawer-kicker">COMMUNITY</span><h3>Borrow ideas, not someone else’s whole trip.</h3>{communityTrips.map(trip => <div className="community-row" key={trip.id}><div><b>{trip.title}</b><small>{trip.match}% fit · by {trip.author}</small></div><button onClick={() => setCommunityTrips(items => items.map(item => item.id === trip.id ? { ...item, saved: !item.saved } : item))}>{trip.saved ? 'Saved' : 'Save'}</button></div>)}<div className="publish-row"><div><b>Your trip</b><small>{published ? 'Public by explicit consent' : 'Private'}</small></div><button onClick={() => setPublished(!published)}>{published ? 'Unpublish' : 'Publish'}</button></div></>}
+      {drawer === 'community' && <><span className="drawer-kicker">COMMUNITY</span><h3>Borrow ideas, not someone else’s whole trip.</h3>{communityTrips.map(trip => <div className="community-row" key={trip.id}><div><b>{trip.title}</b><small>{trip.match}% fit · by {trip.author}</small></div><button onClick={() => setCommunityTrips(items => items.map(item => item.id === trip.id ? { ...item, saved: !item.saved } : item))}>{trip.saved ? 'Saved' : 'Save'}</button></div>)}<CommunityPublishPanel published={published} onChange={setPublished}/></>}
     </section></div>;
   }
 
