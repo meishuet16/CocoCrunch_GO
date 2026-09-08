@@ -6,7 +6,15 @@ export type TripConditionsProps = {
   failedItemName?: string;
   repairAvailable: boolean;
   repairStrategy?: 'backup-replacement' | 'open-recovery' | 'none';
-  onSimulateDisruption: () => void;
+  onSimulateDisruption: (scenario: DisruptionScenario) => void;
+};
+
+export type DisruptionScenario = 'rain' | 'late-transit' | 'low-energy';
+
+const scenarioCopy: Record<DisruptionScenario, { label: string; detail: string }> = {
+  rain: { label: 'rain change', detail: 'Rain is affecting' },
+  'late-transit': { label: 'late transit', detail: 'A late transit connection affects' },
+  'low-energy': { label: 'low-energy check-in', detail: 'A low-energy check-in affects' },
 };
 
 export function TripConditions({ delay, failedItemName, repairAvailable, repairStrategy, onSimulateDisruption }: TripConditionsProps) {
@@ -24,9 +32,9 @@ export function TripConditions({ delay, failedItemName, repairAvailable, repairS
       <small>{delay ? 'Demo condition · not live weather' : 'No live weather or traffic provider is connected.'}</small>
     </div>
     {delay ? <div className="trip-condition-alert">
-      <b>Rain is affecting {failedItemName ?? 'a flexible outdoor plan'}.</b>
+      <b>Reported change is affecting {failedItemName ?? 'a flexible plan'}.</b>
       <small>{repairCopy} Coco protects the Must-Go first.</small>
     </div> : <p>No reported changes to Today’s plan. Manual check-in remains available.</p>}
-    {!delay && <button className="event-button" onClick={onSimulateDisruption}><CloudRain size={20}/> Simulate a rain change</button>}
+    {!delay && <div className="inline-actions" aria-label="Simulate a trip condition"><button className="event-button" onClick={() => onSimulateDisruption('rain')}><CloudRain size={20}/> Simulate rain</button>{(['late-transit', 'low-energy'] as DisruptionScenario[]).map(scenario => <button key={scenario} onClick={() => onSimulateDisruption(scenario)}>Simulate {scenarioCopy[scenario].label}</button>)}</div>}
   </section>;
 }
