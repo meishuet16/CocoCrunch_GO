@@ -1,4 +1,4 @@
-import { Box, CalendarDays, Compass, Heart, Home } from 'lucide-react';
+import { Box, CalendarDays, Compass, Home, User } from 'lucide-react';
 
 export type GlobalTab = 'home' | 'trips' | 'explore' | 'memories' | 'me';
 
@@ -13,7 +13,7 @@ const items: { id: GlobalTab; label: string; icon: React.ComponentType<{ size?: 
   { id: 'trips', label: 'Trips', icon: CalendarDays },
   { id: 'explore', label: 'Explore', icon: Compass },
   { id: 'memories', label: 'Memories', icon: Box },
-  { id: 'me', label: 'Me', icon: Heart },
+  { id: 'me', label: 'Me', icon: User },
 ];
 
 export function GlobalNav({ tab, onChange, onOpenTrips }: GlobalNavProps) {
