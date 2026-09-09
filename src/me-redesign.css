@@ -1,0 +1,1053 @@
+/* ==========================================================================
+   COCOCRUNCH GO - ME TAB REDESIGN (MATCHING TARGET MOCKUP EXACTLY)
+   ========================================================================== */
+
+/* Layout Container */
+.tab-me {
+  background: #f7f5ef !important;
+  padding: 12px 14px calc(80px + env(safe-area-inset-bottom)) !important;
+}
+
+.me-screen {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  padding: 0 0 16px !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+  color: #0c2b5c !important;
+}
+
+/* ==========================================================================
+   1. TOPBAR REFINEMENTS FOR ME TAB
+   ========================================================================== */
+.tab-me .topbar {
+  margin-bottom: 10px !important;
+  padding: 2px 2px !important;
+}
+
+.tab-me .brand-lockup .brand-companion {
+  display: none !important;
+}
+
+.tab-me .wordmark {
+  gap: 1px;
+}
+
+.tab-me .wordmark b {
+  color: #0b3c82;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.tab-me .wordmark small {
+  color: #2b7cd8;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  position: relative;
+  display: inline-block;
+}
+
+.tab-me .wordmark small::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: -3px;
+  width: 38px;
+  height: 3px;
+  background: #ff3344;
+  border-radius: 999px;
+  transform: rotate(-2deg);
+}
+
+.tab-me .topbar-actions::before {
+  display: none !important;
+  content: none !important;
+}
+
+.tab-me .topbar-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.tab-me .bell {
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  max-width: 38px !important;
+  max-height: 38px !important;
+  border: 1px solid rgba(11, 60, 130, 0.14) !important;
+  border-radius: 50% !important;
+  background: #ffffff !important;
+  color: #0b3c82 !important;
+  display: grid !important;
+  place-items: center !important;
+  position: relative !important;
+  flex: 0 0 38px !important;
+  padding: 0 !important;
+}
+
+.tab-me .bell i {
+  position: absolute;
+  top: 7px;
+  right: 8px;
+  width: 7px;
+  height: 7px;
+  background: #ff3344;
+  border-radius: 50%;
+  border: 1.5px solid #ffffff;
+}
+
+.topbar-actions .user-profile-avatar-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  max-width: 38px !important;
+  max-height: 38px !important;
+  border-radius: 50% !important;
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  cursor: pointer;
+  flex: 0 0 38px !important;
+  overflow: hidden !important;
+}
+
+.topbar-actions .me-top-user-avatar {
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  max-width: 38px !important;
+  max-height: 38px !important;
+  border-radius: 50% !important;
+  aspect-ratio: 1 / 1 !important;
+  flex: 0 0 38px !important;
+  object-fit: cover !important;
+  border: 1.5px solid #ffffff !important;
+  box-shadow: 0 2px 8px rgba(11, 60, 130, 0.15) !important;
+  display: block !important;
+}
+
+.tab-me .me-top-coco {
+  display: none !important;
+}
+
+/* ==========================================================================
+   2. CARD 1: MY TINGO CARD (MATCHING IMAGE 1: BIGGER & CENTERED)
+   ========================================================================== */
+.tab-me .me-tingo-card.redesign-card {
+  position: relative !important;
+  background:
+    radial-gradient(ellipse 260px 180px at 85% 15%, rgba(180, 218, 255, 0.5) 0%, transparent 70%),
+    radial-gradient(ellipse 200px 140px at 15% 85%, rgba(205, 232, 255, 0.35) 0%, transparent 65%),
+    linear-gradient(135deg, #e8f4fe 0%, #f4faff 35%, #ffffff 60%, #eef6fd 100%) !important;
+  border-radius: 22px !important;
+  padding: 16px 14px 16px 16px !important;
+  box-shadow: 0 8px 24px rgba(12, 45, 95, 0.07) !important;
+  border: 1px solid rgba(195, 222, 250, 0.75) !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.06fr) !important;
+  gap: 8px !important;
+  align-items: center !important;
+  overflow: hidden !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  box-sizing: border-box !important;
+}
+
+/* Background map & plane trajectory */
+.tab-me .me-tingo-card.redesign-card .me-card-bg-deco {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
+
+.tab-me .me-tingo-card.redesign-card .me-card-copy {
+  position: relative !important;
+  z-index: 2 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  align-items: flex-start !important;
+  height: auto !important;
+  min-height: 0 !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.me-tingo-kicker {
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.12em !important;
+  color: #3b82f6 !important;
+  text-transform: uppercase !important;
+  margin: 0 0 6px 0 !important;
+  display: block !important;
+}
+
+.me-tingo-kicker::after {
+  display: none !important;
+  content: none !important;
+}
+
+.tab-me .me-tingo-card.redesign-card h2 {
+  font-family: Georgia, "Playfair Display", "Times New Roman", serif !important;
+  font-size: 26px !important;
+  line-height: 1.08 !important;
+  font-weight: 800 !important;
+  color: #0a2d64 !important;
+  margin: 0 0 6px 0 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.tab-me .me-tingo-card.redesign-card p {
+  font-size: 10.5px !important;
+  line-height: 1.38 !important;
+  color: #2e4a73 !important;
+  margin: 0 0 10px 0 !important;
+  max-width: 185px !important;
+}
+
+.tab-me .me-tingo-card.redesign-card .me-chip-row {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 5px 5px !important;
+  margin: 0 0 10px 0 !important;
+  padding: 0 !important;
+}
+
+.tab-me .me-tingo-card.redesign-card .me-chip-row small {
+  padding: 3px 8.5px !important;
+  background: #edf5fc !important;
+  border: 1px solid #d4e7f8 !important;
+  border-radius: 999px !important;
+  color: #1765be !important;
+  font-size: 9.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+  line-height: 1 !important;
+  display: inline-block !important;
+}
+
+.tab-me .me-tingo-card.redesign-card .me-tingo-actions-col {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.tab-me .me-tingo-card.redesign-card .me-all-types-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  color: #1766c2 !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  height: auto !important;
+  cursor: pointer !important;
+  text-align: left !important;
+}
+
+.tab-me .me-tingo-card.redesign-card .me-all-types-link svg {
+  color: #1766c2 !important;
+  flex-shrink: 0 !important;
+}
+
+.tab-me .me-tingo-card.redesign-card .me-all-types-link .arrow {
+  font-size: 13px !important;
+  margin-left: 1px !important;
+}
+
+.tab-me .me-tingo-card.redesign-card .me-retake-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  color: #4b78a6 !important;
+  font-size: 10.5px !important;
+  font-weight: 500 !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  height: auto !important;
+  cursor: pointer !important;
+}
+
+.tab-me .me-tingo-card.redesign-card .me-retake-link svg {
+  color: #4b78a6 !important;
+  flex-shrink: 0 !important;
+}
+
+/* Right Column: Mini Card & Profile Button (Big & Centered) */
+.tab-me .me-tingo-card.redesign-card .me-card-collage {
+  position: relative !important;
+  z-index: 2 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 24px 0 0 0 !important;
+  margin: 0 auto !important;
+  width: 100% !important;
+}
+
+.me-handwritten-note-top {
+  position: absolute !important;
+  top: 12px !important;
+  right: 16px !important;
+  z-index: 4 !important;
+  font-family: 'Caveat', 'Segoe Script', 'Comic Sans MS', cursive, sans-serif !important;
+  color: #1a6ac9 !important;
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+  line-height: 1.05 !important;
+  text-align: right !important;
+  display: flex !important;
+  align-items: flex-end !important;
+  gap: 3px !important;
+  pointer-events: none !important;
+}
+
+.me-handwritten-note-top .sparks {
+  color: #ff3344 !important;
+  font-size: 15px !important;
+  line-height: 0.8 !important;
+  font-style: normal !important;
+  margin-bottom: 2px !important;
+}
+
+.me-floating-mini-card {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  width: 100% !important;
+  max-width: 188px !important;
+  background: #ffffff !important;
+  border-radius: 18px !important;
+  padding: 10px 8px 12px !important;
+  box-shadow: 0 10px 26px rgba(10, 45, 95, 0.12), 0 2px 6px rgba(10, 45, 95, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.95) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  transform: rotate(-1deg) !important;
+  box-sizing: border-box !important;
+}
+
+.me-floating-mini-card .me-persona-art {
+  width: 100% !important;
+  height: 96px !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+
+.me-floating-mini-card .me-persona-badge {
+  margin-top: 6px !important;
+  background: #fdf3e9 !important;
+  color: #2b1f15 !important;
+  font-size: 11.5px !important;
+  font-weight: 800 !important;
+  padding: 3.5px 12px !important;
+  border-radius: 999px !important;
+  line-height: 1.15 !important;
+  display: inline-block !important;
+  white-space: nowrap !important;
+}
+
+.me-floating-mini-card .me-persona-subtag {
+  margin-top: 3.5px !important;
+  font-size: 10px !important;
+  color: #635447 !important;
+  line-height: 1.15 !important;
+  display: block !important;
+}
+
+.me-view-profile-btn {
+  margin-top: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  width: 100% !important;
+  max-width: 180px !important;
+  height: 38px !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  padding: 0 16px !important;
+  border-radius: 999px !important;
+  background: #ff3344 !important;
+  color: #ffffff !important;
+  border: none !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  box-shadow: 0 5px 16px rgba(255, 38, 55, 0.35) !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+}
+
+.me-view-profile-btn .arrow {
+  font-size: 14px !important;
+}
+
+/* ==========================================================================
+   3. CARD 2: CURRENT TRIP - JEJU IN AMBER
+   ========================================================================== */
+.me-trip-card.redesign-trip {
+  position: relative;
+  background: #ffffff;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(12, 45, 95, 0.07);
+  border: 1px solid rgba(210, 230, 250, 0.6);
+  display: flex;
+  flex-direction: column;
+}
+
+.me-trip-hero-section {
+  position: relative;
+  min-height: 200px;
+  background:
+    linear-gradient(90deg, rgba(8, 30, 68, 0.82) 0%, rgba(8, 30, 68, 0.5) 52%, rgba(8, 30, 68, 0.12) 100%),
+    url('https://images.unsplash.com/photo-1548115184-bc6544d06a58?w=900&auto=format&fit=crop&q=85') center 65% / cover;
+  padding: 16px 16px 24px;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+/* Scalloped Wavy Bottom Border */
+.me-trip-scallop-divider {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 14px;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.me-trip-scallop-divider svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.me-trip-tag-pill {
+  align-self: flex-start;
+  padding: 3px 9px;
+  background: rgba(10, 30, 60, 0.46);
+  backdrop-filter: blur(4px);
+  border-radius: 999px;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #ffffff;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.me-trip-hero-section h2 {
+  font-family: Georgia, "Playfair Display", serif;
+  font-size: 27px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 8px;
+  line-height: 1.05;
+  text-shadow: 0 2px 10px rgba(0, 20, 50, 0.4);
+}
+
+.me-trip-meta-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.me-trip-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.me-trip-meta-item svg {
+  flex-shrink: 0;
+  color: #ffffff;
+}
+
+.me-trip-blurb {
+  font-size: 10.5px;
+  line-height: 1.32;
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0 0 12px;
+  max-width: 225px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.me-open-trip-btn {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 35px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ff3644, #ff2337);
+  color: #ffffff;
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(255, 38, 55, 0.35);
+  cursor: pointer;
+}
+
+.me-open-trip-btn .arrow {
+  font-size: 14px;
+}
+
+/* Jeju Postmark Stamp (Top Right) */
+.me-postmark-stamp {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 66px;
+  height: 52px;
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #0e5baa;
+  transform: rotate(-6deg);
+  box-shadow: 0 4px 12px rgba(0, 20, 50, 0.15);
+  border: 2px dashed rgba(14, 91, 170, 0.4);
+  padding: 3px;
+}
+
+.me-postmark-stamp b {
+  font-family: Georgia, serif;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.me-postmark-stamp small {
+  font-size: 6.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-top: 3px;
+  opacity: 0.85;
+}
+
+/* Good Journeys Ahead Cursive Note (Bottom Right) */
+.me-good-journeys-note {
+  position: absolute;
+  right: 16px;
+  bottom: 22px;
+  color: #ffffff;
+  font-family: 'Caveat', 'Segoe Script', 'Brush Script MT', cursive;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 0.95;
+  text-align: center;
+  transform: rotate(-7deg);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.me-good-journeys-note .sparks {
+  color: #ff3344;
+  font-size: 14px;
+  position: absolute;
+  top: -2px;
+  right: -8px;
+}
+
+.me-good-journeys-note .underline {
+  width: 44px;
+  height: 2px;
+  background: #ff3344;
+  border-radius: 999px;
+  margin-top: 2px;
+}
+
+/* 4-Step Phase Tracker */
+.me-phase-tracker-bar {
+  background: #ffffff;
+  padding: 12px 14px 10px;
+  position: relative;
+}
+
+.me-tracker-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  position: relative;
+}
+
+/* Dashed connecting line */
+.me-tracker-steps-grid::before {
+  content: '';
+  position: absolute;
+  top: 15px;
+  left: 36px;
+  right: 36px;
+  height: 1px;
+  border-top: 1.5px dashed #4b89d8;
+  opacity: 0.7;
+  z-index: 1;
+}
+
+.me-phase-step-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  z-index: 2;
+  padding: 0;
+}
+
+.me-step-icon-box {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  color: #123e78;
+}
+
+.me-step-check-dot {
+  position: absolute;
+  right: 1px;
+  bottom: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ff3344;
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid #ffffff;
+}
+
+.me-step-check-dot svg {
+  stroke-width: 3.5;
+}
+
+.me-step-active-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #1976d2;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.35);
+  margin-top: -3px;
+}
+
+.me-phase-step-btn span {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #123e78;
+}
+
+.me-phase-step-btn.is-active span {
+  font-weight: 800;
+  color: #1976d2;
+}
+
+/* ==========================================================================
+   4. CARD 3: PACKING SUMMARY
+   ========================================================================== */
+.me-summary-card.redesign-summary {
+  position: relative;
+  background: linear-gradient(135deg, #ffffff 65%, #f2f7fd 100%);
+  border-radius: 22px;
+  padding: 14px 14px 14px 18px;
+  box-shadow: 0 8px 24px rgba(12, 45, 95, 0.06);
+  border: 1px solid rgba(210, 230, 250, 0.6);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 115px;
+  gap: 12px;
+  align-items: center;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+/* Faded plane flight track background */
+.me-summary-card .me-summary-bg-track {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.me-summary-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+}
+
+.me-summary-head-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 7px;
+}
+
+.me-summary-content h3 {
+  font-family: Georgia, serif;
+  font-size: 19px;
+  font-weight: 800;
+  color: #0b2e63;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.me-summary-pct {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #1a75d5;
+}
+
+.me-progress-bar-track {
+  width: 100%;
+  height: 7.5px;
+  background: #dceaf9;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.me-progress-bar-fill {
+  height: 100%;
+  background: #1b74e2;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.me-summary-subtext {
+  font-size: 11px;
+  font-weight: 600;
+  color: #2b4974;
+  margin-bottom: 7px;
+}
+
+.me-summary-pill {
+  align-self: flex-start;
+  padding: 3.5px 9.5px;
+  background: #e8f3fc;
+  border: 1px solid #d4e8fa;
+  border-radius: 999px;
+  color: #1766c2;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.me-summary-right-visual {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.me-suitcase-container {
+  width: 78px;
+  height: 66px;
+  flex-shrink: 0;
+}
+
+.me-suitcase-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.me-round-nav-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e2effd;
+  color: #1766c2;
+  border: none;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   5. CARD 4: PROFILE HISTORY
+   ========================================================================== */
+.me-history-card.redesign-history {
+  position: relative;
+  background: linear-gradient(135deg, #ffffff 65%, #fdf8f2 100%);
+  border-radius: 22px;
+  padding: 14px 14px 14px 18px;
+  box-shadow: 0 8px 24px rgba(12, 45, 95, 0.06);
+  border: 1px solid rgba(210, 230, 250, 0.6);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 115px;
+  gap: 12px;
+  align-items: center;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.me-history-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+}
+
+.me-history-content h3 {
+  font-family: Georgia, serif;
+  font-size: 19px;
+  font-weight: 800;
+  color: #0b2e63;
+  margin: 0 0 5px;
+  letter-spacing: -0.02em;
+}
+
+.me-history-content p {
+  font-size: 11px;
+  line-height: 1.35;
+  color: #2b4974;
+  margin: 0 0 8px;
+  max-width: 190px;
+}
+
+/* Polaroid Double Stack */
+.me-polaroid-stack-wrap {
+  position: relative;
+  width: 78px;
+  height: 68px;
+  flex-shrink: 0;
+}
+
+.me-polaroid-card {
+  position: absolute;
+  width: 50px;
+  height: 58px;
+  background: #ffffff;
+  border-radius: 2px;
+  padding: 3px 3px 10px;
+  box-shadow: 0 4px 10px rgba(10, 35, 75, 0.16);
+}
+
+.me-polaroid-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 1px;
+  display: block;
+}
+
+.me-polaroid-back {
+  top: 2px;
+  right: 3px;
+  transform: rotate(8deg);
+}
+
+.me-polaroid-front {
+  top: 6px;
+  left: 4px;
+  transform: rotate(-6deg);
+}
+
+.me-polaroid-post-it {
+  position: absolute;
+  bottom: 0px;
+  right: -2px;
+  background: #ffffff;
+  border-radius: 1.5px;
+  padding: 3px 5px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  font-family: 'Caveat', 'Segoe Script', cursive;
+  font-size: 8.5px;
+  font-weight: 700;
+  color: #0c529f;
+  line-height: 0.95;
+  text-align: center;
+  transform: rotate(3deg);
+  border: 0.5px solid rgba(0,0,0,0.06);
+}
+
+/* ==========================================================================
+   6. 16 PERSONAS SHOWCASE DRAWER
+   ========================================================================== */
+.me-all-personas-drawer {
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 22px 18px 26px;
+  border-radius: 24px 24px 0 0;
+  background: #fcfdfe;
+}
+
+.me-personas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.me-persona-grid-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid rgba(210, 230, 250, 0.7);
+  box-shadow: 0 4px 12px rgba(12, 45, 95, 0.05);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.me-persona-grid-card.is-current {
+  border: 2px solid #1976d2;
+  background: #f6fafe;
+}
+
+.me-grid-img-wrap {
+  width: 100%;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.me-grid-img-wrap img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.me-current-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #1976d2;
+  color: #ffffff;
+  font-size: 8px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+}
+
+.me-grid-copy b {
+  font-size: 13px;
+  color: #0a2d64;
+  display: block;
+}
+
+.me-grid-tagline {
+  font-size: 10px;
+  color: #7b624f;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.me-grid-copy p {
+  font-size: 10px;
+  line-height: 1.3;
+  color: #3b5577;
+  margin: 0 0 8px;
+}
+
+.me-grid-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: auto;
+}
+
+.me-grid-chips span {
+  font-size: 8px;
+  font-weight: 700;
+  background: #eef6fc;
+  color: #1765be;
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+
+/* ==========================================================================
+   7. BOTTOM NAV ME ACTIVE STATE
+   ========================================================================== */
+.tab-me .bottom-nav button[aria-current="page"] {
+  color: #1976d2;
+}
+
+.tab-me .bottom-nav button[aria-current="page"]::before {
+  background: #ff3344;
+}
+
+/* Responsive adjustments for narrow screens */
+@media (max-width: 380px) {
+  .tab-me .me-tingo-card.redesign-card {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr) !important;
+    padding: 14px 10px 14px 12px !important;
+    gap: 6px !important;
+  }
+  .tab-me .me-floating-mini-card {
+    max-width: 165px !important;
+    transform: rotate(-1deg) !important;
+  }
+  .tab-me .me-floating-mini-card .me-persona-art {
+    height: 84px !important;
+  }
+  .tab-me .me-view-profile-btn {
+    max-width: 160px !important;
+    height: 36px !important;
+    font-size: 12px !important;
+  }
+  .tab-me .me-summary-card.redesign-summary,
+  .tab-me .me-history-card.redesign-history {
+    grid-template-columns: 1fr 100px !important;
+    padding: 12px 12px 12px 14px !important;
+  }
+}

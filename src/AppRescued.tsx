@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Bell, BookOpen, Box, Check, ChevronRight, CircleDollarSign, CloudRain,
+  Bell, BookOpen, Box, Calendar, Check, ChevronRight, CircleDollarSign, CloudRain,
   FileText, Gavel, Heart, Image, Link2, Map, MapPin, PackageCheck, Plane,
-  ReceiptText, Send, Sparkles, Users, X
+  ReceiptText, RotateCcw, Send, Sparkles, Users, X
 } from 'lucide-react';
 import { emitExperience } from './experience';
 import { GlobalNav, type GlobalTab } from './components/GlobalNav';
@@ -37,8 +37,8 @@ import { EverydayGachaMachine } from './components/EverydayGachaMachine';
 import { LuckyDrawReveal } from './components/LuckyDrawReveal';
 import { TripLifecycleTabs, TripWorkspaceContext, TripWorkspaceHeader, type TripPhase } from './components/TripWorkspace';
 import {
-  deriveTingoBehavior, describeTingo, defaultTingoDimensions, scoreTingo, tingoCompletion,
-  tingoGuidance, tingoQuestions, type TingoAnswer, type TingoDimensions,
+  deriveTingoBehavior, deriveTingoIdentity, describeTingo, defaultTingoDimensions, scoreTingo, tingoCompletion,
+  tingoGuidance, tingoQuestions, type TingoAnswer, type TingoDimensions, type TingoPersonaKey,
 } from './domain/tingo';
 import { tripIntentIsReviewable, type TripIntent } from './domain/trip-intent';
 import { checkFeasibility, comparisonOptions, importPhotoMetadata } from './domain/adapters';
@@ -68,17 +68,159 @@ import { CommunityPublishPanel } from './components/CommunityPublishPanel';
 import { PhotoJournalCapture } from './components/PhotoJournalCapture';
 import cocoSheetHappy from './assets/coco/source/coco-sheet-happy.png';
 import cocoSheetNormal from './assets/coco/source/coco-sheet-normal.png';
+import foodieHunter from './assets/coco/personas/foodie_hunter.png';
+import masterPlanner from './assets/coco/personas/master_planner.png';
+import transitNavigator from './assets/coco/personas/transit_navigator.png';
+import budgetKeeper from './assets/coco/personas/budget_keeper.png';
+import photoChaser from './assets/coco/personas/photo_chaser.png';
+import cultureExplorer from './assets/coco/personas/culture_explorer.png';
+import adventureSeeker from './assets/coco/personas/adventure_seeker.png';
+import relaxationLover from './assets/coco/personas/relaxation_lover.png';
+import shoppingScout from './assets/coco/personas/shopping_scout.png';
+import weatherWatcher from './assets/coco/personas/weather_watcher.png';
+import safetyGuardian from './assets/coco/personas/safety_guardian.png';
+import groupCoordinator from './assets/coco/personas/group_coordinator.png';
+import packingPro from './assets/coco/personas/packing_pro.png';
+import nightOwl from './assets/coco/personas/night_owl.png';
+import memoryKeeper from './assets/coco/personas/memory_keeper.png';
+import hiddenGemSeeker from './assets/coco/personas/hidden_gem_seeker.png';
+import userAvatar from './assets/avatar-cartoon-traveler.svg';
 
 type Tab = GlobalTab;
 type TripMode = 'group' | 'solo';
 type Mood = 'great' | 'okay' | 'tired' | null;
 type Privacy = 'status' | 'area' | 'exact';
-type Drawer = 'group' | 'backup' | 'budget' | 'family' | 'location' | 'community' | 'import' | 'discover' | 'tingo' | 'tripSetup' | 'compare' | 'feasibility' | 'reminders' | 'commitments' | 'safety' | 'assistant' | 'gacha' | 'lucky' | 'memoryCard' | null;
+type Drawer = 'group' | 'backup' | 'budget' | 'family' | 'location' | 'community' | 'import' | 'discover' | 'tingo' | 'tripSetup' | 'compare' | 'feasibility' | 'reminders' | 'commitments' | 'safety' | 'assistant' | 'gacha' | 'lucky' | 'memoryCard' | 'all-personas' | null;
 type CommunityTrip = { id: number; title: string; author: string; match: number; saved: boolean };
 type PlaceRecommendation = DiscoveryPlace & { id: number; saved: boolean; added: boolean };
 type GhostWish = { id: number; name: string; reason: string; status: 'resting' | 'revived' | 'released' };
 type GovernedAction = 'assistant-move' | 'split-on' | 'split-off' | null;
 type TripScopedInputs = Pick<TripIntent, 'tripVibe' | 'mustGo' | 'dealBreaker' | 'preference' | 'flexible'>;
+
+const tingoPersonaImages: Record<TingoPersonaKey, string> = {
+  'foodie-hunter': foodieHunter,
+  'master-planner': masterPlanner,
+  'transit-navigator': transitNavigator,
+  'budget-keeper': budgetKeeper,
+  'photo-chaser': photoChaser,
+  'culture-explorer': cultureExplorer,
+  'adventure-seeker': adventureSeeker,
+  'relaxation-lover': relaxationLover,
+  'shopping-scout': shoppingScout,
+  'weather-watcher': weatherWatcher,
+  'safety-guardian': safetyGuardian,
+  'group-coordinator': groupCoordinator,
+  'packing-pro': packingPro,
+  'night-owl': nightOwl,
+  'memory-keeper': memoryKeeper,
+  'hidden-gem-seeker': hiddenGemSeeker,
+};
+
+type PersonaDetail = {
+  label: string;
+  tagline: string;
+  tags: string[];
+  summary: string;
+};
+
+const tingoPersonaDetails: Record<TingoPersonaKey, PersonaDetail> = {
+  'hidden-gem-seeker': {
+    label: 'Hidden Gem Seeker',
+    tagline: 'Handles unique spots',
+    tags: ['FOOD', 'CULTURE', 'EXPLORATION', 'LOCAL LIVING'],
+    summary: 'You love meaningful local experiences, unhurried moments and good food along the way.',
+  },
+  'foodie-hunter': {
+    label: 'Foodie Hunter',
+    tagline: 'Handles food picks',
+    tags: ['FOOD', 'LOCAL TASTES', 'MARKETS', 'DINING'],
+    summary: 'You read the trip through memorable meals, delicious street snacks and local food culture.',
+  },
+  'master-planner': {
+    label: 'Master Planner',
+    tagline: 'Handles trip structure',
+    tags: ['ITINERARY', 'TIMING', 'SMOOTH PACE', 'PROTECTED ANCHORS'],
+    summary: 'You craft well-balanced itineraries with clear timing so the whole trip feels effortless and calm.',
+  },
+  'transit-navigator': {
+    label: 'Transit Navigator',
+    tagline: 'Handles routes & connections',
+    tags: ['ROUTES', 'TRANSIT', 'EFFICIENCY', 'SMOOTH MOVES'],
+    summary: 'You navigate connections, subway maps and transit tradeoffs to keep everyone moving smoothly.',
+  },
+  'budget-keeper': {
+    label: 'Budget Keeper',
+    tagline: 'Handles smart spending',
+    tags: ['SMART VALUE', 'BUDGET CALM', 'HIDDEN SAVINGS', 'SPEND WISELY'],
+    summary: 'You find clever ways to maximize joy and protect budgets without making the trip feel smaller.',
+  },
+  'photo-chaser': {
+    label: 'Photo Chaser',
+    tagline: 'Handles scenic moments',
+    tags: ['SCENIC VIEWS', 'GOLDEN HOUR', 'MEMORY CARDS', 'ICONIC SPOTS'],
+    summary: 'You seek out once-in-a-trip scenery, golden hour viewpoints and the best memory-worthy spots.',
+  },
+  'culture-explorer': {
+    label: 'Culture Explorer',
+    tagline: 'Handles heritage & stories',
+    tags: ['HERITAGE', 'HISTORY', 'LOCAL ARTS', 'TRADITIONS'],
+    summary: 'You dive into local traditions, ancient alleys, museums and stories that bring each place alive.',
+  },
+  'adventure-seeker': {
+    label: 'Adventure Seeker',
+    tagline: 'Handles bold outdoor ideas',
+    tags: ['OUTDOORS', 'HIKING', 'NEW HORIZONS', 'THRILLS'],
+    summary: 'You gravitate toward wild trails, scenic summits and bold outdoor moments that get your heart racing.',
+  },
+  'relaxation-lover': {
+    label: 'Relaxation Lover',
+    tagline: 'Handles calm & rest',
+    tags: ['UNHURRIED', 'CAFÉ BREAKS', 'SLOW PACE', 'RESTFUL STAYS'],
+    summary: 'You protect gentle mornings, leisurely café breaks and the breathing room that makes vacations restorative.',
+  },
+  'shopping-scout': {
+    label: 'Shopping Scout',
+    tagline: 'Handles unique finds',
+    tags: ['BOUTIQUES', 'LOCAL CRAFTS', 'VINTAGE', 'SOUVENIRS'],
+    summary: 'You uncover neighborhood boutiques, curated vintage shops and timeless souvenirs to take home.',
+  },
+  'weather-watcher': {
+    label: 'Weather Watcher',
+    tagline: 'Handles backup plans',
+    tags: ['WEATHER AWARE', 'RAINY PLANS', 'FLEXIBILITY', 'LOW CHAOS'],
+    summary: 'You anticipate seasonal shifts and rain forecasts to pivot gracefully to indoor charms.',
+  },
+  'safety-guardian': {
+    label: 'Safety Guardian',
+    tagline: 'Handles peace of mind',
+    tags: ['SAFE ROUTES', 'LOW FRICTION', 'PREPARED', 'RELIABLE STAYS'],
+    summary: 'You prioritize peace of mind, reliable transport and calm plans so everyone feels secure.',
+  },
+  'group-coordinator': {
+    label: 'Group Coordinator',
+    tagline: 'Handles harmony & choices',
+    tags: ['SHARED JOY', 'CONSENSUS', 'TEAM SPIRIT', 'FAIR CHOICES'],
+    summary: 'You keep everyone engaged, listen to every voice and ensure group decisions feel effortless and fair.',
+  },
+  'packing-pro': {
+    label: 'Packing Pro',
+    tagline: 'Handles gear & essentials',
+    tags: ['LIGHT LUGGAGE', 'ORGANIZED', 'ESSENTIALS', 'SMART PACKING'],
+    summary: 'You pack smart, light and organized, ensuring nothing essential gets left behind.',
+  },
+  'night-owl': {
+    label: 'Night Owl',
+    tagline: 'Handles evening momentum',
+    tags: ['NIGHTLIFE', 'EVENING WALKS', 'LATE BITES', 'CITY LIGHTS'],
+    summary: 'You come alive after dusk, exploring illuminated cityscapes, cozy taverns and night markets.',
+  },
+  'memory-keeper': {
+    label: 'Memory Keeper',
+    tagline: 'Handles keepsakes & stories',
+    tags: ['JOURNALS', 'POSTCARDS', 'MEMENTOS', 'SHARED STORIES'],
+    summary: 'You curate ticket stubs, handwritten notes and photo keepsakes that preserve the magic.',
+  },
+};
 
 const defaultProfile: TravelProfile = {
   vibe: 'Relax + Food',
@@ -141,21 +283,11 @@ function MiniTool({ icon: Icon, label, note, onClick }: { icon: React.ComponentT
 }
 
 function tingoTypeLabel(dimensions: TingoDimensions): string {
-  const behavior = deriveTingoBehavior(dimensions);
-  if (behavior.recommendationBias === 'food') return 'Cultural Foodie';
-  if (behavior.recommendationBias === 'adventure') return 'Curious Explorer';
-  if (behavior.recommendationBias === 'memory') return 'Story Collector';
-  if (behavior.recommendationBias === 'value') return 'Clever Wayfinder';
-  return dimensions.social >= 2 ? 'Group Connector' : 'Balanced Wanderer';
+  return deriveTingoIdentity(dimensions).title;
 }
 
 function tingoTypeCopy(dimensions: TingoDimensions): string {
-  const behavior = deriveTingoBehavior(dimensions);
-  if (behavior.recommendationBias === 'food') return 'You seek authentic flavours, local cultures and meaningful experiences.';
-  if (behavior.recommendationBias === 'adventure') return 'You chase open roads, unusual corners and stories that start with curiosity.';
-  if (behavior.recommendationBias === 'memory') return 'You choose moments that become keepsakes, stories and future traditions.';
-  if (behavior.recommendationBias === 'value') return 'You find the clever route where comfort, cost and joy stay balanced.';
-  return 'You like a thoughtful mix of good plans, breathing room and small discoveries.';
+  return deriveTingoIdentity(dimensions).summary;
 }
 
 export default function AppRescued() {
@@ -182,6 +314,14 @@ export default function AppRescued() {
   const [completedPanel, setCompletedPanel] = useState<CompletedPanel>(null);
   const [readyConfirmed, setReadyConfirmed] = useState(Boolean(stored.readyConfirmed));
   const [drawer, setDrawer] = useState<Drawer>(null);
+  const [personaOverride, setPersonaOverride] = useState<TingoPersonaKey | null>(null);
+  const [, setCocoTick] = useState(0);
+
+  useEffect(() => {
+    const handleSpritesReady = () => setCocoTick(t => t + 1);
+    window.addEventListener('coco-sprites-ready', handleSpritesReady);
+    return () => window.removeEventListener('coco-sprites-ready', handleSpritesReady);
+  }, []);
   const [mode, setMode] = useState<TripMode>(storedMode);
   const [profile, setProfile] = useState<TravelProfile>({
     vibe: storedProfile?.vibe ?? defaultProfile.vibe,
@@ -223,7 +363,8 @@ export default function AppRescued() {
   const [learningProposal, setLearningProposal] = useState<LearningProposal | null>(stored.learningProposal ?? null);
   const [confirmedLearningHistory, setConfirmedLearningHistory] = useState<ConfirmedLearningRecord[]>(stored.confirmedLearningHistory ?? []);
   const [tingoAnswers, setTingoAnswers] = useState<TingoAnswer[]>(stored.tingoAnswers ?? []);
-  const [tingoStep, setTingoStep] = useState(0);
+  const [tingoStep, setTingoStep] = useState(-1);
+  const [tingoRevealed, setTingoRevealed] = useState(() => tingoCompletion(stored.tingoAnswers ?? []) === 100);
   const [basePackingPreferences, setBasePackingPreferences] = useState<string[]>(stored.basePackingPreferences ?? ['comfortable walking shoes', 'portable charger', 'light rain layer']);
   const [tripCreated, setTripCreated] = useState(stored.tripCreated ?? true);
   const [members, setMembers] = useState<TripMember[]>(() => {
@@ -288,6 +429,7 @@ export default function AppRescued() {
 
   const tally = useMemo(() => courtTally(courtVotes), [courtVotes]);
   const tingoDimensions = useMemo(() => scoreTingo(tingoAnswers), [tingoAnswers]);
+  const tingoIdentity = useMemo(() => deriveTingoIdentity(tingoDimensions), [tingoDimensions]);
   const tingoBehavior = useMemo(() => deriveTingoBehavior(tingoDimensions), [tingoDimensions]);
   const tingoPlanGuidance = useMemo(() => tingoGuidance(tingoDimensions), [tingoDimensions]);
   const responsibilitySuggestions = useMemo(() => suggestResponsibilities(members, tingoBehavior, { mei: tingoBehavior }), [members, tingoBehavior]);
@@ -690,20 +832,27 @@ export default function AppRescued() {
 
   function answerTingo(optionId: string) {
     const question = tingoQuestions[tingoStep];
+    if (!question) return;
     setTingoAnswers(current => {
       return [...current.filter(answer => answer.questionId !== question.id), { questionId: question.id, optionId }];
     });
+    setTingoRevealed(false);
     if (tingoStep < tingoQuestions.length - 1) setTingoStep(step => step + 1);
+    else setTingoStep(tingoQuestions.length);
   }
 
   function finishTingo() {
+    setPersonaOverride(null);
     const dimensions = scoreTingo(tingoAnswers);
     setRecommendations(current => makeRecommendations(destination, dimensions, current));
+    setTingoRevealed(true);
   }
 
   function retakeTingo() {
+    setPersonaOverride(null);
     setTingoAnswers([]);
-    setTingoStep(0);
+    setTingoStep(-1);
+    setTingoRevealed(false);
     setDrawer('tingo');
   }
 
@@ -976,131 +1125,365 @@ export default function AppRescued() {
     </div>;
   }
 
+  function SuitcaseGraphic() {
+    return (
+      <svg viewBox="0 0 100 85" className="me-suitcase-svg" aria-hidden="true">
+        <path d="M12,18 L14,14 L18,16 L14,18 L12,22 L10,18 L6,16 L10,14 Z" fill="#f6a83e" opacity="0.8" />
+        <path d="M88,14 L90,11 L93,12 L90,14 L91,17 L89,14 L86,13 L89,11 Z" fill="#f6a83e" opacity="0.8" />
+        <path d="M8,70 L9,68 L11,69 L9,70 L10,72 L8,71 L7,70 L8,68 Z" fill="#f6a83e" opacity="0.7" />
+        <path d="M92,62 L93,60 L95,61 L93,62 L94,64 L92,63 L91,62 L92,60 Z" fill="#f6a83e" opacity="0.7" />
+
+        <ellipse cx="50" cy="80" rx="42" ry="4" fill="rgba(20, 40, 80, 0.15)" />
+
+        <rect x="12" y="24" width="76" height="52" rx="8" fill="#8d5b36" stroke="#683d1c" strokeWidth="1.5" />
+        <rect x="14" y="26" width="72" height="48" rx="6" fill="#a46d43" />
+
+        <path d="M12,34 L22,24 L12,24 Z" fill="#583115" />
+        <path d="M88,34 L78,24 L88,24 Z" fill="#583115" />
+        <path d="M12,66 L22,76 L12,76 Z" fill="#583115" />
+        <path d="M88,66 L78,76 L88,76 Z" fill="#583115" />
+        <circle cx="15" cy="27" r="1" fill="#dfad5c" />
+        <circle cx="85" cy="27" r="1" fill="#dfad5c" />
+        <circle cx="15" cy="73" r="1" fill="#dfad5c" />
+        <circle cx="85" cy="73" r="1" fill="#dfad5c" />
+
+        <rect x="28" y="24" width="7" height="52" fill="#583115" />
+        <rect x="65" y="24" width="7" height="52" fill="#583115" />
+        <rect x="27" y="44" width="9" height="6" rx="1.5" fill="#dfad5c" stroke="#8d5b36" strokeWidth="0.8" />
+        <rect x="64" y="44" width="9" height="6" rx="1.5" fill="#dfad5c" stroke="#8d5b36" strokeWidth="0.8" />
+
+        <path d="M40,24 C40,16 60,16 60,24" fill="none" stroke="#583115" strokeWidth="4" strokeLinecap="round" />
+        <rect x="38" y="21" width="5" height="4" rx="1" fill="#dfad5c" />
+        <rect x="57" y="21" width="5" height="4" rx="1" fill="#dfad5c" />
+
+        <g transform="translate(42, 32) rotate(-5)">
+          <rect x="0" y="0" width="16" height="15" rx="3" fill="#ffffff" />
+          <rect x="1" y="1" width="14" height="13" rx="2" fill="#1b72e8" />
+          <path d="M2,11 Q5,7 9,9 Q13,11 14,8 L14,13 L2,13 Z" fill="#ffffff" />
+          <circle cx="12" cy="4" r="1.5" fill="#fdd835" />
+        </g>
+
+        <g transform="translate(16, 44) rotate(4)">
+          <rect x="0" y="0" width="16" height="18" rx="3" fill="#ffffff" />
+          <rect x="1" y="1" width="14" height="16" rx="2" fill="#f8fafc" />
+          <path d="M5,15 Q8,10 8,6" stroke="#8d5b36" strokeWidth="1.5" fill="none" />
+          <path d="M8,6 Q5,3 2,5" stroke="#2e7d32" strokeWidth="1.5" fill="none" />
+          <path d="M8,6 Q11,3 14,5" stroke="#2e7d32" strokeWidth="1.5" fill="none" />
+          <path d="M8,6 Q8,2 7,1" stroke="#2e7d32" strokeWidth="1.5" fill="none" />
+          <ellipse cx="8" cy="14" rx="5" ry="1.5" fill="#f59e0b" opacity="0.6" />
+        </g>
+
+        <g transform="translate(45, 54) rotate(-3)">
+          <rect x="0" y="0" width="18" height="16" rx="3" fill="#ffffff" />
+          <rect x="1" y="1" width="16" height="14" rx="2" fill="#fff7ed" />
+          <circle cx="9" cy="8" r="4" fill="#f97316" />
+          <polygon points="2,14 7,8 11,14" fill="#0284c7" />
+          <polygon points="8,14 12,6 16,14" fill="#0369a1" />
+        </g>
+      </svg>
+    );
+  }
+
   function renderMe() {
     const tingoComplete = tingoCompletion(tingoAnswers) === 100;
-    const typeLabel = tingoTypeLabel(tingoDimensions);
-    const typeCopy = tingoTypeCopy(tingoDimensions);
+    const identity = deriveTingoIdentity(tingoDimensions);
+    const currentPersonaKey = personaOverride ?? identity.personaKey;
+    const detail = tingoPersonaDetails[currentPersonaKey] ?? tingoPersonaDetails['hidden-gem-seeker'];
+    const personaImage = tingoPersonaImages[currentPersonaKey] ?? tingoPersonaImages['hidden-gem-seeker'];
+    const typeLabel = detail.label;
+    const typeCopy = detail.summary;
+    const personaTagline = detail.tagline;
+    const personaTags = detail.tags;
 
     return <div className="me-screen">
-      <section className={`me-tingo-card ${tingoComplete ? 'is-complete' : 'is-empty'} paper-sheet`}>
-  <div className="me-card-copy">
-    <span>MY TINGO CARD</span>
+      <section className="me-tingo-card redesign-card paper-sheet">
+        <svg className="me-card-bg-deco" viewBox="0 0 400 240" preserveAspectRatio="none" fill="none" aria-hidden="true">
+          <path d="M220,20 C245,10 290,15 325,30 C350,42 385,25 405,40 C410,60 390,80 370,75 C350,95 325,105 300,88 C280,98 255,85 240,65 C225,50 215,30 220,20 Z" fill="#cbe4fc" opacity="0.65" />
+          <path d="M290,105 C315,100 340,115 350,135 C355,155 335,170 315,165 C295,160 285,140 280,125 C275,113 282,107 290,105 Z" fill="#d9ebfb" opacity="0.5" />
+          <path d="M120,40 C140,30 170,45 165,65 C160,85 135,95 120,85 C105,75 105,50 120,40 Z" fill="#e2f0fc" opacity="0.5" />
+          <path d="M25,215 Q140,180 236,40" stroke="#3b82f6" strokeWidth="1.8" strokeDasharray="4 4" opacity="0.6" fill="none" />
+          <g transform="translate(236, 40) rotate(38) scale(0.9)">
+            <path d="M0,0 L16,7 L20,5 L12,0 L20,-5 L16,-7 Z" fill="#1d6fd8" />
+            <path d="M5,1 L3,9 L7,9 L9,1 Z" fill="#1d6fd8" />
+            <path d="M5,-1 L3,-9 L7,-9 L9,-1 Z" fill="#1d6fd8" />
+          </g>
+        </svg>
 
-    <h2>
-      {tingoComplete ? (
-        <>
-          You&apos;re a
-          <br />
-          {typeLabel}
-        </>
-      ) : (
-        <>
-          Find your
-          <br />
-          Tingo type
-        </>
-      )}
-    </h2>
-
-    <p>
-      {tingoComplete ? (
-        typeCopy
-      ) : (
-        <>
-          Take the assessment so Coco
-          <br />
-          can shape trips around your pace,
-          <br />
-          tastes and comfort.
-        </>
-      )}
-    </p>
-
-    <div className="me-chip-row">
-      {(tingoComplete
-        ? ['FOOD', 'CULTURE', 'EXPLORATION', 'LOCAL LIVING']
-        : ['6 QUESTIONS', 'PRIVATE', 'EXPLAINABLE']
-      ).map(chip => (
-        <small key={chip}>{chip}</small>
-      ))}
-    </div>
-
-    {tingoComplete && (
-      <button className="me-text-link" onClick={retakeTingo}>
-        Retake assessment
-      </button>
-    )}
-  </div>
-
-  <div className="me-card-collage">
-    <div className="me-santorini-photo" aria-hidden="true" />
-
-    <button
-      className="me-photo-assessment"
-      onClick={() => setDrawer('tingo')}
-    >
-      {tingoComplete ? 'View profile' : 'Take assessment'}
-      <ChevronRight size={17} />
-    </button>
-
-    <img
-      className="me-sheet-coco"
-      src={cocoSheetHappy}
-      alt=""
-      draggable={false}
-    />
-  </div>
-</section>
-      <section className="me-trip-card paper-sheet">
-        <div className="me-trip-photo" aria-hidden="true">
-          <div className="me-stamp">JEJU<br /><small>SOUTH KOREA</small></div>
-          <div className="me-note trip-note">Collect<br />Good<br />Stories</div>
-          <div className="me-island-script">Jeju<br />Island</div>
+        <div className="me-handwritten-note-top">
+          <span>Small<br />Places<br />Big Stories</span>
+          <span className="sparks">彡</span>
         </div>
-        <div className="me-trip-content">
-          <span>CURRENT TRIP</span>
+
+        <div className="me-card-copy">
+          <span className="me-tingo-kicker">MY TINGO CARD</span>
+
+          <h2>
+            You&apos;re a<br />
+            {typeLabel === 'Hidden Gem Seeker' ? (
+              <>Hidden Gem<br />Seeker</>
+            ) : typeLabel.split(' ').length === 2 ? (
+              <>{typeLabel.split(' ')[0]}<br />{typeLabel.split(' ')[1]}</>
+            ) : typeLabel.split(' ').length > 2 ? (
+              <>{typeLabel.split(' ').slice(0, 2).join(' ')}<br />{typeLabel.split(' ').slice(2).join(' ')}</>
+            ) : (
+              typeLabel
+            )}
+          </h2>
+
+          <p>{typeCopy}</p>
+
+          <div className="me-chip-row">
+            {personaTags.map(tag => (
+              <small key={tag}>{tag}</small>
+            ))}
+          </div>
+
+          <div className="me-tingo-actions-col">
+            <button className="me-all-types-link" onClick={() => setDrawer('all-personas')}>
+              <Users size={15} />
+              <span>See all 16 travel types</span>
+              <span className="arrow">→</span>
+            </button>
+            <button className="me-retake-link" onClick={retakeTingo}>
+              <RotateCcw size={13} />
+              <span>Retake assessment</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="me-card-collage">
+          <div className="me-floating-mini-card">
+            <img className="me-persona-art" src={personaImage} alt={`${typeLabel} illustration`} />
+            <span className="me-persona-badge">{typeLabel}</span>
+            <small className="me-persona-subtag">{personaTagline}</small>
+          </div>
+
+          <button
+            className="me-view-profile-btn"
+            onClick={() => setDrawer('tingo')}
+          >
+            <span>View profile</span>
+            <span className="arrow">→</span>
+          </button>
+        </div>
+      </section>
+
+      <section className="me-trip-card redesign-trip paper-sheet">
+        <div className="me-trip-hero-section">
+          <div className="me-postmark-stamp">
+            <b>JEJU</b>
+            <small>SOUTH KOREA</small>
+          </div>
+
+          <div className="me-good-journeys-note">
+            <span>Good<br />Journeys<br />Ahead</span>
+            <span className="sparks">彡</span>
+            <div className="underline" />
+          </div>
+
+          <span className="me-trip-tag-pill">CURRENT TRIP</span>
           <h2>Jeju In Amber</h2>
-          <p className="me-trip-date"><Map size={16} />20 - 24 Nov 2026</p>
-          <p>Volcanic beauty, coastal trails and incredible local cuisine awaits.</p>
-          <button className="me-red-button" onClick={() => openTrip(tripPhase)}>Open active trip <ChevronRight size={22} /></button>
+
+          <div className="me-trip-meta-list">
+            <div className="me-trip-meta-item">
+              <Calendar size={13} />
+              <span>20 - 24 Nov 2026</span>
+            </div>
+            <div className="me-trip-meta-item">
+              <MapPin size={13} />
+              <span>Jeju Island, South Korea</span>
+            </div>
+          </div>
+
+          <p className="me-trip-blurb">Volcanic beauty, coastal trails and incredible local cuisine awaits.</p>
+
+          <button className="me-open-trip-btn" onClick={() => openTrip(tripPhase)}>
+            <span>Open active trip</span>
+            <span className="arrow">→</span>
+          </button>
+
+          <div className="me-trip-scallop-divider" aria-hidden="true">
+            <svg viewBox="0 0 400 14" preserveAspectRatio="none" fill="#ffffff">
+              <path d="M0,14 L0,8 Q12.5,0 25,8 Q37.5,16 50,8 Q62.5,0 75,8 Q87.5,16 100,8 Q112.5,0 125,8 Q137.5,16 150,8 Q162.5,0 175,8 Q187.5,16 200,8 Q212.5,0 225,8 Q237.5,16 250,8 Q262.5,0 275,8 Q287.5,16 300,8 Q312.5,0 325,8 Q337.5,16 350,8 Q362.5,0 375,8 Q387.5,16 400,8 L400,14 Z" />
+            </svg>
+          </div>
         </div>
-        <div className="me-trip-steps" aria-label="Trip progress">
-          <button><FileText size={26} /><i />Plan</button>
-          <button onClick={openPacking}><PackageCheck size={28} /><i />Pack</button>
-          <button className="active" onClick={() => openTrip('traveling')}><Plane size={28} />Go</button>
-          <button onClick={() => openTrip('completed')}><Image size={25} />Memories</button>
+
+        <div className="me-phase-tracker-bar">
+          <div className="me-tracker-steps-grid" aria-label="Trip progress">
+            <button className="me-phase-step-btn" onClick={() => openTrip('planning')}>
+              <div className="me-step-icon-box">
+                <FileText size={20} />
+                <div className="me-step-check-dot"><Check size={8} /></div>
+              </div>
+              <span>Plan</span>
+            </button>
+            <button className="me-phase-step-btn" onClick={openPacking}>
+              <div className="me-step-icon-box">
+                <Box size={20} />
+                <div className="me-step-check-dot"><Check size={8} /></div>
+              </div>
+              <span>Pack</span>
+            </button>
+            <button className="me-phase-step-btn is-active" onClick={() => openTrip('traveling')}>
+              <div className="me-step-icon-box me-step-active-circle">
+                <Plane size={20} />
+              </div>
+              <span>Go</span>
+            </button>
+            <button className="me-phase-step-btn" onClick={() => openTrip('completed')}>
+              <div className="me-step-icon-box">
+                <Image size={20} />
+              </div>
+              <span>Memories</span>
+            </button>
+          </div>
         </div>
       </section>
-      <section className="me-mini-card packing-card paper-sheet">
-        <PackageCheck size={40} />
-        <div>
-          <h3>Packing Summary</h3>
-          <div className="me-progress"><i style={{ width: '70%' }} /><b>70%</b></div>
-          <p>14 / 20 items packed</p>
+
+      <section className="me-summary-card redesign-summary paper-sheet" onClick={openPacking}>
+        <svg className="me-summary-bg-track" viewBox="0 0 340 90" fill="none" aria-hidden="true">
+          <path d="M120,65 Q210,50 255,20" stroke="#4a89d0" strokeWidth="1" strokeDasharray="3 4" opacity="0.4" />
+          <g transform="translate(225, 28) rotate(-25) scale(0.55)">
+            <path d="M0,0 L14,6 L18,4 L10,0 L18,-4 L14,-6 Z" fill="#1b72e8" opacity="0.6" />
+          </g>
+        </svg>
+
+        <div className="me-summary-content">
+          <div className="me-summary-head-row">
+            <h3>Packing Summary</h3>
+            <span className="me-summary-pct">70%</span>
+          </div>
+          <div className="me-progress-bar-track">
+            <div className="me-progress-bar-fill" style={{ width: '70%' }} />
+          </div>
+          <span className="me-summary-subtext">14 / 20 items packed</span>
+          <div className="me-summary-pill">Almost there! Great progress!</div>
         </div>
-        <div className="me-note mini-note">Pack<br />Lighter<br />Go Further</div>
-        <button aria-label="Open packing" onClick={openPacking}><ChevronRight size={24} /></button>
+
+        <div className="me-summary-right-visual">
+          <div className="me-suitcase-container">
+            <SuitcaseGraphic />
+          </div>
+          <button className="me-round-nav-btn" aria-label="Open packing">
+            <ChevronRight size={18} />
+          </button>
+        </div>
       </section>
-      <section className="me-mini-card history-card paper-sheet">
-        <BookOpen size={39} />
-        <div>
+
+      <section className="me-history-card redesign-history paper-sheet" onClick={() => setDrawer('tingo')}>
+        <div className="me-history-content">
           <h3>Profile History</h3>
           <p>Look back on your trips, memories and how you&apos;ve grown.</p>
+          <div className="me-summary-pill">Your journey tells a great story!</div>
         </div>
-        <div className="me-postcard" aria-hidden="true"><span>More<br />Good<br />Ahead</span></div>
-        <button aria-label="Open profile history" onClick={() => setDrawer('tingo')}><ChevronRight size={24} /></button>
+
+        <div className="me-summary-right-visual">
+          <div className="me-polaroid-stack-wrap">
+            <div className="me-polaroid-card me-polaroid-back">
+              <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=260&auto=format&fit=crop&q=80" alt="Coast" />
+            </div>
+            <div className="me-polaroid-card me-polaroid-front">
+              <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=260&auto=format&fit=crop&q=80" alt="Sunset" />
+            </div>
+            <div className="me-polaroid-post-it">
+              <span>More<br />Good<br />Places</span>
+            </div>
+          </div>
+          <button className="me-round-nav-btn" aria-label="Open profile history">
+            <ChevronRight size={18} />
+          </button>
+        </div>
       </section>
+
       {learningProposal?.status === 'proposed' && <section className="learning-handoff paper-sheet"><div><span>TRIP LEARNING · REVIEW BEFORE APPLY</span><h3>{destination} has a proposal for your long-term Tingo.</h3><p>These changes came from this trip’s actual outcome and will not apply until you confirm them.</p>{learningProposal.changes.map(change => <small key={change.questionId}>{change.questionId}: {change.beforeOptionId ?? 'none'} → {change.afterOptionId} · {change.reason}</small>)}</div><div className="learning-handoff-actions"><button className="secondary" onClick={() => openTrip('completed')}>Review in Completed</button><button className="primary" onClick={confirmLearning}>Confirm this learning</button><button className="secondary" onClick={dismissLearning}>Dismiss</button></div></section>}
       {confirmedLearningHistory.length > 0 && <section className="learning-history paper-sheet"><span>CONFIRMED TINGO LEARNING</span><h3>What you chose to carry forward</h3>{confirmedLearningHistory.slice(0, 3).map(record => <div key={record.id}><b>{record.sourceTripReview === 'yes' ? 'Worth it' : record.sourceTripReview === 'mixed' ? 'Mixed' : 'Not really'} · {new Date(record.confirmedAt).toLocaleDateString()}</b>{record.changes.map(change => <small key={change.questionId}>{change.questionId}: {change.beforeOptionId ?? 'none'} → {change.afterOptionId}</small>)}</div>)}</section>}
-      <section className="base-packing"><div><span>BASE PACKING HABITS</span><b>Inherited by every new checklist</b></div><div className="packing-preferences">{basePackingPreferences.map(item => <button key={item} onClick={() => setBasePackingPreferences(current => current.filter(value => value !== item))}>{item} ×</button>)}<button className="add-preference" onClick={() => setBasePackingPreferences(current => current.includes('medication pouch') ? current : [...current, 'medication pouch'])}>+ medication pouch</button></div></section>
+    </div>;
+  }
+
+  function renderTingoAssessment() {
+    const completion = tingoCompletion(tingoAnswers);
+    const complete = completion === 100;
+    const identity = deriveTingoIdentity(tingoDimensions);
+    const currentQuestion = tingoQuestions[Math.max(0, Math.min(tingoStep, tingoQuestions.length - 1))];
+    const barWidth = tingoStep < 0 ? 12 : complete ? 100 : Math.round(((tingoStep + 1) / tingoQuestions.length) * 100);
+    const statRows: { key: keyof TingoDimensions; label: string; icon: string; color: string }[] = [
+      { key: 'pace', label: 'Pace', icon: '🏝️', color: '#f26c7a' },
+      { key: 'experience', label: 'Experience', icon: '🌎', color: '#156ed0' },
+      { key: 'budget', label: 'Budget', icon: '💳', color: '#f6a83e' },
+      { key: 'comfort', label: 'Comfort', icon: '🏨', color: '#18aee4' },
+      { key: 'food', label: 'Food', icon: '🍴', color: '#0b65c8' },
+      { key: 'adventure', label: 'Adventure', icon: '⛰️', color: '#ff8191' },
+      { key: 'planning', label: 'Planning', icon: '🗂️', color: '#ffa83e' },
+      { key: 'flexibility', label: 'Flexibility', icon: '🔁', color: '#218d7a' },
+      { key: 'social', label: 'Social', icon: '👥', color: '#17aa78' },
+    ];
+    const scoreValue = (key: keyof TingoDimensions) => Math.max(8, Math.min(98, Math.round(58 + tingoDimensions[key] * 7)));
+
+    if (tingoStep < 0 && !complete) {
+      return <div className="tingo-flow tingo-how">
+        <div className="tingo-flow-top"><button aria-label="Back" onClick={() => setDrawer(null)}>‹</button><div><i style={{ width: `${barWidth}%` }} /></div><span>1/12</span></div>
+        <span className="tingo-flow-kicker">LET&apos;S BEGIN</span>
+        <h2>How it works?</h2>
+        <div className="tingo-how-list">
+          <article><span><Map size={25} /></span><div><b>Two options, every question</b><small>Pick the one that feels more like you. No right or wrong answers.</small></div></article>
+          <article><span><Image size={25} /></span><div><b>Real travel scenarios</b><small>Based on actual trip decisions and experiences.</small></div></article>
+          <article><span><MapPin size={25} /></span><div><b>No right or wrong</b><small>Just your personal preferences.</small></div></article>
+          <article><span><Sparkles size={25} /></span><div><b>A better trip for you</b><small>The more you choose, the better we plan for you.</small></div></article>
+        </div>
+        <button className="tingo-flow-primary" onClick={() => setTingoStep(0)}>Got it! <ChevronRight size={20} /></button>
+      </div>;
+    }
+
+    if (complete && !tingoRevealed) {
+      return <div className="tingo-flow tingo-creating">
+        <div className="tingo-flow-top"><button aria-label="Back" onClick={() => setTingoStep(tingoQuestions.length - 1)}>‹</button><div><i style={{ width: '100%' }} /></div><span>12/12</span></div>
+        <h2>Creating your<br />Tingo Card...</h2>
+        <p>Analyzing your preferences and crafting your travel vibe</p>
+        <div className="tingo-checks">
+          <span>✓ <b>Understanding your style</b></span>
+          <span>✓ <b>Matching travel experiences</b></span>
+          <span>◌ <b>Putting it all together</b></span>
+        </div>
+        <div className="tingo-creating-photo" aria-hidden="true"></div>
+        <button className="tingo-flow-primary" onClick={finishTingo}>Reveal my card <ChevronRight size={20} /></button>
+      </div>;
+    }
+
+    if (complete) {
+      return <div className="tingo-flow tingo-result-screen">
+        <div className="tingo-result-head"><button aria-label="Back" onClick={() => setDrawer(null)}>‹</button><b>Your Tingo Card</b><button aria-label="Retake assessment" onClick={retakeTingo}>↻</button></div>
+        <div className="tingo-result-hero">
+          <div><span>THE<br />{identity.title}</span><strong>{identity.personaLabel}</strong></div>
+          <img src={tingoPersonaImages[identity.personaKey]} alt={`${identity.personaLabel} logo`} />
+          <i>TRAVEL<br />YOUR<br />WAY</i>
+        </div>
+        <p className="tingo-result-quote">&quot;{identity.summary}&quot;</p>
+        <div className="tingo-role-card"><span>BEST TRIP ROLE</span><b>{identity.role}</b><small>{identity.roleReason}</small></div>
+        <div className="tingo-stat-list">{statRows.map(row => <div key={row.key}><span>{row.icon}</span><b>{row.label}</b><i><em style={{ width: `${scoreValue(row.key)}%`, background: row.color }} /></i><strong>{scoreValue(row.key)}</strong></div>)}</div>
+        <button className="tingo-flow-primary tingo-red-primary" onClick={() => { finishTingo(); setDrawer(null); }}>Plan My Trip <ChevronRight size={20} /></button>
+      </div>;
+    }
+
+    return <div className="tingo-flow tingo-question-screen">
+      <div className="tingo-flow-top"><button aria-label="Back" onClick={() => setTingoStep(step => Math.max(-1, step - 1))}>‹</button><div><i style={{ width: `${barWidth}%` }} /></div><span>{tingoStep + 1}/12</span></div>
+      <span className="tingo-question-kicker">{currentQuestion.category?.toUpperCase()}</span>
+      <h2>{currentQuestion.prompt}</h2>
+      <div className="tingo-choice-grid">{currentQuestion.options.map(option => <button key={option.id} onClick={() => answerTingo(option.id)}>
+        <img src={option.photoUrl} alt="" />
+        <b>{option.label}</b>
+        <span>{option.hint}</span>
+        {(option.tags ?? []).map(tag => <small key={tag}>{tag}</small>)}
+      </button>)}</div>
+      <button className="tingo-neither" onClick={() => answerTingo('neither')}>Neither feels like me</button>
     </div>;
   }
 
   function renderDrawer() {
     if (!drawer) return null;
-    return <div className="overlay" onMouseDown={() => setDrawer(null)}><section className="drawer" onMouseDown={e => e.stopPropagation()}><button className="close" aria-label="Close drawer" onClick={() => setDrawer(null)}><X size={20} /></button>
+    return <div className={`overlay ${drawer === 'tingo' ? 'tingo-overlay' : ''}`} onMouseDown={() => setDrawer(null)}><section className={`drawer ${drawer === 'tingo' ? 'tingo-flow-drawer' : ''}`} onMouseDown={e => e.stopPropagation()}>{drawer !== 'tingo' && <button className="close" aria-label="Close drawer" onClick={() => setDrawer(null)}><X size={20} /></button>}
       {drawer === 'discover' && <><span className="drawer-kicker">DISCOVER · COCO PICKS</span><h3>Where are we going?</h3><p className="drawer-copy">Search Tokyo, Kyoto or Osaka for destination-aware prototype data. Unknown destinations are explicitly marked as fallback examples. Ranking uses your current Tingo dimensions.</p><div className="discover-search"><input className="big-input" value={exploreDestination} onChange={e => { setExploreDestination(e.target.value); setDestinationSearched(false); }} placeholder="Tokyo, Kyoto, Osaka…" /><button className="primary" onClick={searchDestination}>Search</button></div>{destinationSearched && <div className="discover-results"><span className="drawer-kicker">FOR YOUR {exploreDestination.toUpperCase()} TRIP · {tingoBehavior.recommendationBias.toUpperCase()} BIAS</span>{recommendations.map(place => <article className="community-row discover-row" key={place.id}><div><b>{place.name}</b><small>{place.match}% Tingo-adjusted match · {place.type}</small><small>{place.cost} · {place.duration}</small><small><strong>Why Coco picked this:</strong> {place.why}</small><small>{place.source === 'prototype-catalog' ? 'Local prototype catalog' : 'Fallback example · not live destination data'}</small><div className="inline-actions"><button onClick={() => toggleRecommendation(place.id, 'save')}>{place.saved ? '✓ Saved' : 'Save idea'}</button><button onClick={() => toggleRecommendation(place.id, 'add')}>{mode === 'group' ? (place.added ? '✓ Suggested to group' : 'Suggest to group') : (place.added ? '✓ In plan' : 'Add to plan')}</button></div>{mode === 'group' && <small>Suggestion only · the official Group itinerary changes only after group confirmation.</small>}</div></article>)}</div>}</>}
-      {drawer === 'tingo' && <><span className="drawer-kicker">TINGO CARD · {tingoCompletion(tingoAnswers)}% COMPLETE</span><h3>Tell Coco what a good trip feels like.</h3><p className="drawer-copy">Six small choices become a persistent, explainable profile — not a personality label.</p>{tingoCompletion(tingoAnswers) < 100 ? <><div className="assessment-progress"><i style={{ width: `${tingoCompletion(tingoAnswers)}%` }} /></div><div className="assessment-question"><span>QUESTION {tingoStep + 1} / {tingoQuestions.length}</span><b>{tingoQuestions[tingoStep].prompt}</b></div><div className="assessment-options">{tingoQuestions[tingoStep].options.map(option => <button key={option.id} className={tingoAnswers.some(answer => answer.questionId === tingoQuestions[tingoStep].id && answer.optionId === option.id) ? 'active' : ''} onClick={() => answerTingo(option.id)}><b>{option.label}</b><small>{option.hint}</small></button>)}</div></> : <><div className="tingo-result"><span>YOUR TRAVEL DNA</span><b>{describeTingo(tingoDimensions).join(' · ')}</b><small>{tingoPlanGuidance.itineraryGuidance} {tingoPlanGuidance.accommodationGuidance}</small></div><button className="primary" onClick={finishTingo}>Refresh profile + recommendations</button><button className="secondary" onClick={retakeTingo}>Retake Tingo Card</button></>}</>}
+{drawer === 'tingo' && renderTingoAssessment()}
       {drawer === 'tripSetup' && <><span className="drawer-kicker">NEW TRIP · BEFORE</span><h3>Give this journey a shape.</h3><label className="setup-field"><span>Destination</span><input className="big-input" value={destination} onChange={e => { setDestination(e.target.value); setDestinationSearched(false); }} /></label><div className="mode-toggle"><button className={mode === 'group' ? 'active' : ''} onClick={() => setMode('group')}>Group</button><button className={mode === 'solo' ? 'active' : ''} onClick={() => setMode('solo')}>Solo</button></div><div className="setup-fields"><label><span>Trip vibe / goal</span><input value={tripInputs.tripVibe} onChange={e => setTripInputField('tripVibe', e.target.value)} /></label><label><span>Must-Go anchor</span><input value={tripInputs.mustGo} onChange={e => setTripInputField('mustGo', e.target.value)} /></label><label><span>Deal breaker</span><input value={tripInputs.dealBreaker} onChange={e => setTripInputField('dealBreaker', e.target.value)} /></label><label><span>Preference</span><input value={tripInputs.preference} onChange={e => setTripInputField('preference', e.target.value)} /></label><label><span>Flexible</span><input value={tripInputs.flexible} onChange={e => setTripInputField('flexible', e.target.value)} /></label></div><div className="constraint-row"><button onClick={() => updateConstraint('must-go', tripInputs.mustGo)}>Save Must-Go</button><button onClick={() => updateConstraint('deal-breaker', tripInputs.dealBreaker)}>Save Deal Breaker</button><button onClick={() => updateConstraint('preference', tripInputs.preference)}>Save Preference</button><button onClick={() => updateConstraint('flexible', tripInputs.flexible)}>Save Flexible</button></div><div className="adapter-note"><b>Coco plan adapter</b><small>{tingoPlanGuidance.itineraryGuidance} {tingoPlanGuidance.budgetGuidance} Weather is provider-backed when available; map, traffic, and pricing remain local/prototype boundaries.</small></div><button className="primary" onClick={() => { setReadyConfirmed(current => transitionReadyConfirmation(current, 'confirm-trip-setup')); setTripCreated(true); setDrawer(null); openTrip('planning'); }}>Confirm inputs & open plan <ChevronRight size={15} /></button></>}
       {drawer === 'group' && <><span className="drawer-kicker">GROUP DNA</span><h3>{groupDNA.conflicts.length ? `${groupDNA.conflicts.length} conflict${groupDNA.conflicts.length === 1 ? '' : 's'} stay visible until the group decides.` : 'Shared signals are explicit, not averaged from Mei.'}</h3><div className="dna-grid"><div><span>Trip Vibe</span><b>{tripInputs.tripVibe}</b></div><div><span>Shared priority</span><b>{groupDNA.sharedPriorities[0]?.label ?? 'None yet'}</b></div><div><span>Budget range</span><b>{groupDNA.budgetRange.max ? `RM${groupDNA.budgetRange.min}–${groupDNA.budgetRange.max}` : 'No ranges yet'}</b></div><div><span>Budget sensitivity</span><b>{groupDNA.budgetSensitivity}</b></div></div><div className="member-list">{members.map(member => <div key={member.id}><div><b>{member.name}</b><small>{member.inviteStatus === 'pending' ? 'Invite pending' : member.role} · {member.pace} pace · {memberPreferenceProfiles[member.id]?.tingoAssessed ? 'Tingo assessed' : 'Tingo not assessed'}</small></div><button onClick={() => setMembers(current => current.map(item => item.id === member.id ? { ...item, role: item.role === 'Trip lead' ? 'Food scout' : item.role === 'Food scout' ? 'Memory keeper' : 'Trip lead' } : item))}>Rotate role</button></div>)}</div><div className="adapter-note"><b>Coco responsibility preview</b>{responsibilitySuggestions.map(item => <small key={item.memberId}><strong>{item.source === 'member-tingo' ? 'Tingo-assessed' : 'Fallback'} · </strong>{item.memberName}: {item.suggestedRole} — {item.reason}</small>)}<button className="secondary" onClick={() => setMembers(current => applyResponsibilitySuggestions(current, responsibilitySuggestions))}>Confirm & apply suggested roles</button></div><button className="secondary" onClick={inviteMember}>+ Invite a traveller</button><div className="conflict-mini"><span>GROUP DNA SIGNALS</span>{groupDNA.conflicts.length ? groupDNA.conflicts.map(conflict => <div key={`${conflict.kind}-${conflict.label}`}><b>{conflict.label}</b><small>{conflict.reason}</small></div>) : <b>No strong conflict detected from explicit member inputs.</b>}<small>{groupDNA.evidence.join(' ')}</small><small>{tingoPlanGuidance.courtGuidance} AI can explain options, but cannot silently choose for the group.</small></div><label className="setup-field"><span>Mark another uncertainty</span><input className="big-input" value={draftConflict} onChange={e => setDraftConflict(e.target.value)} placeholder="e.g. Shinjuku hotel vs Asakusa hotel" /></label><button className="secondary" onClick={markConflict}>{conflictMarked ? 'Send another conflict to Court' : 'Mark conflict & open Court'}</button><div className="planner-turn"><span>Editing turn</span><b>{plannerTurn}</b><button onClick={() => setPlannerTurn(plannerTurn === 'Mei' ? 'JH' : plannerTurn === 'JH' ? 'Zi Shan' : plannerTurn === 'Zi Shan' ? 'Alex' : 'Mei')}>Pass turn</button></div><button className="secondary" onClick={() => setDrawer('reminders')}>Reminders & human commitments</button></>}
       {drawer === 'backup' && <><span className="drawer-kicker">BACKUP PLAN POOL</span><h3>Only viable, Deal-Breaker-safe alternatives are repair candidates.</h3>{backupPool.map(item => <div className={`backup-row ${item.viable && item.dealBreakerSafe ? '' : 'off'}`} key={item.id}><b>{item.name}</b><small>{item.support} supporters · {item.costDelta >= 0 ? '+' : ''}RM{item.costDelta} · {item.timeDeltaMinutes >= 0 ? '+' : ''}{item.timeDeltaMinutes} min · {item.viable && item.dealBreakerSafe ? 'viable' : 'blocked'}</small><small>{item.source} · {item.lossReason}</small></div>)}{backupPool.length === 0 && <div className="adapter-note">No Backup candidate has been retained yet. A confirmed Court loser appears here only when it is viable and Deal-Breaker-safe.</div>}{ghostWishes.filter(wish => wish.status === 'revived').map(wish => <div className="backup-row" key={`ghost-${wish.id}`}><b>👻 {wish.name}</b><small>Revived from Ghost Wish · preserved with original reason</small></div>)}</>}
@@ -1113,15 +1496,43 @@ export default function AppRescued() {
       {drawer === 'assistant' && <><CocoAssistantPrompt mode={mode} destination={destination} onReviewProposal={() => { setAssistantPreview(true); setAssistantUndone(false); }} />{assistantPreview && !assistantApplied && <><div className="change-ticket"><div><span>KEEP</span><b>{tripInputs.mustGo} · anchor</b></div><div><span>MOVE</span><b>{visibleTripPlan.items.find(item => item.kind === 'floating')?.timeLabel ?? 'current time'} → {suggestedFloatingLabel}</b></div><div><span>WHY</span><b>Derived from the generated floating block and the current breathing-room signal.</b></div></div><div className="action-row"><button className="secondary" onClick={() => setAssistantPreview(false)}>Not now</button><button className="primary" onClick={() => openGovernedAction('assistant-move')}>{mode === 'group' ? 'Send to Group Court' : 'Confirm & apply'}</button></div></>}{assistantApplied && <><div className="success-note"><Check size={21} /><div><b>Suggestion applied.</b><small>Only the generated floating block moved. Anchor and promise stayed intact.</small></div></div><button className="secondary" onClick={() => { setFloatingStartOverride(null); setAssistantApplied(false); setAssistantUndone(true); }}>Undo change</button></>}{assistantUndone && <small className="adapter-note">Change undone. No group decision was silently changed.</small>}</>}
       {drawer === 'gacha' && <><EverydayGachaMachine result={everydayGacha ?? undefined} onTurn={runEverydayGacha} candidates={everydayCandidates} />{everydayCandidates.length === 0 && <div className="adapter-note"><b>No current draw candidates.</b><small>Save an idea, keep an optional activity, or add a flexible block before asking Coco for a playful suggestion. Sources remain unchanged.</small></div>}</>}
       {drawer === 'lucky' && <LuckyDrawReveal result={luckyDraw ?? undefined} onDraw={runLuckyDraw} />}
-      {drawer === 'memoryCard' && expressiveAvailable && <><span className="drawer-kicker">MEMORY STICKER CARD</span><h3>Turn one moment into a keepsake.</h3><p className="drawer-copy">Generation-ready entry point. No image-generation backend is connected, so this prototype saves the note and metadata contract only.</p><label className="setup-field"><span>Memory note</span><textarea value={memoryNote} onChange={e => setMemoryNote(e.target.value)} /></label><label className="toggle-row"><span><b>Public Community card</b><small>Private by default; explicit consent required.</small></span><input type="checkbox" checked={memoryPublic} onChange={e => setMemoryPublic(e.target.checked)} /></label><button className="primary" onClick={() => setDrawer(null)}>Save {memoryPublic ? 'public' : 'private'} card</button></>}
-      {drawer === 'family' && <FamilyWindowPanel privacy={privacy} continuousLocation={continuousLocation} reported={reported} delayed={delay} destination={destination} onReviewLocation={() => setDrawer('location')} onSendReassurance={sendFamilyReassurance} />}
-      {drawer === 'location' && <LocationPrivacyPanel privacy={privacy} continuousLocation={continuousLocation} onOpenFamily={() => setDrawer('family')} onPrivacyChange={level => setPrivacy(level)} />}
-      {drawer === 'import' && <><span className="drawer-kicker">IMPORT INSPIRATION</span><h3>Check if an outside recommendation fits your trip.</h3><input className="big-input" value={externalLink} onChange={e => setExternalLink(e.target.value)} /><button className="primary" onClick={() => setLinkAnalyzed(true)}>{linkAnalyzed ? 'Analyze again' : 'Analyze link'}</button>{linkAnalyzed && <div className="analysis-result"><b>84% demo fit</b><small>3 ideas match your pace · 1 conflicts with the budget cap. Execution still requires your confirmation.</small></div>}</>}
-      {drawer === 'community' && <><span className="drawer-kicker">COMMUNITY</span><h3>Borrow ideas, not someone else’s whole trip.</h3>{communityTrips.map(trip => <div className="community-row" key={trip.id}><div><b>{trip.title}</b><small>{trip.match}% fit · by {trip.author}</small></div><button onClick={() => setCommunityTrips(items => items.map(item => item.id === trip.id ? { ...item, saved: !item.saved } : item))}>{trip.saved ? 'Saved' : 'Save'}</button></div>)}<CommunityPublishPanel published={published} onChange={setPublished} /></>}
+      {drawer === 'family' && <FamilyWindowPanel privacy={privacy} continuousLocation={continuousLocation} reported={reported} delayed={delay} destination={destination} onReviewLocation={() => setDrawer('location')} onSendReassurance={() => setReported(true)} />}
+      {drawer === 'location' && <LocationPrivacyPanel privacy={privacy} continuousLocation={continuousLocation} onOpenFamily={() => setDrawer('family')} onPrivacyChange={setPrivacy} />}
+      {drawer === 'community' && <CommunityPublishPanel published={published} onChange={setPublished} />}
+      {drawer === 'import' && <PhotoJournalCapture destination={destination} onIndex={() => { setPhotoIndexed(true); setPhotoImport(true); setDrawer(null); }} />}
+      {drawer === 'memoryCard' && <section className="memory-card-drawer"><h3>Memory Sticker Card</h3><p>Make one moment collectible.</p><button className="primary" onClick={() => setDrawer(null)}>Collect sticker</button></section>}
+      {drawer === 'all-personas' && (
+        <section className="me-all-personas-drawer">
+          <span className="drawer-kicker">16 TRAVEL PERSONAS</span>
+          <h3>Explore Every Travel Style</h3>
+          <p className="drawer-copy">From spontaneous food hunters to meticulous planners, find every way CocoCrunch understands travellers.</p>
+          <div className="me-personas-grid">
+            {Object.entries(tingoPersonaDetails).map(([key, item]) => {
+              const isCurrent = key === (personaOverride ?? tingoIdentity.personaKey);
+              return (
+                <div key={key} className={`me-persona-grid-card ${isCurrent ? 'is-current' : ''}`} onClick={() => { setPersonaOverride(key as TingoPersonaKey); setDrawer(null); }} style={{ cursor: 'pointer' }}>
+                  <div className="me-grid-img-wrap">
+                    <img src={tingoPersonaImages[key as TingoPersonaKey]} alt={item.label} />
+                    {isCurrent && <span className="me-current-badge">★ YOUR TYPE</span>}
+                  </div>
+                  <div className="me-grid-copy">
+                    <b>{item.label}</b>
+                    <span className="me-grid-tagline">{item.tagline}</span>
+                    <p>{item.summary}</p>
+                  </div>
+                  <div className="me-grid-chips">
+                    {item.tags.map(t => <span key={t}>{t}</span>)}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
     </section></div>;
   }
 
-  const renderCourt = () => {
+  function renderCourt() {
     if (!courtOpen) return null;
     const first = courtOptions[0];
     const second = courtOptions[1];
@@ -1134,15 +1545,122 @@ export default function AppRescued() {
       setCourtConfirmed(false);
       setCourtDecision(null);
     };
-    return <div className="ritual-overlay"><section className="court-stage"><button className="close light" aria-label="Close Group Court" onClick={() => setCourtOpen(false)}><X size={20} /></button><span className="ritual-kicker">GROUP COURT · {courtOptions.length} OPTIONS</span><Coco mood="happy" context="court" /><h3>{activeConflict}</h3><p>{courtOptions.map(option => `${option.label}: ${tally.counts[option.id] ?? 0}`).join(' · ')}. {tally.tied ? 'This is a true unresolved tie.' : 'There is a majority, so Gacha stays locked.'}</p><div className="member-votes">{courtVotes.map(vote => <div key={vote.member}><b>{vote.member}</b><span>{courtOptions.map(option => <button key={option.id} className={vote.pick === option.id ? 'active' : ''} onClick={() => castVote(vote.member, option.id)}>{option.label}</button>)}</span></div>)}</div><div className="court-add-option"><input value={draftCourtOption} onChange={event => setDraftCourtOption(event.target.value)} placeholder="Add an option" /><button onClick={() => { const label = draftCourtOption.trim(); if (!label || courtOptions.some(option => option.label.toLowerCase() === label.toLowerCase())) return; setCourtOptions(options => [...options, { id: optionSlug(label, options.length), label }]); setDraftCourtOption(''); setGacha(null); setCourtDecision(null); setCourtConfirmed(false); }}>Add option</button></div><div className="trade-slip"><b>Possible exchange</b><small>{first?.label ?? 'Option A'} ↔ protect a linked concession for {second?.label ?? 'Option B'} later. The binding stores the exact pre-concession vote snapshot; any new vote invalidates the stale binding.</small><button onClick={attachConcession}>{tradeAccepted ? 'Withdraw concession & restore votes' : 'Attach concession snapshot'}</button>{courtConcession && <small>{courtConcession.status} · linked to {optionLabel(courtConcession.linkedOptionId)}</small>}</div>{tally.tied ? <CourtTieRitual key={JSON.stringify([activeConflict, courtVotes])} tied={tally.tied} options={courtOptions.map(option => option.label)} result={gacha ?? undefined} onDraw={() => { setCourtDrawRevealed(false); gachaResult(); }} onReveal={() => setCourtDrawRevealed(true)} /> : <div className="majority-note"><b>Majority decides normally.</b><small>Randomness is not used when the vote already resolves the conflict.</small></div>}{proposedDecision && (!gacha || courtDrawRevealed) && <div className="verdict"><span>PROPOSED VERDICT</span><b>{proposedDecision}</b><small>{gacha ? 'Random tie-break is still only a proposal.' : 'Computed from member votes.'}</small><button onClick={confirmCourt}>{courtConfirmed && courtDecision === proposedDecision ? '✓ Added to official timeline' : 'Confirm result'}</button></div>}</section></div>;
-  };
+    return (
+      <div className="ritual-overlay">
+        <section className="court-stage">
+          <button className="close light" aria-label="Close Group Court" onClick={() => setCourtOpen(false)}>
+            <X size={20} />
+          </button>
+          <span className="ritual-kicker">GROUP COURT · {courtOptions.length} OPTIONS</span>
+          <Coco mood="happy" context="court" />
+          <h3>{activeConflict}</h3>
+          <p>
+            {courtOptions.map(option => `${option.label}: ${tally.counts[option.id] ?? 0}`).join(' · ')}. {tally.tied ? 'This is a true unresolved tie.' : 'There is a majority, so Gacha stays locked.'}
+          </p>
+          <div className="member-votes">
+            {courtVotes.map(vote => (
+              <div key={vote.member}>
+                <b>{vote.member}</b>
+                <span>
+                  {courtOptions.map(option => (
+                    <button
+                      key={option.id}
+                      className={vote.pick === option.id ? 'active' : ''}
+                      onClick={() => castVote(vote.member, option.id)}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="court-add-option">
+            <input
+              value={draftCourtOption}
+              onChange={event => setDraftCourtOption(event.target.value)}
+              placeholder="Add an option"
+            />
+            <button
+              onClick={() => {
+                const label = draftCourtOption.trim();
+                if (!label || courtOptions.some(option => option.label.toLowerCase() === label.toLowerCase())) return;
+                setCourtOptions(options => [...options, { id: optionSlug(label, options.length), label }]);
+                setDraftCourtOption('');
+                setGacha(null);
+                setCourtDecision(null);
+                setCourtConfirmed(false);
+              }}
+            >
+              Add option
+            </button>
+          </div>
+          <div className="trade-slip">
+            <b>Possible exchange</b>
+            <small>
+              {first?.label ?? 'Option A'} ↔ protect a linked concession for {second?.label ?? 'Option B'} later. The binding stores the exact pre-concession vote snapshot; any new vote invalidates the stale binding.
+            </small>
+            <button onClick={attachConcession}>
+              {tradeAccepted ? 'Withdraw concession & restore votes' : 'Attach concession snapshot'}
+            </button>
+            {courtConcession && (
+              <small>{courtConcession.status} · linked to {optionLabel(courtConcession.linkedOptionId)}</small>
+            )}
+          </div>
+          {tally.tied ? (
+            <CourtTieRitual
+              key={JSON.stringify([activeConflict, courtVotes])}
+              tied={tally.tied}
+              options={courtOptions.map(option => option.label)}
+              result={gacha ?? undefined}
+              onDraw={() => {
+                setCourtDrawRevealed(false);
+                gachaResult();
+              }}
+              onReveal={() => setCourtDrawRevealed(true)}
+            />
+          ) : (
+            <div className="majority-note">
+              <b>Majority decides normally.</b>
+              <small>Randomness is not used when the vote already resolves the conflict.</small>
+            </div>
+          )}
+          {proposedDecision && (!gacha || courtDrawRevealed) && (
+            <div className="verdict">
+              <span>PROPOSED VERDICT</span>
+              <b>{proposedDecision}</b>
+              <small>{gacha ? 'Random tie-break is still only a proposal.' : 'Computed from member votes.'}</small>
+              <button onClick={confirmCourt}>
+                {courtConfirmed && courtDecision === proposedDecision ? '✓ Added to official timeline' : 'Confirm result'}
+              </button>
+            </div>
+          )}
+        </section>
+      </div>
+    );
+  }
 
-  return <div className={`app-shell tab-${tab}`}>
-    <header className="topbar"><button className="brand-lockup" onClick={() => { setTripWorkspaceOpen(false); setTab('home'); }} aria-label="Go to Home"><img className="brand-companion" src={cocoAsset('expression-normal')} alt="Coco, your travel companion" /><span className="wordmark"><b>COCOCRUNCH</b><small>travel, with room to breathe</small></span></button><div className="topbar-actions"><button className="bell" aria-label="Notifications"><Bell size={19} /><i /></button><img className="me-top-coco" src={cocoSheetNormal} alt="" draggable={false} /></div></header>
-    <main>{tab === 'home' ? renderHome() : tab === 'trips' ? (tripWorkspaceOpen ? renderTripWorkspace() : renderTrips()) : tab === 'explore' ? renderExplore() : tab === 'memories' ? renderGlobalMemories() : renderMe()}</main>
-    <GlobalNav tab={tab} onChange={setTab} onOpenTrips={() => setTripWorkspaceOpen(false)} />
-    {renderCourt()}
-    {renderDrawer()}
-    <GlobalCocoCompanion onAsk={() => { setTripWorkspaceOpen(true); setTripPhase('traveling'); setTab('trips'); setDrawer('assistant'); }} onPray={() => emitExperience({ type: 'open-prayer', source: 'user-reported', uncertainty: 'Personal prayer only; no weather, itinerary, or provider claim.' })} onNext={() => handleJourneyAction(journeyState.nextAction?.target ?? 'trip')} onEveryday={() => { setTripWorkspaceOpen(true); setTripPhase('traveling'); setTab('trips'); setDrawer('gacha'); }} onLucky={() => { setTripWorkspaceOpen(true); setTripPhase('traveling'); setTab('trips'); setDrawer('lucky'); }} />
-  </div>;
+  return (
+    <div className={`app-shell tab-${tab}`}>
+      <header className="topbar">
+        <button className="brand-lockup" onClick={() => { setTripWorkspaceOpen(false); setTab('home'); }} aria-label="Go to Home">
+          <img className="brand-companion" src={cocoAsset('scene-home')} alt="Coco, your travel companion" />
+          <span className="wordmark"><b>COCOCRUNCH</b><small>travel, with room to breathe</small></span>
+        </button>
+        {tab === 'me' && (
+          <div className="topbar-actions">
+            <button className="bell" aria-label="Notifications"><Bell size={19} /><i /></button>
+            <button className="user-profile-avatar-btn" aria-label="My Profile" onClick={() => setDrawer('tingo')}>
+              <img className="me-top-user-avatar" src={userAvatar} alt="User profile" draggable={false} />
+            </button>
+          </div>
+        )}
+      </header>
+      <main>{tab === 'home' ? renderHome() : tab === 'trips' ? (tripWorkspaceOpen ? renderTripWorkspace() : renderTrips()) : tab === 'explore' ? renderExplore() : tab === 'memories' ? renderGlobalMemories() : renderMe()}</main>
+      <GlobalNav tab={tab} onChange={setTab} onOpenTrips={() => setTripWorkspaceOpen(false)} />
+      {renderCourt()}
+      {renderDrawer()}
+      <GlobalCocoCompanion onAsk={() => { setTripWorkspaceOpen(true); setTripPhase('traveling'); setTab('trips'); setDrawer('assistant'); }} onPray={() => emitExperience({ type: 'open-prayer', source: 'user-reported', uncertainty: 'Personal prayer only; no weather, itinerary, or provider claim.' })} onNext={() => handleJourneyAction(journeyState.nextAction?.target ?? 'trip')} onEveryday={() => { setTripWorkspaceOpen(true); setTripPhase('traveling'); setTab('trips'); setDrawer('gacha'); }} onLucky={() => { setTripWorkspaceOpen(true); setTripPhase('traveling'); setTab('trips'); setDrawer('lucky'); }} />
+    </div>
+  );
 }

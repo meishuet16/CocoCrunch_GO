@@ -4,12 +4,18 @@ import AppRescued from './AppRescued';
 import { cocoAsset } from './components/coco/assets';
 
 const completeTingoAnswers = [
-  { questionId: 'morning', optionId: 'mix' },
+  { questionId: 'morning', optionId: 'slow' },
+  { questionId: 'anchor-style', optionId: 'anchor' },
+  { questionId: 'transport', optionId: 'save-route' },
   { questionId: 'tradeoff', optionId: 'save' },
-  { questionId: 'food', optionId: 'pause' },
-  { questionId: 'change', optionId: 'explain' },
-  { questionId: 'company', optionId: 'quiet' },
+  { questionId: 'food', optionId: 'hunt' },
+  { questionId: 'change', optionId: 'adapt' },
+  { questionId: 'comfort-adventure', optionId: 'relaxed' },
+  { questionId: 'company', optionId: 'connect' },
   { questionId: 'sleep', optionId: 'value' },
+  { questionId: 'memory', optionId: 'story' },
+  { questionId: 'planning-role', optionId: 'organize' },
+  { questionId: 'conflict', optionId: 'mediate' },
 ];
 
 function stubPersistedTrip(readyConfirmed: boolean) {

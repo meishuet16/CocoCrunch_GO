@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <clipPath id="avatar-circle">
+      <circle cx="50" cy="50" r="48" />
+    </clipPath>
+    <linearGradient id="avatar-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#bae6fd" />
+      <stop offset="100%" stop-color="#e0f2fe" />
+    </linearGradient>
+    <linearGradient id="hair-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#33241c" />
+      <stop offset="100%" stop-color="#1f1611" />
+    </linearGradient>
+    <linearGradient id="hoodie-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff6b6b" />
+      <stop offset="100%" stop-color="#ee5253" />
+    </linearGradient>
+  </defs>
+
+  <g clip-path="url(#avatar-circle)">
+    <!-- Background circle -->
+    <rect width="100" height="100" fill="url(#avatar-bg)" />
+
+    <!-- Shoulders / Clothes -->
+    <path d="M18,98 C18,74 34,70 50,70 C66,70 82,74 82,98 Z" fill="url(#hoodie-grad)" />
+    <!-- Collar / inner shirt -->
+    <path d="M42,70 L50,80 L58,70 Z" fill="#ffffff" />
+    <path d="M46,70 L50,76 L54,70 Z" fill="#fed7aa" />
+
+    <!-- Neck -->
+    <rect x="44" y="58" width="12" height="14" rx="3" fill="#fcd34d" />
+    <rect x="44" y="58" width="12" height="14" rx="3" fill="#fbcfe8" opacity="0.15" />
+
+    <!-- Back Hair -->
+    <ellipse cx="50" cy="46" rx="26" ry="24" fill="url(#hair-grad)" />
+
+    <!-- Head -->
+    <ellipse cx="50" cy="46" rx="19" ry="20" fill="#fde68a" />
+    <ellipse cx="50" cy="46" rx="19" ry="20" fill="#fca5a5" opacity="0.12" />
+
+    <!-- Ears -->
+    <circle cx="31" cy="46" r="4.5" fill="#fde68a" />
+    <circle cx="69" cy="46" r="4.5" fill="#fde68a" />
+    <circle cx="31" cy="46" r="2.5" fill="#f87171" opacity="0.3" />
+    <circle cx="69" cy="46" r="2.5" fill="#f87171" opacity="0.3" />
+
+    <!-- Eyes (Cute curved happy cartoon eyes) -->
+    <ellipse cx="42" cy="45" rx="2.5" ry="3" fill="#1e293b" />
+    <ellipse cx="58" cy="45" rx="2.5" ry="3" fill="#1e293b" />
+    <!-- Eye highlights -->
+    <circle cx="43" cy="44" r="1" fill="#ffffff" />
+    <circle cx="59" cy="44" r="1" fill="#ffffff" />
+
+    <!-- Eyebrows -->
+    <path d="M38,39 Q42,37 45,39" stroke="#33241c" stroke-width="1.6" stroke-linecap="round" fill="none" />
+    <path d="M55,39 Q58,37 62,39" stroke="#33241c" stroke-width="1.6" stroke-linecap="round" fill="none" />
+
+    <!-- Cute Blush Cheeks -->
+    <circle cx="37" cy="50" r="3.5" fill="#f87171" opacity="0.45" />
+    <circle cx="63" cy="50" r="3.5" fill="#f87171" opacity="0.45" />
+
+    <!-- Sweet Smile -->
+    <path d="M46,51 Q50,56 54,51" stroke="#991b1b" stroke-width="1.8" stroke-linecap="round" fill="none" />
+
+    <!-- Stylish Front Hair Bangs -->
+    <path d="M31,38 C35,28 46,26 50,34 C54,26 65,28 69,38 C66,33 58,32 50,37 C42,32 34,33 31,38 Z" fill="url(#hair-grad)" />
+
+    <!-- Cute Traveler Cap / Beret (Warm Ochre Yellow) -->
+    <ellipse cx="50" cy="27" rx="23" ry="12" fill="#f59e0b" transform="rotate(-6 50 27)" />
+    <circle cx="50" cy="15" r="3" fill="#d97706" />
+    <path d="M28,29 C34,22 66,22 72,29" stroke="#b45309" stroke-width="2" fill="none" opacity="0.4" />
+  </g>
+
+  <!-- Outer circular border -->
+  <circle cx="50" cy="50" r="48" stroke="#ffffff" stroke-width="3" fill="none" />
+</svg>

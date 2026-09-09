@@ -5675,3 +5675,791 @@ main {
 .tab-me .me-sheet-coco {
   z-index: 11;
 }
+
+/* Tingo assessment flow */
+.tingo-overlay {
+  align-items: center;
+  padding: 14px;
+  background: rgba(8, 28, 68, .22);
+}
+.tingo-flow-drawer {
+  width: min(386px, 100%);
+  height: min(696px, calc(100svh - 28px));
+  max-height: none;
+  overflow: hidden;
+  padding: 0;
+  border-radius: 18px;
+  background: #fffefe;
+  color: #073583;
+  box-shadow: 0 16px 44px rgba(5, 31, 78, .18);
+}
+.tingo-flow {
+  position: relative;
+  min-height: 100%;
+  display: grid;
+  align-content: start;
+  padding: 22px 17px 17px;
+  overflow: hidden;
+  background: radial-gradient(circle at 18% 0, rgba(42, 164, 255, .18), transparent 22%), linear-gradient(180deg, #fff 0%, #fffefd 100%);
+}
+.tingo-flow-top {
+  display: grid;
+  grid-template-columns: 30px 1fr 38px;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.tingo-flow-top button,
+.tingo-result-head button {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #075cc2;
+  font-size: 30px;
+  line-height: 1;
+}
+.tingo-flow-top div {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e7edf2;
+}
+.tingo-flow-top i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #0974dd, #25a8f7);
+}
+.tingo-flow-top span {
+  color: #0750a1;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: right;
+}
+.tingo-flow-kicker,
+.tingo-question-kicker,
+.tingo-role-card span {
+  display: block;
+  color: #ff2631;
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: .02em;
+}
+.tingo-flow h2 {
+  margin: 4px 0 14px;
+  color: #073583;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 28px;
+  line-height: .98;
+  letter-spacing: -.055em;
+}
+.tingo-how {
+  padding-bottom: 0;
+}
+.tingo-how::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 118px;
+  background: linear-gradient(0deg, rgba(255,255,255,.12), rgba(255,255,255,.55)), url('https://images.unsplash.com/photo-1533104816931-20fa691ff6ca?w=520&auto=format&fit=crop&q=80') center bottom/cover;
+}
+.tingo-how-list {
+  display: grid;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+.tingo-how-list article {
+  min-height: 72px;
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 11px 13px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.9);
+  box-shadow: inset 0 0 0 1px rgba(7, 53, 131, .08), 0 8px 22px rgba(7, 53, 131, .055);
+}
+.tingo-how-list article > span {
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 16px;
+  background: #e8f4ff;
+  font-size: 30px;
+}
+.tingo-how-list b,
+.tingo-choice-grid b,
+.tingo-role-card b {
+  color: #073583;
+  font-size: 13px;
+  line-height: 1.18;
+}
+.tingo-how-list small {
+  display: block;
+  margin-top: 3px;
+  color: #0750a1;
+  font-size: 11px;
+  line-height: 1.25;
+}
+.tingo-flow-primary {
+  position: relative;
+  z-index: 2;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  align-self: end;
+  width: 100%;
+  margin-top: 14px;
+  border: 0;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #086bd3, #0755ba);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 760;
+}
+.tingo-question-screen h2 {
+  margin-bottom: 14px;
+  font-size: 26px;
+}
+.tingo-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.tingo-choice-grid button {
+  min-height: 305px;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 0 9px 12px;
+  border: 0;
+  border-radius: 13px;
+  background: #fff;
+  color: #073583;
+  text-align: left;
+  box-shadow: 0 8px 22px rgba(7, 53, 131, .1), inset 0 0 0 1px rgba(7, 53, 131, .08);
+}
+.tingo-choice-grid img {
+  width: calc(100% + 18px);
+  height: 126px;
+  margin: 0 -9px 2px;
+  border-radius: 13px 13px 0 0;
+  object-fit: cover;
+}
+.tingo-choice-grid span,
+.tingo-choice-grid small {
+  justify-self: start;
+  border-radius: 999px;
+  background: #dff0ff;
+  color: #0750a1;
+  font-size: 11px;
+  line-height: 1.05;
+}
+.tingo-choice-grid span {
+  padding: 7px 10px;
+}
+.tingo-choice-grid small {
+  padding: 6px 9px;
+}
+.tingo-neither {
+  min-height: 42px;
+  margin-top: 13px;
+  border: 0;
+  border-radius: 999px;
+  background: #eef3f8;
+  color: #073583;
+  font-size: 14px;
+  font-weight: 760;
+}
+.tingo-creating {
+  align-content: stretch;
+}
+.tingo-creating h2 {
+  margin-top: 50px;
+  font-size: 28px;
+}
+.tingo-creating p,
+.tingo-result-quote,
+.tingo-role-card small {
+  margin: 0;
+  color: #0750a1;
+  font-size: 13px;
+  line-height: 1.35;
+}
+.tingo-checks {
+  display: grid;
+  gap: 12px;
+  margin: 24px 0;
+}
+.tingo-checks span {
+  color: #0878df;
+  font-size: 14px;
+}
+.tingo-checks b {
+  margin-left: 8px;
+  color: #073583;
+  font-weight: 650;
+}
+.tingo-creating-photo {
+  align-self: end;
+  min-height: 242px;
+  margin: auto -17px -17px;
+  background: linear-gradient(180deg, rgba(255,255,255,.2), rgba(255,255,255,0)), url('https://images.unsplash.com/photo-1533104816931-20fa691ff6ca?w=680&auto=format&fit=crop&q=80') center/cover;
+}
+.tingo-creating .tingo-flow-primary {
+  position: absolute;
+  left: 17px;
+  right: 17px;
+  bottom: 17px;
+  width: auto;
+}
+.tingo-result-screen {
+  gap: 11px;
+}
+.tingo-result-head {
+  display: grid;
+  grid-template-columns: 34px 1fr 34px;
+  align-items: center;
+  color: #073583;
+}
+.tingo-result-head b {
+  justify-self: center;
+  font-size: 18px;
+}
+.tingo-result-head button:last-child {
+  font-size: 21px;
+}
+.tingo-result-hero {
+  position: relative;
+  min-height: 136px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: linear-gradient(90deg, rgba(255,255,255,.72), rgba(255,255,255,.05)), url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=620&auto=format&fit=crop&q=80') center/cover;
+}
+.tingo-result-hero span {
+  position: absolute;
+  left: 19px;
+  top: 17px;
+  color: #0a58b5;
+  font-family: "Brush Script MT", "Segoe Script", cursive;
+  font-size: 27px;
+  line-height: .86;
+  transform: rotate(-4deg);
+}
+.tingo-result-hero i {
+  position: absolute;
+  right: 14px;
+  top: 18px;
+  width: 65px;
+  height: 65px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #ff313b;
+  border-radius: 50%;
+  color: #ff313b;
+  font-style: normal;
+  font-size: 9px;
+  font-weight: 850;
+  line-height: 1.05;
+  text-align: center;
+  transform: rotate(-12deg);
+}
+.tingo-role-card {
+  display: grid;
+  gap: 5px;
+  padding: 11px 13px;
+  border-radius: 13px;
+  background: #eff7ff;
+}
+.tingo-stat-list {
+  display: grid;
+  gap: 7px;
+}
+.tingo-stat-list div {
+  display: grid;
+  grid-template-columns: 22px 78px 1fr 28px;
+  gap: 7px;
+  align-items: center;
+}
+.tingo-stat-list b {
+  color: #073583;
+  font-size: 11px;
+}
+.tingo-stat-list i {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e8edf1;
+}
+.tingo-stat-list em {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+.tingo-stat-list strong {
+  color: #0750a1;
+  font-size: 11px;
+  text-align: right;
+}
+.tingo-red-primary {
+  margin-top: 6px;
+  background: linear-gradient(135deg, #ff3039, #ff383f);
+}
+
+@media (max-width: 380px) {
+  .tingo-overlay { padding: 0; }
+  .tingo-flow-drawer {
+    width: 100%;
+    height: 100svh;
+    border-radius: 0;
+  }
+  .tingo-flow h2 { font-size: 25px; }
+  .tingo-choice-grid { gap: 9px; }
+  .tingo-choice-grid button { min-height: 292px; }
+  .tingo-choice-grid img { height: 112px; }
+}
+
+/* Refined Tingo identity pass */
+.tab-me .me-tingo-card {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.94), rgba(247,250,255,.84)),
+    linear-gradient(160deg, rgba(5, 44, 105, .07), transparent 58%);
+  box-shadow: 0 14px 34px rgba(2, 25, 71, .1);
+}
+
+.tab-me .me-card-copy h2,
+.tingo-flow h2 {
+  letter-spacing: 0;
+}
+
+.tab-me .me-chip-row small,
+.tingo-choice-grid span,
+.tingo-choice-grid small {
+  background: #eaf2fb;
+  color: #083f87;
+  box-shadow: inset 0 0 0 1px rgba(8, 63, 135, .04);
+}
+
+.me-persona-logo {
+  position: absolute;
+  top: 1px;
+  right: 4px;
+  width: 158px;
+  margin: 0;
+  transform: rotate(-4deg);
+}
+
+.me-persona-logo img {
+  display: block;
+  width: 100%;
+  border-radius: 15px;
+  box-shadow: 0 14px 26px rgba(4, 32, 82, .16);
+}
+
+.me-persona-logo figcaption {
+  position: absolute;
+  left: 11px;
+  right: 11px;
+  bottom: 10px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .88);
+  color: #062f72;
+  font-size: 10px;
+  font-weight: 850;
+  text-align: center;
+}
+
+.me-tingo-card.is-complete .me-photo-assessment {
+  top: auto;
+  right: 12px;
+  bottom: 8px;
+  min-width: 118px;
+  background: linear-gradient(135deg, #e92835, #ff3a45);
+  color: #fff;
+  box-shadow: 0 10px 18px rgba(229, 38, 51, .18);
+}
+
+.me-tingo-card.is-complete .me-photo-assessment svg {
+  background: rgba(255, 255, 255, .18);
+  color: #fff;
+}
+
+.me-tingo-card.is-complete .me-card-copy p {
+  width: min(210px, 100%);
+}
+
+.tingo-flow {
+  background:
+    radial-gradient(circle at 18% 0, rgba(12, 97, 189, .13), transparent 25%),
+    linear-gradient(180deg, #fcfdff 0%, #ffffff 100%);
+}
+
+.tingo-flow-drawer {
+  background: #fbfdff;
+  box-shadow: 0 20px 48px rgba(3, 23, 61, .2);
+}
+
+.tingo-flow-top div {
+  height: 6px;
+  background: #e8edf3;
+}
+
+.tingo-flow-top i {
+  background: linear-gradient(90deg, #0a59bd, #1788df);
+}
+
+.tingo-flow-top button,
+.tingo-result-head button {
+  color: #064eaa;
+}
+
+.tingo-flow-kicker,
+.tingo-question-kicker,
+.tingo-role-card span {
+  color: #f02b35;
+  font-size: 11px;
+  letter-spacing: .06em;
+}
+
+.tingo-how-list article,
+.tingo-choice-grid button,
+.tingo-role-card {
+  border-radius: 14px;
+  background: rgba(255,255,255,.95);
+  box-shadow: 0 10px 22px rgba(4, 36, 88, .075), inset 0 0 0 1px rgba(7, 53, 131, .075);
+}
+
+.tingo-how-list article > span {
+  background: linear-gradient(145deg, #edf5ff, #f8fbff);
+  color: #0a5fbd;
+  font-size: 0;
+  box-shadow: inset 0 0 0 1px rgba(6, 78, 170, .07);
+}
+
+.tingo-how-list article > span svg {
+  stroke-width: 1.9;
+}
+
+.tingo-flow-primary {
+  border-radius: 12px;
+  background: linear-gradient(135deg, #075ebe, #084aa7);
+  box-shadow: 0 12px 22px rgba(6, 73, 163, .18);
+}
+
+.tingo-question-screen h2 {
+  max-width: 330px;
+}
+
+.tingo-choice-grid button {
+  box-shadow: 0 12px 24px rgba(4, 36, 88, .095), inset 0 0 0 1px rgba(7, 53, 131, .07);
+}
+
+.tingo-neither {
+  background: #edf2f7;
+  color: #073583;
+}
+
+.tingo-result-hero {
+  min-height: 144px;
+  display: grid;
+  grid-template-columns: 1fr 128px;
+  align-items: center;
+  padding: 14px 13px 14px 17px;
+  background:
+    linear-gradient(105deg, rgba(255,255,255,.96), rgba(255,255,255,.72) 50%, rgba(235,244,255,.72)),
+    url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=620&auto=format&fit=crop&q=80') center/cover;
+  box-shadow: inset 0 0 0 1px rgba(7, 53, 131, .08);
+}
+
+.tingo-result-hero div {
+  position: relative;
+  z-index: 2;
+}
+
+.tingo-result-hero span {
+  position: static;
+  display: block;
+  color: #073583;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 24px;
+  font-weight: 850;
+  line-height: 1.02;
+  transform: none;
+}
+
+.tingo-result-hero strong {
+  display: inline-flex;
+  margin-top: 8px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #eef5ff;
+  color: #0750a1;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.tingo-result-hero img {
+  position: relative;
+  z-index: 1;
+  width: 122px;
+  justify-self: end;
+  border-radius: 16px;
+  box-shadow: 0 12px 24px rgba(4, 32, 82, .16);
+  transform: rotate(3deg);
+}
+
+.tingo-result-hero i {
+  right: 11px;
+  top: 11px;
+  width: 52px;
+  height: 52px;
+  background: rgba(255,255,255,.76);
+  font-size: 7px;
+}
+
+.tingo-red-primary {
+  background: linear-gradient(135deg, #ed2c37, #ff3540);
+  box-shadow: 0 12px 22px rgba(237, 44, 55, .2);
+}
+
+@media (max-width: 380px) {
+  .me-persona-logo { width: 150px; }
+  .tingo-result-hero { grid-template-columns: 1fr 110px; }
+  .tingo-result-hero img { width: 106px; }
+}
+
+/* Final product layout tightening */
+.tab-me .me-tingo-card.is-complete {
+  min-height: 218px;
+  grid-template-columns: minmax(0, 54%) minmax(0, 46%);
+  padding: 16px 14px 15px 16px;
+}
+
+.tab-me .me-tingo-card.is-complete .me-card-copy {
+  min-width: 0;
+  padding-right: 10px;
+}
+
+.tab-me .me-tingo-card.is-complete .me-card-copy h2 {
+  max-width: 205px;
+  margin-top: 8px;
+  font-size: 28px;
+  line-height: .94;
+}
+
+.tab-me .me-tingo-card.is-complete .me-card-copy p {
+  width: 190px;
+  max-width: 100%;
+  font-size: 10.5px;
+  line-height: 1.22;
+}
+
+.tab-me .me-tingo-card.is-complete .me-chip-row {
+  margin-top: 8px;
+  gap: 5px;
+}
+
+.tab-me .me-tingo-card.is-complete .me-chip-row small {
+  padding: 4px 8px;
+  background: #edf3f9;
+  color: #0a448b;
+}
+
+.tab-me .me-tingo-card.is-complete .me-card-collage {
+  height: 100%;
+  min-height: 187px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 0 0;
+  overflow: visible;
+}
+
+.tab-me .me-tingo-card.is-complete .me-persona-logo {
+  position: relative;
+  top: auto;
+  right: auto;
+  width: min(158px, 100%);
+  transform: rotate(-3deg);
+}
+
+.tab-me .me-tingo-card.is-complete .me-persona-logo img {
+  border-radius: 13px;
+  box-shadow: 0 13px 24px rgba(4, 32, 82, .14);
+}
+
+.tab-me .me-tingo-card.is-complete .me-persona-logo figcaption {
+  display: none;
+}
+
+.tab-me .me-tingo-card.is-complete .me-photo-assessment {
+  position: relative;
+  inset: auto;
+  z-index: 3;
+  height: 40px;
+  min-width: 124px;
+  padding: 0 6px 0 15px;
+  align-self: flex-end;
+  background: linear-gradient(135deg, #ed2b37, #ff3541);
+  box-shadow: 0 12px 24px rgba(237, 43, 55, .2);
+}
+
+.tab-me .me-tingo-card.is-complete .me-photo-assessment::before {
+  width: 30px;
+  background: rgba(255, 255, 255, .8);
+}
+
+.tingo-flow-drawer {
+  overflow: hidden;
+}
+
+.tingo-result-screen {
+  min-height: 100%;
+  max-height: 100%;
+  overflow-y: auto;
+  align-content: start;
+  gap: 9px;
+  padding: 18px 18px 14px;
+  scrollbar-width: none;
+}
+
+.tingo-result-screen::-webkit-scrollbar {
+  display: none;
+}
+
+.tingo-result-head {
+  min-height: 34px;
+}
+
+.tingo-result-head b {
+  font-size: 17px;
+  font-weight: 760;
+}
+
+.tingo-result-hero {
+  min-height: 126px;
+  grid-template-columns: minmax(0, 1fr) 112px;
+  padding: 12px 12px 12px 16px;
+}
+
+.tingo-result-hero span {
+  font-size: 22px;
+  line-height: 1.04;
+}
+
+.tingo-result-hero strong {
+  margin-top: 7px;
+  font-size: 10px;
+}
+
+.tingo-result-hero img {
+  width: 108px;
+  border-radius: 13px;
+}
+
+.tingo-result-hero i {
+  width: 46px;
+  height: 46px;
+  border-width: 1.6px;
+  font-size: 6.5px;
+}
+
+.tingo-result-quote {
+  font-size: 12px;
+  line-height: 1.28;
+}
+
+.tingo-role-card {
+  gap: 4px;
+  padding: 10px 12px;
+  background: #f5f9fd;
+}
+
+.tingo-role-card b {
+  font-size: 13px;
+}
+
+.tingo-role-card small {
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.tingo-stat-list {
+  gap: 5px;
+}
+
+.tingo-stat-list div {
+  grid-template-columns: 20px 76px 1fr 28px;
+  gap: 6px;
+  min-height: 18px;
+}
+
+.tingo-stat-list span {
+  font-size: 14px;
+}
+
+.tingo-stat-list b,
+.tingo-stat-list strong {
+  font-size: 10.5px;
+}
+
+.tingo-stat-list i {
+  height: 6px;
+}
+
+.tingo-result-screen .tingo-flow-primary {
+  flex: 0 0 auto;
+  min-height: 43px;
+  margin-top: 3px;
+}
+
+@media (max-width: 380px) {
+  .tab-me .me-tingo-card.is-complete {
+    min-height: 212px;
+    grid-template-columns: 52% 48%;
+    padding: 14px 11px 13px 13px;
+  }
+
+  .tab-me .me-tingo-card.is-complete .me-card-copy h2 {
+    max-width: 165px;
+    font-size: 24px;
+  }
+
+  .tab-me .me-tingo-card.is-complete .me-card-copy p {
+    width: 158px;
+    font-size: 9.5px;
+  }
+
+  .tab-me .me-tingo-card.is-complete .me-persona-logo {
+    width: 138px;
+  }
+
+  .tab-me .me-tingo-card.is-complete .me-photo-assessment {
+    min-width: 112px;
+    height: 37px;
+    font-size: 9.5px;
+  }
+
+  .tingo-result-screen {
+    padding: 16px 16px 13px;
+  }
+
+  .tingo-result-hero {
+    grid-template-columns: minmax(0, 1fr) 99px;
+  }
+
+  .tingo-result-hero img {
+    width: 96px;
+  }
+}
