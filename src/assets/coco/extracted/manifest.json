@@ -1,0 +1,26 @@
+{
+  "dimensions": [1448, 1086],
+  "assets": [
+    { "outputFile": "src/assets/coco/extracted/coco-scene-home.png", "sourceRegion": [20, 708, 125, 108], "canvas": [125, 108] },
+    { "outputFile": "src/assets/coco/extracted/coco-scene-planning.png", "sourceRegion": [150, 708, 185, 108], "canvas": [185, 108] },
+    { "outputFile": "src/assets/coco/extracted/coco-expression-thinking.png", "sourceRegion": [500, 230, 102, 120], "canvas": [102, 120] },
+    { "outputFile": "src/assets/coco/extracted/coco-expression-proud.png", "sourceRegion": [500, 556, 102, 110], "canvas": [102, 110] },
+    { "outputFile": "src/assets/coco/extracted/coco-scene-traveling.png", "sourceRegion": [888, 708, 152, 108], "canvas": [152, 108] },
+    { "outputFile": "src/assets/coco/extracted/coco-action-map.png", "sourceRegion": [970, 75, 106, 115], "canvas": [106, 115] },
+    { "outputFile": "src/assets/coco/extracted/coco-action-umbrella.png", "sourceRegion": [1208, 390, 114, 124], "canvas": [114, 124] },
+    { "outputFile": "src/assets/coco/extracted/coco-expression-normal.png", "sourceRegion": [500, 75, 102, 115], "canvas": [102, 115] },
+    { "outputFile": "src/assets/coco/extracted/coco-scene-court.png", "sourceRegion": [342, 708, 168, 108], "canvas": [168, 108] },
+    { "outputFile": "src/assets/coco/extracted/coco-scene-gacha.png", "sourceRegion": [535, 708, 145, 108], "canvas": [145, 108] },
+    { "outputFile": "src/assets/coco/extracted/coco-expression-sparkle.png", "sourceRegion": [838, 75, 117, 115], "canvas": [117, 115] },
+    { "outputFile": "src/assets/coco/extracted/coco-scene-packing.png", "sourceRegion": [710, 708, 160, 108], "canvas": [160, 108] },
+    { "outputFile": "src/assets/coco/extracted/coco-expression-happy.png", "sourceRegion": [612, 75, 106, 115], "canvas": [106, 115] },
+    { "outputFile": "src/assets/coco/extracted/coco-scene-memory-trunk.png", "sourceRegion": [1065, 708, 170, 108], "canvas": [170, 108] },
+    { "outputFile": "src/assets/coco/extracted/coco-scene-empty.png", "sourceRegion": [1250, 708, 190, 108], "canvas": [190, 108] },
+    { "outputFile": "src/assets/coco/extracted/coco-action-suggest.png", "sourceRegion": [1326, 230, 114, 120], "canvas": [114, 120] },
+    { "outputFile": "src/assets/coco/extracted/coco-action-photo.png", "sourceRegion": [1088, 75, 112, 115], "canvas": [112, 115] },
+    { "outputFile": "src/assets/coco/extracted/coco-action-journal.png", "sourceRegion": [1326, 75, 114, 115], "canvas": [114, 115] },
+    { "outputFile": "src/assets/coco/extracted/coco-expression-tired.png", "sourceRegion": [500, 392, 102, 122], "canvas": [102, 122] },
+    { "outputFile": "src/assets/coco/extracted/coco-expression-love.png", "sourceRegion": [726, 556, 106, 110], "canvas": [106, 110] },
+    { "outputFile": "src/assets/coco/extracted/coco-action-celebrate.png", "sourceRegion": [1326, 556, 114, 112], "canvas": [114, 112] }
+  ]
+}

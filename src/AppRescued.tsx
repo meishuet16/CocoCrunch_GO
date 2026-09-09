@@ -66,8 +66,6 @@ import { SafetyToolkit } from './components/SafetyToolkit';
 import { CocoAssistantPrompt } from './components/CocoAssistantPrompt';
 import { CommunityPublishPanel } from './components/CommunityPublishPanel';
 import { PhotoJournalCapture } from './components/PhotoJournalCapture';
-import cocoSheetHappy from './assets/coco/source/coco-sheet-happy.png';
-import cocoSheetNormal from './assets/coco/source/coco-sheet-normal.png';
 import foodieHunter from './assets/coco/personas/foodie_hunter.png';
 import masterPlanner from './assets/coco/personas/master_planner.png';
 import transitNavigator from './assets/coco/personas/transit_navigator.png';

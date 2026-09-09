@@ -20,30 +20,31 @@ export const cocoContextPose = {
 } as const satisfies Record<string, CocoPose>;
 export type CocoContext = keyof typeof cocoContextPose;
 
-import cocoSheetNormal from '../../assets/coco/source/coco-sheet-normal.png';
-import cocoSheetHappy from '../../assets/coco/source/coco-sheet-happy.png';
-import { extractAndSaveAllCocoSprites, extractedCocoCache } from './autoExtractCoco';
-
 const images = import.meta.glob<string>('../../assets/coco/extracted/coco-*.png', { eager: true, query: '?url', import: 'default' });
 
-if (typeof window !== 'undefined') {
-  void extractAndSaveAllCocoSprites('/coco-master-sheet.jpg');
-}
-
 export function cocoAsset(pose: CocoPose): string {
-  if (extractedCocoCache[pose]) return extractedCocoCache[pose];
   const image = images[`../../assets/coco/extracted/coco-${pose}.png`];
   if (image) return image;
-  if (pose === 'scene-home' || pose === 'expression-normal') {
-    if (extractedCocoCache['scene-home']) return extractedCocoCache['scene-home'];
-    const homeDisk = images['../../assets/coco/extracted/coco-scene-home.png'];
-    if (homeDisk) return homeDisk;
+
+  if (pose === 'scene-home') {
+    const home = images['../../assets/coco/extracted/coco-scene-home.png'] || images['../../assets/coco/extracted/coco-screne-home.png'];
+    if (home) return home;
   }
+
+  if (pose.startsWith('move-')) {
+    const parts = pose.split('-');
+    const direction = parts[1] ?? 'down';
+    const moveFallback = images[`../../assets/coco/extracted/coco-move-${direction}-idle.png`] || images['../../assets/coco/extracted/coco-move-down-idle.png'];
+    if (moveFallback) return moveFallback;
+  }
+
   if (pose.includes('happy') || pose.includes('celebrate') || pose.includes('sparkle')) {
-    return cocoSheetHappy;
+    return images['../../assets/coco/extracted/coco-expression-happy.png'] || images['../../assets/coco/extracted/coco-expression-normal.png'] || '';
   }
-  return cocoSheetNormal;
+
+  return images['../../assets/coco/extracted/coco-expression-normal.png'] || '';
 }
+
 
 export function movementFrame(direction: CocoMovementDirection, tick: number, reducedMotion: boolean): CocoPose {
   const frame = reducedMotion ? 'idle' : movementFrames[((Math.floor(tick) % 4) + 4) % 4];

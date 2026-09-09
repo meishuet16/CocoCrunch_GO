@@ -1,7 +1,8 @@
 .global-coco { position:fixed; z-index:120; transform:translateY(-50%); display:grid; gap:8px; align-items:center; padding:6px; }
 .global-coco--left { left:max(8px, env(safe-area-inset-left)); }.global-coco--right { right:max(8px, env(safe-area-inset-right)); }
 .global-coco__button { width:74px; height:74px; padding:0; border:1px solid #a65f40; border-radius:50%; background:#fff8e7; box-shadow:0 8px 24px #4b342238; cursor:grab; }
-.global-coco__button:active { cursor:grabbing; }.global-coco__button img { width:64px; height:64px; }
+.global-coco__button:active { cursor:grabbing; }.global-coco__button img { width:64px; height:64px; mix-blend-mode:multiply; }
+
 .global-coco__menu { display:grid; gap:6px; width:156px; padding:10px; border:1px solid #d4b990; border-radius:16px; background:#fff8e7; box-shadow:0 12px 30px #4b342238; }
 .global-coco__menu--left { margin-left:4px; }.global-coco__menu--right { margin-right:4px; }
 .global-coco__menu button { min-height:40px; padding:8px 10px; border:1px solid #b86b45; border-radius:10px; background:#fffdf5; color:#752d32; text-align:left; font-weight:800; }
