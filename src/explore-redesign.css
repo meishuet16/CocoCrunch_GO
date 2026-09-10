@@ -378,21 +378,14 @@
   flex-direction: column;
   gap: 3px;
   padding-right: 4px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(147, 5, 0, 0.3) transparent;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
 
 .country-scroll-list::-webkit-scrollbar {
-  width: 5px;
-}
-
-.country-scroll-list::-webkit-scrollbar-thumb {
-  background: rgba(147, 5, 0, 0.25);
-  border-radius: 4px;
-}
-
-.country-scroll-list::-webkit-scrollbar-thumb:hover {
-  background: var(--sangria);
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 .country-option-item {

@@ -12,7 +12,8 @@
 .memory-trunk__hinges { position: absolute; top: -12px; left: 16%; right: 16%; height: 12px; border-inline: 27px solid #d3ae65; border-radius: 3px; z-index: 5; box-shadow: 0 2px 2px #422d24; }
 .memory-trunk__handle { position: absolute; bottom: -29px; left: calc(50% - 40px); width: 80px; height: 24px; border: 7px solid #533a2c; border-top: 5px solid #d3ae65; border-radius: 4px 4px 12px 12px; }
 .memory-trunk__contents { position: relative; z-index: 2; padding: 1.4rem; min-height: 17rem; }
-.memory-trunk__papers { display: flex; flex-direction: column; padding: .5rem .5rem 1rem; max-height: 27rem; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; }
+.memory-trunk__papers { display: flex; flex-direction: column; padding: .5rem .5rem 1rem; max-height: 27rem; overflow-y: auto; overflow-x: hidden; scrollbar-width: none !important; -ms-overflow-style: none !important; }
+.memory-trunk__papers::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
 .memory-trunk button { min-width: 44px; min-height: 44px; cursor: pointer; color: var(--trunk-ink); font: inherit; }
 .memory-trunk button:disabled { cursor: default; }
 .memory-trunk button:focus-visible, .memory-trunk__reading:focus-visible { outline: 3px solid #18564f; outline-offset: 5px; }

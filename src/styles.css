@@ -15,6 +15,20 @@
 
 * {
   box-sizing: border-box;
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+*::-webkit-scrollbar,
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+div::-webkit-scrollbar,
+section::-webkit-scrollbar,
+article::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
 }
 
 html,
@@ -24,6 +38,8 @@ body,
   min-width: 320px;
   min-height: 100%;
   background: var(--cream);
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 body {
@@ -2203,12 +2219,21 @@ main {
   width: min(460px, 100%);
   max-height: 82svh;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
   padding: 25px 18px calc(26px + env(safe-area-inset-bottom));
   border-radius: 26px 26px 0 0;
   background: var(--cream);
   position: relative;
   box-shadow: 0 -18px 50px rgba(39, 24, 20, .18);
   animation: drawerUp .28s cubic-bezier(.2, .8, .2, 1);
+}
+
+.drawer::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 @keyframes drawerUp {
