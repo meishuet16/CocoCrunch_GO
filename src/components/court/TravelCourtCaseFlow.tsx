@@ -2635,7 +2635,15 @@ export function TravelCourtCaseFlow({
             <button
               type="button"
               className="court-sticky-cta-btn"
-              style={{ margin: '8px 0 6px', width: '100%' }}
+              style={{
+                width: '100%',
+                height: 50,
+                minHeight: 50,
+                maxHeight: 50,
+                borderRadius: 16,
+                flexShrink: 0,
+                margin: '10px 0 6px',
+              }}
               onClick={() => {
                 playWhoosh();
                 setCurrentStep('summary');
