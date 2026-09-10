@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   ChevronLeft, Check, X, Clock, Heart, Send, Plane, Home,
-  MapPin, Utensils, ArrowRight, Plus, MessageCircle
+  MapPin, Utensils, ArrowRight, Plus, MessageCircle, Edit3
 } from 'lucide-react';
 import {
   DuolingoJudge, DuolingoJudgeBench,
@@ -27,6 +27,7 @@ export type CourtStep =
   | 'verdict-pass'// Screen 5: Case 1 of 3 - Approved Verdict
   | 'verdict-fail'// Screen 6: Case 2 of 3 - Rejected Verdict
   | 'discussion'  // Screen 7: Discussion / Votes Tab
+  | 'showdown'    // Screen 7.5: 2 vs 2 Tiebreaker Duel & Betting
   | 'summary';    // Screen 8: Final Trip Summary (Jeju Added!)
 
 const JURORS: JurorVoteState[] = [
@@ -302,6 +303,52 @@ export function TravelCourtCaseFlow({
     }
   }, [currentStep, caseIndex]);
 
+  // Showdown Duel State (Case 2: 2 vs 2 Tiebreaker)
+  const [showdownUserStake, setShowdownUserStake] = useState(40);
+  const [showdownStakesLocked, setShowdownStakesLocked] = useState(false);
+  const [showdownDebateChat, setShowdownDebateChat] = useState('');
+  const [showdownWinner, setShowdownWinner] = useState<'go' | 'not-now' | null>(null);
+  const [debateBubbles, setDebateBubbles] = useState<Array<{
+    id: string;
+    sender: string;
+    team: 'left' | 'right';
+    text: string;
+  }>>([
+    { id: 'b1', sender: 'Alex', team: 'left', text: 'Fresh seafood hotpot is unbeatable!' },
+    { id: 'b2', sender: 'Ken', team: 'right', text: "Let's check other spots instead!" },
+  ]);
+  const [activeLeftBubble, setActiveLeftBubble] = useState<{ id: string; sender: string; text: string } | null>(null);
+  const [activeRightBubble, setActiveRightBubble] = useState<{ id: string; sender: string; text: string } | null>(null);
+  const [showPointBubbles, setShowPointBubbles] = useState(false);
+
+  // Auto-dismiss initial debate bubbles after 4.2s on entering showdown
+  useEffect(() => {
+    if (currentStep === 'showdown') {
+      const initId = `init-${Date.now()}`;
+      setActiveLeftBubble({
+        id: `left-${initId}`,
+        sender: 'Alex',
+        text: 'Fresh seafood hotpot is unbeatable!',
+      });
+      setActiveRightBubble({
+        id: `right-${initId}`,
+        sender: 'Ken',
+        text: "Let's check other spots instead!",
+      });
+
+      const timer = window.setTimeout(() => {
+        setActiveLeftBubble(null);
+        setActiveRightBubble(null);
+      }, 4200);
+
+      return () => window.clearTimeout(timer);
+    } else {
+      setActiveLeftBubble(null);
+      setActiveRightBubble(null);
+      setShowPointBubbles(false);
+    }
+  }, [currentStep]);
+
   // Discussion comments state
   const [segmentedTab, setSegmentedTab] = useState<'discussion' | 'votes'>('discussion');
   const [comments, setComments] = useState(CASE_DEFAULT_COMMENTS[1]);
@@ -439,7 +486,12 @@ export function TravelCourtCaseFlow({
         triggerHaptic('pop');
         setLiveJurors(prev =>
           prev.map(j =>
-            j.id === 'ken' ? { ...j, vote: userEffectiveVote === 'not-now' ? 'go' : 'not-now' } : j
+            j.id === 'ken' ? {
+              ...j,
+              vote: (caseIndex === 2 && userEffectiveVote === 'not-now')
+                ? 'not-now'
+                : (userEffectiveVote === 'not-now' ? 'go' : 'not-now'),
+            } : j
           )
         );
       }, 3600);
@@ -449,9 +501,13 @@ export function TravelCourtCaseFlow({
         setTimerCount(c => (c > 0 ? c - 1 : 0));
       }, 1000);
 
-      // Auto-advance to verdict after all votes are in
+      // Auto-advance to verdict or showdown after all votes are in
       const finishTimer = window.setTimeout(() => {
-        handleGoToVerdict('pass');
+        if (caseIndex === 2 && userEffectiveVote === 'not-now') {
+          handleGoToShowdown();
+        } else {
+          handleGoToVerdict('pass');
+        }
       }, 5400);
 
       return () => {
@@ -462,6 +518,144 @@ export function TravelCourtCaseFlow({
       };
     }
   }, [currentStep, userVote]);
+
+  // Trigger 2 vs 2 Tie Showdown on Case 2
+  const handleGoToShowdown = () => {
+    setLiveJurors([
+      { id: 'alex', name: 'Alex', vote: 'go', variant: 'green', avatarColor: '#10b981', hairColor: '#065f46' },
+      { id: 'mavis', name: 'Mavis', vote: 'go', variant: 'purple', avatarColor: '#a855f7', hairColor: '#f59e0b' },
+      { id: 'ken', name: 'Ken', vote: 'not-now', variant: 'blue', avatarColor: '#f59e0b', hairColor: '#1e3a8a' },
+      { id: 'june', name: 'June (You)', vote: 'not-now', variant: 'coral', avatarColor: '#ef4444', hairColor: '#db2777' },
+    ]);
+    setShowdownStakesLocked(false);
+    setShowdownWinner(null);
+    setShowdownUserStake(60);
+    setShowdownDebateChat('');
+    setDebateBubbles([
+      { id: 'b1', sender: 'Alex', team: 'left', text: 'Fresh seafood hotpot is unbeatable! 🍲' },
+      { id: 'b2', sender: 'Ken', team: 'right', text: 'Too raw and pricey! Save money! 💸' },
+      {
+        id: 'b3',
+        sender: 'June (You)',
+        team: 'right',
+        text: userReason.trim() ? userReason.trim() : 'Let’s check other spots instead! 🙅‍♀️',
+      },
+    ]);
+    playGavelStrike();
+    triggerHaptic('gavel');
+    triggerScreenShake('court-shake-target');
+    setCurrentStep('showdown');
+  };
+
+  const handleTriggerLeftBubble = (customText?: string) => {
+    playPop();
+    triggerHaptic('tap');
+    const bubble = {
+      id: `left-${Date.now()}`,
+      sender: 'Alex',
+      text: customText || 'Fresh seafood hotpot is unbeatable!',
+    };
+    setActiveLeftBubble(bubble);
+    window.setTimeout(() => {
+      setActiveLeftBubble(prev => (prev?.id === bubble.id ? null : prev));
+    }, 4200);
+  };
+
+  const handleTriggerRightBubble = (customText?: string) => {
+    playPop();
+    triggerHaptic('tap');
+    const bubble = {
+      id: `right-${Date.now()}`,
+      sender: 'Ken',
+      text: customText || "Let's check other spots instead!",
+    };
+    setActiveRightBubble(bubble);
+    window.setTimeout(() => {
+      setActiveRightBubble(prev => (prev?.id === bubble.id ? null : prev));
+    }, 4200);
+  };
+
+  const handleSendShowdownChat = () => {
+    const text = showdownDebateChat.trim();
+    if (!text) return;
+    playPop();
+    triggerHaptic('tap');
+    const newBubble = {
+      id: `chat-${Date.now()}`,
+      sender: 'June (You)',
+      team: 'right' as const,
+      text,
+    };
+    setDebateBubbles(prev => [...prev.slice(-3), newBubble]);
+    setActiveRightBubble({
+      id: newBubble.id,
+      sender: newBubble.sender,
+      text: newBubble.text,
+    });
+    setShowdownDebateChat('');
+
+    // Auto-dismiss June's bubble after 4.2s
+    window.setTimeout(() => {
+      setActiveRightBubble(prev => (prev?.id === newBubble.id ? null : prev));
+    }, 4200);
+
+    // Opponent team rebuttal after 850ms
+    const rebuttals = [
+      'We came all the way to Jeju for fresh seafood!',
+      'Abalone hotpot is legendary here in Jeju!',
+      'The ocean table view is already booked!',
+      'Give it a try, it will be an unforgettable meal!',
+    ];
+    window.setTimeout(() => {
+      playPop();
+      triggerHaptic('pop');
+      const oppBubble = {
+        id: `opp-${Date.now()}`,
+        sender: Math.random() > 0.5 ? 'Alex' : 'Mavis',
+        team: 'left' as const,
+        text: rebuttals[Math.floor(Math.random() * rebuttals.length)],
+      };
+      setDebateBubbles(prev => [...prev.slice(-3), oppBubble]);
+      setActiveLeftBubble({
+        id: oppBubble.id,
+        sender: oppBubble.sender,
+        text: oppBubble.text,
+      });
+
+      // Auto-dismiss opponent bubble after 4.2s
+      window.setTimeout(() => {
+        setActiveLeftBubble(prev => (prev?.id === oppBubble.id ? null : prev));
+      }, 4200);
+    }, 850);
+  };
+
+  const handleConfirmShowdownStakes = () => {
+    playGavelStrike();
+    triggerHaptic('gavel');
+    triggerScreenShake('court-shake-target');
+    setShowdownStakesLocked(true);
+    setShowPointBubbles(true);
+
+    // Point bubbles stay visible for 4.2s then fade out smoothly
+    window.setTimeout(() => {
+      setShowPointBubbles(false);
+    }, 4200);
+
+    const teamGoPoints = 85;
+    const teamNotNowPoints = 45 + showdownUserStake;
+
+    window.setTimeout(() => {
+      playVictoryFanfare();
+      triggerHaptic('victory');
+      if (teamNotNowPoints >= teamGoPoints) {
+        setShowdownWinner('not-now');
+        setCaseOutcomes(prev => ({ ...prev, 2: false }));
+      } else {
+        setShowdownWinner('go');
+        setCaseOutcomes(prev => ({ ...prev, 2: true }));
+      }
+    }, 400);
+  };
 
   // Handle verdict trigger with Gavel strike sound, haptic, screen shake
   const handleGoToVerdict = (outcome: 'pass' | 'fail') => {
@@ -2338,7 +2532,14 @@ export function TravelCourtCaseFlow({
                     cursor: 'pointer',
                     padding: '6px 12px',
                   }}
-                  onClick={() => handleGoToVerdict('pass')}
+                  onClick={() => {
+                    const userEffectiveVote = userVote === 'not-now' ? 'not-now' : 'go';
+                    if (caseIndex === 2 && userEffectiveVote === 'not-now') {
+                      handleGoToShowdown();
+                    } else {
+                      handleGoToVerdict('pass');
+                    }
+                  }}
                 >
                   Skip to verdict →
                 </button>
@@ -2940,6 +3141,499 @@ export function TravelCourtCaseFlow({
             </button>
             <MobileHomeIndicator />
           </div>
+        </div>
+      )}
+
+      {/* ====================================================================
+          SCREEN 7.5: CASE 2 TIE SHOWDOWN (2 vs 2 COURT DUEL & BETTING)
+          ==================================================================== */}
+      {currentStep === 'showdown' && (
+        <div className="court-case-chamber">
+          <MobileStatusBar />
+          <header className="court-navbar">
+            <button className="court-nav-back-btn" onClick={() => setCurrentStep('proposal')} aria-label="Back">
+              <ChevronLeft size={24} />
+            </button>
+            <div className="court-nav-title-group" style={{ alignItems: 'center' }}>
+              <span style={{ fontSize: '12px', fontWeight: 700, color: '#dc2626' }}>
+                Case 2 of 3 • 2 vs 2 Showdown
+              </span>
+              <div style={{ display: 'flex', gap: 4, width: 80, marginTop: 4 }}>
+                <div style={{ height: 4, flex: 1, background: '#1877f2', borderRadius: 99 }} />
+                <div style={{ height: 4, flex: 1, background: '#ef4444', borderRadius: 99 }} />
+                <div style={{ height: 4, flex: 1, background: '#e2e8f0', borderRadius: 99 }} />
+              </div>
+            </div>
+            <div style={{ width: 38 }} />
+          </header>
+
+          <div className="court-showdown-screen">
+            {/* Header info card */}
+            <div className="court-showdown-header-card">
+              <img
+                src={activeCase.imageUrl}
+                alt="Haenyeo Seafood"
+                className="court-showdown-case-thumb"
+              />
+              <div className="court-showdown-case-info">
+                <h3 className="court-showdown-case-title">
+                  Court Deadlock: 2 vs 2 Tie!
+                </h3>
+                <p className="court-showdown-case-sub">
+                  Eat at Haenyeo Seafood? Stake points to break the tie.
+                </p>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 3, flexShrink: 0 }}>
+                <div className="court-showdown-sword-badge">
+                  <span style={{ fontSize: '18px', lineHeight: 1 }}>⚔️</span>
+                  <span style={{ fontSize: '9px', fontWeight: 900, color: '#ef4444', letterSpacing: '0.4px', marginTop: 2 }}>
+                    SHOWDOWN
+                  </span>
+                </div>
+                <span style={{
+                  fontSize: '9.5px',
+                  fontWeight: 800,
+                  color: '#dc2626',
+                  background: '#fef2f2',
+                  padding: '1px 6px',
+                  borderRadius: 6,
+                  border: '1px solid #fee2e2',
+                }}>
+                  1 pt = RM 0.50
+                </span>
+              </div>
+            </div>
+
+            {/* Courtroom Stage Box matching user reference image */}
+            <div className="court-showdown-stage-box">
+              <img
+                src="/characters/court_stage_bg.jpg?v=vertical_no_chairs_v6"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = '/court_stage_bg.jpg?v=vertical_no_chairs_v6';
+                }}
+                alt="Courtroom Duel Stage"
+                className="court-showdown-stage-bg"
+                draggable={false}
+              />
+
+              {/* Team Banners (No points revealed before confirm) */}
+              <div className="court-showdown-pill-left">
+                <Send size={11} style={{ transform: 'rotate(-30deg)' }} /> Team Go
+              </div>
+              <div className="court-showdown-pill-right">
+                <span style={{ fontSize: '11px', fontWeight: 900 }}>✕</span> Team Not Now
+              </div>
+
+              {/* Left Desk Team (Team Go: Alex & Mavis) */}
+              {/* Alex */}
+              <div
+                style={{
+                  position: 'absolute',
+                  left: '18%',
+                  top: 135,
+                  transform: 'translateX(-50%)',
+                  zIndex: 14,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  cursor: 'pointer',
+                }}
+                onClick={() => handleTriggerLeftBubble('Fresh seafood hotpot is unbeatable!')}
+                title="Click Alex to speak"
+              >
+                {showPointBubbles && (
+                  <div className="court-point-bubble bubble-green">+45</div>
+                )}
+                <div style={{ position: 'relative' }}>
+                  <TravelCourtCharacter
+                    variant="boy_green"
+                    vote="yes"
+                    state="action"
+                    size={52}
+                    animated
+                  />
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: -2,
+                      right: -2,
+                      width: 16,
+                      height: 16,
+                      borderRadius: '50%',
+                      background: '#10b981',
+                      color: '#ffffff',
+                      fontSize: '10px',
+                      fontWeight: 900,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '1.5px solid #ffffff',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                    }}
+                  >
+                    ✓
+                  </div>
+                </div>
+                <span className="tc-character-label" style={{ marginTop: -2, fontSize: '9.5px', padding: '1px 7px' }}>
+                  Alex
+                </span>
+              </div>
+
+              {/* Mavis */}
+              <div
+                style={{
+                  position: 'absolute',
+                  left: '34%',
+                  top: 155,
+                  transform: 'translateX(-50%)',
+                  zIndex: 16,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  cursor: 'pointer',
+                }}
+                onClick={() => handleTriggerLeftBubble('Abalone hotpot is legendary here in Jeju!')}
+                title="Click Mavis to speak"
+              >
+                {showPointBubbles && (
+                  <div className="court-point-bubble bubble-green">+40</div>
+                )}
+                <div style={{ position: 'relative' }}>
+                  <TravelCourtCharacter
+                    variant="girl_blonde"
+                    vote="yes"
+                    state="support"
+                    size={54}
+                    animated
+                  />
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: -2,
+                      right: -2,
+                      width: 16,
+                      height: 16,
+                      borderRadius: '50%',
+                      background: '#10b981',
+                      color: '#ffffff',
+                      fontSize: '10px',
+                      fontWeight: 900,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '1.5px solid #ffffff',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                    }}
+                  >
+                    ✓
+                  </div>
+                </div>
+                <span className="tc-character-label" style={{ marginTop: -2, fontSize: '9.5px', padding: '1px 7px' }}>
+                  Mavis
+                </span>
+              </div>
+
+              {/* Right Desk Team (Team Not Now: Ken & June) */}
+              {/* Ken */}
+              <div
+                style={{
+                  position: 'absolute',
+                  left: '66%',
+                  top: 155,
+                  transform: 'translateX(-50%)',
+                  zIndex: 14,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  cursor: 'pointer',
+                }}
+                onClick={() => handleTriggerRightBubble("Let's check other spots instead!")}
+                title="Click Ken to speak"
+              >
+                {showPointBubbles && (
+                  <div className="court-point-bubble bubble-red">+45</div>
+                )}
+                <div style={{ position: 'relative' }}>
+                  <TravelCourtCharacter
+                    variant="boy_yellow"
+                    vote="no"
+                    state="action"
+                    size={52}
+                    animated
+                  />
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: -2,
+                      right: -2,
+                      width: 16,
+                      height: 16,
+                      borderRadius: '50%',
+                      background: '#ef4444',
+                      color: '#ffffff',
+                      fontSize: '10px',
+                      fontWeight: 900,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '1.5px solid #ffffff',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                    }}
+                  >
+                    ✕
+                  </div>
+                </div>
+                <span className="tc-character-label" style={{ marginTop: -2, fontSize: '9.5px', padding: '1px 7px' }}>
+                  Ken
+                </span>
+              </div>
+
+              {/* June (You) */}
+              <div
+                style={{
+                  position: 'absolute',
+                  left: '82%',
+                  top: 135,
+                  transform: 'translateX(-50%)',
+                  zIndex: 16,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  cursor: 'pointer',
+                }}
+                onClick={() => handleTriggerRightBubble(showdownDebateChat.trim() || 'Too raw and pricey! Save money!')}
+                title="Click June to speak"
+              >
+                {showPointBubbles && (
+                  <div className="court-point-bubble bubble-red">+{showdownUserStake}</div>
+                )}
+                <div style={{ position: 'relative' }}>
+                  <TravelCourtCharacter
+                    variant="girl_redhat"
+                    vote="no"
+                    state={showdownStakesLocked ? 'celebrate' : 'thinking'}
+                    size={54}
+                    animated
+                  />
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: -2,
+                      right: -2,
+                      width: 16,
+                      height: 16,
+                      borderRadius: '50%',
+                      background: '#ef4444',
+                      color: '#ffffff',
+                      fontSize: '10px',
+                      fontWeight: 900,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '1.5px solid #ffffff',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                    }}
+                  >
+                    ✕
+                  </div>
+                </div>
+                <span className="tc-character-label" style={{ marginTop: -2, fontSize: '9.5px', padding: '1px 7px', background: '#fee2e2', color: '#991b1b', border: '1px solid #fca5a5' }}>
+                  June (You)
+                </span>
+              </div>
+
+              {/* Debate Speech Bubbles matching reference image (auto-dismiss after ~4.2s) */}
+              {activeLeftBubble && (
+                <div key={activeLeftBubble.id} className="court-debate-bubble-left">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 4 }}>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#0f172a', lineHeight: 1.35 }}>
+                      {activeLeftBubble.text}
+                    </span>
+                    <span style={{ color: '#0d9488', fontSize: '11px', flexShrink: 0, marginTop: -2 }}>🪄</span>
+                  </div>
+                </div>
+              )}
+
+              {activeRightBubble && (
+                <div key={activeRightBubble.id} className="court-debate-bubble-right">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 4 }}>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#0f172a', lineHeight: 1.35 }}>
+                      {activeRightBubble.text}
+                    </span>
+                    <span style={{ color: '#ef4444', fontSize: '11px', flexShrink: 0, marginTop: -2 }}>🪄</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Chat Input for typing debate arguments */}
+            <div className="court-showdown-chat-card">
+              <Edit3 size={17} color="#94a3b8" style={{ flexShrink: 0 }} />
+              <input
+                type="text"
+                placeholder="Type your argument for Team Not Now..."
+                value={showdownDebateChat}
+                onChange={(e) => setShowdownDebateChat(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleSendShowdownChat();
+                }}
+                className="court-showdown-chat-input"
+              />
+              <button
+                type="button"
+                onClick={handleSendShowdownChat}
+                className="court-showdown-send-btn"
+                aria-label="Send argument"
+              >
+                <Send size={15} />
+              </button>
+            </div>
+
+            {/* Stake card with slider */}
+            <div className="court-showdown-stake-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a' }}>
+                    Your Stake
+                  </span>
+                  <span style={{
+                    fontSize: '9.5px',
+                    fontWeight: 700,
+                    color: '#64748b',
+                    background: '#f1f5f9',
+                    padding: '2px 6px',
+                    borderRadius: 6,
+                    border: '1px solid #e2e8f0',
+                  }}>
+                    1 pt = RM 0.50
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <span className="court-stake-val-pill">
+                    +{showdownUserStake} pts
+                  </span>
+                  <span style={{ fontSize: '12px', fontWeight: 800, color: '#ef4444' }}>
+                    ≈ RM {(showdownUserStake * 0.5).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+              <input
+                type="range"
+                min={10}
+                max={100}
+                step={5}
+                value={showdownUserStake}
+                disabled={showdownStakesLocked}
+                onChange={(e) => setShowdownUserStake(Number(e.target.value))}
+                className="court-stake-slider"
+              />
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10.5px', color: '#94a3b8', fontWeight: 600 }}>
+                <span>10 pts (RM 5)</span>
+                <span>50 pts (RM 25)</span>
+                <span>100 pts (RM 50)</span>
+              </div>
+              <div style={{
+                fontSize: '10.5px',
+                color: '#64748b',
+                background: '#f8fafc',
+                borderRadius: 10,
+                padding: '5px 9px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                border: '1px dashed #e2e8f0',
+                marginTop: 2,
+              }}>
+                <span>💰 Trip Fund (Losers pay)</span>
+                <span style={{ fontWeight: 800, color: '#0f172a' }}>
+                  RM {(showdownUserStake * 0.5).toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            {/* Confirm button (No emoji!) or Result announcement */}
+            {!showdownStakesLocked ? (
+              <button
+                type="button"
+                className="court-showdown-confirm-btn"
+                onClick={handleConfirmShowdownStakes}
+              >
+                Confirm Stakes & Lock Bet (RM {(showdownUserStake * 0.5).toFixed(2)})
+              </button>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }}>
+                {/* Score balance revealed upon confirmation */}
+                <div style={{
+                  background: '#ffffff',
+                  borderRadius: 16,
+                  border: '1px solid #e2e8f0',
+                  padding: '10px 14px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 6,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11.5px', fontWeight: 800 }}>
+                    <span style={{ color: '#059669' }}>Team Go: 85 pts (RM 42.50)</span>
+                    <span style={{ color: '#94a3b8', fontSize: '10px' }}>VS</span>
+                    <span style={{ color: '#dc2626' }}>Team Not Now: {45 + showdownUserStake} pts (RM {((45 + showdownUserStake) * 0.5).toFixed(2)})</span>
+                  </div>
+                  <div className="court-showdown-score-track">
+                    <div
+                      className="court-showdown-score-green"
+                      style={{
+                        width: `${(85 / (85 + 45 + showdownUserStake)) * 100}%`,
+                      }}
+                    />
+                    <div
+                      className="court-showdown-score-red"
+                      style={{
+                        width: `${((45 + showdownUserStake) / (85 + 45 + showdownUserStake)) * 100}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    padding: '10px 14px',
+                    borderRadius: 14,
+                    background: showdownWinner === 'not-now' ? '#fef2f2' : '#ecfdf5',
+                    border: `1.5px solid ${showdownWinner === 'not-now' ? '#fecaca' : '#a7f3d0'}`,
+                    color: showdownWinner === 'not-now' ? '#991b1b' : '#065f46',
+                    fontSize: '12px',
+                    fontWeight: 800,
+                    textAlign: 'center',
+                    lineHeight: 1.4,
+                  }}
+                >
+                  {showdownWinner === 'not-now'
+                    ? `🏆 Team Not Now Wins! Seafood skipped. Team Go pays RM 42.50 to the trip fund.`
+                    : `🏆 Team Go Wins! Seafood approved. Team Not Now pays RM ${((45 + showdownUserStake) * 0.5).toFixed(2)} to the trip fund.`}
+                </div>
+                <button
+                  type="button"
+                  className="court-showdown-confirm-btn"
+                  style={{
+                    background: '#1877f2',
+                    boxShadow: '0 4px 14px rgba(24, 119, 242, 0.35)',
+                  }}
+                  onClick={() => {
+                    playWhoosh();
+                    triggerHaptic('tap');
+                    setCaseIndex(3);
+                    setUserVote(null);
+                    setUserReason('');
+                    setComments(CASE_DEFAULT_COMMENTS[3] || CASE_DEFAULT_COMMENTS[1]);
+                    setCurrentStep('proposal');
+                  }}
+                >
+                  Proceed to Next Case → (Case 3 of 3)
+                </button>
+              </div>
+            )}
+          </div>
+          <MobileHomeIndicator />
         </div>
       )}
 
