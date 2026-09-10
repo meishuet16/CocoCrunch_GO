@@ -2383,6 +2383,13 @@ body:has(.court-modal-overlay) {
   border: 1px solid #e2e8f0;
   border-radius: 14px;
   padding: 12px 16px;
+  transition: all 0.2s ease;
+}
+
+.court-checklist-item.is-planned {
+  background: #ffffff;
+  border-color: #a7f3d0;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08);
 }
 
 .court-check-label {
@@ -2398,6 +2405,23 @@ body:has(.court-modal-overlay) {
   font-size: 12px;
   color: #94a3b8;
   font-weight: 600;
+}
+
+.court-check-status.planned {
+  color: #059669;
+  font-weight: 750;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  max-width: 170px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ==========================================================================

@@ -812,52 +812,7 @@ export function DuolingoAirplaneSquad({ size = 260 }: { size?: number }) {
         </div>
       </div>
 
-      {/* Floating Boarding Passes / Tickets */}
-      <div
-        className="duo-bulb-pulse"
-        style={{
-          position: 'absolute',
-          top: 14,
-          left: 10,
-          transform: 'rotate(-12deg)',
-          background: '#ffffff',
-          borderRadius: 6,
-          padding: '3px 8px',
-          boxShadow: '0 3px 10px rgba(0,0,0,0.08)',
-          border: '1.5px solid #dbeafe',
-          fontSize: '11px',
-          fontWeight: 800,
-          color: '#1d4ed8',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 4,
-          zIndex: 3,
-        }}
-      >
-        <span>✈️</span>
-        <span style={{ fontSize: '10px', color: '#1877f2', letterSpacing: '0.5px' }}>JEJU</span>
-      </div>
 
-      <div
-        className="duo-bulb-pulse"
-        style={{
-          position: 'absolute',
-          bottom: 22,
-          right: 12,
-          transform: 'rotate(15deg)',
-          background: '#ffffff',
-          borderRadius: 6,
-          padding: '3px 8px',
-          boxShadow: '0 3px 10px rgba(0,0,0,0.08)',
-          border: '1.5px solid #dcfce7',
-          fontSize: '11px',
-          fontWeight: 800,
-          color: '#15803d',
-          zIndex: 3,
-        }}
-      >
-        <span>PASS ✓</span>
-      </div>
 
       {/* Colorful Confetti Sparks & Streamers */}
       <div style={{ position: 'absolute', top: 12, right: 38, fontSize: '14px', color: '#facc15', zIndex: 3 }}>✦</div>

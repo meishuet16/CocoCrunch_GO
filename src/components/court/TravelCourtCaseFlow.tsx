@@ -289,6 +289,19 @@ export function TravelCourtCaseFlow({
   // Confetti particles for verdict passed
   const [showConfetti, setShowConfetti] = useState(false);
 
+  // Track passed/failed outcomes for each case (Case 1 destination Jeju is passed by default)
+  const [caseOutcomes, setCaseOutcomes] = useState<Record<number, boolean>>({
+    1: true,
+  });
+
+  useEffect(() => {
+    if (currentStep === 'verdict-pass') {
+      setCaseOutcomes(prev => ({ ...prev, [caseIndex]: true }));
+    } else if (currentStep === 'verdict-fail') {
+      setCaseOutcomes(prev => ({ ...prev, [caseIndex]: false }));
+    }
+  }, [currentStep, caseIndex]);
+
   // Discussion comments state
   const [segmentedTab, setSegmentedTab] = useState<'discussion' | 'votes'>('discussion');
   const [comments, setComments] = useState(CASE_DEFAULT_COMMENTS[1]);
@@ -453,6 +466,12 @@ export function TravelCourtCaseFlow({
   // Handle verdict trigger with Gavel strike sound, haptic, screen shake
   const handleGoToVerdict = (outcome: 'pass' | 'fail') => {
     const userEffectiveVote = userVote === 'not-now' ? 'not-now' : 'go';
+
+    // Record decision for current case based on outcome
+    setCaseOutcomes(prev => ({
+      ...prev,
+      [caseIndex]: outcome === 'pass',
+    }));
 
     // Ensure all 4 juror votes are fully set and consistent
     setLiveJurors([
@@ -2940,77 +2959,125 @@ export function TravelCourtCaseFlow({
             </button>
           </header>
 
-          <div
-            className="court-summary-screen"
-            style={{
-              padding: '8px 18px 2px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flex: 1,
-              minHeight: 0,
-              overflow: 'hidden',
-              boxSizing: 'border-box',
-            }}
-          >
-            {/* Top Section: Illustration + Title + Checklist */}
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div className="court-summary-illustration" style={{ margin: '2px 0 6px' }}>
-                <DuolingoAirplaneSquad size={210} />
-              </div>
+          {(() => {
+            const foodCase = CASES.find(c => (c.type === 'restaurant' || c.type === 'food') && caseOutcomes[c.id]);
+            const foodPlanned = Boolean(foodCase);
+            const foodTitle = foodCase ? (foodCase.id === 2 ? 'Haenyeo Seafood' : foodCase.title) : '';
 
-              <div className="court-summary-title" style={{ fontSize: '24px', margin: '0 0 2px' }}>Jeju added!</div>
-              <div className="court-summary-desc" style={{ fontSize: '13px', margin: '0 0 10px' }}>It's official. Jeju is in our trip plan!</div>
+            const activitiesCase = CASES.find(c => c.type === 'activity' && caseOutcomes[c.id]);
+            const activitiesPlanned = Boolean(activitiesCase);
+            const activitiesTitle = activitiesCase ? activitiesCase.title : '';
 
-              <div className="court-checklist-container" style={{ gap: 7, marginBottom: 0 }}>
-                <div className="court-checklist-item" style={{ padding: '9px 14px' }}>
-                  <div className="court-check-label">
-                    <Plane size={17} color="#1877f2" /> Flights
-                  </div>
-                  <span className="court-check-status">Not planned</span>
-                </div>
+            const flightsCase = CASES.find(c => c.type === 'flight' && caseOutcomes[c.id]);
+            const flightsPlanned = Boolean(flightsCase);
+            const flightsTitle = flightsCase ? flightsCase.title : '';
 
-                <div className="court-checklist-item" style={{ padding: '9px 14px' }}>
-                  <div className="court-check-label">
-                    <Home size={17} color="#1877f2" /> Accommodation
-                  </div>
-                  <span className="court-check-status">Not planned</span>
-                </div>
+            const accommodationCase = CASES.find(c => (c.type === 'hotel' || c.type === 'accommodation') && caseOutcomes[c.id]);
+            const accommodationPlanned = Boolean(accommodationCase);
+            const accommodationTitle = accommodationCase ? accommodationCase.title : '';
 
-                <div className="court-checklist-item" style={{ padding: '9px 14px' }}>
-                  <div className="court-check-label">
-                    <MapPin size={17} color="#1877f2" /> Activities
-                  </div>
-                  <span className="court-check-status">Not planned</span>
-                </div>
-
-                <div className="court-checklist-item" style={{ padding: '9px 14px' }}>
-                  <div className="court-check-label">
-                    <Utensils size={17} color="#1877f2" /> Food
-                  </div>
-                  <span className="court-check-status">Not planned</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Action Group */}
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 8, paddingTop: 4 }}>
-              <button
-                type="button"
-                className="court-dark-pill-btn"
-                style={{ width: '100%', marginBottom: 6 }}
-                onClick={() => {
-                  playVictoryFanfare();
-                  triggerHaptic('victory');
-                  onConfirmPlan('Jeju');
+            return (
+              <div
+                className="court-summary-screen"
+                style={{
+                  padding: '8px 18px 2px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flex: 1,
+                  minHeight: 0,
+                  overflow: 'hidden',
+                  boxSizing: 'border-box',
                 }}
               >
-                Continue planning →
-              </button>
-              <MobileHomeIndicator />
-            </div>
-          </div>
+                {/* Top Section: Illustration + Title + Checklist */}
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <div className="court-summary-illustration" style={{ margin: '2px 0 6px' }}>
+                    <DuolingoAirplaneSquad size={210} />
+                  </div>
+
+                  <div className="court-summary-title" style={{ fontSize: '24px', margin: '0 0 2px' }}>Jeju added!</div>
+                  <div className="court-summary-desc" style={{ fontSize: '13px', margin: '0 0 10px' }}>It's official. Jeju is in our trip plan!</div>
+
+                  <div className="court-checklist-container" style={{ gap: 7, marginBottom: 0 }}>
+                    {/* Flights */}
+                    <div className={`court-checklist-item ${flightsPlanned ? 'is-planned' : ''}`} style={{ padding: '9px 14px' }}>
+                      <div className="court-check-label">
+                        <Plane size={17} color={flightsPlanned ? '#10b981' : '#1877f2'} /> Flights
+                      </div>
+                      {flightsPlanned ? (
+                        <span className="court-check-status planned">
+                          <Check size={12} strokeWidth={3} /> {flightsTitle}
+                        </span>
+                      ) : (
+                        <span className="court-check-status">Not planned</span>
+                      )}
+                    </div>
+
+                    {/* Accommodation */}
+                    <div className={`court-checklist-item ${accommodationPlanned ? 'is-planned' : ''}`} style={{ padding: '9px 14px' }}>
+                      <div className="court-check-label">
+                        <Home size={17} color={accommodationPlanned ? '#10b981' : '#1877f2'} /> Accommodation
+                      </div>
+                      {accommodationPlanned ? (
+                        <span className="court-check-status planned">
+                          <Check size={12} strokeWidth={3} /> {accommodationTitle}
+                        </span>
+                      ) : (
+                        <span className="court-check-status">Not planned</span>
+                      )}
+                    </div>
+
+                    {/* Activities */}
+                    <div className={`court-checklist-item ${activitiesPlanned ? 'is-planned' : ''}`} style={{ padding: '9px 14px' }}>
+                      <div className="court-check-label">
+                        <MapPin size={17} color={activitiesPlanned ? '#10b981' : '#1877f2'} /> Activities
+                      </div>
+                      {activitiesPlanned ? (
+                        <span className="court-check-status planned">
+                          <Check size={12} strokeWidth={3} /> {activitiesTitle}
+                        </span>
+                      ) : (
+                        <span className="court-check-status">Not planned</span>
+                      )}
+                    </div>
+
+                    {/* Food */}
+                    <div className={`court-checklist-item ${foodPlanned ? 'is-planned' : ''}`} style={{ padding: '9px 14px' }}>
+                      <div className="court-check-label">
+                        <Utensils size={17} color={foodPlanned ? '#10b981' : '#1877f2'} /> Food
+                      </div>
+                      {foodPlanned ? (
+                        <span className="court-check-status planned">
+                          <Check size={12} strokeWidth={3} /> {foodTitle}
+                        </span>
+                      ) : (
+                        <span className="court-check-status">Not planned</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom Action Group */}
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 8, paddingTop: 4 }}>
+                  <button
+                    type="button"
+                    className="court-dark-pill-btn"
+                    style={{ width: '100%', marginBottom: 6 }}
+                    onClick={() => {
+                      playVictoryFanfare();
+                      triggerHaptic('victory');
+                      onConfirmPlan('Jeju');
+                    }}
+                  >
+                    Continue planning →
+                  </button>
+                  <MobileHomeIndicator />
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
     </div>
