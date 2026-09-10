@@ -1,0 +1,6 @@
+{
+  "name":"cococrunch-travel-court-animated",
+  "version":"1.0.0",
+  "private":true,
+  "description":"Animated SVG Travel Court components for React + TypeScript"
+}

@@ -5,6 +5,7 @@ import {
   ReceiptText, RotateCcw, Send, Sparkles, Users, X
 } from 'lucide-react';
 import { emitExperience } from './experience';
+import { playSound } from './sound';
 import { GlobalNav, type GlobalTab } from './components/GlobalNav';
 import { TripJourneyStatus } from './components/TripJourneyStatus';
 import { JourneyProgress } from './components/JourneyProgress';
@@ -57,7 +58,8 @@ import { CocoCompanion } from './components/coco/CocoCompanion';
 import { cocoAsset } from './components/coco/assets';
 import { commitRitualState, loadRitualState, memoryEligible } from './ritualState';
 import { MemoryTrunk } from './components/MemoryTrunk';
-import { CourtTieRitual } from './components/CourtTieRitual';
+import { TravelCourtModal } from './components/court/TravelCourtModal';
+import { type CourtStep } from './components/court/TravelCourtCaseFlow';
 import { WeatherGlance } from './components/WeatherGlance';
 import { GlobalCocoCompanion } from './components/GlobalCocoCompanion';
 import { HomeTripGlance } from './components/HomeTripGlance';
@@ -88,6 +90,7 @@ type Tab = GlobalTab;
 type TripMode = 'group' | 'solo';
 type Mood = 'great' | 'okay' | 'tired' | null;
 type Privacy = 'status' | 'area' | 'exact';
+type CourtView = 'upload' | 'discussion' | 'voting';
 type Drawer = 'group' | 'backup' | 'budget' | 'family' | 'location' | 'community' | 'import' | 'discover' | 'tingo' | 'tripSetup' | 'compare' | 'feasibility' | 'reminders' | 'commitments' | 'safety' | 'assistant' | 'gacha' | 'lucky' | 'memoryCard' | 'all-personas' | null;
 type CommunityTrip = { id: number; title: string; author: string; match: number; saved: boolean };
 type PlaceRecommendation = DiscoveryPlace & { id: number; saved: boolean; added: boolean };
@@ -337,6 +340,55 @@ export default function AppRescued() {
   });
   const [plannerTurn, setPlannerTurn] = useState(stored.plannerTurn ?? 'Mei');
   const [courtOpen, setCourtOpen] = useState(false);
+  const [courtInitialMode, setCourtInitialMode] = useState<'ideas' | 'case' | 'playground'>('case');
+  const [courtInitialStep, setCourtInitialStep] = useState<CourtStep>('lobby');
+  const [courtView, setCourtView] = useState<CourtView>('upload');
+
+  // Auto-open Travel Court directly from URL: ?court=summary or ?court=case or ?court=ideas
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleUrlCheck = () => {
+      const params = new URLSearchParams(window.location.search);
+      const courtParam =
+        params.get('court') ||
+        (window.location.hash.includes('court=')
+          ? window.location.hash.split('court=')[1]?.split('&')[0]
+          : null);
+
+      if (courtParam) {
+        if (
+          courtParam === 'summary' ||
+          courtParam === 'jeju' ||
+          courtParam === 'airplane' ||
+          courtParam === 'screen8' ||
+          courtParam === 'save'
+        ) {
+          setCourtInitialMode('case');
+          setCourtInitialStep('summary');
+          setCourtOpen(true);
+        } else if (courtParam === 'playground' || courtParam === 'poses') {
+          setCourtInitialMode('playground');
+          setCourtOpen(true);
+        } else if (courtParam === 'ideas' || courtParam === 'upload' || courtParam === 'board') {
+          setCourtInitialMode('ideas');
+          setCourtInitialStep('lobby');
+          setCourtOpen(true);
+        } else {
+          setCourtInitialMode('case');
+          setCourtInitialStep('lobby');
+          setCourtOpen(true);
+        }
+      }
+    };
+
+    handleUrlCheck();
+    window.addEventListener('popstate', handleUrlCheck);
+    window.addEventListener('hashchange', handleUrlCheck);
+    return () => {
+      window.removeEventListener('popstate', handleUrlCheck);
+      window.removeEventListener('hashchange', handleUrlCheck);
+    };
+  }, []);
   const [courtOptions, setCourtOptions] = useState<CourtOptionState[]>(stored.courtOptions && stored.courtOptions.length >= 2 ? stored.courtOptions : defaultCourtOptions);
   const [draftCourtOption, setDraftCourtOption] = useState('');
   const [courtVotes, setCourtVotes] = useState<CourtVote[]>(stored.courtVotes?.length ? stored.courtVotes : defaultVotes);
@@ -595,6 +647,7 @@ export default function AppRescued() {
   }
 
   function castVote(member: string, pick: CourtOption) {
+    playSound('tap');
     setCourtVotes(votes => votes.map(vote => vote.member === member ? { ...vote, pick } : vote));
     if (tradeAccepted) {
       setTradeAccepted(false);
@@ -606,7 +659,19 @@ export default function AppRescued() {
     setCourtDecision(null);
   }
 
+  function openCourt(
+    view: CourtView = 'upload',
+    step: CourtStep = 'lobby',
+    mode?: 'ideas' | 'case' | 'playground'
+  ) {
+    setCourtView(view);
+    setCourtInitialMode(mode ?? 'case');
+    setCourtInitialStep(step);
+    setCourtOpen(true);
+  }
+
   function attachConcession() {
+    playSound('tap');
     if (!tradeAccepted) {
       const linkedOptionId = courtOptions[1]?.id ?? courtOptions[0]?.id ?? 'option';
       const concession = attachCourtConcession(courtVotes, {
@@ -648,6 +713,7 @@ export default function AppRescued() {
 
   function confirmCourt() {
     if (!proposedDecision) return;
+    playSound('gavel');
     const decision = proposedDecision;
     const winnerId = courtOptions.find(option => option.label === decision)?.id ?? tally.majority ?? '';
     const losingBackups = promoteCourtLosers(courtOptions.map(option => ({ ...option, support: tally.counts[option.id] ?? 0 })), winnerId, tripInputs.dealBreaker);
@@ -778,7 +844,7 @@ export default function AppRescued() {
     if (actionId === 'open-court') {
       openTrip('planning');
       setDrawer(null);
-      setCourtOpen(true);
+      openCourt();
       return;
     }
 
@@ -902,7 +968,7 @@ export default function AppRescued() {
     setTradeSnapshot(null);
     setCourtConcession(null);
     setDrawer(null);
-    setCourtOpen(true);
+    openCourt();
   }
 
   function markConflict() {
@@ -924,7 +990,7 @@ export default function AppRescued() {
     }
     setDraftConflict('');
     setDrawer(null);
-    setCourtOpen(true);
+    openCourt();
   }
 
   function renderHome() {
@@ -1051,7 +1117,7 @@ export default function AppRescued() {
         <section className="trip-intent-summary paper-sheet"><div><span>TRIP INTENT · THIS JOURNEY ONLY</span><h3>{tripInputs.tripVibe || 'A shape is still forming.'}</h3><p>Must-Go: {tripInputs.mustGo || 'not set'} · Deal breaker: {tripInputs.dealBreaker || 'not set'}</p><small>Preference: {tripInputs.preference || 'optional'} · Flexible: {tripInputs.flexible || 'not set'} · Budget: RM {budgetTotal}</small></div><button className="secondary" onClick={() => setDrawer('tripSetup')}>Review inputs <ChevronRight size={14} /></button></section>
         {mode === 'group' && <section className="group-signal-summary paper-sheet"><div><span>PEOPLE · GROUP DNA</span><h3>{groupDNA.conflicts.length ? `${groupDNA.conflicts.length} decision${groupDNA.conflicts.length === 1 ? '' : 's'} remain visible.` : 'Shared signals are explicit, not averaged.'}</h3><p>{groupDNA.sharedPriorities[0]?.label ?? 'No shared priority yet'} · {groupDNA.budgetSensitivity} budget sensitivity</p></div><button className="secondary" onClick={() => setDrawer('group')}>Open people <ChevronRight size={14} /></button></section>}
       </section>
-      {mode === 'group' && <section className="conflict-ticket"><span>{courtConfirmed ? 'COURT DECISION RECORDED' : 'UNRESOLVED CONFLICT'}</span><b>{activeConflict}</b><small>{first?.label ?? 'Option A'} {firstCount} · {second?.label ?? 'Option B'} {secondCount} · {tally.tied ? 'tie · Gacha is eligible' : `${optionLabel(tally.majority)} has majority`}</small><button className="ritual-trigger" onClick={() => setCourtOpen(true)}>{courtConfirmed ? 'Review Group Court' : 'Open Group Court'} <Gavel size={18} /></button></section>}
+      {mode === 'group' && <section className="conflict-ticket"><span>{courtConfirmed ? 'COURT DECISION RECORDED' : 'UNRESOLVED CONFLICT'}</span><b>{activeConflict}</b><small>{first?.label ?? 'Option A'} {firstCount} · {second?.label ?? 'Option B'} {secondCount} · {tally.tied ? 'tie · Gacha is eligible' : `${optionLabel(tally.majority)} has majority`}</small><button className="ritual-trigger" onClick={() => openCourt()}>{courtConfirmed ? 'Review Group Court' : 'Open Group Court'} <Gavel size={18} /></button></section>}
       <div className="planning-plan">
         <div className="planning-itinerary-primary">
           <TripPlanOverview plan={visibleTripPlan} planHealth={planHealth} tripIntent={tripIntent} onOpenWhy={setPlanWhyItemId} onOpenHealth={() => setDrawer('feasibility')} />
@@ -1532,109 +1598,25 @@ export default function AppRescued() {
 
   function renderCourt() {
     if (!courtOpen) return null;
-    const first = courtOptions[0];
-    const second = courtOptions[1];
-    const gachaResult = () => {
-      const topCount = Math.max(...courtOptions.map(option => tally.counts[option.id] ?? 0));
-      const tiedOptions = courtOptions.filter(option => (tally.counts[option.id] ?? 0) === topCount);
-      const winner = tiedOptions[Math.floor(Math.random() * tiedOptions.length)];
-      if (!winner) return;
-      setGacha(winner.label);
-      setCourtConfirmed(false);
-      setCourtDecision(null);
-    };
     return (
-      <div className="ritual-overlay">
-        <section className="court-stage">
-          <button className="close light" aria-label="Close Group Court" onClick={() => setCourtOpen(false)}>
-            <X size={20} />
-          </button>
-          <span className="ritual-kicker">GROUP COURT · {courtOptions.length} OPTIONS</span>
-          <Coco mood="happy" context="court" />
-          <h3>{activeConflict}</h3>
-          <p>
-            {courtOptions.map(option => `${option.label}: ${tally.counts[option.id] ?? 0}`).join(' · ')}. {tally.tied ? 'This is a true unresolved tie.' : 'There is a majority, so Gacha stays locked.'}
-          </p>
-          <div className="member-votes">
-            {courtVotes.map(vote => (
-              <div key={vote.member}>
-                <b>{vote.member}</b>
-                <span>
-                  {courtOptions.map(option => (
-                    <button
-                      key={option.id}
-                      className={vote.pick === option.id ? 'active' : ''}
-                      onClick={() => castVote(vote.member, option.id)}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </span>
-              </div>
-            ))}
-          </div>
-          <div className="court-add-option">
-            <input
-              value={draftCourtOption}
-              onChange={event => setDraftCourtOption(event.target.value)}
-              placeholder="Add an option"
-            />
-            <button
-              onClick={() => {
-                const label = draftCourtOption.trim();
-                if (!label || courtOptions.some(option => option.label.toLowerCase() === label.toLowerCase())) return;
-                setCourtOptions(options => [...options, { id: optionSlug(label, options.length), label }]);
-                setDraftCourtOption('');
-                setGacha(null);
-                setCourtDecision(null);
-                setCourtConfirmed(false);
-              }}
-            >
-              Add option
-            </button>
-          </div>
-          <div className="trade-slip">
-            <b>Possible exchange</b>
-            <small>
-              {first?.label ?? 'Option A'} ↔ protect a linked concession for {second?.label ?? 'Option B'} later. The binding stores the exact pre-concession vote snapshot; any new vote invalidates the stale binding.
-            </small>
-            <button onClick={attachConcession}>
-              {tradeAccepted ? 'Withdraw concession & restore votes' : 'Attach concession snapshot'}
-            </button>
-            {courtConcession && (
-              <small>{courtConcession.status} · linked to {optionLabel(courtConcession.linkedOptionId)}</small>
-            )}
-          </div>
-          {tally.tied ? (
-            <CourtTieRitual
-              key={JSON.stringify([activeConflict, courtVotes])}
-              tied={tally.tied}
-              options={courtOptions.map(option => option.label)}
-              result={gacha ?? undefined}
-              onDraw={() => {
-                setCourtDrawRevealed(false);
-                gachaResult();
-              }}
-              onReveal={() => setCourtDrawRevealed(true)}
-            />
-          ) : (
-            <div className="majority-note">
-              <b>Majority decides normally.</b>
-              <small>Randomness is not used when the vote already resolves the conflict.</small>
-            </div>
-          )}
-          {proposedDecision && (!gacha || courtDrawRevealed) && (
-            <div className="verdict">
-              <span>PROPOSED VERDICT</span>
-              <b>{proposedDecision}</b>
-              <small>{gacha ? 'Random tie-break is still only a proposal.' : 'Computed from member votes.'}</small>
-              <button onClick={confirmCourt}>
-                {courtConfirmed && courtDecision === proposedDecision ? '✓ Added to official timeline' : 'Confirm result'}
-              </button>
-            </div>
-          )}
-        </section>
-      </div>
+      <TravelCourtModal
+        isOpen={courtOpen}
+        onClose={() => {
+          setCourtOpen(false);
+          if (typeof window !== 'undefined' && window.location.search.includes('court=')) {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('court');
+            window.history.replaceState({}, '', url.pathname + (url.search || ''));
+          }
+        }}
+        initialMode={courtInitialMode}
+        initialStep={courtInitialStep}
+        onConfirmDecision={(decision) => {
+          setCourtDecision(decision);
+          setCourtConfirmed(true);
+          confirmCourt();
+        }}
+      />
     );
   }
 
@@ -1658,6 +1640,7 @@ export default function AppRescued() {
       <GlobalNav tab={tab} onChange={setTab} onOpenTrips={() => setTripWorkspaceOpen(false)} />
       {renderCourt()}
       {renderDrawer()}
+
       <GlobalCocoCompanion onAsk={() => { setTripWorkspaceOpen(true); setTripPhase('traveling'); setTab('trips'); setDrawer('assistant'); }} onPray={() => emitExperience({ type: 'open-prayer', source: 'user-reported', uncertainty: 'Personal prayer only; no weather, itinerary, or provider claim.' })} onNext={() => handleJourneyAction(journeyState.nextAction?.target ?? 'trip')} onEveryday={() => { setTripWorkspaceOpen(true); setTripPhase('traveling'); setTab('trips'); setDrawer('gacha'); }} onLucky={() => { setTripWorkspaceOpen(true); setTripPhase('traveling'); setTab('trips'); setDrawer('lucky'); }} />
     </div>
   );
