@@ -461,10 +461,15 @@ export function TravelCourtCaseFlow({
     if (currentStep === 'jury-live') {
       const userEffectiveVote = userVote === 'not-now' ? 'not-now' : 'go';
 
+      // For Case 3 (Cable Car), outcome is REJECTED (opposite of Case 1: 1 Go vs 3 Not now)
+      const initialAlexVote = caseIndex === 3
+        ? (userEffectiveVote === 'go' ? 'not-now' : 'go')
+        : 'go';
+
       // Initially 2 submitted: Alex and June (You, the user whose vote is already in!)
       // and 2 pending: Mavis and Ken
       setLiveJurors([
-        { id: 'alex', name: 'Alex', vote: 'go', variant: 'green', avatarColor: '#10b981', hairColor: '#065f46' },
+        { id: 'alex', name: 'Alex', vote: initialAlexVote, variant: 'green', avatarColor: '#10b981', hairColor: '#065f46' },
         { id: 'june', name: 'June (You)', vote: userEffectiveVote, variant: 'coral', avatarColor: '#ef4444', hairColor: '#db2777' },
         { id: 'mavis', name: 'Mavis', vote: null, variant: 'purple', avatarColor: '#a855f7', hairColor: '#f59e0b' },
         { id: 'ken', name: 'Ken', vote: null, variant: 'blue', avatarColor: '#f59e0b', hairColor: '#1e3a8a' },
@@ -476,7 +481,7 @@ export function TravelCourtCaseFlow({
         playPop();
         triggerHaptic('pop');
         setLiveJurors(prev =>
-          prev.map(j => (j.id === 'mavis' ? { ...j, vote: 'go' } : j))
+          prev.map(j => (j.id === 'mavis' ? { ...j, vote: caseIndex === 3 ? 'not-now' : 'go' } : j))
         );
       }, 1800);
 
@@ -488,9 +493,11 @@ export function TravelCourtCaseFlow({
           prev.map(j =>
             j.id === 'ken' ? {
               ...j,
-              vote: (caseIndex === 2 && userEffectiveVote === 'not-now')
+              vote: caseIndex === 3
                 ? 'not-now'
-                : (userEffectiveVote === 'not-now' ? 'go' : 'not-now'),
+                : ((caseIndex === 2 && userEffectiveVote === 'not-now')
+                  ? 'not-now'
+                  : (userEffectiveVote === 'not-now' ? 'go' : 'not-now')),
             } : j
           )
         );
@@ -505,6 +512,8 @@ export function TravelCourtCaseFlow({
       const finishTimer = window.setTimeout(() => {
         if (caseIndex === 2 && userEffectiveVote === 'not-now') {
           handleGoToShowdown();
+        } else if (caseIndex === 3) {
+          handleGoToVerdict('fail');
         } else {
           handleGoToVerdict('pass');
         }
@@ -517,7 +526,7 @@ export function TravelCourtCaseFlow({
         clearTimeout(finishTimer);
       };
     }
-  }, [currentStep, userVote]);
+  }, [currentStep, userVote, caseIndex]);
 
   // Trigger 2 vs 2 Tie Showdown on Case 2
   const handleGoToShowdown = () => {
@@ -668,12 +677,22 @@ export function TravelCourtCaseFlow({
     }));
 
     // Ensure all 4 juror votes are fully set and consistent
-    setLiveJurors([
-      { id: 'alex', name: 'Alex', vote: 'go', variant: 'green', avatarColor: '#10b981', hairColor: '#065f46' },
-      { id: 'mavis', name: 'Mavis', vote: 'go', variant: 'purple', avatarColor: '#a855f7', hairColor: '#f59e0b' },
-      { id: 'ken', name: 'Ken', vote: userEffectiveVote === 'not-now' ? 'go' : 'not-now', variant: 'blue', avatarColor: '#f59e0b', hairColor: '#1e3a8a' },
-      { id: 'june', name: 'June (You)', vote: userEffectiveVote, variant: 'coral', avatarColor: '#ef4444', hairColor: '#db2777' },
-    ]);
+    if (outcome === 'fail' || caseIndex === 3) {
+      const alexVote = userEffectiveVote === 'go' ? 'not-now' : 'go';
+      setLiveJurors([
+        { id: 'alex', name: 'Alex', vote: alexVote, variant: 'green', avatarColor: '#10b981', hairColor: '#065f46' },
+        { id: 'mavis', name: 'Mavis', vote: 'not-now', variant: 'purple', avatarColor: '#a855f7', hairColor: '#f59e0b' },
+        { id: 'ken', name: 'Ken', vote: 'not-now', variant: 'blue', avatarColor: '#f59e0b', hairColor: '#1e3a8a' },
+        { id: 'june', name: 'June (You)', vote: userEffectiveVote, variant: 'coral', avatarColor: '#ef4444', hairColor: '#db2777' },
+      ]);
+    } else {
+      setLiveJurors([
+        { id: 'alex', name: 'Alex', vote: 'go', variant: 'green', avatarColor: '#10b981', hairColor: '#065f46' },
+        { id: 'mavis', name: 'Mavis', vote: 'go', variant: 'purple', avatarColor: '#a855f7', hairColor: '#f59e0b' },
+        { id: 'ken', name: 'Ken', vote: userEffectiveVote === 'not-now' ? 'go' : 'not-now', variant: 'blue', avatarColor: '#f59e0b', hairColor: '#1e3a8a' },
+        { id: 'june', name: 'June (You)', vote: userEffectiveVote, variant: 'coral', avatarColor: '#ef4444', hairColor: '#db2777' },
+      ]);
+    }
 
     if (outcome === 'pass') {
       setCurrentStep('verdict-pass');
@@ -2536,6 +2555,8 @@ export function TravelCourtCaseFlow({
                     const userEffectiveVote = userVote === 'not-now' ? 'not-now' : 'go';
                     if (caseIndex === 2 && userEffectiveVote === 'not-now') {
                       handleGoToShowdown();
+                    } else if (caseIndex === 3) {
+                      handleGoToVerdict('fail');
                     } else {
                       handleGoToVerdict('pass');
                     }
@@ -2799,14 +2820,29 @@ export function TravelCourtCaseFlow({
                 <div className="court-verdict-header-block">
                   <div className="court-verdict-subtitle-text">The verdict is...</div>
                   <div className="court-verdict-title-wrap">
+                    {/* Subtle sparks */}
+                    <svg width="18" height="18" viewBox="0 0 24 24" style={{ position: 'absolute', left: 4, top: -4 }}>
+                      <path d="M4 14 Q8 10 14 6" stroke="#f87171" strokeWidth="3" strokeLinecap="round" fill="none" />
+                    </svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" style={{ position: 'absolute', left: -6, bottom: 2 }}>
+                      <path d="M6 6 C12 6 14 12 10 16" stroke="#fbbf24" strokeWidth="3" strokeLinecap="round" fill="none" />
+                    </svg>
+
                     <h2 className="court-verdict-main-title" style={{ color: '#ef4444' }}>
-                      Not this time!
+                      {caseIndex === 3 ? "We're skipping Cable Car!" : "Not this time!"}
                     </h2>
+
+                    <svg width="18" height="18" viewBox="0 0 24 24" style={{ position: 'absolute', right: 4, top: -4 }}>
+                      <path d="M4 6 Q10 10 14 14" stroke="#fbbf24" strokeWidth="3" strokeLinecap="round" fill="none" />
+                    </svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" style={{ position: 'absolute', right: -6, bottom: 2 }}>
+                      <path d="M14 6 C8 6 6 12 10 16" stroke="#f87171" strokeWidth="3" strokeLinecap="round" fill="none" />
+                    </svg>
                   </div>
 
-                  {/* Stage Area: Sticky Note + Slumped Judge */}
+                  {/* Stage Area: Sticky Note + Slumped Judge + Stamp */}
                   <div className="court-verdict-stage-area">
-                    <div className="court-verdict-stickynote" style={{ background: '#fef3f2', border: '1px solid #fecdd3' }}>
+                    <div className="court-verdict-stickynote" style={{ background: '#fef3f2', border: '1px solid #fecdd3', color: '#991b1b' }}>
                       Next<br />
                       Time<br />
                       Another<br />
@@ -2815,6 +2851,17 @@ export function TravelCourtCaseFlow({
                     </div>
 
                     <DuolingoJudgeBench state="slumped" size={118} benchWidth={148} />
+
+                    <div className="court-verdict-stamp">
+                      <div className="court-stamp-circle" style={{ borderColor: '#ef4444' }}>
+                        <span className="court-stamp-label" style={{ color: '#ef4444' }}>TRAVEL</span>
+                        <span className="court-stamp-label" style={{ color: '#ef4444' }}>COURT</span>
+                        <X size={11} color="#ef4444" strokeWidth={3} className="court-stamp-plane-icon" />
+                      </div>
+                      <svg width="22" height="26" viewBox="0 0 22 26" style={{ marginLeft: 2 }}>
+                        <path d="M0 5 Q 5 1, 11 5 T 22 5 M0 13 Q 5 9, 11 13 T 22 13 M0 21 Q 5 17, 11 21 T 22 21" stroke="#ef4444" strokeWidth="1.3" fill="none" opacity="0.65" />
+                      </svg>
+                    </div>
                   </div>
                 </div>
 
@@ -2831,7 +2878,7 @@ export function TravelCourtCaseFlow({
                       <span className="court-badge-result" style={{ background: '#fee2e2', color: '#b91c1c' }}>Verdict Rejected</span>
                     </div>
                     <h3 className="court-selected-case-title">
-                      {activeCase.selectedTitle}
+                      {caseIndex === 3 ? 'Seongsan Cable Car skipped' : `${activeCase.title} skipped`}
                     </h3>
                     <p className="court-selected-case-desc">
                       {activeCase.description}
@@ -2944,7 +2991,11 @@ export function TravelCourtCaseFlow({
         <div className="court-case-chamber">
           <MobileStatusBar />
           <header className="court-navbar">
-            <button className="court-nav-back-btn" onClick={() => setCurrentStep('verdict-pass')} aria-label="Back">
+            <button
+              className="court-nav-back-btn"
+              onClick={() => setCurrentStep(caseOutcomes[caseIndex] === false ? 'verdict-fail' : 'verdict-pass')}
+              aria-label="Back"
+            >
               <ChevronLeft size={24} />
             </button>
             <div className="court-nav-title-group" style={{ alignItems: 'center' }}>
@@ -2953,8 +3004,8 @@ export function TravelCourtCaseFlow({
               </span>
               <div style={{ display: 'flex', gap: 4, width: 80, marginTop: 4 }}>
                 <div style={{ height: 4, flex: 1, background: '#1877f2', borderRadius: 99 }} />
-                <div style={{ height: 4, flex: 1, background: '#e2e8f0', borderRadius: 99 }} />
-                <div style={{ height: 4, flex: 1, background: '#e2e8f0', borderRadius: 99 }} />
+                <div style={{ height: 4, flex: 1, background: caseIndex >= 2 ? '#1877f2' : '#e2e8f0', borderRadius: 99 }} />
+                <div style={{ height: 4, flex: 1, background: caseIndex >= 3 ? '#1877f2' : '#e2e8f0', borderRadius: 99 }} />
               </div>
             </div>
             <div style={{ width: 38 }} />
