@@ -1171,27 +1171,31 @@ body:has(.court-modal-overlay) {
 }
 
 .court-voting-header {
-  margin: 4px 0 8px;
+  margin: 2px 0 8px;
 }
 
 .court-voting-header h2 {
-  font-size: 25px;
-  font-weight: 900;
-  color: #0f172a;
-  margin: 0 0 3px;
+  font-size: 26px;
+  font-weight: 950;
+  color: #111827;
+  margin: 0 0 2px;
   letter-spacing: 0;
+  line-height: 1.05;
+  font-family: "Avenir Next", "Nunito", "Inter", system-ui, sans-serif;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
 }
 
 .court-voting-header p {
-  font-size: 13px;
+  font-size: 12.5px;
   color: #64748b;
   margin: 0;
-  font-weight: 700;
+  font-weight: 750;
+  font-family: "Avenir Next", "Nunito", "Inter", system-ui, sans-serif;
 }
 
 .court-vote-mini-stage {
   width: 100%;
-  height: 268px;
+  height: 222px;
   border-radius: 26px;
   position: relative;
   overflow: hidden;
@@ -1200,7 +1204,7 @@ body:has(.court-modal-overlay) {
   box-shadow:
     0 18px 36px -22px rgba(15, 23, 42, 0.38),
     inset 0 0 0 1.5px rgba(255, 255, 255, 0.74);
-  margin: 2px 0 14px;
+  margin: 2px 0 10px;
 }
 
 .court-vote-mini-stage-bg {
@@ -1233,22 +1237,119 @@ body:has(.court-modal-overlay) {
 
 .court-vote-friend-left {
   left: 26px;
-  bottom: 42px;
+  bottom: 32px;
 }
 
 .court-vote-friend-right {
   right: 24px;
-  bottom: 48px;
+  bottom: 36px;
 }
 
 .court-voting-avatar-wrap {
   position: absolute;
   left: 50%;
-  bottom: 16px;
+  bottom: 8px;
   z-index: 6;
   transform: translateX(-50%);
   filter: drop-shadow(0 16px 18px rgba(15, 23, 42, 0.2));
   animation: court-vote-june-pop 0.55s cubic-bezier(0.2, 0.85, 0.2, 1) both;
+}
+
+.court-vote-case-brief {
+  width: 100%;
+  min-height: 86px;
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 11px;
+  align-items: center;
+  padding: 10px;
+  margin: 0 0 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(203, 213, 225, 0.72);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.78), rgba(239, 246, 255, 0.54)),
+    rgba(255, 255, 255, 0.58);
+  backdrop-filter: blur(18px) saturate(1.28);
+  -webkit-backdrop-filter: blur(18px) saturate(1.28);
+  box-shadow:
+    0 16px 34px -24px rgba(15, 23, 42, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.94);
+  box-sizing: border-box;
+}
+
+.court-vote-case-thumb {
+  width: 76px;
+  height: 64px;
+  border-radius: 14px;
+  object-fit: cover;
+  box-shadow: 0 8px 18px -12px rgba(15, 23, 42, 0.48);
+  user-select: none;
+}
+
+.court-vote-case-copy {
+  min-width: 0;
+  text-align: left;
+}
+
+.court-vote-case-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+
+.court-vote-case-meta span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(239, 246, 255, 0.86);
+  border: 1px solid rgba(191, 219, 254, 0.82);
+  color: #2563eb;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.court-vote-case-copy h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.12;
+  letter-spacing: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.court-vote-case-copy p {
+  margin: 2px 0 5px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.court-vote-case-tags {
+  display: flex;
+  gap: 5px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.court-vote-case-tags span {
+  flex: 0 1 auto;
+  min-width: 0;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(203, 213, 225, 0.68);
+  color: #1d4ed8;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .court-voting-avatar-wrap .tc-character-wrapper {
@@ -1261,6 +1362,13 @@ body:has(.court-modal-overlay) {
   position: relative;
   display: inline-flex;
   transform-origin: center bottom;
+}
+
+.court-june-react-either {
+  position: relative;
+  display: inline-flex;
+  transform-origin: center bottom;
+  animation: court-june-either-steady 0.65s cubic-bezier(0.2, 0.85, 0.2, 1) both;
 }
 
 .court-june-idle-2d {
@@ -1305,6 +1413,12 @@ body:has(.court-modal-overlay) {
   animation: court-june-expression-pop 0.52s cubic-bezier(0.2, 0.85, 0.2, 1) both;
 }
 
+.court-june-expression.is-either {
+  opacity: 1;
+  color: #2563eb;
+  animation: court-june-expression-pop 0.65s cubic-bezier(0.2, 0.85, 0.2, 1) both;
+}
+
 .court-voting-avatar-wrap .tc-character-label,
 .court-vote-friend .tc-character-label,
 .court-vote-zoom-focus .tc-character-label,
@@ -1320,25 +1434,34 @@ body:has(.court-modal-overlay) {
 .court-dual-vote-buttons {
   display: flex;
   justify-content: center;
-  gap: 24px;
-  margin: 0 0 12px;
+  align-items: flex-start;
+  gap: 18px;
+  margin: 0 0 11px;
   width: 100%;
 }
 
 .court-vote-btn-choice {
+  flex: 0 0 78px;
+  min-width: 0;
+  min-height: 88px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 7px;
+  justify-content: center;
+  gap: 8px;
   cursor: pointer;
   border: none;
+  border-radius: 0;
   background: transparent;
   padding: 0;
+  box-shadow: none;
+  box-sizing: border-box;
+  transition: transform 0.16s ease;
 }
 
 .court-vote-circle {
-  width: 84px;
-  height: 84px;
+  width: 62px;
+  height: 62px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1346,36 +1469,62 @@ body:has(.court-modal-overlay) {
   color: #ffffff;
   transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
   animation: court-vote-choice-idle 2.6s ease-in-out infinite;
+  flex-shrink: 0;
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
 }
 
 .court-vote-circle.go {
-  background: #12b76a;
-  box-shadow: 0 6px 0 #027a48, 0 12px 24px rgba(18, 183, 106, 0.3);
+  background:
+    linear-gradient(180deg, rgba(52, 211, 153, 0.96), rgba(5, 150, 105, 0.94)),
+    rgba(255, 255, 255, 0.22);
+  box-shadow: 0 5px 0 #047857, 0 14px 26px -12px rgba(18, 183, 106, 0.68);
+}
+
+.court-vote-circle.either {
+  background:
+    linear-gradient(180deg, rgba(96, 165, 250, 0.95), rgba(37, 99, 235, 0.9)),
+    rgba(255, 255, 255, 0.25);
+  box-shadow: 0 5px 0 #1d4ed8, 0 14px 26px -12px rgba(37, 99, 235, 0.62);
+}
+
+.court-vote-circle.either span {
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 950;
+  letter-spacing: 0;
 }
 
 .court-vote-circle.not-now {
-  background: #f04438;
-  box-shadow: 0 6px 0 #b42318, 0 12px 24px rgba(240, 68, 56, 0.3);
+  background:
+    linear-gradient(180deg, rgba(248, 113, 113, 0.97), rgba(239, 68, 68, 0.95)),
+    rgba(255, 255, 255, 0.22);
+  box-shadow: 0 5px 0 #b91c1c, 0 14px 26px -12px rgba(240, 68, 56, 0.68);
 }
 
-.court-vote-btn-choice:hover .court-vote-circle {
-  transform: translateY(-2px) scale(1.05);
+.court-vote-btn-choice:hover {
+  transform: translateY(-2px);
 }
 
-.court-vote-btn-choice:active .court-vote-circle {
-  transform: translateY(4px) scale(0.96);
+.court-vote-btn-choice:active {
+  transform: translateY(2px) scale(0.98);
+}
+
+.court-vote-btn-choice.selected {
+  transform: translateY(-3px);
 }
 
 .court-vote-btn-choice.selected .court-vote-circle {
-  outline: 4px solid rgba(24, 119, 242, 0.22);
-  outline-offset: 4px;
+  outline: 4px solid rgba(24, 119, 242, 0.16);
+  outline-offset: 5px;
   animation: court-vote-choice-selected 0.45s cubic-bezier(0.2, 0.85, 0.2, 1) both;
 }
 
 .court-vote-btn-choice span {
-  font-size: 15px;
+  font-size: 13.5px;
   font-weight: 800;
   color: #0f172a;
+  white-space: nowrap;
 }
 
 .court-reason-input {
@@ -1575,6 +1724,21 @@ body:has(.court-modal-overlay) {
   }
   84% {
     transform: translateX(2px) rotate(1deg);
+  }
+}
+
+@keyframes court-june-either-steady {
+  0% {
+    transform: rotate(0) translateY(0) scale(1);
+  }
+  35% {
+    transform: rotate(-2deg) translateY(-4px) scale(1.03);
+  }
+  70% {
+    transform: rotate(2deg) translateY(1px) scale(0.99);
+  }
+  100% {
+    transform: rotate(0) translateY(0) scale(1.01);
   }
 }
 

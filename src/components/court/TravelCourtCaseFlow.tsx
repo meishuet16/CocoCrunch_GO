@@ -227,9 +227,10 @@ export function TravelCourtCaseFlow({
       tags: ['Scenic', 'Photo Spot', 'Adventure', 'Views'],
     },
   ];
+  const activeCase = CASES[caseIndex - 1] ?? CASES[0];
 
   // Voting state for user
-  const [userVote, setUserVote] = useState<'go' | 'not-now' | null>(null);
+  const [userVote, setUserVote] = useState<'go' | 'either' | 'not-now' | null>(null);
   const [userReason, setUserReason] = useState('');
   const [voteZooming, setVoteZooming] = useState(false);
 
@@ -1785,7 +1786,7 @@ export function TravelCourtCaseFlow({
                   <TravelCourtCharacter variant="boy_yellow" state="thinking" size={56} label="Ken" animated />
                 </div>
                 <div className="court-voting-avatar-wrap">
-                  <div className={userVote === 'go' ? 'court-june-react-yes' : userVote === 'not-now' ? 'court-june-react-no' : 'court-june-idle-2d'}>
+                  <div className={userVote === 'go' ? 'court-june-react-yes' : userVote === 'either' ? 'court-june-react-either' : userVote === 'not-now' ? 'court-june-react-no' : 'court-june-idle-2d'}>
                     <TravelCourtCharacter
                       variant="girl_redhat"
                       state="idle"
@@ -1794,9 +1795,31 @@ export function TravelCourtCaseFlow({
                       label="June"
                       animated={false}
                     />
-                    <span className={`court-june-expression ${userVote === 'go' ? 'is-happy' : userVote === 'not-now' ? 'is-no' : ''}`}>
-                      {userVote === 'go' ? '♪' : userVote === 'not-now' ? '!' : ''}
+                    <span className={`court-june-expression ${userVote === 'go' ? 'is-happy' : userVote === 'either' ? 'is-either' : userVote === 'not-now' ? 'is-no' : ''}`}>
+                      {userVote === 'go' ? '♪' : userVote === 'either' ? '~' : userVote === 'not-now' ? '!' : ''}
                     </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="court-vote-case-brief">
+                <img
+                  src={activeCase.imageUrl}
+                  alt={activeCase.title}
+                  className="court-vote-case-thumb"
+                  draggable={false}
+                />
+                <div className="court-vote-case-copy">
+                  <div className="court-vote-case-meta">
+                    <span>{activeCase.typeLabel}</span>
+                    <span>Case {caseIndex}</span>
+                  </div>
+                  <h3>{activeCase.question}</h3>
+                  <p>{activeCase.title}</p>
+                  <div className="court-vote-case-tags">
+                    {activeCase.tags.slice(0, 3).map(tag => (
+                      <span key={tag}>{tag}</span>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -1812,9 +1835,24 @@ export function TravelCourtCaseFlow({
                   }}
                 >
                   <div className="court-vote-circle go">
-                    <Check size={42} strokeWidth={3.7} />
+                    <Check size={32} strokeWidth={3.7} />
                   </div>
                   <span>Go!</span>
+                </button>
+
+                <button
+                  type="button"
+                  className={`court-vote-btn-choice ${userVote === 'either' ? 'selected' : ''}`}
+                  onClick={() => {
+                    playVoteChime(true);
+                    triggerHaptic('vote');
+                    setUserVote('either');
+                  }}
+                >
+                  <div className="court-vote-circle either">
+                    <span>OK</span>
+                  </div>
+                  <span>Either</span>
                 </button>
 
                 <button
@@ -1827,7 +1865,7 @@ export function TravelCourtCaseFlow({
                   }}
                 >
                   <div className="court-vote-circle not-now">
-                    <X size={42} strokeWidth={3.7} />
+                    <X size={32} strokeWidth={3.7} />
                   </div>
                   <span>Not now</span>
                 </button>
