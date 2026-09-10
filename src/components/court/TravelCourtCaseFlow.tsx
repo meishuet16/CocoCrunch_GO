@@ -179,6 +179,24 @@ export function BouncingWaveText({ text }: { text: string }) {
   );
 }
 
+const CASE_DEFAULT_COMMENTS: Record<number, Array<{ id: string; author: string; avatar: string; text: string; timeAgo: string; likes: number; liked: boolean }>> = {
+  1: [
+    { id: '1-1', author: 'Alex', avatar: '#10b981', text: 'The food in Jeju is amazing!', timeAgo: '2m ago', likes: 3, liked: false },
+    { id: '1-2', author: 'Mavis', avatar: '#a855f7', text: 'I really want to see the beaches', timeAgo: '3m ago', likes: 2, liked: false },
+    { id: '1-3', author: 'Ken', avatar: '#3b82f6', text: 'Maybe we should also check city spots?', timeAgo: '4m ago', likes: 1, liked: false },
+  ],
+  2: [
+    { id: '2-1', author: 'Alex', avatar: '#10b981', text: 'Fresh seafood right by the ocean sounds incredible!', timeAgo: '2m ago', likes: 3, liked: false },
+    { id: '2-2', author: 'Mavis', avatar: '#a855f7', text: 'Love seafood hotpot, count me in!', timeAgo: '3m ago', likes: 2, liked: false },
+    { id: '2-3', author: 'Ken', avatar: '#3b82f6', text: 'Is it too spicy or raw? Not sure yet.', timeAgo: '4m ago', likes: 1, liked: false },
+  ],
+  3: [
+    { id: '3-1', author: 'Alex', avatar: '#10b981', text: 'The aerial ocean view from the cable car is top rated!', timeAgo: '2m ago', likes: 3, liked: false },
+    { id: '3-2', author: 'Mavis', avatar: '#a855f7', text: 'A must-do photo spot at sunset!', timeAgo: '3m ago', likes: 2, liked: false },
+    { id: '3-3', author: 'Ken', avatar: '#3b82f6', text: 'A bit scared of heights, but willing to try.', timeAgo: '4m ago', likes: 1, liked: false },
+  ],
+};
+
 export function TravelCourtCaseFlow({
   initialStep = 'lobby',
   onBackToIdeas,
@@ -206,7 +224,7 @@ export function TravelCourtCaseFlow({
       title: 'Jeju Island',
       selectedTitle: 'Jeju Island selected',
       verdictTitle: "We're going to Jeju!",
-      description: 'Clear turquoise water, volcanic landscapes, delicious food, and so much more!',
+      description: 'Golden beaches, volcanic landscapes, and fresh seafood by the ocean.',
       question: 'Shall we go to Jeju?',
       imageUrl: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?w=800&auto=format&fit=crop&q=80',
       tags: ['Beaches', 'Nature', 'Good food', 'Relax'],
@@ -273,12 +291,7 @@ export function TravelCourtCaseFlow({
 
   // Discussion comments state
   const [segmentedTab, setSegmentedTab] = useState<'discussion' | 'votes'>('discussion');
-  const [comments, setComments] = useState([
-    { id: '1', author: 'Alex', avatar: '#10b981', text: 'The food in Jeju is amazing!', timeAgo: '2m ago', likes: 3, liked: false },
-    { id: '2', author: 'Mavis', avatar: '#ec4899', text: 'I really want to see the beaches', timeAgo: '3m ago', likes: 2, liked: false },
-    { id: '3', author: 'Ken', avatar: '#3b82f6', text: 'Maybe we should also check city spots?', timeAgo: '4m ago', likes: 1, liked: false },
-    { id: '4', author: 'June', avatar: '#f59e0b', text: "I'm totally down! It's been on my bucket list!", timeAgo: '5m ago', likes: 2, liked: false },
-  ]);
+  const [comments, setComments] = useState(CASE_DEFAULT_COMMENTS[1]);
   const [newCommentText, setNewCommentText] = useState('');
   const [inviteToast, setInviteToast] = useState(false);
   const [internalMembers, setInternalMembers] = useState<DynamicCourtMember[]>(DEFAULT_COURT_MEMBERS);
@@ -386,30 +399,35 @@ export function TravelCourtCaseFlow({
   // When entering Screen 4 (jury-live), simulate sequential voting reveals
   useEffect(() => {
     if (currentStep === 'jury-live') {
-      // Initially 2 submitted (Alex & Mavis) and 2 pending (Ken & June), matching Figure 3
+      const userEffectiveVote = userVote === 'not-now' ? 'not-now' : 'go';
+
+      // Initially 2 submitted: Alex and June (You, the user whose vote is already in!)
+      // and 2 pending: Mavis and Ken
       setLiveJurors([
         { id: 'alex', name: 'Alex', vote: 'go', variant: 'green', avatarColor: '#10b981', hairColor: '#065f46' },
-        { id: 'mavis', name: 'Mavis', vote: 'go', variant: 'purple', avatarColor: '#a855f7', hairColor: '#f59e0b' },
+        { id: 'june', name: 'June (You)', vote: userEffectiveVote, variant: 'coral', avatarColor: '#ef4444', hairColor: '#db2777' },
+        { id: 'mavis', name: 'Mavis', vote: null, variant: 'purple', avatarColor: '#a855f7', hairColor: '#f59e0b' },
         { id: 'ken', name: 'Ken', vote: null, variant: 'blue', avatarColor: '#f59e0b', hairColor: '#1e3a8a' },
-        { id: 'june', name: 'June', vote: null, variant: 'coral', avatarColor: '#ef4444', hairColor: '#db2777' },
       ]);
       setTimerCount(6);
 
-      // Ken votes after 1.8s
+      // Mavis votes after 1.8s
+      const tMavis = window.setTimeout(() => {
+        playPop();
+        triggerHaptic('pop');
+        setLiveJurors(prev =>
+          prev.map(j => (j.id === 'mavis' ? { ...j, vote: 'go' } : j))
+        );
+      }, 1800);
+
+      // Ken votes after 3.6s
       const tKen = window.setTimeout(() => {
         playPop();
         triggerHaptic('pop');
         setLiveJurors(prev =>
-          prev.map(j => (j.id === 'ken' ? { ...j, vote: 'not-now' } : j))
-        );
-      }, 1800);
-
-      // June votes after 3.6s
-      const tJune = window.setTimeout(() => {
-        playPop();
-        triggerHaptic('pop');
-        setLiveJurors(prev =>
-          prev.map(j => (j.id === 'june' ? { ...j, vote: 'go' } : j))
+          prev.map(j =>
+            j.id === 'ken' ? { ...j, vote: userEffectiveVote === 'not-now' ? 'go' : 'not-now' } : j
+          )
         );
       }, 3600);
 
@@ -424,16 +442,26 @@ export function TravelCourtCaseFlow({
       }, 5400);
 
       return () => {
+        clearTimeout(tMavis);
         clearTimeout(tKen);
-        clearTimeout(tJune);
         clearInterval(countdownInterval);
         clearTimeout(finishTimer);
       };
     }
-  }, [currentStep]);
+  }, [currentStep, userVote]);
 
   // Handle verdict trigger with Gavel strike sound, haptic, screen shake
   const handleGoToVerdict = (outcome: 'pass' | 'fail') => {
+    const userEffectiveVote = userVote === 'not-now' ? 'not-now' : 'go';
+
+    // Ensure all 4 juror votes are fully set and consistent
+    setLiveJurors([
+      { id: 'alex', name: 'Alex', vote: 'go', variant: 'green', avatarColor: '#10b981', hairColor: '#065f46' },
+      { id: 'mavis', name: 'Mavis', vote: 'go', variant: 'purple', avatarColor: '#a855f7', hairColor: '#f59e0b' },
+      { id: 'ken', name: 'Ken', vote: userEffectiveVote === 'not-now' ? 'go' : 'not-now', variant: 'blue', avatarColor: '#f59e0b', hairColor: '#1e3a8a' },
+      { id: 'june', name: 'June (You)', vote: userEffectiveVote, variant: 'coral', avatarColor: '#ef4444', hairColor: '#db2777' },
+    ]);
+
     if (outcome === 'pass') {
       setCurrentStep('verdict-pass');
       playGavelStrike();
@@ -478,14 +506,14 @@ export function TravelCourtCaseFlow({
     triggerHaptic('vote');
     const newC = {
       id: `c-${Date.now()}`,
-      author: 'You',
-      avatar: '#10b981',
+      author: 'June (You)',
+      avatar: '#ef4444',
       text,
       timeAgo: 'Just now',
       likes: 0,
       liked: false,
     };
-    setComments([...comments, newC]);
+    setComments(prev => [...prev, newC]);
     setNewCommentText('');
   };
 
@@ -1905,6 +1933,37 @@ export function TravelCourtCaseFlow({
                 onClick={() => {
                   playWhoosh();
                   triggerHaptic('tap');
+
+                  const userEffectiveVote = userVote === 'not-now' ? 'not-now' : 'go';
+
+                  // Update June's vote in liveJurors immediately
+                  setLiveJurors(prev =>
+                    prev.map(j => (j.id === 'june' ? { ...j, vote: userEffectiveVote } : j))
+                  );
+
+                  // Update comments: only add June's comment if user typed a reason!
+                  if (userReason.trim()) {
+                    setComments(prev => {
+                      const clean = prev.filter(c => c.author !== 'June (You)' && c.author !== 'June' && c.author !== 'You');
+                      return [
+                        ...clean,
+                        {
+                          id: `c-june-${caseIndex}-${Date.now()}`,
+                          author: 'June (You)',
+                          avatar: '#ef4444',
+                          text: userReason.trim(),
+                          timeAgo: 'Just now',
+                          likes: 0,
+                          liked: false,
+                        }
+                      ];
+                    });
+                  } else {
+                    setComments(prev =>
+                      prev.filter(c => c.author !== 'June (You)' && c.author !== 'June' && c.author !== 'You')
+                    );
+                  }
+
                   setCurrentStep('jury-live');
                 }}
               >
@@ -2296,17 +2355,18 @@ export function TravelCourtCaseFlow({
 
           {(() => {
             const currentVerdictTitle = activeCase.verdictTitle ?? `We're going to ${activeCase.title}!`;
-            const yesCount = 3;
-            const noCount = 1;
-            const greenPct = 75;
+            const userEffectiveVote = userVote === 'not-now' ? 'not-now' : 'go';
 
-            // 4 Members with explicit voting states matching Figure 2
+            // 4 Members with dynamic voting states guaranteeing exactly 3 Go and 1 Not now matching Figure 2
             const verdictMembers = [
-              { id: 'alex', name: 'Alex', variant: 'green' as CharacterVariant, vote: 'go', bg: '#e6f9f0' },
-              { id: 'mavis', name: 'Mavis', variant: 'purple' as CharacterVariant, vote: 'go', bg: '#fef7e7' },
-              { id: 'ken', name: 'Ken', variant: 'blue' as CharacterVariant, vote: 'go', bg: '#f1f5f9' },
-              { id: 'june', name: 'June', variant: 'coral' as CharacterVariant, vote: 'not-now', bg: '#fff1f2' },
+              { id: 'alex', name: 'Alex', variant: 'green' as CharacterVariant, vote: 'go' as const, bg: '#e6f9f0' },
+              { id: 'mavis', name: 'Mavis', variant: 'purple' as CharacterVariant, vote: 'go' as const, bg: '#fef7e7' },
+              { id: 'ken', name: 'Ken', variant: 'blue' as CharacterVariant, vote: (userEffectiveVote === 'not-now' ? 'go' : 'not-now') as 'go' | 'not-now', bg: '#f1f5f9' },
+              { id: 'june', name: 'June (You)', variant: 'coral' as CharacterVariant, vote: userEffectiveVote, bg: '#fff1f2' },
             ];
+            const yesCount = verdictMembers.filter(m => m.vote === 'go').length;
+            const noCount = verdictMembers.filter(m => m.vote === 'not-now').length;
+            const greenPct = Math.round((yesCount / verdictMembers.length) * 100);
 
             return (
               <div className="court-verdict-page-container">
@@ -2456,9 +2516,11 @@ export function TravelCourtCaseFlow({
                       playWhoosh();
                       triggerHaptic('tap');
                       if (caseIndex < CASES.length) {
-                        setCaseIndex(prev => prev + 1);
+                        const nextCase = caseIndex + 1;
+                        setCaseIndex(nextCase);
                         setUserVote(null);
                         setUserReason('');
+                        setComments(CASE_DEFAULT_COMMENTS[nextCase] || CASE_DEFAULT_COMMENTS[1]);
                         setCurrentStep('proposal');
                       } else {
                         setCurrentStep('summary');
@@ -2483,96 +2545,175 @@ export function TravelCourtCaseFlow({
         <div className="court-case-chamber">
           <MobileStatusBar />
           <header className="court-navbar">
-            <button className="court-nav-back-btn" onClick={() => setCurrentStep('jury-live')} aria-label="Back">
+            <button className="court-nav-back-btn" onClick={() => setCurrentStep('proposal')} aria-label="Back">
               <ChevronLeft size={24} />
             </button>
             <div className="court-nav-title-group" style={{ alignItems: 'center' }}>
               <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>
-                Case 2 of 3
+                Case {caseIndex} of 3
               </span>
               <div style={{ display: 'flex', gap: 4, width: 80, marginTop: 4 }}>
                 <div style={{ height: 4, flex: 1, background: '#1877f2', borderRadius: 99 }} />
-                <div style={{ height: 4, flex: 1, background: '#1877f2', borderRadius: 99 }} />
-                <div style={{ height: 4, flex: 1, background: '#e2e8f0', borderRadius: 99 }} />
+                <div style={{ height: 4, flex: 1, background: caseIndex >= 2 ? '#1877f2' : '#e2e8f0', borderRadius: 99 }} />
+                <div style={{ height: 4, flex: 1, background: caseIndex >= 3 ? '#1877f2' : '#e2e8f0', borderRadius: 99 }} />
               </div>
             </div>
             <div style={{ width: 38 }} />
           </header>
 
-          <div
-            className="court-verdict-screen"
-            style={{
-              padding: '8px 18px 2px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flex: 1,
-              minHeight: 0,
-              overflow: 'hidden',
-              boxSizing: 'border-box',
-            }}
-          >
-            {/* Top Section */}
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div className="court-verdict-subtitle" style={{ fontSize: '13px', margin: '2px 0' }}>The verdict is...</div>
-              <div className="court-verdict-title rejected" style={{ fontSize: '24px', margin: '2px 0 6px' }}>Not this time!</div>
+          {(() => {
+            const userEffectiveVote = userVote === 'not-now' ? 'not-now' : 'go';
+            const verdictMembers = [
+              { id: 'alex', name: 'Alex', variant: 'green' as CharacterVariant, vote: (userEffectiveVote === 'go' ? 'not-now' : 'go') as 'go' | 'not-now', bg: '#e6f9f0' },
+              { id: 'mavis', name: 'Mavis', variant: 'purple' as CharacterVariant, vote: 'not-now' as const, bg: '#fef7e7' },
+              { id: 'ken', name: 'Ken', variant: 'blue' as CharacterVariant, vote: 'not-now' as const, bg: '#f1f5f9' },
+              { id: 'june', name: 'June (You)', variant: 'coral' as CharacterVariant, vote: userEffectiveVote, bg: '#fff1f2' },
+            ];
+            const yesCount = verdictMembers.filter(m => m.vote === 'go').length;
+            const noCount = verdictMembers.filter(m => m.vote === 'not-now').length;
+            const greenPct = Math.round((yesCount / verdictMembers.length) * 100);
 
-              <div style={{ margin: '4px 0 10px', display: 'flex', justifyContent: 'center' }}>
-                <DuolingoJudgeBench state="slumped" size={135} benchWidth={160} />
-              </div>
+            return (
+              <div className="court-verdict-page-container">
+                {/* Top Section */}
+                <div className="court-verdict-header-block">
+                  <div className="court-verdict-subtitle-text">The verdict is...</div>
+                  <div className="court-verdict-title-wrap">
+                    <h2 className="court-verdict-main-title" style={{ color: '#ef4444' }}>
+                      Not this time!
+                    </h2>
+                  </div>
 
-              {/* Score Bar 1 vs 3 */}
-              <div className="court-score-bar-card" style={{ width: '100%', marginTop: 4 }}>
-                <div className="court-score-numbers">
-                  <span className="court-score-green">1</span>
-                  <span className="court-score-red">3</span>
-                </div>
-                <div className="court-score-split-bar">
-                  <div className="court-score-bar-green" style={{ width: '25%' }} />
-                  <div className="court-score-bar-red" style={{ width: '75%' }} />
-                </div>
-                <div className="court-score-avatars-row" style={{ justifyContent: 'space-around', padding: '0 20px' }}>
-                  {JURORS.map((j, i) => (
-                    <div key={j.id} className="court-score-avatar-item">
-                      <TravelCourtCharacter
-                        variant={j.variant || 'blue'}
-                        isAvatar
-                        size={42}
-                      />
-                      <div className={`court-score-avatar-badge ${i < 1 ? 'green' : 'red'}`}>
-                        {i < 1 ? '✓' : '✕'}
-                      </div>
+                  {/* Stage Area: Sticky Note + Slumped Judge */}
+                  <div className="court-verdict-stage-area">
+                    <div className="court-verdict-stickynote" style={{ background: '#fef3f2', border: '1px solid #fecdd3' }}>
+                      Next<br />
+                      Time<br />
+                      Another<br />
+                      Spot<br />
+                      Together ♡
                     </div>
-                  ))}
-                </div>
-              </div>
-            </div>
 
-            {/* Bottom Action Group */}
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 8, paddingTop: 4 }}>
-              <button
-                type="button"
-                className="court-sticky-cta-btn"
-                style={{ width: '100%', marginBottom: 6 }}
-                onClick={() => {
-                  playWhoosh();
-                  triggerHaptic('tap');
-                  if (caseIndex < CASES.length) {
-                    setCaseIndex(prev => prev + 1);
-                    setUserVote(null);
-                    setUserReason('');
-                    setCurrentStep('proposal');
-                  } else {
-                    setCurrentStep('summary');
-                  }
-                }}
-              >
-                {caseIndex < CASES.length ? 'Next case →' : 'View summary →'}
-              </button>
-              <MobileHomeIndicator />
-            </div>
-          </div>
+                    <DuolingoJudgeBench state="slumped" size={118} benchWidth={148} />
+                  </div>
+                </div>
+
+                {/* Card 1: Selected Case Card */}
+                <div className="court-selected-case-card">
+                  <img
+                    src={activeCase.imageUrl}
+                    alt={activeCase.title}
+                    className="court-selected-case-thumb"
+                  />
+                  <div className="court-selected-case-info">
+                    <div className="court-selected-case-badges">
+                      <span className="court-badge-type">{activeCase.typeLabel}</span>
+                      <span className="court-badge-result" style={{ background: '#fee2e2', color: '#b91c1c' }}>Verdict Rejected</span>
+                    </div>
+                    <h3 className="court-selected-case-title">
+                      {activeCase.selectedTitle}
+                    </h3>
+                    <p className="court-selected-case-desc">
+                      {activeCase.description}
+                    </p>
+                    <div className="court-selected-case-tags">
+                      {activeCase.tags.slice(0, 3).map((tag, idx) => (
+                        <span key={idx} className="court-selected-case-tag">{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card 2: Vote Results Card */}
+                <div className="court-vote-results-card">
+                  <div className="court-vote-results-header">
+                    <div className="court-vote-results-title-group">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="13" width="4.5" height="8" rx="1.5" fill="#93c5fd" />
+                        <rect x="9.75" y="8" width="4.5" height="13" rx="1.5" fill="#60a5fa" />
+                        <rect x="16.5" y="3" width="4.5" height="18" rx="1.5" fill="#1877f2" />
+                      </svg>
+                      <h3 className="court-vote-results-title">Vote results</h3>
+                    </div>
+                    <span className="court-vote-results-count">4 members voted</span>
+                  </div>
+
+                  {/* Score numbers and Split Bar */}
+                  <div className="court-vote-score-row">
+                    <span className="court-vote-num-green">{yesCount}</span>
+                    <div className="court-vote-progress-track">
+                      <div className="court-vote-progress-green" style={{ width: `${greenPct}%` }} />
+                      <div className="court-vote-progress-red" style={{ width: `${100 - greenPct}%` }} />
+                    </div>
+                    <span className="court-vote-num-red">{noCount}</span>
+                  </div>
+
+                  {/* 4 Members */}
+                  <div className="court-vote-members-grid">
+                    {verdictMembers.map((j) => {
+                      const isYes = j.vote !== 'not-now';
+                      return (
+                        <div key={j.id} className="court-vote-member-col">
+                          <div className="court-vote-avatar-container" style={{ background: j.bg }}>
+                            <TravelCourtCharacter
+                              variant={j.variant}
+                              isAvatar
+                              size={46}
+                            />
+                            <div className={`court-vote-member-badge ${isYes ? 'badge-green' : 'badge-red'}`}>
+                              {isYes ? '✓' : '✕'}
+                            </div>
+                          </div>
+                          <span className="court-vote-member-name">{j.name}</span>
+                          <span className={`court-vote-member-pill ${isYes ? 'pill-green' : 'pill-red'}`}>
+                            {isYes ? 'Go!' : 'Not now'}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Bottom Action Group */}
+                <div className="court-verdict-bottom-actions">
+                  <button
+                    type="button"
+                    className="court-verdict-secondary-btn"
+                    onClick={() => {
+                      playWhoosh();
+                      setCurrentStep('discussion');
+                    }}
+                  >
+                    <MessageCircle size={18} />
+                    <span>View discussion</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="court-verdict-primary-btn"
+                    onClick={() => {
+                      playWhoosh();
+                      triggerHaptic('tap');
+                      if (caseIndex < CASES.length) {
+                        const nextCase = caseIndex + 1;
+                        setCaseIndex(nextCase);
+                        setUserVote(null);
+                        setUserReason('');
+                        setComments(CASE_DEFAULT_COMMENTS[nextCase] || CASE_DEFAULT_COMMENTS[1]);
+                        setCurrentStep('proposal');
+                      } else {
+                        setCurrentStep('summary');
+                      }
+                    }}
+                  >
+                    <span>{caseIndex < CASES.length ? 'Next case →' : 'View summary →'}</span>
+                  </button>
+                </div>
+
+                <MobileHomeIndicator />
+              </div>
+            );
+          })()}
         </div>
       )}
 
@@ -2635,13 +2776,20 @@ export function TravelCourtCaseFlow({
                   {comments.map(c => (
                     <div key={c.id} className="court-comment-bubble">
                       <TravelCourtCharacter
-                        variant={c.author === 'Alex' ? 'green' : c.author === 'Mavis' ? 'coral' : c.author === 'Ken' ? 'blue' : c.author === 'June' ? 'purple' : 'yellow'}
+                        variant={
+                          c.author.includes('Alex') ? 'green' :
+                          c.author.includes('Mavis') ? 'purple' :
+                          c.author.includes('Ken') ? 'blue' :
+                          'coral'
+                        }
                         isAvatar
                         size={40}
                       />
                       <div className="court-comment-content">
                         <div className="court-comment-header">
-                          <b>{c.author}</b>
+                          <b style={{ color: (c.author.includes('June') || c.author.includes('You')) ? '#dc2626' : '#0f172a' }}>
+                            {c.author}
+                          </b>
                           <span>{c.timeAgo}</span>
                         </div>
                         <p className="court-comment-text">{c.text}</p>
@@ -2681,33 +2829,74 @@ export function TravelCourtCaseFlow({
             ) : (
               /* Votes Tab breakdown */
               <div className="court-comments-stream">
-                {JURORS.map((j, i) => (
-                  <div key={j.id} className="court-comment-bubble" style={{ alignItems: 'center' }}>
-                    <TravelCourtCharacter
-                      variant={j.variant || 'blue'}
-                      isAvatar
-                      size={44}
-                    />
-                    <div style={{ flex: 1, marginLeft: 10 }}>
-                      <b style={{ fontSize: '14px', color: '#0f172a' }}>{j.name}</b>
-                      <div style={{ fontSize: '12px', color: '#64748b' }}>
-                        {i !== 2 ? 'Voted Go! (Wants to visit beaches & food)' : 'Voted Not now (Prefers city spots)'}
+                {(() => {
+                  const userEffectiveVote = userVote === 'not-now' ? 'not-now' : 'go';
+                  const votesBreakdown = [
+                    {
+                      id: 'alex',
+                      name: 'Alex',
+                      variant: 'green' as CharacterVariant,
+                      vote: 'go' as const,
+                      reason: activeCase.id === 1 ? 'Wants to visit beaches & food' : activeCase.id === 2 ? 'Loves seafood hotpot by the coast' : 'Excited for high-altitude scenic views',
+                    },
+                    {
+                      id: 'mavis',
+                      name: 'Mavis',
+                      variant: 'purple' as CharacterVariant,
+                      vote: 'go' as const,
+                      reason: activeCase.id === 1 ? 'Can’t wait for coastal walks' : activeCase.id === 2 ? 'Eager to try local abalone' : 'Great spot for group photos',
+                    },
+                    {
+                      id: 'ken',
+                      name: 'Ken',
+                      variant: 'blue' as CharacterVariant,
+                      vote: (userEffectiveVote === 'not-now' ? 'go' : 'not-now') as 'go' | 'not-now',
+                      reason: userEffectiveVote === 'not-now'
+                        ? (activeCase.id === 1 ? 'Convinced to join the beach trip' : activeCase.id === 2 ? 'Convinced to try fresh seafood' : 'Ready to enjoy the scenic ride')
+                        : (activeCase.id === 1 ? 'Prefers downtown city spots' : activeCase.id === 2 ? 'Worried about seafood allergies' : 'Prefers staying on the ground'),
+                    },
+                    {
+                      id: 'june',
+                      name: 'June (You)',
+                      variant: 'coral' as CharacterVariant,
+                      vote: userEffectiveVote,
+                      reason: userReason.trim()
+                        ? userReason.trim()
+                        : (userEffectiveVote === 'not-now' ? 'Prefers an alternative plan' : 'Ready to explore!'),
+                    },
+                  ];
+
+                  return votesBreakdown.map((j) => {
+                    const isYes = j.vote === 'go';
+                    return (
+                      <div key={j.id} className="court-comment-bubble" style={{ alignItems: 'center' }}>
+                        <TravelCourtCharacter
+                          variant={j.variant}
+                          isAvatar
+                          size={44}
+                        />
+                        <div style={{ flex: 1, marginLeft: 10 }}>
+                          <b style={{ fontSize: '14px', color: '#0f172a' }}>{j.name}</b>
+                          <div style={{ fontSize: '12px', color: '#64748b' }}>
+                            {isYes ? `Voted Go! (${j.reason})` : `Voted Not now (${j.reason})`}
+                          </div>
+                        </div>
+                        <span
+                          style={{
+                            padding: '4px 10px',
+                            borderRadius: 99,
+                            fontSize: '12px',
+                            fontWeight: 800,
+                            background: isYes ? '#edfdf5' : '#fef3f2',
+                            color: isYes ? '#12b76a' : '#f04438',
+                          }}
+                        >
+                          {isYes ? 'Go!' : 'Not now'}
+                        </span>
                       </div>
-                    </div>
-                    <span
-                      style={{
-                        padding: '4px 10px',
-                        borderRadius: 99,
-                        fontSize: '12px',
-                        fontWeight: 800,
-                        background: i !== 2 ? '#edfdf5' : '#fef3f2',
-                        color: i !== 2 ? '#12b76a' : '#f04438',
-                      }}
-                    >
-                      {i !== 2 ? 'Go!' : 'Not now'}
-                    </span>
-                  </div>
-                ))}
+                    );
+                  });
+                })()}
               </div>
             )}
 
