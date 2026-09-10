@@ -1485,18 +1485,71 @@ export default function AppRescued() {
     const scoreValue = (key: keyof TingoDimensions) => Math.max(8, Math.min(98, Math.round(58 + tingoDimensions[key] * 7)));
 
     if (tingoStep < 0 && !complete) {
-      return <div className="tingo-flow tingo-how">
-        <div className="tingo-flow-top"><button aria-label="Back" onClick={() => setDrawer(null)}>‹</button><div><i style={{ width: `${barWidth}%` }} /></div><span>1/12</span></div>
-        <span className="tingo-flow-kicker">LET&apos;S BEGIN</span>
-        <h2>How it works?</h2>
-        <div className="tingo-how-list">
-          <article><span><Map size={25} /></span><div><b>Two options, every question</b><small>Pick the one that feels more like you. No right or wrong answers.</small></div></article>
-          <article><span><Image size={25} /></span><div><b>Real travel scenarios</b><small>Based on actual trip decisions and experiences.</small></div></article>
-          <article><span><MapPin size={25} /></span><div><b>No right or wrong</b><small>Just your personal preferences.</small></div></article>
-          <article><span><Sparkles size={25} /></span><div><b>A better trip for you</b><small>The more you choose, the better we plan for you.</small></div></article>
+      return (
+        <div className="tingo-flow tingo-how">
+          <div className="tingo-flow-top">
+            <button aria-label="Back" onClick={() => setDrawer(null)}>‹</button>
+            <div><i style={{ width: `${barWidth}%` }} /></div>
+            <span>1/12</span>
+          </div>
+
+          <div className="tingo-how-header">
+            <h2>How it works?</h2>
+            <p>4 quick rules to uncover your true travel persona ✨</p>
+          </div>
+
+          <div className="tingo-how-list">
+            <article className="how-card how-card-1">
+              <span className="how-step-num num-maroon">01</span>
+              <div className="how-card-body">
+                <div className="how-card-title-row">
+                  <b>Two options, every question</b>
+                  <span className="how-feature-tag tag-maroon">Pick 1</span>
+                </div>
+                <small>Pick what feels like you. No right or wrong answers.</small>
+              </div>
+            </article>
+
+            <article className="how-card how-card-2">
+              <span className="how-step-num num-travel">02</span>
+              <div className="how-card-body">
+                <div className="how-card-title-row">
+                  <b>Real travel scenarios</b>
+                  <span className="how-feature-tag tag-travel">Real Life</span>
+                </div>
+                <small>Based on actual trip dilemmas and genuine moments.</small>
+              </div>
+            </article>
+
+            <article className="how-card how-card-3">
+              <span className="how-step-num num-heart">03</span>
+              <div className="how-card-body">
+                <div className="how-card-title-row">
+                  <b>No right or wrong</b>
+                  <span className="how-feature-tag tag-heart">100% You</span>
+                </div>
+                <small>Just your spontaneous personal vibes and gut instincts.</small>
+              </div>
+            </article>
+
+            <article className="how-card how-card-4">
+              <span className="how-step-num num-sparkles">04</span>
+              <div className="how-card-body">
+                <div className="how-card-title-row">
+                  <b>A better trip for you</b>
+                  <span className="how-feature-tag tag-sparkles">AI Magic</span>
+                </div>
+                <small>The more you choose, the smarter we personalize your plan.</small>
+              </div>
+            </article>
+          </div>
+
+          <button className="tingo-flow-primary tingo-how-maroon-btn" onClick={() => setTingoStep(0)}>
+            <span>Got it, let&apos;s go!</span>
+            <ChevronRight size={18} />
+          </button>
         </div>
-        <button className="tingo-flow-primary" onClick={() => setTingoStep(0)}>Got it! <ChevronRight size={20} /></button>
-      </div>;
+      );
     }
 
     if (complete && !tingoRevealed) {
