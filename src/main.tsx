@@ -9,6 +9,7 @@ import './v2-polish.css';
 import './gacha-interactions.css';
 import './explore-redesign.css';
 import './me-redesign.css';
+import './components/court/court-styles.css';
 
 window.addEventListener('error', (e) => {
   console.error('[Global Error]', e.error || e.message);

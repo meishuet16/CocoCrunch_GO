@@ -9,6 +9,7 @@ export type CocoSound =
   | 'capture'
   | 'courier'
   | 'receipt'
+  | 'gavel'
   | 'prayer-step'
   | 'memory-open'
   | 'memory-seal';
@@ -26,6 +27,7 @@ const cue: Record<CocoSound, CueName> = {
   capture: 'drop',
   courier: 'send',
   receipt: 'complete',
+  gavel: 'drop',
   'prayer-step': 'progress-step',
   'memory-open': 'open',
   'memory-seal': 'checkpoint',
@@ -50,8 +52,34 @@ export function playSound(sound: CocoSound): void {
   if (!ready) return;
   try {
     ui.play(cue[sound]);
+    if (sound === 'gavel') playGavelKnock();
   } catch {
     // Audio is progressive enhancement; never block product logic.
+  }
+}
+
+function playGavelKnock(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const AudioContextCtor = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AudioContextCtor) return;
+    const audio = new AudioContextCtor();
+    const now = audio.currentTime;
+    const oscillator = audio.createOscillator();
+    const gain = audio.createGain();
+    oscillator.type = 'triangle';
+    oscillator.frequency.setValueAtTime(118, now);
+    oscillator.frequency.exponentialRampToValueAtTime(54, now + 0.08);
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.exponentialRampToValueAtTime(0.34, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+    oscillator.connect(gain);
+    gain.connect(audio.destination);
+    oscillator.start(now);
+    oscillator.stop(now + 0.17);
+    window.setTimeout(() => { void audio.close(); }, 240);
+  } catch {
+    // The packaged cue above is enough when custom synthesis is unavailable.
   }
 }
 
