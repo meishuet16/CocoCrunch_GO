@@ -345,21 +345,21 @@ export const CourtCharacter: React.FC<CourtCharacterProps> = ({
     : 'duo-anim-thinking';
 
 const AVATAR_CONFIGS: Record<CharacterId, { scale: number; shiftX: number; shiftY: number }> = {
-  // Alex (绿色): shifted left by 3 units (shiftX: -15), cap intact, face centered
-  boy_green: { scale: 1.88, shiftX: -15, shiftY: -1 },
-  // Mavis (红色): shifted left by 3 units (shiftX: -14), red hat intact, face centered
-  girl_redhat: { scale: 1.82, shiftX: -14, shiftY: 0 },
-  // Ken (墨镜): centered horizontally (shiftX: 0), shifted down by 2 units (shiftY: 3)
-  boy_yellow: { scale: 1.88, shiftX: 0, shiftY: 3 },
-  // June (金发): face centered (shiftX: -16)
-  girl_blonde: { scale: 1.92, shiftX: -16, shiftY: -2 },
+  // Alex (绿色帽子男孩): head centered, cap fully intact with breathing room
+  boy_green: { scale: 1.71, shiftX: -22.1, shiftY: -1.9 },
+  // Mavis (金发女孩): head centered, golden hair and cute smile framed nicely
+  girl_blonde: { scale: 2.04, shiftX: -19.2, shiftY: -13.5 },
+  // Ken (墨镜卷发男孩): head centered horizontally, sunglasses and smile centered
+  boy_yellow: { scale: 1.71, shiftX: -1.0, shiftY: -1.9 },
+  // June (红帽子女孩): head centered, red bucket hat fully visible with breathing room
+  girl_redhat: { scale: 2.0, shiftX: -21.2, shiftY: -11.5 },
   // Judge (法官): white wig intact, face centered
-  judge: { scale: 1.85, shiftX: -12, shiftY: -1 },
+  judge: { scale: 1.65, shiftX: -11.5, shiftY: -1.9 },
 };
 
   // Dedicated Centered Bust / Headshot Avatar Mode (Perfect for circular avatars)
   if (isAvatar) {
-    const config = AVATAR_CONFIGS[charId] || { scale: 1.88, shiftX: 0, shiftY: -1 };
+    const config = AVATAR_CONFIGS[charId] || { scale: 1.71, shiftX: -1.0, shiftY: -1.9 };
     const avatarCellW = Math.round(size * config.scale);
     const avatarCellH = Math.round(avatarCellW * 1.15);
     const avatarTop = Math.round(size * (config.shiftY / 100));
@@ -378,8 +378,6 @@ const AVATAR_CONFIGS: Record<CharacterId, { scale: number; shiftX: number; shift
           alignItems: 'center',
           justifyContent: 'center',
           background: 'radial-gradient(circle at 50% 35%, #ffffff 0%, #f1f5f9 100%)',
-          border: '2px solid #ffffff',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
           cursor: onClick ? 'pointer' : 'default',
           flexShrink: 0,
           ...style,
@@ -404,10 +402,14 @@ const AVATAR_CONFIGS: Record<CharacterId, { scale: number; shiftX: number; shift
             src={currentImgSrc}
             alt={alt || `${charId} avatar`}
             onError={() => setUseFallback(true)}
+            className="duo-avatar-sprite-img"
             style={{
               position: 'absolute',
               width: '300%',
               height: '200%',
+              maxWidth: 'none',
+              maxHeight: 'none',
+              borderRadius: 0,
               left: `${-coord.c * 100}%`,
               top: `${-coord.r * 100}%`,
               objectFit: 'fill',

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   ChevronLeft, Check, X, Clock, Heart, Send, Plane, Home,
-  MapPin, Utensils, ArrowRight, Plus
+  MapPin, Utensils, ArrowRight, Plus, MessageCircle
 } from 'lucide-react';
 import {
   DuolingoJudge, DuolingoJudgeBench,
@@ -204,6 +204,9 @@ export function TravelCourtCaseFlow({
       type: 'destination',
       typeLabel: '📍 Destination',
       title: 'Jeju Island',
+      selectedTitle: 'Jeju Island selected',
+      verdictTitle: "We're going to Jeju!",
+      description: 'Clear turquoise water, volcanic landscapes, delicious food, and so much more!',
       question: 'Shall we go to Jeju?',
       imageUrl: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?w=800&auto=format&fit=crop&q=80',
       tags: ['Beaches', 'Nature', 'Good food', 'Relax'],
@@ -213,18 +216,24 @@ export function TravelCourtCaseFlow({
       type: 'restaurant',
       typeLabel: '🍽️ Restaurant',
       title: 'Haenyeo Seafood House',
+      selectedTitle: 'Haenyeo Seafood House selected',
+      verdictTitle: "We're eating at Haenyeo Seafood!",
+      description: 'Fresh abalone and seafood hotpot cooked by local haenyeo divers right by the sea.',
       question: 'Eat at Haenyeo Seafood?',
       imageUrl: 'https://images.unsplash.com/photo-1519984388953-d2406bc725e1?w=800&auto=format&fit=crop&q=80',
-      tags: ['Seafood', 'Local Eats', 'Authentic', 'Must Try'],
+      tags: ['Fresh seafood', 'Local culinary', 'Must-try'],
     },
     {
       id: 3,
       type: 'activity',
       typeLabel: '🚠 Activity',
       title: 'Seongsan Cable Car',
+      selectedTitle: 'Seongsan Cable Car selected',
+      verdictTitle: "We're riding the Seongsan Cable Car!",
+      description: 'Panoramic views of the sunrise peak and coastline from high-altitude glass cabins.',
       question: 'Ride the Seongsan Cable Car?',
       imageUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&auto=format&fit=crop&q=80',
-      tags: ['Scenic', 'Photo Spot', 'Adventure', 'Views'],
+      tags: ['Scenic views', 'Outdoor', 'Family friendly'],
     },
   ];
   const activeCase = CASES[caseIndex - 1] ?? CASES[0];
@@ -2182,14 +2191,13 @@ export function TravelCourtCaseFlow({
                         <div
                           key={j.id}
                           style={{
-                            width: 24,
-                            height: 24,
+                            width: 26,
+                            height: 26,
                             borderRadius: '50%',
-                            border: '2px solid #ffffff',
                             boxShadow: '0 2px 5px rgba(0,0,0,0.12)',
                             marginLeft: i === 0 ? 0 : -6,
                             zIndex: 10 - i,
-                            overflow: 'hidden',
+                            border: '1.5px solid #ffffff',
                             background: j.avatarColor,
                             display: 'flex',
                             alignItems: 'center',
@@ -2215,14 +2223,13 @@ export function TravelCourtCaseFlow({
                         <div
                           key={j.id}
                           style={{
-                            width: 24,
-                            height: 24,
+                            width: 26,
+                            height: 26,
                             borderRadius: '50%',
-                            border: '2px solid #ffffff',
                             boxShadow: '0 2px 5px rgba(0,0,0,0.12)',
                             marginLeft: i === 0 ? 0 : -6,
                             zIndex: 10 - i,
-                            overflow: 'hidden',
+                            border: '1.5px solid #ffffff',
                             background: j.avatarColor,
                             display: 'flex',
                             alignItems: 'center',
@@ -2288,109 +2295,181 @@ export function TravelCourtCaseFlow({
           </header>
 
           {(() => {
-            const verdictTitles = [
-              "We're going to Jeju!",
-              "We're eating at Haenyeo Seafood!",
-              "We're riding the Seongsan Cable Car!",
+            const currentVerdictTitle = activeCase.verdictTitle ?? `We're going to ${activeCase.title}!`;
+            const yesCount = 3;
+            const noCount = 1;
+            const greenPct = 75;
+
+            // 4 Members with explicit voting states matching Figure 2
+            const verdictMembers = [
+              { id: 'alex', name: 'Alex', variant: 'green' as CharacterVariant, vote: 'go', bg: '#e6f9f0' },
+              { id: 'mavis', name: 'Mavis', variant: 'purple' as CharacterVariant, vote: 'go', bg: '#fef7e7' },
+              { id: 'ken', name: 'Ken', variant: 'blue' as CharacterVariant, vote: 'go', bg: '#f1f5f9' },
+              { id: 'june', name: 'June', variant: 'coral' as CharacterVariant, vote: 'not-now', bg: '#fff1f2' },
             ];
-            const currentVerdictTitle = verdictTitles[caseIndex - 1] ?? `We're going to ${activeCase.title}!`;
-            const yesCount = liveJurors.filter(j => j.vote === 'go').length || 3;
-            const noCount = liveJurors.filter(j => j.vote === 'not-now').length || 1;
-            const greenPct = Math.round((yesCount / (yesCount + noCount)) * 100);
 
             return (
-              <div
-                className="court-verdict-screen"
-                style={{
-                  padding: '8px 18px 2px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  flex: 1,
-                  minHeight: 0,
-                  overflow: 'hidden',
-                  boxSizing: 'border-box',
-                }}
-              >
-                {/* Top Section: Subtitle + Title + Judge Bench + Score Bar Card */}
-                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <div className="court-verdict-subtitle" style={{ fontSize: '13px', margin: '2px 0' }}>The verdict is...</div>
-                  <div className="court-verdict-title accepted" style={{ fontSize: '24px', margin: '2px 0 6px' }}>
-                    {currentVerdictTitle}
+              <div className="court-verdict-page-container">
+                {/* Top Section: Subtitle + Dynamic Title with Sparks + Stage Judge Area */}
+                <div className="court-verdict-header-block">
+                  <div className="court-verdict-subtitle-text">The verdict is...</div>
+                  <div className="court-verdict-title-wrap">
+                    {/* Festive confetti sparks */}
+                    <svg width="18" height="18" viewBox="0 0 24 24" style={{ position: 'absolute', left: 4, top: -4 }}>
+                      <path d="M4 14 Q8 10 14 6" stroke="#38bdf8" strokeWidth="3" strokeLinecap="round" fill="none" />
+                    </svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" style={{ position: 'absolute', left: -6, bottom: 2 }}>
+                      <path d="M6 6 C12 6 14 12 10 16" stroke="#f59e0b" strokeWidth="3" strokeLinecap="round" fill="none" />
+                    </svg>
+
+                    <h2 className="court-verdict-main-title">
+                      {currentVerdictTitle}
+                    </h2>
+
+                    <svg width="18" height="18" viewBox="0 0 24 24" style={{ position: 'absolute', right: 4, top: -4 }}>
+                      <path d="M4 6 Q10 10 14 14" stroke="#f59e0b" strokeWidth="3" strokeLinecap="round" fill="none" />
+                    </svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" style={{ position: 'absolute', right: -6, bottom: 2 }}>
+                      <path d="M14 6 C8 6 6 12 10 16" stroke="#38bdf8" strokeWidth="3" strokeLinecap="round" fill="none" />
+                    </svg>
                   </div>
 
-                  <div style={{ margin: '4px 0 10px', display: 'flex', justifyContent: 'center' }}>
-                    <DuolingoJudgeBench state="striking" size={135} benchWidth={160} />
+                  {/* Stage Area: Sticky Note + Judge + Stamp */}
+                  <div className="court-verdict-stage-area">
+                    <div className="court-verdict-stickynote">
+                      Good<br />
+                      Places<br />
+                      Brighter<br />
+                      Journeys<br />
+                      Together ♡
+                    </div>
+
+                    <DuolingoJudgeBench state="striking" size={118} benchWidth={148} />
+
+                    <div className="court-verdict-stamp">
+                      <div className="court-stamp-circle">
+                        <span className="court-stamp-label">TRAVEL</span>
+                        <span className="court-stamp-label">COURT</span>
+                        <Plane size={11} className="court-stamp-plane-icon" />
+                      </div>
+                      <svg width="22" height="26" viewBox="0 0 22 26" style={{ marginLeft: 2 }}>
+                        <path d="M0 5 Q 5 1, 11 5 T 22 5 M0 13 Q 5 9, 11 13 T 22 13 M0 21 Q 5 17, 11 21 T 22 21" stroke="#b91c1c" strokeWidth="1.3" fill="none" opacity="0.65" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card 1: Selected Case Card */}
+                <div className="court-selected-case-card">
+                  <img
+                    src={activeCase.imageUrl}
+                    alt={activeCase.title}
+                    className="court-selected-case-thumb"
+                  />
+                  <div className="court-selected-case-info">
+                    <div className="court-selected-case-badges">
+                      <span className="court-badge-type">{activeCase.typeLabel}</span>
+                      <span className="court-badge-result">Final result</span>
+                    </div>
+                    <h3 className="court-selected-case-title">
+                      {activeCase.selectedTitle}
+                    </h3>
+                    <p className="court-selected-case-desc">
+                      {activeCase.description}
+                    </p>
+                    <div className="court-selected-case-tags">
+                      {activeCase.tags.slice(0, 3).map((tag, idx) => (
+                        <span key={idx} className="court-selected-case-tag">{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card 2: Vote Results Card */}
+                <div className="court-vote-results-card">
+                  <div className="court-vote-results-header">
+                    <div className="court-vote-results-title-group">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="13" width="4.5" height="8" rx="1.5" fill="#93c5fd" />
+                        <rect x="9.75" y="8" width="4.5" height="13" rx="1.5" fill="#60a5fa" />
+                        <rect x="16.5" y="3" width="4.5" height="18" rx="1.5" fill="#1877f2" />
+                      </svg>
+                      <h3 className="court-vote-results-title">Vote results</h3>
+                    </div>
+                    <span className="court-vote-results-count">4 members voted</span>
                   </div>
 
-                  {/* Score Bar */}
-                  <div className="court-score-bar-card" style={{ width: '100%', marginTop: 4 }}>
-                    <div className="court-score-numbers">
-                      <span className="court-score-green">{yesCount}</span>
-                      <span className="court-score-red">{noCount}</span>
+                  {/* Score numbers and Split Bar */}
+                  <div className="court-vote-score-row">
+                    <span className="court-vote-num-green">{yesCount}</span>
+                    <div className="court-vote-progress-track">
+                      <div className="court-vote-progress-green" style={{ width: `${greenPct}%` }} />
+                      <div className="court-vote-progress-red" style={{ width: `${100 - greenPct}%` }} />
                     </div>
-                    <div className="court-score-split-bar">
-                      <div className="court-score-bar-green" style={{ width: `${greenPct}%` }} />
-                      <div className="court-score-bar-red" style={{ width: `${100 - greenPct}%` }} />
-                    </div>
-                    <div className="court-score-avatars-row" style={{ justifyContent: 'space-around', padding: '0 20px' }}>
-                      {liveJurors.map((j) => {
-                        const isNo = j.vote === 'not-now';
-                        return (
-                          <div key={j.id} className="court-score-avatar-item">
+                    <span className="court-vote-num-red">{noCount}</span>
+                  </div>
+
+                  {/* 4 Members */}
+                  <div className="court-vote-members-grid">
+                    {verdictMembers.map((j) => {
+                      const isYes = j.vote !== 'not-now';
+                      return (
+                        <div key={j.id} className="court-vote-member-col">
+                          <div className="court-vote-avatar-container" style={{ background: j.bg }}>
                             <TravelCourtCharacter
-                              variant={j.variant || 'blue'}
+                              variant={j.variant}
                               isAvatar
-                              size={42}
+                              size={46}
                             />
-                            <div className={`court-score-avatar-badge ${isNo ? 'red' : 'green'}`}>
-                              {isNo ? '✕' : '✓'}
+                            <div className={`court-vote-member-badge ${isYes ? 'badge-green' : 'badge-red'}`}>
+                              {isYes ? '✓' : '✕'}
                             </div>
                           </div>
-                        );
-                      })}
-                    </div>
+                          <span className="court-vote-member-name">{j.name}</span>
+                          <span className={`court-vote-member-pill ${isYes ? 'pill-green' : 'pill-red'}`}>
+                            {isYes ? 'Go!' : 'Not now'}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
                 {/* Bottom Action Group */}
-                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 8, paddingTop: 4 }}>
-                  <div style={{ display: 'flex', gap: 10, width: '100%', marginBottom: 6 }}>
-                    <button
-                      type="button"
-                      className="court-sticky-cta-btn"
-                      style={{ background: '#f1f5f9', color: '#0f172a', boxShadow: '0 4px 0 #cbd5e1', flex: 1 }}
-                      onClick={() => {
-                        playWhoosh();
-                        setCurrentStep('discussion');
-                      }}
-                    >
-                      View discussion
-                    </button>
+                <div className="court-verdict-bottom-actions">
+                  <button
+                    type="button"
+                    className="court-verdict-secondary-btn"
+                    onClick={() => {
+                      playWhoosh();
+                      setCurrentStep('discussion');
+                    }}
+                  >
+                    <MessageCircle size={18} />
+                    <span>View discussion</span>
+                  </button>
 
-                    <button
-                      type="button"
-                      className="court-sticky-cta-btn"
-                      style={{ flex: 1 }}
-                      onClick={() => {
-                        playWhoosh();
-                        triggerHaptic('tap');
-                        if (caseIndex < CASES.length) {
-                          setCaseIndex(prev => prev + 1);
-                          setUserVote(null);
-                          setUserReason('');
-                          setCurrentStep('proposal');
-                        } else {
-                          setCurrentStep('summary');
-                        }
-                      }}
-                    >
-                      {caseIndex < CASES.length ? 'Next case →' : 'View summary →'}
-                    </button>
-                  </div>
-                  <MobileHomeIndicator />
+                  <button
+                    type="button"
+                    className="court-verdict-primary-btn"
+                    onClick={() => {
+                      playWhoosh();
+                      triggerHaptic('tap');
+                      if (caseIndex < CASES.length) {
+                        setCaseIndex(prev => prev + 1);
+                        setUserVote(null);
+                        setUserReason('');
+                        setCurrentStep('proposal');
+                      } else {
+                        setCurrentStep('summary');
+                      }
+                    }}
+                  >
+                    <span>{caseIndex < CASES.length ? 'Next case →' : 'View summary →'}</span>
+                  </button>
                 </div>
+
+                <MobileHomeIndicator />
               </div>
             );
           })()}

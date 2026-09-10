@@ -2152,10 +2152,12 @@ body:has(.court-modal-overlay) {
   position: relative;
 }
 
-.court-score-avatar-item img {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+.duo-character-avatar img.duo-avatar-sprite-img {
+  width: 300% !important;
+  height: 200% !important;
+  max-width: none !important;
+  max-height: none !important;
+  border-radius: 0 !important;
 }
 
 .court-score-avatar-badge {
@@ -2232,7 +2234,7 @@ body:has(.court-modal-overlay) {
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
 
-.court-comment-bubble img {
+.court-comment-bubble > img:not(.duo-avatar-sprite-img) {
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -3678,4 +3680,434 @@ body:has(.court-modal-overlay) {
 .court-card-swipe-out {
   animation: court-card-fly-out 0.38s cubic-bezier(0.4, 0, 0.6, 1) forwards;
   pointer-events: none;
+}
+
+/* ==========================================================================
+   SCREEN 5: VERDICT PASS SCREEN - PIXEL-PERFECT MATCH FOR FIGURE 2
+   ========================================================================== */
+.court-verdict-page-container {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 4px 16px 8px;
+  overflow: hidden;
+  box-sizing: border-box;
+  background: linear-gradient(180deg, #f0f7ff 0%, #ffffff 40%, #f8fafc 100%);
+}
+
+.court-verdict-header-block {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.court-verdict-subtitle-text {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #64748b;
+  letter-spacing: 0.02em;
+  margin: 0 0 2px;
+}
+
+.court-verdict-title-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24px;
+}
+
+.court-verdict-main-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 24px;
+  font-weight: 900;
+  color: #1877f2;
+  letter-spacing: -0.01em;
+  margin: 0;
+  text-align: center;
+  line-height: 1.15;
+}
+
+.court-verdict-stage-area {
+  width: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 2px 0 6px;
+  min-height: 110px;
+}
+
+/* Tilted Sticky Note on Left */
+.court-verdict-stickynote {
+  position: absolute;
+  left: 0;
+  top: 4px;
+  background: #fefce8;
+  border: 1px solid #fef08a;
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-family: 'Caveat', cursive, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #854d0e;
+  line-height: 1.15;
+  transform: rotate(-7deg);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Postal Stamp on Right */
+.court-verdict-stamp {
+  position: absolute;
+  right: 0;
+  top: 6px;
+  display: flex;
+  align-items: center;
+  transform: rotate(8deg);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.court-stamp-circle {
+  width: 52px;
+  height: 52px;
+  border: 1.5px dashed #b91c1c;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(254, 242, 242, 0.45);
+  box-shadow: inset 0 0 0 1.5px rgba(185, 28, 28, 0.3);
+}
+
+.court-stamp-label {
+  font-size: 6.5px;
+  font-weight: 800;
+  color: #b91c1c;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.court-stamp-plane-icon {
+  color: #b91c1c;
+  margin-top: 2px;
+  transform: rotate(-25deg);
+}
+
+/* Card 1: Selected Case Card */
+.court-selected-case-card {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 10px 12px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+  border: 1px solid #f1f5f9;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+}
+
+.court-selected-case-thumb {
+  width: 78px;
+  height: 78px;
+  border-radius: 14px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.court-selected-case-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.court-selected-case-badges {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.court-badge-type {
+  background: #e0f2fe;
+  color: #0284c7;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 99px;
+  line-height: 1.2;
+}
+
+.court-badge-result {
+  background: #dcfce7;
+  color: #16a34a;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 99px;
+  line-height: 1.2;
+}
+
+.court-selected-case-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 3px 0 2px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.court-selected-case-desc {
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.3;
+  margin: 0 0 5px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.court-selected-case-tags {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.court-selected-case-tag {
+  background: #f0f7ff;
+  color: #2563eb;
+  font-size: 9.5px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 99px;
+  line-height: 1.2;
+}
+
+/* Card 2: Vote Results Card */
+.court-vote-results-card {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 12px 14px 12px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+  border: 1px solid #f1f5f9;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+}
+
+.court-vote-results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.court-vote-results-title-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.court-vote-results-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 15.5px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.court-vote-results-count {
+  font-size: 11.5px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.court-vote-score-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.court-vote-num-green {
+  font-size: 24px;
+  font-weight: 800;
+  color: #10b981;
+  min-width: 20px;
+}
+
+.court-vote-num-red {
+  font-size: 24px;
+  font-weight: 800;
+  color: #ef4444;
+  min-width: 20px;
+  text-align: right;
+}
+
+.court-vote-progress-track {
+  flex: 1;
+  height: 9px;
+  border-radius: 99px;
+  overflow: hidden;
+  display: flex;
+  background: #f1f5f9;
+  margin: 0 10px;
+}
+
+.court-vote-progress-green {
+  background: #10b981;
+  height: 100%;
+  transition: width 0.5s ease;
+}
+
+.court-vote-progress-red {
+  background: #ef4444;
+  height: 100%;
+  transition: width 0.5s ease;
+}
+
+/* 4 Members Row */
+.court-vote-members-grid {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.court-vote-member-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.court-vote-avatar-container {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+  border: 1.5px solid #ffffff;
+}
+
+.court-vote-member-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9.5px;
+  font-weight: 900;
+  color: #ffffff;
+  border: 1.5px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  z-index: 5;
+}
+
+.court-vote-member-badge.badge-green {
+  background: #10b981;
+}
+
+.court-vote-member-badge.badge-red {
+  background: #ef4444;
+}
+
+.court-vote-member-name {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #334155;
+  margin: 4px 0 2px;
+}
+
+.court-vote-member-pill {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1.5px 8px;
+  border-radius: 99px;
+  line-height: 1.2;
+}
+
+.court-vote-member-pill.pill-green {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.court-vote-member-pill.pill-red {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+/* Bottom Action Buttons */
+.court-verdict-bottom-actions {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 2px;
+  padding-bottom: 2px;
+}
+
+.court-verdict-secondary-btn {
+  flex: 1;
+  height: 46px;
+  border-radius: 99px;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  color: #1e293b;
+  font-size: 13.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  transition: background-color 0.15s;
+}
+
+.court-verdict-secondary-btn:active {
+  background: #f8fafc;
+  transform: scale(0.985);
+}
+
+.court-verdict-primary-btn {
+  flex: 1;
+  height: 46px;
+  border-radius: 99px;
+  background: #1877f2;
+  border: none;
+  color: #ffffff;
+  font-size: 13.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(24, 119, 242, 0.32);
+  transition: background-color 0.15s;
+}
+
+.court-verdict-primary-btn:active {
+  background: #1d4ed8;
+  transform: scale(0.985);
 }
