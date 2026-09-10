@@ -377,40 +377,46 @@ export function TravelCourtCaseFlow({
   // When entering Screen 4 (jury-live), simulate sequential voting reveals
   useEffect(() => {
     if (currentStep === 'jury-live') {
-      setLiveJurors(JURORS.map(j => ({ ...j, vote: null })));
-      setTimerCount(8);
+      // Initially 2 submitted (Alex & Mavis) and 2 pending (Ken & June), matching Figure 3
+      setLiveJurors([
+        { id: 'alex', name: 'Alex', vote: 'go', variant: 'green', avatarColor: '#10b981', hairColor: '#065f46' },
+        { id: 'mavis', name: 'Mavis', vote: 'go', variant: 'purple', avatarColor: '#a855f7', hairColor: '#f59e0b' },
+        { id: 'ken', name: 'Ken', vote: null, variant: 'blue', avatarColor: '#f59e0b', hairColor: '#1e3a8a' },
+        { id: 'june', name: 'June', vote: null, variant: 'coral', avatarColor: '#ef4444', hairColor: '#db2777' },
+      ]);
+      setTimerCount(6);
 
-      const voteSequence: Array<{ idx: number; vote: 'go' | 'not-now'; delay: number }> = [
-        { idx: 0, vote: 'go', delay: 400 },
-        { idx: 1, vote: 'go', delay: 850 },
-        { idx: 2, vote: 'not-now', delay: 1300 },
-        { idx: 3, vote: 'go', delay: 1750 },
-      ];
+      // Ken votes after 1.8s
+      const tKen = window.setTimeout(() => {
+        playPop();
+        triggerHaptic('pop');
+        setLiveJurors(prev =>
+          prev.map(j => (j.id === 'ken' ? { ...j, vote: 'not-now' } : j))
+        );
+      }, 1800);
 
-      const timers = voteSequence.map(({ idx, vote, delay }) =>
-        window.setTimeout(() => {
-          playPop();
-          triggerHaptic('pop');
-          setLiveJurors(prev => {
-            const next = [...prev];
-            if (next[idx]) next[idx] = { ...next[idx], vote };
-            return next;
-          });
-        }, delay)
-      );
+      // June votes after 3.6s
+      const tJune = window.setTimeout(() => {
+        playPop();
+        triggerHaptic('pop');
+        setLiveJurors(prev =>
+          prev.map(j => (j.id === 'june' ? { ...j, vote: 'go' } : j))
+        );
+      }, 3600);
 
-      // Countdown timer decrement
+      // 1-second countdown timer
       const countdownInterval = window.setInterval(() => {
-        setTimerCount(c => (c > 1 ? c - 1 : 1));
-      }, 300);
+        setTimerCount(c => (c > 0 ? c - 1 : 0));
+      }, 1000);
 
-      // Auto-advance to verdict after sequence
+      // Auto-advance to verdict after all votes are in
       const finishTimer = window.setTimeout(() => {
         handleGoToVerdict('pass');
-      }, 2600);
+      }, 5400);
 
       return () => {
-        timers.forEach(t => clearTimeout(t));
+        clearTimeout(tKen);
+        clearTimeout(tJune);
         clearInterval(countdownInterval);
         clearTimeout(finishTimer);
       };
@@ -1890,20 +1896,7 @@ export function TravelCourtCaseFlow({
                 onClick={() => {
                   playWhoosh();
                   triggerHaptic('tap');
-                  if (caseIndex < CASES.length) {
-                    // Animate current card swiping out, then advance
-                    setCardExiting(true);
-                    setTimeout(() => {
-                      setCaseIndex(prev => prev + 1);
-                      setUserVote(null);
-                      setUserReason('');
-                      setCardExiting(false);
-                      setCurrentStep('proposal');
-                    }, 380);
-                  } else {
-                    // Last card — proceed to jury
-                    setCurrentStep('jury-live');
-                  }
+                  setCurrentStep('jury-live');
                 }}
               >
                 Submit →
@@ -1919,90 +1912,357 @@ export function TravelCourtCaseFlow({
       {/* ====================================================================
           SCREEN 4: CASE 1 OF 3 - THE JURY IS VOTING...
           ==================================================================== */}
-      {currentStep === 'jury-live' && (
-        <div className="court-case-chamber">
-          <MobileStatusBar />
-          <header className="court-navbar">
-            <button className="court-nav-back-btn" onClick={() => setCurrentStep('voting')} aria-label="Back">
-              <ChevronLeft size={24} />
-            </button>
-            <div className="court-nav-title-group" style={{ alignItems: 'center' }}>
-              <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>
-                Case {caseIndex} of 3
-              </span>
-              <div style={{ display: 'flex', gap: 4, width: 80, marginTop: 4 }}>
-                <div style={{ height: 4, flex: 1, background: '#1877f2', borderRadius: 99 }} />
-                <div style={{ height: 4, flex: 1, background: '#e2e8f0', borderRadius: 99 }} />
-                <div style={{ height: 4, flex: 1, background: '#e2e8f0', borderRadius: 99 }} />
-              </div>
-            </div>
-            <div style={{ width: 38 }} />
-          </header>
+      {/* ====================================================================
+          SCREEN 4: CASE 1 OF 3 - THE JURY IS VOTING...
+          ==================================================================== */}
+      {currentStep === 'jury-live' && (() => {
+        const submittedJurors = liveJurors.filter(j => j.vote !== null);
+        const pendingJurors = liveJurors.filter(j => j.vote === null);
 
-          <div
-            className="court-jury-screen"
-            style={{
-              padding: '8px 18px 2px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flex: 1,
-              minHeight: 0,
-              overflow: 'hidden',
-              boxSizing: 'border-box',
-            }}
-          >
-            {/* Top Section: Header + Judge + Jury Box + Timer Card */}
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div className="court-jury-header" style={{ margin: '4px 0 8px' }}>
-                <h2 style={{ fontSize: '24px', margin: 0 }}>The jury is voting...</h2>
-              </div>
+        const alexJuror = liveJurors.find(j => j.id === 'alex') || liveJurors[0];
+        const mavisJuror = liveJurors.find(j => j.id === 'mavis') || liveJurors[1];
+        const kenJuror = liveJurors.find(j => j.id === 'ken') || liveJurors[2];
+        const juneJuror = liveJurors.find(j => j.id === 'june') || liveJurors[3];
 
-              <div style={{ margin: '4px 0 8px' }}>
-                <DuolingoJudge state="idle" size={130} />
-              </div>
-
-              <DuolingoJuryBox jurors={liveJurors} />
-
-              <div className="court-jury-timer-card" style={{ width: '100%', marginTop: 10 }}>
-                <div className="court-timer-row">
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <Clock size={16} /> Waiting for others...
-                  </span>
-                  <b>00:{timerCount < 10 ? `0${timerCount}` : timerCount}</b>
+        return (
+          <div className="court-case-chamber">
+            <MobileStatusBar />
+            <header className="court-navbar">
+              <button className="court-nav-back-btn" onClick={() => setCurrentStep('voting')} aria-label="Back">
+                <ChevronLeft size={24} />
+              </button>
+              <div className="court-nav-title-group" style={{ alignItems: 'center' }}>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>
+                  Case {caseIndex} of 3
+                </span>
+                <div style={{ display: 'flex', gap: 4, width: 80, marginTop: 4 }}>
+                  <div style={{ height: 4, flex: 1, background: '#1877f2', borderRadius: 99 }} />
+                  <div style={{ height: 4, flex: 1, background: caseIndex >= 2 ? '#1877f2' : '#e2e8f0', borderRadius: 99 }} />
+                  <div style={{ height: 4, flex: 1, background: caseIndex >= 3 ? '#1877f2' : '#e2e8f0', borderRadius: 99 }} />
                 </div>
-                <div className="court-timer-track">
+              </div>
+              <div style={{ width: 38 }} />
+            </header>
+
+            <div
+              className="court-jury-screen"
+              style={{
+                padding: '4px 16px 8px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                flex: 1,
+                minHeight: 0,
+                width: '100%',
+                boxSizing: 'border-box',
+              }}
+            >
+              {/* Header (Matching Figure 3) */}
+              <div className="court-jury-header" style={{ margin: '2px 0 10px' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 4, position: 'relative' }}>
+                  <h2>The jury is voting...</h2>
+                  <span style={{ color: '#ef4444', fontSize: '18px', fontWeight: 900, marginTop: -10 }}>″</span>
+                </div>
+                <p style={{ marginTop: 2 }}>Your vote is in. Waiting for the rest of the court.</p>
+              </div>
+
+              {/* Case Brief Card (Matching Figure 3) */}
+              <div className="court-vote-case-brief" style={{ width: '100%', margin: '0 0 12px', minHeight: 68, padding: '8px 11px' }}>
+                <img
+                  src={activeCase.imageUrl}
+                  alt={activeCase.title}
+                  className="court-vote-case-thumb"
+                  style={{ width: 66, height: 56, borderRadius: 12 }}
+                  draggable={false}
+                />
+                <div className="court-vote-case-copy">
+                  <div className="court-vote-case-meta" style={{ marginBottom: 2 }}>
+                    <span style={{ fontSize: '9px', minHeight: 16, padding: '1px 6px' }}>{activeCase.typeLabel}</span>
+                    <span style={{ fontSize: '9px', minHeight: 16, padding: '1px 6px' }}>Case {caseIndex}</span>
+                  </div>
+                  <h3 style={{ fontSize: '13.5px', margin: 0 }}>{activeCase.question}</h3>
+                  <p style={{ fontSize: '11px', margin: '1px 0 3px' }}>{activeCase.title}</p>
+                  <div className="court-vote-case-tags">
+                    {activeCase.tags.slice(0, 3).map(tag => (
+                      <span key={tag} style={{ fontSize: '9px', padding: '1px 6px' }}>{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Courtroom Stage (Matching Figure 2 scene with animated characters holding voted paddles - NO duplicated judge sprite) */}
+              <div className="court-jury-stage" style={{ height: 262, margin: '0 0 14px' }}>
+                <img
+                  src="/characters/court_stage_bg.jpg?v=vertical_no_chairs_v6"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = '/court_stage_bg.jpg?v=vertical_no_chairs_v6';
+                  }}
+                  alt="Courtroom Stage"
+                  className="court-jury-stage-bg"
+                  draggable={false}
+                />
+
+                {/* Top-Right Badge: "X / 4 votes received" */}
+                <div className="court-jury-votes-badge">
+                  <div className="court-jury-votes-count">
+                    <span>{submittedJurors.length} / 4</span>
+                    <span style={{ color: '#f59e0b', fontSize: '12px' }}>✨</span>
+                  </div>
+                  <div className="court-jury-votes-label">votes received</div>
+                </div>
+
+                {/* ================= LEFT DESK MEMBERS ================= */}
+                {/* Alex (Back Left Desk) */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: '26%',
+                    top: 92,
+                    transform: 'translateX(-50%)',
+                    zIndex: 12,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                  }}
+                >
+                  {alexJuror.vote ? (
+                    <div className="court-jury-bubble-submitted">
+                      <Check size={9} strokeWidth={3.5} /> Submitted
+                    </div>
+                  ) : (
+                    <div className="court-jury-bubble-waiting">
+                      ••• Waiting
+                    </div>
+                  )}
+                  <TravelCourtCharacter
+                    variant="boy_green"
+                    vote={alexJuror.vote === 'go' ? 'yes' : alexJuror.vote === 'not-now' ? 'no' : null}
+                    state={alexJuror.vote ? 'action' : 'thinking'}
+                    size={48}
+                    animated
+                  />
+                  <span className="tc-character-label" style={{ marginTop: -3, fontSize: '9.5px', padding: '1px 7px' }}>
+                    Alex
+                  </span>
+                </div>
+
+                {/* Mavis (Front Left Desk - comfortably separated) */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: '13%',
+                    top: 184,
+                    transform: 'translateX(-50%)',
+                    zIndex: 14,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                  }}
+                >
+                  {mavisJuror.vote ? (
+                    <div className="court-jury-bubble-submitted">
+                      <Check size={9} strokeWidth={3.5} /> Submitted
+                    </div>
+                  ) : (
+                    <div className="court-jury-bubble-waiting">
+                      ••• Waiting
+                    </div>
+                  )}
+                  <TravelCourtCharacter
+                    variant="girl_blonde"
+                    vote={mavisJuror.vote === 'go' ? 'yes' : mavisJuror.vote === 'not-now' ? 'no' : null}
+                    state={mavisJuror.vote ? 'support' : 'thinking'}
+                    size={52}
+                    animated
+                  />
+                  <span className="tc-character-label" style={{ marginTop: -3, fontSize: '9.5px', padding: '1px 7px' }}>
+                    Mavis
+                  </span>
+                </div>
+
+                {/* ================= RIGHT DESK MEMBERS ================= */}
+                {/* Ken (Back Right Desk) */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: '74%',
+                    top: 92,
+                    transform: 'translateX(-50%)',
+                    zIndex: 12,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                  }}
+                >
+                  {kenJuror.vote ? (
+                    <div className="court-jury-bubble-submitted">
+                      <Check size={9} strokeWidth={3.5} /> Submitted
+                    </div>
+                  ) : (
+                    <div className="court-jury-bubble-waiting">
+                      ••• Waiting
+                    </div>
+                  )}
+                  <TravelCourtCharacter
+                    variant="boy_yellow"
+                    vote={kenJuror.vote === 'go' ? 'yes' : kenJuror.vote === 'not-now' ? 'no' : null}
+                    state={kenJuror.vote ? 'action' : 'thinking'}
+                    size={48}
+                    animated
+                  />
+                  <span className="tc-character-label" style={{ marginTop: -3, fontSize: '9.5px', padding: '1px 7px' }}>
+                    Ken
+                  </span>
+                </div>
+
+                {/* June (Front Right Desk - comfortably separated) */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: '87%',
+                    top: 184,
+                    transform: 'translateX(-50%)',
+                    zIndex: 14,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                  }}
+                >
+                  {juneJuror.vote ? (
+                    <div className="court-jury-bubble-submitted">
+                      <Check size={9} strokeWidth={3.5} /> Submitted
+                    </div>
+                  ) : (
+                    <div className="court-jury-bubble-waiting">
+                      ••• Waiting
+                    </div>
+                  )}
+                  <TravelCourtCharacter
+                    variant="girl_redhat"
+                    vote={juneJuror.vote === 'go' ? 'yes' : juneJuror.vote === 'not-now' ? 'no' : null}
+                    state={juneJuror.vote ? 'celebrate' : 'thinking'}
+                    size={52}
+                    animated
+                  />
+                  <span className="tc-character-label" style={{ marginTop: -3, fontSize: '9.5px', padding: '1px 7px' }}>
+                    June
+                  </span>
+                </div>
+              </div>
+
+              {/* Bottom Waiting Card (Matching Figure 3 exactly) */}
+              <div className="court-jury-waiting-card" style={{ margin: '0 0 10px' }}>
+                {/* Top row: Clock + Waiting for others... + 00:06 */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                    <Clock size={16} strokeWidth={2.4} color="#0f172a" />
+                    <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
+                      Waiting for others...
+                    </span>
+                  </div>
+                  <span style={{ fontSize: '13.5px', fontWeight: 700, color: '#0f172a', fontVariantNumeric: 'tabular-nums' }}>
+                    00:0{timerCount}
+                  </span>
+                </div>
+
+                {/* Middle row: Progress bar */}
+                <div className="court-jury-progress-track">
                   <div
-                    className="court-timer-fill"
-                    style={{ width: `${((12 - timerCount) / 12) * 100}%` }}
+                    className="court-jury-progress-fill"
+                    style={{ width: `${Math.min(100, ((6 - timerCount) / 6) * 100)}%` }}
                   />
                 </div>
+
+                {/* Bottom row: Submitted Avatars & Count | Pending Avatars & Count */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  {/* Left: Submitted */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      {submittedJurors.map((j, i) => (
+                        <div
+                          key={j.id}
+                          style={{
+                            width: 24,
+                            height: 24,
+                            borderRadius: '50%',
+                            border: '2px solid #ffffff',
+                            boxShadow: '0 2px 5px rgba(0,0,0,0.12)',
+                            marginLeft: i === 0 ? 0 : -6,
+                            zIndex: 10 - i,
+                            overflow: 'hidden',
+                            background: j.avatarColor,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <TravelCourtCharacter variant={j.variant || 'green'} size={24} isAvatar />
+                        </div>
+                      ))}
+                    </div>
+                    <span style={{ fontSize: '12.5px', fontWeight: 750, color: '#059669' }}>
+                      {submittedJurors.length} submitted
+                    </span>
+                  </div>
+
+                  {/* Vertical Divider */}
+                  <div style={{ width: 1, height: 18, background: '#e2e8f0' }} />
+
+                  {/* Right: Pending */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      {pendingJurors.map((j, i) => (
+                        <div
+                          key={j.id}
+                          style={{
+                            width: 24,
+                            height: 24,
+                            borderRadius: '50%',
+                            border: '2px solid #ffffff',
+                            boxShadow: '0 2px 5px rgba(0,0,0,0.12)',
+                            marginLeft: i === 0 ? 0 : -6,
+                            zIndex: 10 - i,
+                            overflow: 'hidden',
+                            background: j.avatarColor,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <TravelCourtCharacter variant={j.variant || 'coral'} size={24} isAvatar />
+                        </div>
+                      ))}
+                    </div>
+                    <span style={{ fontSize: '12.5px', fontWeight: 750, color: '#64748b' }}>
+                      {pendingJurors.length} pending
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Action Group */}
+              <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 'auto', paddingTop: 2 }}>
+                <button
+                  type="button"
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#64748b',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    padding: '6px 12px',
+                  }}
+                  onClick={() => handleGoToVerdict('pass')}
+                >
+                  Skip to verdict →
+                </button>
+                <MobileHomeIndicator />
               </div>
             </div>
-
-            {/* Bottom Action Group */}
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 8, paddingTop: 4 }}>
-              <button
-                type="button"
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#64748b',
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  padding: '6px 12px',
-                }}
-                onClick={() => handleGoToVerdict('pass')}
-              >
-                Skip to verdict →
-              </button>
-              <MobileHomeIndicator />
-            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* ====================================================================
           SCREEN 5: CASE 1 OF 3 - VERDICT ACCEPTED ("We're going to Jeju!")
@@ -2020,94 +2280,120 @@ export function TravelCourtCaseFlow({
               </span>
               <div style={{ display: 'flex', gap: 4, width: 80, marginTop: 4 }}>
                 <div style={{ height: 4, flex: 1, background: '#1877f2', borderRadius: 99 }} />
-                <div style={{ height: 4, flex: 1, background: '#e2e8f0', borderRadius: 99 }} />
-                <div style={{ height: 4, flex: 1, background: '#e2e8f0', borderRadius: 99 }} />
+                <div style={{ height: 4, flex: 1, background: caseIndex >= 2 ? '#1877f2' : '#e2e8f0', borderRadius: 99 }} />
+                <div style={{ height: 4, flex: 1, background: caseIndex >= 3 ? '#1877f2' : '#e2e8f0', borderRadius: 99 }} />
               </div>
             </div>
             <div style={{ width: 38 }} />
           </header>
 
-          <div
-            className="court-verdict-screen"
-            style={{
-              padding: '8px 18px 2px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flex: 1,
-              minHeight: 0,
-              overflow: 'hidden',
-              boxSizing: 'border-box',
-            }}
-          >
-            {/* Top Section: Subtitle + Title + Judge Bench + Score Bar Card */}
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div className="court-verdict-subtitle" style={{ fontSize: '13px', margin: '2px 0' }}>The verdict is...</div>
-              <div className="court-verdict-title accepted" style={{ fontSize: '24px', margin: '2px 0 6px' }}>We're going to Jeju!</div>
+          {(() => {
+            const verdictTitles = [
+              "We're going to Jeju!",
+              "We're eating at Haenyeo Seafood!",
+              "We're riding the Seongsan Cable Car!",
+            ];
+            const currentVerdictTitle = verdictTitles[caseIndex - 1] ?? `We're going to ${activeCase.title}!`;
+            const yesCount = liveJurors.filter(j => j.vote === 'go').length || 3;
+            const noCount = liveJurors.filter(j => j.vote === 'not-now').length || 1;
+            const greenPct = Math.round((yesCount / (yesCount + noCount)) * 100);
 
-              <div style={{ margin: '4px 0 10px', display: 'flex', justifyContent: 'center' }}>
-                <DuolingoJudgeBench state="striking" size={135} benchWidth={160} />
-              </div>
+            return (
+              <div
+                className="court-verdict-screen"
+                style={{
+                  padding: '8px 18px 2px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flex: 1,
+                  minHeight: 0,
+                  overflow: 'hidden',
+                  boxSizing: 'border-box',
+                }}
+              >
+                {/* Top Section: Subtitle + Title + Judge Bench + Score Bar Card */}
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <div className="court-verdict-subtitle" style={{ fontSize: '13px', margin: '2px 0' }}>The verdict is...</div>
+                  <div className="court-verdict-title accepted" style={{ fontSize: '24px', margin: '2px 0 6px' }}>
+                    {currentVerdictTitle}
+                  </div>
 
-              {/* Score Bar 3 vs 1 */}
-              <div className="court-score-bar-card" style={{ width: '100%', marginTop: 4 }}>
-                <div className="court-score-numbers">
-                  <span className="court-score-green">3</span>
-                  <span className="court-score-red">1</span>
-                </div>
-                <div className="court-score-split-bar">
-                  <div className="court-score-bar-green" style={{ width: '75%' }} />
-                  <div className="court-score-bar-red" style={{ width: '25%' }} />
-                </div>
-                <div className="court-score-avatars-row" style={{ justifyContent: 'space-around', padding: '0 20px' }}>
-                  {JURORS.map((j, i) => (
-                    <div key={j.id} className="court-score-avatar-item">
-                      <TravelCourtCharacter
-                        variant={j.variant || 'blue'}
-                        isAvatar
-                        size={42}
-                      />
-                      <div className={`court-score-avatar-badge ${i < 3 ? 'green' : 'red'}`}>
-                        {i < 3 ? '✓' : '✕'}
-                      </div>
+                  <div style={{ margin: '4px 0 10px', display: 'flex', justifyContent: 'center' }}>
+                    <DuolingoJudgeBench state="striking" size={135} benchWidth={160} />
+                  </div>
+
+                  {/* Score Bar */}
+                  <div className="court-score-bar-card" style={{ width: '100%', marginTop: 4 }}>
+                    <div className="court-score-numbers">
+                      <span className="court-score-green">{yesCount}</span>
+                      <span className="court-score-red">{noCount}</span>
                     </div>
-                  ))}
+                    <div className="court-score-split-bar">
+                      <div className="court-score-bar-green" style={{ width: `${greenPct}%` }} />
+                      <div className="court-score-bar-red" style={{ width: `${100 - greenPct}%` }} />
+                    </div>
+                    <div className="court-score-avatars-row" style={{ justifyContent: 'space-around', padding: '0 20px' }}>
+                      {liveJurors.map((j) => {
+                        const isNo = j.vote === 'not-now';
+                        return (
+                          <div key={j.id} className="court-score-avatar-item">
+                            <TravelCourtCharacter
+                              variant={j.variant || 'blue'}
+                              isAvatar
+                              size={42}
+                            />
+                            <div className={`court-score-avatar-badge ${isNo ? 'red' : 'green'}`}>
+                              {isNo ? '✕' : '✓'}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom Action Group */}
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 8, paddingTop: 4 }}>
+                  <div style={{ display: 'flex', gap: 10, width: '100%', marginBottom: 6 }}>
+                    <button
+                      type="button"
+                      className="court-sticky-cta-btn"
+                      style={{ background: '#f1f5f9', color: '#0f172a', boxShadow: '0 4px 0 #cbd5e1', flex: 1 }}
+                      onClick={() => {
+                        playWhoosh();
+                        setCurrentStep('discussion');
+                      }}
+                    >
+                      View discussion
+                    </button>
+
+                    <button
+                      type="button"
+                      className="court-sticky-cta-btn"
+                      style={{ flex: 1 }}
+                      onClick={() => {
+                        playWhoosh();
+                        triggerHaptic('tap');
+                        if (caseIndex < CASES.length) {
+                          setCaseIndex(prev => prev + 1);
+                          setUserVote(null);
+                          setUserReason('');
+                          setCurrentStep('proposal');
+                        } else {
+                          setCurrentStep('summary');
+                        }
+                      }}
+                    >
+                      {caseIndex < CASES.length ? 'Next case →' : 'View summary →'}
+                    </button>
+                  </div>
+                  <MobileHomeIndicator />
                 </div>
               </div>
-            </div>
-
-            {/* Bottom Action Group */}
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 8, paddingTop: 4 }}>
-              <div style={{ display: 'flex', gap: 10, width: '100%', marginBottom: 6 }}>
-                <button
-                  type="button"
-                  className="court-sticky-cta-btn"
-                  style={{ background: '#f1f5f9', color: '#0f172a', boxShadow: '0 4px 0 #cbd5e1', flex: 1 }}
-                  onClick={() => {
-                    playWhoosh();
-                    setCurrentStep('discussion');
-                  }}
-                >
-                  View discussion
-                </button>
-
-                <button
-                  type="button"
-                  className="court-sticky-cta-btn"
-                  style={{ flex: 1 }}
-                  onClick={() => {
-                    playWhoosh();
-                    triggerHaptic('tap');
-                    setCurrentStep('summary');
-                  }}
-                >
-                  Next case →
-                </button>
-              </div>
-              <MobileHomeIndicator />
-            </div>
-          </div>
+            );
+          })()}
         </div>
       )}
 
@@ -2193,10 +2479,17 @@ export function TravelCourtCaseFlow({
                 onClick={() => {
                   playWhoosh();
                   triggerHaptic('tap');
-                  setCurrentStep('summary');
+                  if (caseIndex < CASES.length) {
+                    setCaseIndex(prev => prev + 1);
+                    setUserVote(null);
+                    setUserReason('');
+                    setCurrentStep('proposal');
+                  } else {
+                    setCurrentStep('summary');
+                  }
                 }}
               >
-                Next case →
+                {caseIndex < CASES.length ? 'Next case →' : 'View summary →'}
               </button>
               <MobileHomeIndicator />
             </div>
