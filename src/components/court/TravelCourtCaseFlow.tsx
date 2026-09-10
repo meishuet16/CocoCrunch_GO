@@ -1827,7 +1827,7 @@ export function TravelCourtCaseFlow({
               <div className="court-dual-vote-buttons">
                 <button
                   type="button"
-                  className={`court-vote-btn-choice ${userVote === 'go' ? 'selected' : ''}`}
+                  className={`court-vote-btn-choice ${userVote === 'go' ? 'selected' : userVote ? 'dimmed' : ''}`}
                   onClick={() => {
                     playVoteChime(true);
                     triggerHaptic('vote');
@@ -1835,29 +1835,14 @@ export function TravelCourtCaseFlow({
                   }}
                 >
                   <div className="court-vote-circle go">
-                    <Check size={32} strokeWidth={3.7} />
+                    <Check size={34} strokeWidth={3.8} />
                   </div>
                   <span>Go!</span>
                 </button>
 
                 <button
                   type="button"
-                  className={`court-vote-btn-choice ${userVote === 'either' ? 'selected' : ''}`}
-                  onClick={() => {
-                    playVoteChime(true);
-                    triggerHaptic('vote');
-                    setUserVote('either');
-                  }}
-                >
-                  <div className="court-vote-circle either">
-                    <span>OK</span>
-                  </div>
-                  <span>Either</span>
-                </button>
-
-                <button
-                  type="button"
-                  className={`court-vote-btn-choice ${userVote === 'not-now' ? 'selected' : ''}`}
+                  className={`court-vote-btn-choice ${userVote === 'not-now' ? 'selected' : userVote ? 'dimmed' : ''}`}
                   onClick={() => {
                     playVoteChime(false);
                     triggerHaptic('vote');
@@ -1865,9 +1850,24 @@ export function TravelCourtCaseFlow({
                   }}
                 >
                   <div className="court-vote-circle not-now">
-                    <X size={32} strokeWidth={3.7} />
+                    <X size={34} strokeWidth={3.8} />
                   </div>
                   <span>Not now</span>
+                </button>
+              </div>
+
+              {/* Either option: subtle grey underlined text button */}
+              <div style={{ display: 'flex', justifyContent: 'center', margin: '-2px 0 10px' }}>
+                <button
+                  type="button"
+                  className={`court-vote-either-text-btn ${userVote === 'either' ? 'selected' : ''}`}
+                  onClick={() => {
+                    playVoteChime(true);
+                    triggerHaptic('vote');
+                    setUserVote('either');
+                  }}
+                >
+                  I'm fine with either
                 </button>
               </div>
 
