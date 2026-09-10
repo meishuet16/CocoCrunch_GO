@@ -4,8 +4,8 @@ import {
   MapPin, Utensils, ArrowRight, Plus
 } from 'lucide-react';
 import {
-  DuolingoJudge, DuolingoJudgeBench, DuolingoCourtroomClashStage,
-  DuolingoJuryBox, DuolingoVoterGirl, DuolingoAirplaneSquad,
+  DuolingoJudge, DuolingoJudgeBench,
+  DuolingoJuryBox, DuolingoAirplaneSquad,
   type JurorVoteState
 } from './CourtCharacters';
 import { TravelCourtCharacter, type CharacterVariant } from './TravelCourtCharacter';
@@ -231,6 +231,7 @@ export function TravelCourtCaseFlow({
   // Voting state for user
   const [userVote, setUserVote] = useState<'go' | 'not-now' | null>(null);
   const [userReason, setUserReason] = useState('');
+  const [voteZooming, setVoteZooming] = useState(false);
 
   // Proposal screen: countdown timer (5 min limit)
   const PROPOSAL_TOTAL = 300;
@@ -492,6 +493,31 @@ export function TravelCourtCaseFlow({
               }}
             />
           ))}
+        </div>
+      )}
+
+      {voteZooming && (
+        <div className="court-vote-zoom-overlay" aria-hidden="true">
+          <div className="court-vote-zoom-scene">
+            <img
+              src="/characters/court_stage_bg.jpg?v=vote_zoom"
+              alt=""
+              className="court-vote-zoom-bg"
+              draggable={false}
+            />
+            <div className="court-vote-zoom-member court-vote-zoom-alex">
+              <TravelCourtCharacter variant="boy_green" state="thinking" size={64} label="Alex" animated />
+            </div>
+            <div className="court-vote-zoom-member court-vote-zoom-mavis">
+              <TravelCourtCharacter variant="girl_blonde" state="idle" size={64} label="Mavis" animated />
+            </div>
+            <div className="court-vote-zoom-member court-vote-zoom-ken">
+              <TravelCourtCharacter variant="boy_yellow" state="thinking" size={64} label="Ken" animated />
+            </div>
+            <div className="court-vote-zoom-member court-vote-zoom-focus">
+              <TravelCourtCharacter variant="girl_redhat" state="idle" size={72} label="June" animated />
+            </div>
+          </div>
         </div>
       )}
 
@@ -1667,9 +1693,14 @@ export function TravelCourtCaseFlow({
                     className="court-sticky-cta-btn"
                     style={{ width: '100%' }}
                     onClick={() => {
+                      if (voteZooming) return;
                       playWhoosh();
                       triggerHaptic('tap');
-                      setCurrentStep('voting');
+                      setVoteZooming(true);
+                      setTimeout(() => {
+                        setVoteZooming(false);
+                        setCurrentStep('voting');
+                      }, 620);
                     }}
                   >
                     Next to Vote →
@@ -1697,9 +1728,8 @@ export function TravelCourtCaseFlow({
           SCREEN 3: CASE 1 OF 3 - IT'S YOUR TURN! (VOTING)
           ==================================================================== */}
       {currentStep === 'voting' && (
-        <div className="court-case-chamber">
-          <MobileStatusBar />
-          <header className="court-navbar">
+        <div className="court-case-chamber court-vote-chamber">
+          <header className="court-navbar court-vote-navbar">
             <button className="court-nav-back-btn" onClick={() => setCurrentStep('proposal')} aria-label="Back">
               <ChevronLeft size={24} />
             </button>
@@ -1719,7 +1749,7 @@ export function TravelCourtCaseFlow({
           <div
             className="court-voting-screen"
             style={{
-              padding: '8px 18px 8px',
+              padding: '8px 18px 0',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -1731,18 +1761,47 @@ export function TravelCourtCaseFlow({
               boxSizing: 'border-box',
             }}
           >
-            {/* Top Section: Header + Avatar + Dual Buttons + Reason Input */}
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div className="court-voting-header" style={{ margin: '4px 0 8px' }}>
-                <h2 style={{ fontSize: '24px', margin: 0 }}>It's your turn!</h2>
-                <p style={{ fontSize: '13px', margin: '2px 0 0', color: '#64748b' }}>What's your vote?</p>
+            <div className="court-vote-focus-area">
+              <div className="court-voting-header">
+                <h2>It's your turn!</h2>
+                <p>What's your vote?</p>
               </div>
 
-              <div className="court-voting-avatar-wrap" style={{ margin: '4px 0 10px' }}>
-                <DuolingoVoterGirl size={115} vote={userVote === 'go' ? 'yes' : userVote === 'not-now' ? 'no' : null} />
+              <div className="court-vote-mini-stage">
+                <img
+                  src="/characters/court_stage_bg.jpg?v=vote_focus"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = '/court_stage_bg.jpg?v=vote_focus';
+                  }}
+                  alt=""
+                  className="court-vote-mini-stage-bg"
+                  draggable={false}
+                />
+                <div className="court-vote-stage-glow" />
+                <div className="court-vote-friend court-vote-friend-left">
+                  <TravelCourtCharacter variant="boy_green" state="thinking" size={56} label="Alex" animated />
+                </div>
+                <div className="court-vote-friend court-vote-friend-right">
+                  <TravelCourtCharacter variant="boy_yellow" state="thinking" size={56} label="Ken" animated />
+                </div>
+                <div className="court-voting-avatar-wrap">
+                  <div className={userVote === 'go' ? 'court-june-react-yes' : userVote === 'not-now' ? 'court-june-react-no' : 'court-june-idle-2d'}>
+                    <TravelCourtCharacter
+                      variant="girl_redhat"
+                      state="idle"
+                      vote={null}
+                      size={132}
+                      label="June"
+                      animated={false}
+                    />
+                    <span className={`court-june-expression ${userVote === 'go' ? 'is-happy' : userVote === 'not-now' ? 'is-no' : ''}`}>
+                      {userVote === 'go' ? '♪' : userVote === 'not-now' ? '!' : ''}
+                    </span>
+                  </div>
+                </div>
               </div>
 
-              <div className="court-dual-vote-buttons" style={{ gap: 14, margin: '6px 0 10px' }}>
+              <div className="court-dual-vote-buttons">
                 <button
                   type="button"
                   className={`court-vote-btn-choice ${userVote === 'go' ? 'selected' : ''}`}
@@ -1753,7 +1812,7 @@ export function TravelCourtCaseFlow({
                   }}
                 >
                   <div className="court-vote-circle go">
-                    <Check size={40} strokeWidth={3.5} />
+                    <Check size={42} strokeWidth={3.7} />
                   </div>
                   <span>Go!</span>
                 </button>
@@ -1768,7 +1827,7 @@ export function TravelCourtCaseFlow({
                   }}
                 >
                   <div className="court-vote-circle not-now">
-                    <X size={40} strokeWidth={3.5} />
+                    <X size={42} strokeWidth={3.7} />
                   </div>
                   <span>Not now</span>
                 </button>
@@ -1780,12 +1839,11 @@ export function TravelCourtCaseFlow({
                 placeholder="Add a reason (optional)"
                 value={userReason}
                 onChange={e => setUserReason(e.target.value)}
-                style={{ width: '100%', padding: '10px 14px', borderRadius: 14, fontSize: '13px' }}
               />
             </div>
 
             {/* Bottom Action Group */}
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div className="court-vote-submit-wrap">
               <button
                 type="button"
                 className="court-sticky-cta-btn"
@@ -1812,6 +1870,8 @@ export function TravelCourtCaseFlow({
               >
                 Submit →
               </button>
+            </div>
+            <div className="court-vote-home-wrap">
               <MobileHomeIndicator />
             </div>
           </div>
