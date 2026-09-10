@@ -2980,4 +2980,19 @@ body:has(.court-modal-overlay) {
   transform: scale(0.985);
 }
 
+/* Card swipe-out animation (after voting, current card flies away) */
+@keyframes court-card-fly-out {
+  0% {
+    transform: translateX(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(110%) rotate(14deg);
+    opacity: 0;
+  }
+}
 
+.court-card-swipe-out {
+  animation: court-card-fly-out 0.38s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+  pointer-events: none;
+}

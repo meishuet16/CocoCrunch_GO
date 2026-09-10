@@ -195,10 +195,63 @@ export function TravelCourtCaseFlow({
   }, [initialStep]);
 
   const [caseIndex, setCaseIndex] = useState(1); // 1 of 3, 2 of 3, 3 of 3
+  const [cardExiting, setCardExiting] = useState(false);
+
+  // The 3 travel discussion cards
+  const CASES = [
+    {
+      id: 1,
+      type: 'destination',
+      typeLabel: '📍 Destination',
+      title: 'Jeju Island',
+      question: 'Shall we go to Jeju?',
+      imageUrl: 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?w=800&auto=format&fit=crop&q=80',
+      tags: ['Beaches', 'Nature', 'Good food', 'Relax'],
+    },
+    {
+      id: 2,
+      type: 'restaurant',
+      typeLabel: '🍽️ Restaurant',
+      title: 'Haenyeo Seafood House',
+      question: 'Eat at Haenyeo Seafood?',
+      imageUrl: 'https://images.unsplash.com/photo-1519984388953-d2406bc725e1?w=800&auto=format&fit=crop&q=80',
+      tags: ['Seafood', 'Local Eats', 'Authentic', 'Must Try'],
+    },
+    {
+      id: 3,
+      type: 'activity',
+      typeLabel: '🚠 Activity',
+      title: 'Seongsan Cable Car',
+      question: 'Ride the Seongsan Cable Car?',
+      imageUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&auto=format&fit=crop&q=80',
+      tags: ['Scenic', 'Photo Spot', 'Adventure', 'Views'],
+    },
+  ];
 
   // Voting state for user
   const [userVote, setUserVote] = useState<'go' | 'not-now' | null>(null);
   const [userReason, setUserReason] = useState('');
+
+  // Proposal screen: countdown timer (5 min limit)
+  const PROPOSAL_TOTAL = 300;
+  const [proposalElapsed, setProposalElapsed] = useState(42); // starts partway through
+  useEffect(() => {
+    if (currentStep !== 'proposal') return;
+    const t = setInterval(() => setProposalElapsed(p => p < PROPOSAL_TOTAL ? p + 1 : p), 1000);
+    return () => clearInterval(t);
+  }, [currentStep]);
+  const proposalTimeLeft = Math.max(0, PROPOSAL_TOTAL - proposalElapsed);
+  const proposalProgress = Math.min(100, Math.round((proposalElapsed / PROPOSAL_TOTAL) * 100));
+  const fmtProposalTime = (s: number) => `${String(Math.floor(s / 60)).padStart(2,'0')}:${String(s % 60).padStart(2,'0')}`;
+
+  // Proposal screen: auto-animate friend votes (pop sounds)
+  const [proposalVotedCount, setProposalVotedCount] = useState(0);
+  useEffect(() => {
+    if (currentStep !== 'proposal') { setProposalVotedCount(0); return; }
+    const t1 = setTimeout(() => { setProposalVotedCount(1); playPop(); }, 1400);
+    const t2 = setTimeout(() => { setProposalVotedCount(2); playPop(); }, 3200);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [currentStep, caseIndex]);
 
   // Jury live voting states
   const [liveJurors, setLiveJurors] = useState<JurorVoteState[]>(JURORS);
@@ -1347,7 +1400,6 @@ export function TravelCourtCaseFlow({
           ==================================================================== */}
       {currentStep === 'proposal' && (
         <div className="court-case-chamber">
-          <MobileStatusBar />
           <header className="court-navbar">
             <button
               className="court-nav-back-btn"
@@ -1377,71 +1429,269 @@ export function TravelCourtCaseFlow({
             <div style={{ width: 38 }} />
           </header>
 
-          <div
-            className="court-proposal-screen"
-            style={{
-              padding: '8px 16px 8px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flex: 1,
-              minHeight: 0,
-              width: '100%',
-              overflow: 'hidden',
-              boxSizing: 'border-box',
-            }}
-          >
-            {/* Top Section */}
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div className="court-proposal-title" style={{ margin: '4px 0 8px' }}>
-                Shall we go to <b>Jeju?</b>
-              </div>
-
-              <div style={{ margin: '4px 0 10px', display: 'flex', justifyContent: 'center' }}>
-                <DuolingoJudgeBench state="waving" size={135} benchWidth={160} />
-              </div>
-
-              <div className="court-proposal-card" style={{ marginTop: 6 }}>
-                <div className="court-proposal-img-wrap" style={{ height: 160 }}>
-                  <img
-                    src="https://images.unsplash.com/photo-1544644181-1484b3fdfc62?w=800&auto=format&fit=crop&q=80"
-                    alt="Jeju Island"
-                  />
-                </div>
-                <div className="court-proposal-info" style={{ padding: '12px 14px' }}>
-                  <div className="court-proposal-destination" style={{ fontSize: '17px', marginBottom: 6 }}>
-                    <MapPin size={18} color="#1877f2" /> Jeju
-                  </div>
-                  <div className="court-idea-tags">
-                    <span className="court-idea-tag">Beaches</span>
-                    <span className="court-idea-tag">Nature</span>
-                    <span className="court-idea-tag">Good food</span>
-                    <span className="court-idea-tag">Relax</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Action Group */}
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <button
-                type="button"
-                className="court-sticky-cta-btn"
-                style={{ width: '100%' }}
-                onClick={() => {
-                  playWhoosh();
-                  triggerHaptic('tap');
-                  setCurrentStep('voting');
+          {(() => {
+            const currentCase = CASES[caseIndex - 1];
+            const remainingAfter = CASES.slice(caseIndex); // cards behind
+            return (
+              <div
+                className="court-proposal-screen"
+                style={{
+                  position: 'relative',
+                  padding: '2px 16px 112px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                  gap: 0,
+                  flex: 1,
+                  minHeight: 0,
+                  width: '100%',
+                  overflow: 'hidden',
+                  boxSizing: 'border-box',
                 }}
               >
-                Next to Vote →
-              </button>
-              <MobileHomeIndicator />
-            </div>
-          </div>
+                {/* Top: Timer row → Judge with title above his head */}
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+
+                  {/* Timer + Vote Count Row — at the very top */}
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    margin: '0 0 1px',
+                    background: '#f8fafc',
+                    borderRadius: 99,
+                    padding: '5px 14px',
+                    border: '1px solid #e2e8f0',
+                  }}>
+                    {/* Countdown */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Clock size={12} color="#e11d48" strokeWidth={2.5} />
+                      <span style={{ fontSize: '12px', fontWeight: 800, color: '#e11d48' }}>
+                        {fmtProposalTime(proposalTimeLeft)}
+                      </span>
+                    </div>
+                    <div style={{ width: 1, height: 14, background: '#e2e8f0' }} />
+                    {/* Vote avatars */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      {courtMembers.slice(0, 4).map((m, idx) => {
+                        const voted = idx < proposalVotedCount;
+                        return (
+                          <div key={m.id} style={{
+                            width: 22, height: 22, borderRadius: '50%',
+                            background: voted ? m.avatarColor : '#e2e8f0',
+                            border: voted ? `2px solid ${m.avatarColor}` : '2px solid #cbd5e1',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: '9px', fontWeight: 800, color: voted ? '#fff' : '#94a3b8',
+                            transform: voted ? 'scale(1.15)' : 'scale(1)',
+                            transition: 'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',
+                            boxShadow: voted ? `0 2px 6px ${m.avatarColor}55` : 'none',
+                          }}>
+                            {voted ? '✓' : m.name[0]}
+                          </div>
+                        );
+                      })}
+                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', marginLeft: 2 }}>
+                        {proposalVotedCount}/{courtMembers.length} voted
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Progress bar */}
+                  <div style={{ width: '80%', height: 3, background: '#f1f5f9', borderRadius: 99, margin: '1px 0 0', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${proposalProgress}%`, background: 'linear-gradient(90deg, #800000, #b91c1c)', borderRadius: 99, transition: 'width 0.4s ease' }} />
+                  </div>
+
+                  {/* Title floats right above judge */}
+                  <div style={{ margin: '4px 0 -8px', textAlign: 'center', lineHeight: 1.12 }}>
+                    <span style={{
+                      fontSize: '25px', fontWeight: 900, color: '#0f172a',
+                      fontFamily: "Georgia, 'Times New Roman', serif",
+                      letterSpacing: '-0.02em',
+                    }}>
+                      {currentCase.question.split(' ').map((word, i, arr) => {
+                        const isLast = i === arr.length - 1;
+                        const isDestWord = i >= arr.length - 2;
+                        return (
+                          <span key={i} style={isDestWord ? { color: '#1877f2', fontStyle: 'italic' } : undefined}>
+                            {word}{!isLast ? ' ' : ''}
+                          </span>
+                        );
+                      })}
+                    </span>
+                  </div>
+
+                  {/* Judge */}
+                  <div style={{ margin: '-2px 0 -22px', display: 'flex', justifyContent: 'center' }}>
+                    <DuolingoJudgeBench state="waving" size={100} benchWidth={130} />
+                  </div>
+                </div>
+
+
+                {/* Stacked Card Deck — back cards peek from ABOVE, anchored to bottom */}
+                {(() => {
+                  const PEEK_HEIGHT = 34; // how many px of each back card peeks above the front card
+                  const FRONT_CARD_HEIGHT = 224;
+                  // Total container height: front card + 2 peek strips
+                  const numPeekCards = Math.min(remainingAfter.length, 2);
+                  const containerHeight = FRONT_CARD_HEIGHT + numPeekCards * PEEK_HEIGHT;
+
+                  return (
+                    <div style={{ position: 'relative', width: '100%', height: containerHeight, flexShrink: 0, marginTop: 46 }}>
+
+                      {/* Back card 2 (furthest behind) — peeks at very top */}
+                      {remainingAfter.length >= 2 && (
+                        <div style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 12,
+                          right: 12,
+                          height: FRONT_CARD_HEIGHT + 2 * PEEK_HEIGHT,
+                          background: 'linear-gradient(145deg, rgba(255,255,255,0.42), rgba(222,235,248,0.22))',
+                          backdropFilter: 'blur(24px) saturate(180%)',
+                          WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+                          borderRadius: 20,
+                          boxShadow: 'inset 0 1px 0 rgba(255,255,255,.82), 0 12px 30px rgba(37,62,91,0.10)',
+                          zIndex: 1,
+                          overflow: 'hidden',
+                          border: '1px solid rgba(255,255,255,0.64)',
+                        }}>
+                          {/* Only the top strip is visible — show peek content */}
+                          <div style={{ padding: '7px 14px', display: 'flex', alignItems: 'center', gap: 10, height: PEEK_HEIGHT, overflow: 'hidden' }}>
+                            <div style={{ width: 23, height: 23, borderRadius: 8, overflow: 'hidden', flexShrink: 0, background: '#cbd5e1' }}>
+                              <img src={remainingAfter[1]?.imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.55 }} />
+                            </div>
+                            <span style={{ fontSize: '12px', fontWeight: 750, color: 'rgba(71,85,105,.66)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {remainingAfter[1]?.title}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Back card 1 (middle) — peeks second from top */}
+                      {remainingAfter.length >= 1 && (
+                        <div style={{
+                          position: 'absolute',
+                          top: remainingAfter.length >= 2 ? PEEK_HEIGHT : 0,
+                          left: 6,
+                          right: 6,
+                          height: FRONT_CARD_HEIGHT + PEEK_HEIGHT,
+                          background: 'linear-gradient(145deg, rgba(255,255,255,0.58), rgba(226,238,249,0.30))',
+                          backdropFilter: 'blur(26px) saturate(185%)',
+                          WebkitBackdropFilter: 'blur(26px) saturate(185%)',
+                          borderRadius: 22,
+                          boxShadow: 'inset 0 1px 0 rgba(255,255,255,.9), 0 14px 32px rgba(37,62,91,0.12)',
+                          zIndex: 2,
+                          overflow: 'hidden',
+                          border: '1px solid rgba(255,255,255,0.68)',
+                        }}>
+                          {/* Only the top strip is visible */}
+                          <div style={{ padding: '7px 14px', display: 'flex', alignItems: 'center', gap: 10, height: PEEK_HEIGHT, overflow: 'hidden' }}>
+                            <div style={{ width: 24, height: 24, borderRadius: 9, overflow: 'hidden', flexShrink: 0, background: '#e2e8f0' }}>
+                              <img src={remainingAfter[0]?.imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.7 }} />
+                            </div>
+                            <span style={{ fontSize: '12.5px', fontWeight: 760, color: 'rgba(71,85,105,.76)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {remainingAfter[0]?.title}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Front card — fully visible, sits at the bottom of the stack */}
+                      <div
+                        className={cardExiting ? 'court-card-swipe-out' : ''}
+                        style={{
+                          position: 'absolute',
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          height: FRONT_CARD_HEIGHT,
+                          background: '#ffffff',
+                          borderRadius: 22,
+                          boxShadow: '0 12px 32px rgba(15,23,42,0.14), 0 1px 4px rgba(0,0,0,0.06)',
+                          overflow: 'hidden',
+                          zIndex: 10,
+                          border: '1px solid #f1f5f9',
+                        }}
+                      >
+                        {/* Type badge */}
+                        <div style={{
+                          position: 'absolute', top: 10, left: 10, zIndex: 20,
+                          background: 'rgba(0,0,0,0.52)', backdropFilter: 'blur(6px)',
+                          borderRadius: 99, padding: '3px 9px',
+                          fontSize: '10px', fontWeight: 800, color: '#ffffff',
+                          letterSpacing: '0.02em',
+                        }}>
+                          {currentCase.typeLabel}
+                        </div>
+                        {/* Photo */}
+                        <div style={{ height: 136, overflow: 'hidden' }}>
+                          <img
+                            src={currentCase.imageUrl}
+                            alt={currentCase.title}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                          />
+                        </div>
+                        {/* Info */}
+                        <div style={{ padding: '10px 14px 12px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 7 }}>
+                            <MapPin size={14} color="#1877f2" />
+                            <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a' }}>{currentCase.title}</span>
+                          </div>
+                          <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                            {currentCase.tags.map(tag => (
+                              <span key={tag} style={{
+                                fontSize: '10.5px', fontWeight: 700, color: '#1877f2',
+                                background: '#eff6ff', borderRadius: 99, padding: '3px 8px',
+                                border: '1px solid #bfdbfe',
+                              }}>{tag}</span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  );
+                })()}
+
+                {/* Bottom Action */}
+                <div style={{
+                  position: 'absolute',
+                  left: 16,
+                  right: 16,
+                  bottom: 34,
+                  display: 'flex',
+                  alignItems: 'center',
+                  zIndex: 30,
+                }}>
+                  <button
+                    type="button"
+                    className="court-sticky-cta-btn"
+                    style={{ width: '100%' }}
+                    onClick={() => {
+                      playWhoosh();
+                      triggerHaptic('tap');
+                      setCurrentStep('voting');
+                    }}
+                  >
+                    Next to Vote →
+                  </button>
+                </div>
+                <div style={{
+                  position: 'absolute',
+                  left: 0,
+                  right: 0,
+                  bottom: 4,
+                  zIndex: 29,
+                  pointerEvents: 'none',
+                }}>
+                  <MobileHomeIndicator />
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
+
+
 
       {/* ====================================================================
           SCREEN 3: CASE 1 OF 3 - IT'S YOUR TURN! (VOTING)
@@ -1544,10 +1794,23 @@ export function TravelCourtCaseFlow({
                 onClick={() => {
                   playWhoosh();
                   triggerHaptic('tap');
-                  setCurrentStep('jury-live');
+                  if (caseIndex < CASES.length) {
+                    // Animate current card swiping out, then advance
+                    setCardExiting(true);
+                    setTimeout(() => {
+                      setCaseIndex(prev => prev + 1);
+                      setUserVote(null);
+                      setUserReason('');
+                      setCardExiting(false);
+                      setCurrentStep('proposal');
+                    }, 380);
+                  } else {
+                    // Last card — proceed to jury
+                    setCurrentStep('jury-live');
+                  }
                 }}
               >
-                Submit
+                Submit →
               </button>
               <MobileHomeIndicator />
             </div>
