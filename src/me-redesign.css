@@ -415,6 +415,60 @@
   font-size: 14px !important;
 }
 
+/* Unassessed / General State Enhancements */
+.me-quiz-badge-note {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4.5px !important;
+  color: #0284c7 !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  margin-top: 2px !important;
+  opacity: 0.95 !important;
+}
+
+.me-quiz-badge-note svg {
+  color: #f59e0b !important;
+  flex-shrink: 0 !important;
+}
+
+.me-floating-mini-card--unassessed {
+  border: 1.5px dashed rgba(186, 230, 253, 0.9) !important;
+  background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%) !important;
+}
+
+.me-floating-mini-card--unassessed .me-persona-art {
+  filter: drop-shadow(0 4px 8px rgba(14, 165, 233, 0.18)) !important;
+}
+
+.me-floating-mini-card--unassessed .me-persona-badge {
+  background: #fef3c7 !important;
+  color: #92400e !important;
+  border: 1px solid #fde68a !important;
+}
+
+.me-floating-mini-card--unassessed .me-persona-subtag {
+  color: #0369a1 !important;
+  font-weight: 700 !important;
+}
+
+.me-start-assessment-btn {
+  background: linear-gradient(135deg, #ff3344 0%, #e11d48 100%) !important;
+  box-shadow: 0 5px 18px rgba(225, 29, 72, 0.38) !important;
+  animation: mePulseCta 2.4s ease-in-out infinite alternate !important;
+}
+
+@keyframes mePulseCta {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.02); box-shadow: 0 7px 22px rgba(225, 29, 72, 0.45); }
+}
+
+.tab-me .me-tingo-card.redesign-card .me-chip-row--unassessed small {
+  background: #f0fdf4 !important;
+  border-color: #bbf7d0 !important;
+  color: #166534 !important;
+}
+
 /* ==========================================================================
    3. CARD 2: CURRENT TRIP - JEJU IN AMBER
    ========================================================================== */
