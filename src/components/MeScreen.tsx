@@ -1,12 +1,13 @@
 import React from 'react';
 import {
   Calendar, Check, ChevronRight, FileText, Box, Plane, Image,
-  MapPin, RotateCcw, Users
+  MapPin, RotateCcw, Sparkles, Users
 } from 'lucide-react';
 import {
   deriveTingoIdentity, tingoCompletion, type TingoAnswer,
   type TingoDimensions, type TingoPersonaKey
 } from '../domain/tingo';
+import { cocoAsset } from './coco/assets';
 import { type TripPhase } from './TripWorkspace';
 import foodieHunter from '../assets/coco/personas/foodie_hunter.png';
 import masterPlanner from '../assets/coco/personas/master_planner.png';
@@ -226,6 +227,7 @@ export type MeScreenProps = {
 };
 
 export function MeScreen({
+  tingoAnswers = [],
   tingoDimensions,
   personaOverride,
   retakeTingo,
@@ -239,6 +241,7 @@ export function MeScreen({
   dismissLearning,
   confirmedLearningHistory,
 }: MeScreenProps) {
+  const isAssessed = tingoCompletion(tingoAnswers) === 100;
   const identity = deriveTingoIdentity(tingoDimensions);
   const currentPersonaKey = personaOverride ?? identity.personaKey;
   const detail = tingoPersonaDetails[currentPersonaKey] ?? tingoPersonaDetails['hidden-gem-seeker'];
@@ -263,63 +266,121 @@ export function MeScreen({
           </g>
         </svg>
 
-        <div className="me-card-copy">
-          <span className="me-tingo-kicker">MY TINGO CARD</span>
+        {isAssessed ? (
+          <>
+            <div className="me-card-copy">
+              <span className="me-tingo-kicker">MY TINGO CARD</span>
 
-          <h2>
-            You&apos;re a<br />
-            {typeLabel === 'Hidden Gem Seeker' ? (
-              <>Hidden Gem<br />Seeker</>
-            ) : typeLabel.split(' ').length === 2 ? (
-              <>{typeLabel.split(' ')[0]}<br />{typeLabel.split(' ')[1]}</>
-            ) : typeLabel.split(' ').length > 2 ? (
-              <>{typeLabel.split(' ').slice(0, 2).join(' ')}<br />{typeLabel.split(' ').slice(2).join(' ')}</>
-            ) : (
-              typeLabel
-            )}
-          </h2>
+              <h2>
+                You&apos;re a<br />
+                {typeLabel === 'Hidden Gem Seeker' ? (
+                  <>Hidden Gem<br />Seeker</>
+                ) : typeLabel.split(' ').length === 2 ? (
+                  <>{typeLabel.split(' ')[0]}<br />{typeLabel.split(' ')[1]}</>
+                ) : typeLabel.split(' ').length > 2 ? (
+                  <>{typeLabel.split(' ').slice(0, 2).join(' ')}<br />{typeLabel.split(' ').slice(2).join(' ')}</>
+                ) : (
+                  typeLabel
+                )}
+              </h2>
 
-          <p>{typeCopy}</p>
+              <p>{typeCopy}</p>
 
-          <div className="me-chip-row">
-            {personaTags.map(tag => (
-              <small key={tag}>{tag}</small>
-            ))}
-          </div>
+              <div className="me-chip-row">
+                {personaTags.map(tag => (
+                  <small key={tag}>{tag}</small>
+                ))}
+              </div>
 
-          <div className="me-tingo-actions-col">
-            <button className="me-all-types-link" onClick={() => setDrawer('all-personas')}>
-              <Users size={15} />
-              <span>See all 16 travel types</span>
-              <span className="arrow">→</span>
-            </button>
-            <button className="me-retake-link" onClick={retakeTingo}>
-              <RotateCcw size={13} />
-              <span>Retake assessment</span>
-            </button>
-          </div>
-        </div>
+              <div className="me-tingo-actions-col">
+                <button className="me-all-types-link" onClick={() => setDrawer('all-personas')}>
+                  <Users size={15} />
+                  <span>See all 16 travel types</span>
+                  <span className="arrow">→</span>
+                </button>
+                <button className="me-retake-link" onClick={retakeTingo}>
+                  <RotateCcw size={13} />
+                  <span>Retake assessment</span>
+                </button>
+              </div>
+            </div>
 
-        <div className="me-card-collage">
-          <div className="me-handwritten-note-top">
-            <span>Small<br />Places<br />Big Stories</span>
-            <span className="sparks">彡</span>
-          </div>
+            <div className="me-card-collage">
+              <div className="me-handwritten-note-top">
+                <span>Small<br />Places<br />Big Stories</span>
+                <span className="sparks">彡</span>
+              </div>
 
-          <div className="me-floating-mini-card">
-            <img className="me-persona-art" src={personaImage} alt={`${typeLabel} illustration`} />
-            <span className="me-persona-badge">{typeLabel}</span>
-            <small className="me-persona-subtag">{personaTagline}</small>
-          </div>
+              <div className="me-floating-mini-card">
+                <img className="me-persona-art" src={personaImage} alt={`${typeLabel} illustration`} />
+                <span className="me-persona-badge">{typeLabel}</span>
+                <small className="me-persona-subtag">{personaTagline}</small>
+              </div>
 
-          <button
-            className="me-view-profile-btn"
-            onClick={() => setDrawer('tingo')}
-          >
-            <span>View profile</span>
-            <span className="arrow">→</span>
-          </button>
-        </div>
+              <button
+                className="me-view-profile-btn"
+                onClick={() => setDrawer('tingo')}
+              >
+                <span>View profile</span>
+                <span className="arrow">→</span>
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="me-card-copy">
+              <span className="me-tingo-kicker">DISCOVER YOUR TRAVEL DNA</span>
+
+              <h2>
+                What kind of<br />
+                traveller are you?
+              </h2>
+
+              <p>
+                Take our quick 2-minute vibe quiz to unlock your personal Tingo Card, travel rhythm, and tailor-made spot suggestions.
+              </p>
+
+              <div className="me-chip-row me-chip-row--unassessed">
+                <small>16 TRAVEL TYPES</small>
+                <small>SMART MATCH</small>
+                <small>UNHURRIED VIBES</small>
+              </div>
+
+              <div className="me-tingo-actions-col">
+                <button className="me-all-types-link" onClick={() => setDrawer('all-personas')}>
+                  <Users size={15} />
+                  <span>Explore all 16 personas</span>
+                  <span className="arrow">→</span>
+                </button>
+                <span className="me-quiz-badge-note">
+                  <Sparkles size={12} />
+                  <span>2 min vibe quiz · No wrong answers</span>
+                </span>
+              </div>
+            </div>
+
+            <div className="me-card-collage">
+              <div className="me-handwritten-note-top">
+                <span>Find<br />Your<br />Travel Vibe</span>
+                <span className="sparks">✦</span>
+              </div>
+
+              <div className="me-floating-mini-card me-floating-mini-card--unassessed">
+                <img className="me-persona-art" src={cocoAsset('action-binoculars')} alt="Mystery travel persona" />
+                <span className="me-persona-badge">Mystery Persona ✦</span>
+                <small className="me-persona-subtag">Waiting to be unlocked ✨</small>
+              </div>
+
+              <button
+                className="me-view-profile-btn me-start-assessment-btn"
+                onClick={retakeTingo}
+              >
+                <span>Start assessment</span>
+                <span className="arrow">→</span>
+              </button>
+            </div>
+          </>
+        )}
       </section>
 
       {/* 2. CURRENT TRIP CARD (Jeju In Amber) */}
