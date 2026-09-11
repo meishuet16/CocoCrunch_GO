@@ -5,7 +5,14 @@ import {
 } from 'lucide-react';
 import { TravelCourtCharacter, type CharacterVariant } from './TravelCourtCharacter';
 import { playPop, playWhoosh, triggerHaptic } from './courtSoundAndHaptics';
-import { MobileStatusBar, MobileHomeIndicator } from './TravelCourtCaseFlow';
+import {
+  MobileStatusBar,
+  MobileHomeIndicator,
+  TornPaperButton,
+  LuggageTag,
+  WashiTapeStrip,
+  PostmarkStamp,
+} from './TravelCourtCaseFlow';
 import './court-styles.css';
 
 export type GroupIdea = {
@@ -170,18 +177,18 @@ export function TravelCourtIdeasBoard({
               width: 36,
               height: 36,
               borderRadius: '50%',
-              border: 'none',
-              background: 'rgba(255, 255, 255, 0.92)',
+              border: '1px solid #e8d5b5',
+              background: 'rgba(255, 253, 247, 0.95)',
               backdropFilter: 'blur(6px)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+              boxShadow: '0 2px 8px rgba(100, 65, 25, 0.12)',
               cursor: 'pointer',
               flexShrink: 0,
             }}
           >
-            <ChevronLeft size={22} color="#1e293b" />
+            <ChevronLeft size={22} color="#8b0d09" />
           </button>
 
           {/* Long Shaking Deliberation Pill (Active in progress + growing progress bar to limit) */}
@@ -232,18 +239,19 @@ export function TravelCourtIdeasBoard({
             boxSizing: 'border-box',
           }}
         >
-          {/* 4 Progress Segments: 2 filled, 2 empty */}
+          {/* 4 Progress Segments: 2 filled (sangria red), 2 empty (warm paper) */}
           <div style={{ display: 'flex', gap: 6, flex: 1, maxWidth: 220 }}>
-            <div style={{ height: 4, flex: 1, background: '#1877f2', borderRadius: 99 }} />
-            <div style={{ height: 4, flex: 1, background: '#1877f2', borderRadius: 99 }} />
-            <div style={{ height: 4, flex: 1, background: '#e2e8f0', borderRadius: 99 }} />
-            <div style={{ height: 4, flex: 1, background: '#e2e8f0', borderRadius: 99 }} />
+            <div style={{ height: 4, flex: 1, background: '#8b0d09', borderRadius: 99 }} />
+            <div style={{ height: 4, flex: 1, background: '#8b0d09', borderRadius: 99 }} />
+            <div style={{ height: 4, flex: 1, background: '#dece9a', borderRadius: 99 }} />
+            <div style={{ height: 4, flex: 1, background: '#dece9a', borderRadius: 99 }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: 1.1 }}>
-            <b style={{ fontSize: '12px', fontWeight: 900, color: '#0f172a' }}>2 / 4</b>
-            <span style={{ fontSize: '9.5px', color: '#64748b', fontWeight: 600 }}>Share ideas</span>
+            <b style={{ fontSize: '12px', fontWeight: 900, color: '#2b1810' }}>2 / 4</b>
+            <span style={{ fontSize: '9.5px', color: '#8b6b4e', fontWeight: 600 }}>Share ideas</span>
           </div>
         </div>
+
 
         {/* Scrollable Content Body */}
         <div className="court-ideas-vintage-scroll">
@@ -500,52 +508,43 @@ export function TravelCourtIdeasBoard({
               />
             </div>
 
-            {/* Row 2: 4 Enlarged Action Chips across the row */}
-            <div className="court-upload-chips-grid">
-              <button
-                type="button"
-                className={`court-large-action-chip ${activeChip === 'photo' ? 'active' : ''}`}
+            {/* Row 2: 4 Authentic Luggage Tag Chips (like element sheet) */}
+            <div className="court-upload-chips-grid" style={{ display: 'flex', gap: 6, justifyContent: 'space-between' }}>
+              <LuggageTag
+                label="Photo"
+                icon={<ImageIcon size={13} />}
+                active={activeChip === 'photo'}
+                color={activeChip === 'photo' ? 'blue' : 'cream'}
                 onClick={() => setActiveChip('photo')}
-              >
-                <ImageIcon size={14} color="#0284c7" />
-                <span>Photo</span>
-              </button>
-              <button
-                type="button"
-                className={`court-large-action-chip ${activeChip === 'place' ? 'active' : ''}`}
+              />
+              <LuggageTag
+                label="Place"
+                icon={<MapPin size={13} />}
+                active={activeChip === 'place'}
+                color={activeChip === 'place' ? 'red' : 'cream'}
                 onClick={() => setActiveChip('place')}
-              >
-                <MapPin size={14} color="#ef4444" />
-                <span>Place</span>
-              </button>
-              <button
-                type="button"
-                className={`court-large-action-chip ${activeChip === 'note' ? 'active' : ''}`}
+              />
+              <LuggageTag
+                label="Note"
+                icon={<FileText size={13} />}
+                active={activeChip === 'note'}
+                color={activeChip === 'note' ? 'blue' : 'cream'}
                 onClick={() => setActiveChip('note')}
-              >
-                <FileText size={14} color="#eab308" />
-                <span>Note</span>
-              </button>
-              <button
-                type="button"
-                className={`court-large-action-chip ${activeChip === 'link' ? 'active' : ''}`}
+              />
+              <LuggageTag
+                label="Link"
+                icon={<Link2 size={13} />}
+                active={activeChip === 'link'}
+                color={activeChip === 'link' ? 'blue' : 'cream'}
                 onClick={() => setActiveChip('link')}
-              >
-                <Link2 size={14} color="#6366f1" />
-                <span>Link</span>
-              </button>
+              />
             </div>
 
-            {/* Row 3: Dedicated Full-Width Upload Button */}
-            <div className="court-upload-btn-row">
-              <button
-                type="button"
-                className="court-upload-btn-full"
-                onClick={handleUploadIdea}
-              >
-                <Upload size={15} strokeWidth={2.6} />
-                <span>Upload idea</span>
-              </button>
+            {/* Row 3: Dedicated Full-Width Torn Paper Upload Button (Plan Trip -> style) */}
+            <div className="court-upload-btn-row" style={{ marginTop: 8 }}>
+              <TornPaperButton onClick={handleUploadIdea} variant="blue">
+                Upload idea
+              </TornPaperButton>
             </div>
           </div>
 
@@ -596,13 +595,13 @@ export function TravelCourtIdeasBoard({
                           height: 36,
                           borderRadius: '50%',
                           overflow: 'hidden',
-                          background: 'radial-gradient(circle at 50% 35%, #ffffff 0%, #f1f5f9 100%)',
-                          border: '1.5px solid #e2e8f0',
+                          background: 'radial-gradient(circle at 50% 35%, #fffdf7 0%, #f5edd8 100%)',
+                          border: '1.5px solid #e8d5b5',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           flexShrink: 0,
-                          boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
+                          boxShadow: '0 2px 6px rgba(100, 65, 25, 0.1)',
                         }}
                       >
                         <TravelCourtCharacter
@@ -655,19 +654,16 @@ export function TravelCourtIdeasBoard({
             STICKY BOTTOM ACTION BAR: [ 👥 Open Discussion (6) → ]
             ============================================================= */}
         <div className="court-ideas-sticky-bar">
-          <button
-            type="button"
-            className="court-open-discussion-btn"
+          <TornPaperButton
             onClick={() => {
               playWhoosh();
               triggerHaptic('tap');
               onEnterCourt();
             }}
+            variant="crimson"
           >
-            <Users size={18} />
-            <span>Open Discussion {discussionLabel}</span>
-            <span style={{ fontSize: '17px', marginLeft: 2 }}>→</span>
-          </button>
+            Open Discussion {discussionLabel}
+          </TornPaperButton>
           <MobileHomeIndicator />
         </div>
 
