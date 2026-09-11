@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   ChevronLeft, Check, X, Clock, Heart, Send, Plane, Home,
   MapPin, Utensils, ArrowRight, Plus, MessageCircle, Edit3, Lightbulb
@@ -82,6 +82,7 @@ export interface TravelCourtCaseFlowProps {
   onGoToIdeas?: () => void;
   onClose?: () => void;
   onConfirmPlan: (decision: string) => void;
+  onSkippedIdeaSealed?: (idea: string) => void;
   courtMembers?: DynamicCourtMember[];
   onUpdateMembers?: (members: DynamicCourtMember[]) => void;
 }
@@ -204,6 +205,7 @@ export function TravelCourtCaseFlow({
   onGoToIdeas,
   onClose,
   onConfirmPlan,
+  onSkippedIdeaSealed,
   courtMembers: externalMembers,
   onUpdateMembers,
 }: TravelCourtCaseFlowProps) {
@@ -215,6 +217,8 @@ export function TravelCourtCaseFlow({
 
   const [caseIndex, setCaseIndex] = useState(1); // 1 of 3, 2 of 3, 3 of 3
   const [cardExiting, setCardExiting] = useState(false);
+  const [showSkippedGachaShowcase, setShowSkippedGachaShowcase] = useState(false);
+  const sealedSkippedIdeas = useRef(new Set<string>());
 
   // The 3 travel discussion cards
   const CASES = [
@@ -323,6 +327,21 @@ export function TravelCourtCaseFlow({
       setCaseOutcomes(prev => ({ ...prev, [caseIndex]: false }));
     }
   }, [currentStep, caseIndex]);
+
+  useEffect(() => {
+    if (currentStep !== 'verdict-fail' || caseIndex !== 3) {
+      setShowSkippedGachaShowcase(false);
+      return;
+    }
+
+    if (!sealedSkippedIdeas.current.has(activeCase.title)) {
+      sealedSkippedIdeas.current.add(activeCase.title);
+      onSkippedIdeaSealed?.(activeCase.title);
+    }
+    setShowSkippedGachaShowcase(true);
+    const timer = window.setTimeout(() => setShowSkippedGachaShowcase(false), 3600);
+    return () => window.clearTimeout(timer);
+  }, [activeCase.title, currentStep, caseIndex, onSkippedIdeaSealed]);
 
   // Showdown Duel State (Case 2: 2 vs 2 Tiebreaker)
   const [showdownUserStake, setShowdownUserStake] = useState(40);
@@ -2821,6 +2840,17 @@ export function TravelCourtCaseFlow({
 
             return (
               <div className="court-verdict-page-container">
+                {showSkippedGachaShowcase && (
+                  <div className="court-skipped-gacha-showcase" aria-label="Skipped idea sealed for a future gacha draw">
+                    <div className="court-skipped-gacha-pack">
+                      <div className="court-skipped-gacha-pack__capsule"><i /><b /></div>
+                      <div className="court-skipped-gacha-pack__paper">
+                        <span>Seongsan Cable Car</span>
+                      </div>
+                      <small>Skipped idea sealed for a future gacha draw</small>
+                    </div>
+                  </div>
+                )}
                 {/* Top Section */}
                 <div className="court-verdict-header-block">
                   <div className="court-verdict-subtitle-text">The verdict is...</div>

@@ -434,6 +434,7 @@ export default function AppRescued() {
   const [assistantUndone, setAssistantUndone] = useState(false);
   const [floatingStartOverride, setFloatingStartOverride] = useState<number | null>(null);
   const [everydayGacha, setEverydayGacha] = useState<string | null>(null);
+  const [sealedCourtIdeas, setSealedCourtIdeas] = useState<string[]>([]);
   const [tradeAccepted, setTradeAccepted] = useState(false);
   const [tradeSnapshot, setTradeSnapshot] = useState<CourtVote[] | null>(null);
   const [courtConcession, setCourtConcession] = useState<CourtConcession | null>(null);
@@ -536,13 +537,20 @@ export default function AppRescued() {
     : baseTripPlan, [baseTripPlan, delay, failedPlanItem, replanApplied]);
   const repairPreview = useMemo(() => failedPlanItem ? buildMinimumLossRepair({ plan: repairSourcePlan, failedItemId: failedPlanItem.id, backups: backupPool, budgetRemaining: remaining, mode }) : null, [backupPool, failedPlanItem, mode, remaining, repairSourcePlan]);
   const visibleTripPlan = useMemo(() => appliedRepair ? applyRepairToPlan(repairSourcePlan, appliedRepair, true).plan : repairSourcePlan, [appliedRepair, repairSourcePlan]);
+  const optionLabel = (id: string | null) => courtOptions.find(option => option.id === id)?.label ?? id ?? '';
+  const courtSkippedCandidates = useMemo(() => {
+    if (!courtConfirmed || !courtDecision) return [];
+    const winnerId = courtOptions.find(option => option.label === courtDecision)?.id ?? tally.majority;
+    return courtOptions.filter(option => option.id !== winnerId).map(option => option.label);
+  }, [courtConfirmed, courtDecision, courtOptions, tally.majority]);
   const everydayCandidates = useMemo(() => deriveEverydayDrawPool([
     ...visibleTripPlan.items.filter(item => item.kind === 'floating').map(item => ({ name: item.name, source: 'floating-itinerary' as const })),
     ...recommendations.filter(place => place.saved).map(place => ({ name: place.name, source: 'saved-idea' as const })),
     ...backupPool.map(item => ({ name: item.name, source: 'backup' as const, viable: item.viable, dealBreakerSafe: item.dealBreakerSafe })),
-  ]), [backupPool, recommendations, visibleTripPlan.items]);
+    ...courtSkippedCandidates.map(name => ({ name, source: 'court-skipped' as const })),
+    ...sealedCourtIdeas.map(name => ({ name, source: 'court-skipped' as const })),
+  ]), [backupPool, courtSkippedCandidates, recommendations, sealedCourtIdeas, visibleTripPlan.items]);
   const planHealth = calculatePlanHealth({ plan: visibleTripPlan, budget: budgetTotal, groupDNA, tingoBehavior, dealBreaker: tripInputs.dealBreaker, resolvedConflictLabels });
-  const optionLabel = (id: string | null) => courtOptions.find(option => option.id === id)?.label ?? id ?? '';
   const majorityDecision = tally.majority ? optionLabel(tally.majority) : null;
   const proposedDecision = gacha ?? majorityDecision;
   const completedPaceEvidence: CompletedPaceEvidence = { delayed: delay, mood, arrivalChecked };
@@ -1611,6 +1619,7 @@ export default function AppRescued() {
         }}
         initialMode={courtInitialMode}
         initialStep={courtInitialStep}
+        onSkippedIdeaSealed={(idea) => setSealedCourtIdeas(current => current.includes(idea) ? current : [idea, ...current])}
         onConfirmDecision={(decision) => {
           setCourtDecision(decision);
           setCourtConfirmed(true);

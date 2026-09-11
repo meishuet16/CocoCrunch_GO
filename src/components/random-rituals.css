@@ -10,22 +10,32 @@
 .random-ritual .ritual-hold { display:block; margin:12px auto; background:var(--ritual-ink); color:#fff5dc; border-radius:20px; }
 .random-ritual__status { min-height:36px; margin-top:14px; font-size:13px; }
 .random-ritual__status b { display:block; margin:8px 0; font-size:18px; }
-.travel-machine { position:relative; width:220px; max-width:100%; height:325px; margin:20px auto; color:var(--ritual-ink); }
-.travel-machine__roof { height:30px; border-radius:45% 45% 0 0; background:var(--ritual-ink); color:var(--ritual-paper); font-size:10px; padding-top:10px; letter-spacing:2px; }
-.travel-machine__drum { position:relative; height:132px; overflow:hidden; border:5px solid var(--ritual-ink); border-top:0; border-radius:0 0 35px 35px; background:linear-gradient(125deg,#fffaf0dd,#b8d9d499); box-shadow:inset 10px 0 0 #ffffff70; }
-.drum-ball { position:absolute; width:37px; height:37px; border:2px solid var(--ritual-ink); border-radius:50%; background:linear-gradient(#ddad66 48%,var(--ritual-ink) 49%,var(--ritual-ink) 53%,#fff5dc 54%); bottom:8px; left:12px; }
+.travel-machine { position:relative; width:250px; max-width:100%; height:350px; margin:22px auto; color:var(--ritual-ink); filter:drop-shadow(0 18px 28px rgba(88,45,43,.18)); }
+.travel-machine__roof { height:30px; border-radius:45% 45% 0 0; background:#7b2b31; color:var(--ritual-paper); font-size:10px; padding-top:10px; letter-spacing:2px; box-shadow:inset 0 -4px 0 rgba(69,31,34,.22); }
+.travel-machine__drum { position:relative; height:146px; overflow:hidden; border:5px solid #7b2b31; border-top:0; border-radius:0 0 38px 38px; background:linear-gradient(130deg,rgba(255,250,240,.9),rgba(201,224,211,.58)); box-shadow:inset 10px 0 0 #ffffff70, inset -8px 0 0 rgba(123,43,49,.08); }
+.travel-machine__drum::after { content:''; position:absolute; inset:0; background:linear-gradient(115deg,rgba(255,255,255,.62) 0 20%,transparent 21% 100%); pointer-events:none; }
+.drum-ball { position:absolute; width:37px; height:37px; border:2px solid var(--ritual-ink); border-radius:50%; background:linear-gradient(#e7bb6f 48%,var(--ritual-ink) 49%,var(--ritual-ink) 53%,#fff5dc 54%); bottom:8px; left:12px; box-shadow:inset -4px -5px 0 rgba(117,45,50,.12); }
 .ball-1 { left:55px; bottom:3px; transform:rotate(30deg); }.ball-2 { left:100px; bottom:9px; transform:rotate(-20deg); }.ball-3 { left:145px; bottom:7px; transform:rotate(65deg); }.ball-4 { left:35px; bottom:47px; }.ball-5 { left:82px; bottom:49px; transform:rotate(40deg); }.ball-6 { left:127px; bottom:52px; }
-.drum-ball:nth-child(2n) { background:linear-gradient(#71aaa2 48%,var(--ritual-ink) 49%,var(--ritual-ink) 53%,#fff5dc 54%); }
-.travel-machine__base { position:relative; height:115px; background:#b85c58; border:4px solid var(--ritual-ink); border-radius:14px 14px 24px 24px; margin-top:-4px; }
+.drum-ball:nth-child(2n) { background:linear-gradient(#82bbb1 48%,var(--ritual-ink) 49%,var(--ritual-ink) 53%,#fff5dc 54%); }
+.drum-ball:nth-child(3n) { background:linear-gradient(#bd605c 48%,var(--ritual-ink) 49%,var(--ritual-ink) 53%,#fff5dc 54%); }
+.travel-machine__base { position:relative; height:125px; background:#bd5f5d; border:4px solid #7b2b31; border-radius:14px 14px 26px 26px; margin-top:-4px; box-shadow:inset 0 5px 0 rgba(255,245,220,.16); }
 .travel-machine__base>span { position:absolute; left:10px; top:12px; width:80px; color:#fff5dc; font-size:9px; line-height:1.7; letter-spacing:1px; }
-.travel-machine__knob { position:absolute; right:22px; top:9px; width:42px; height:42px; border:3px solid var(--ritual-ink); border-radius:50%; background:var(--ritual-paper); }
-.travel-machine__knob::after { content:''; position:absolute; inset:15px 2px; background:var(--ritual-ink); border-radius:4px; }
+.travel-machine__knob { position:absolute; right:24px; top:11px; width:48px; height:48px; border:3px solid var(--ritual-ink); border-radius:50%; background:var(--ritual-paper); cursor:pointer; transition:transform 160ms ease, box-shadow 160ms ease; box-shadow:0 4px 0 rgba(69,31,34,.18); }
+.travel-machine__knob::after { content:''; position:absolute; inset:18px 3px; background:var(--ritual-ink); border-radius:4px; }
+.travel-machine__knob:hover { transform:translateY(-1px); box-shadow:0 5px 0 rgba(69,31,34,.2); }
+.travel-machine__knob:active { transform:translateY(3px) rotate(18deg); box-shadow:0 1px 0 rgba(69,31,34,.18); }
+.travel-machine__knob:focus-visible { outline:3px solid #217976; outline-offset:4px; }
+.travel-machine[data-turnable="false"] .travel-machine__knob { cursor:wait; opacity:.55; }
 .travel-machine__slot { position:absolute; width:92px; height:42px; bottom:7px; left:50%; transform:translateX(-50%); background:#452e32; border-radius:22px 22px 8px 8px; box-shadow:inset 0 4px 0 #2b1e22; }
-.travel-capsule { position:absolute; top:226px; left:calc(50% - 23px); width:46px; height:46px; visibility:hidden; }
-.travel-capsule i,.travel-capsule b { display:block; height:23px; border:2px solid var(--ritual-ink); background:#e5b66f; border-radius:30px 30px 0 0; }
+.travel-capsule { position:absolute; top:248px; left:calc(50% - 23px); width:46px; height:46px; visibility:hidden; }
+.travel-capsule i,.travel-capsule b { display:block; height:23px; border:2px solid var(--ritual-ink); background:#e7bb6f; border-radius:30px 30px 0 0; }
 .travel-capsule b { background:var(--ritual-paper); border-radius:0 0 30px 30px; }
+.travel-capsule em { position:absolute; left:50%; top:52px; width:128px; min-height:30px; transform:translateX(-50%) scale(.88); padding:7px 9px; border:1px solid #d9a56d; border-radius:8px; background:#fffaf0; color:#752d32; font-size:10px; font-style:normal; font-weight:850; opacity:0; box-shadow:0 8px 16px rgba(88,45,43,.16); }
+.travel-machine__idea-note { position:absolute; left:50%; top:188px; width:96px; min-height:34px; padding:7px 9px; border:1px solid #d9a56d; border-radius:9px; background:#fffaf0; color:#752d32; font-size:10px; font-weight:850; line-height:1.25; opacity:0; transform:translate(-50%,12px) rotate(-4deg) scale(.84); box-shadow:0 8px 14px rgba(88,45,43,.14); pointer-events:none; }
+.travel-machine__idea-note span { display:-webkit-box; overflow:hidden; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
 .travel-machine>small { position:absolute; bottom:0; left:0; right:0; font-size:10px; letter-spacing:2px; }
 [data-stage="turning"] .travel-machine__knob { animation:ritual-crank 420ms ease-in-out both; }
+[data-stage="turning"] .travel-machine__idea-note { animation:gacha-note-fold 420ms ease-in both; }
 [data-stage="rolling"] .drum-ball { animation:ritual-roll 310ms ease-in-out 2 alternate; }
 [data-stage="rolling"] .drum-ball:nth-child(2n) { animation-direction:alternate-reverse; }
 [data-stage="dropping"] .travel-capsule { visibility:visible; animation:ritual-drop 360ms ease-in both; }
@@ -34,6 +44,7 @@
 [data-stage="opening"] .travel-capsule i { animation:ritual-open 480ms ease-out both; }
 [data-stage="revealed"] .travel-capsule i { transform:translate(-18px,-22px) rotate(-28deg); }
 [data-stage="opening"] .travel-capsule b,[data-stage="revealed"] .travel-capsule b { transform:translate(10px,4px) rotate(12deg); }
+[data-stage="opening"] .travel-capsule em,[data-stage="revealed"] .travel-capsule em { opacity:1; transform:translateX(-50%) scale(1); }
 .fortune-scene { position:relative; height:285px; width:240px; max-width:100%; margin:20px auto; }
 .fortune-vessel { position:absolute; width:130px; height:205px; bottom:15px; left:calc(50% - 65px); transform-origin:50% 85%; }
 .fortune-sticks { position:absolute; inset:0 14px; }
@@ -58,6 +69,11 @@
 @keyframes ritual-drop { from { opacity:0; transform:translateY(-48px) scale(.75); } to { opacity:1; transform:translateY(14px); } }
 @keyframes ritual-settle { 0%,100% { transform:translateY(14px); } 45% { transform:translateY(3px) rotate(12deg); } }
 @keyframes ritual-open { to { transform:translate(-18px,-22px) rotate(-28deg); } }
+@keyframes gacha-note-fold {
+  0% { opacity:1; transform:translate(-50%,12px) rotate(-4deg) scale(1); border-radius:9px; }
+  55% { opacity:1; transform:translate(-50%,-18px) rotate(12deg) scale(.7); border-radius:18px; }
+  100% { opacity:0; transform:translate(-50%,-38px) rotate(34deg) scale(.22); border-radius:50%; }
+}
 @keyframes fortune-shake { 25% { transform:rotate(-7deg); } 75% { transform:rotate(7deg); } }
 @keyframes fortune-rattle { 50% { translate:3px -5px; } }
 @keyframes fortune-emerge { to { transform:translateY(-48px) rotate(5deg); } }

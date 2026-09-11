@@ -1,4 +1,4 @@
-export type DrawPoolSource = 'floating-itinerary' | 'saved-idea' | 'backup' | 'optional';
+export type DrawPoolSource = 'floating-itinerary' | 'saved-idea' | 'backup' | 'court-skipped' | 'optional';
 
 export type DrawPoolCandidate = { name: string; source: DrawPoolSource; viable?: boolean; dealBreakerSafe?: boolean };
 
