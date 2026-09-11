@@ -3913,16 +3913,17 @@ main {
 
 .tingo-summary h3 {
   margin: 0;
-  font-family: Georgia, serif;
-  font-size: 19px;
+  font-family: 'Caveat', cursive;
+  font-size: 26px;
   line-height: 1.05;
 }
 
 .tingo-summary p {
   margin: 0;
   color: var(--muted);
-  font-size: 10px;
-  line-height: 1.4;
+  font-family: 'Caveat', cursive;
+  font-size: 14.5px;
+  line-height: 1.25;
 }
 
 .tingo-summary .primary {
@@ -3962,8 +3963,8 @@ main {
 }
 
 .assessment-question b {
-  font-family: Georgia, serif;
-  font-size: 22px;
+  font-family: 'Caveat', cursive;
+  font-size: 26px;
   line-height: 1.08;
 }
 
@@ -4007,15 +4008,16 @@ main {
 }
 
 .tingo-result b {
-  font-family: Georgia, serif;
-  font-size: 19px;
+  font-family: 'Caveat', cursive;
+  font-size: 24px;
   line-height: 1.15;
 }
 
 .tingo-result small {
   color: var(--muted);
-  font-size: 9px;
-  line-height: 1.5;
+  font-family: 'Caveat', cursive;
+  font-size: 14px;
+  line-height: 1.35;
 }
 
 .base-packing {
@@ -5768,17 +5770,18 @@ main {
 .tingo-role-card span {
   display: block;
   color: #ff2631;
-  font-size: 12px;
-  font-weight: 850;
+  font-family: 'Caveat', cursive !important;
+  font-size: 16px;
+  font-weight: 700;
   letter-spacing: .02em;
 }
 .tingo-flow h2 {
   margin: 4px 0 14px;
   color: #073583;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 28px;
+  font-family: 'Caveat', cursive !important;
+  font-size: 32px;
   line-height: .98;
-  letter-spacing: -.055em;
+  letter-spacing: 0;
 }
 .tingo-how {
   padding-bottom: 0;
@@ -5822,14 +5825,17 @@ main {
 .tingo-choice-grid b,
 .tingo-role-card b {
   color: #073583;
-  font-size: 13px;
+  font-family: 'Caveat', cursive !important;
+  font-size: 18px;
+  font-weight: 700;
   line-height: 1.18;
 }
 .tingo-how-list small {
   display: block;
   margin-top: 3px;
   color: #0750a1;
-  font-size: 11px;
+  font-family: 'Caveat', cursive !important;
+  font-size: 14.5px;
   line-height: 1.25;
 }
 .tingo-flow-primary {
@@ -5847,12 +5853,14 @@ main {
   border-radius: 13px;
   background: linear-gradient(135deg, #086bd3, #0755ba);
   color: #fff;
-  font-size: 15px;
-  font-weight: 760;
+  font-family: 'Caveat', cursive !important;
+  font-size: 20px;
+  font-weight: 700;
 }
 .tingo-question-screen h2 {
   margin-bottom: 14px;
-  font-size: 26px;
+  font-family: 'Caveat', cursive !important;
+  font-size: 30px;
 }
 .tingo-choice-grid {
   display: grid;
@@ -5885,7 +5893,9 @@ main {
   border-radius: 999px;
   background: #dff0ff;
   color: #0750a1;
-  font-size: 11px;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 10.5px;
+  font-weight: 600;
   line-height: 1.05;
 }
 .tingo-choice-grid span {
@@ -5901,22 +5911,25 @@ main {
   border-radius: 999px;
   background: #eef3f8;
   color: #073583;
-  font-size: 14px;
-  font-weight: 760;
+  font-family: 'Caveat', cursive !important;
+  font-size: 18px;
+  font-weight: 700;
 }
 .tingo-creating {
   align-content: stretch;
 }
 .tingo-creating h2 {
   margin-top: 50px;
-  font-size: 28px;
+  font-family: 'Caveat', cursive !important;
+  font-size: 32px;
 }
 .tingo-creating p,
 .tingo-result-quote,
 .tingo-role-card small {
   margin: 0;
   color: #0750a1;
-  font-size: 13px;
+  font-family: 'Caveat', cursive !important;
+  font-size: 15px;
   line-height: 1.35;
 }
 .tingo-checks {
@@ -5931,7 +5944,9 @@ main {
 .tingo-checks b {
   margin-left: 8px;
   color: #073583;
-  font-weight: 650;
+  font-family: 'Caveat', cursive !important;
+  font-size: 17px;
+  font-weight: 700;
 }
 .tingo-creating-photo {
   align-self: end;
@@ -5957,7 +5972,9 @@ main {
 }
 .tingo-result-head b {
   justify-self: center;
-  font-size: 18px;
+  font-family: 'Caveat', cursive !important;
+  font-size: 22px;
+  font-weight: 700;
 }
 .tingo-result-head button:last-child {
   font-size: 21px;
@@ -5974,9 +5991,9 @@ main {
   left: 19px;
   top: 17px;
   color: #0a58b5;
-  font-family: "Brush Script MT", "Segoe Script", cursive;
-  font-size: 27px;
-  line-height: .86;
+  font-family: 'Caveat', cursive !important;
+  font-size: 32px;
+  line-height: .95;
   transform: rotate(-4deg);
 }
 .tingo-result-hero i {
@@ -5991,8 +6008,9 @@ main {
   border-radius: 50%;
   color: #ff313b;
   font-style: normal;
-  font-size: 9px;
-  font-weight: 850;
+  font-family: 'Caveat', cursive !important;
+  font-size: 11px;
+  font-weight: 700;
   line-height: 1.05;
   text-align: center;
   transform: rotate(-12deg);
@@ -6016,7 +6034,9 @@ main {
 }
 .tingo-stat-list b {
   color: #073583;
-  font-size: 11px;
+  font-family: 'Caveat', cursive !important;
+  font-size: 15px;
+  font-weight: 700;
 }
 .tingo-stat-list i {
   height: 7px;
@@ -6031,7 +6051,9 @@ main {
 }
 .tingo-stat-list strong {
   color: #0750a1;
+  font-family: 'Inter', sans-serif !important;
   font-size: 11px;
+  font-weight: 600;
   text-align: right;
 }
 .tingo-red-primary {
@@ -6071,6 +6093,8 @@ main {
   background: #eaf2fb;
   color: #083f87;
   box-shadow: inset 0 0 0 1px rgba(8, 63, 135, .04);
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 600 !important;
 }
 
 .me-persona-logo {
@@ -6586,8 +6610,9 @@ main {
 }
 
 .tingo-result-head b {
-  font-size: 17px;
-  font-weight: 760;
+  font-family: 'Caveat', cursive !important;
+  font-size: 22px;
+  font-weight: 700;
 }
 
 .tingo-result-hero {
@@ -6597,13 +6622,15 @@ main {
 }
 
 .tingo-result-hero span {
-  font-size: 22px;
+  font-family: 'Caveat', cursive !important;
+  font-size: 30px;
   line-height: 1.04;
 }
 
 .tingo-result-hero strong {
   margin-top: 7px;
-  font-size: 10px;
+  font-family: 'Caveat', cursive !important;
+  font-size: 14px;
 }
 
 .tingo-result-hero img {
@@ -6619,7 +6646,8 @@ main {
 }
 
 .tingo-result-quote {
-  font-size: 12px;
+  font-family: 'Caveat', cursive !important;
+  font-size: 15px;
   line-height: 1.28;
 }
 
@@ -6630,11 +6658,14 @@ main {
 }
 
 .tingo-role-card b {
-  font-size: 13px;
+  font-family: 'Caveat', cursive !important;
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .tingo-role-card small {
-  font-size: 12px;
+  font-family: 'Caveat', cursive !important;
+  font-size: 14px;
   line-height: 1.25;
 }
 
@@ -6705,4 +6736,10 @@ main {
   .tingo-result-hero img {
     width: 96px;
   }
+}
+
+.tingo-how-list .how-card-title-row b,
+.tingo-how-list .how-card-body small,
+.tingo-how-list .how-feature-tag {
+  font-family: 'Inter', sans-serif !important;
 }
