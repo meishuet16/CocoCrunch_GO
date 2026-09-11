@@ -6737,3 +6737,9 @@ main {
     width: 96px;
   }
 }
+
+.tingo-how-list .how-card-title-row b,
+.tingo-how-list .how-card-body small,
+.tingo-how-list .how-feature-tag {
+  font-family: 'Inter', sans-serif !important;
+}
