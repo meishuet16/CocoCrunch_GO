@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   ChevronLeft, Check, X, Clock, Heart, Send, Plane, Home,
-  MapPin, Utensils, ArrowRight, Plus, MessageCircle, Edit3
+  MapPin, Utensils, ArrowRight, Plus, MessageCircle, Edit3, Lightbulb
 } from 'lucide-react';
 import {
   DuolingoJudge, DuolingoJudgeBench,
@@ -82,6 +82,7 @@ export interface TravelCourtCaseFlowProps {
   onGoToIdeas?: () => void;
   onClose?: () => void;
   onConfirmPlan: (decision: string) => void;
+  onSkippedIdeaSealed?: (idea: string) => void;
   courtMembers?: DynamicCourtMember[];
   onUpdateMembers?: (members: DynamicCourtMember[]) => void;
 }
@@ -204,6 +205,7 @@ export function TravelCourtCaseFlow({
   onGoToIdeas,
   onClose,
   onConfirmPlan,
+  onSkippedIdeaSealed,
   courtMembers: externalMembers,
   onUpdateMembers,
 }: TravelCourtCaseFlowProps) {
@@ -215,6 +217,8 @@ export function TravelCourtCaseFlow({
 
   const [caseIndex, setCaseIndex] = useState(1); // 1 of 3, 2 of 3, 3 of 3
   const [cardExiting, setCardExiting] = useState(false);
+  const [showSkippedGachaShowcase, setShowSkippedGachaShowcase] = useState(false);
+  const sealedSkippedIdeas = useRef(new Set<string>());
 
   // The 3 travel discussion cards
   const CASES = [
@@ -273,6 +277,27 @@ export function TravelCourtCaseFlow({
   const proposalTimeLeft = Math.max(0, PROPOSAL_TOTAL - proposalElapsed);
   const proposalProgress = Math.min(100, Math.round((proposalElapsed / PROPOSAL_TOTAL) * 100));
   const fmtProposalTime = (s: number) => `${String(Math.floor(s / 60)).padStart(2,'0')}:${String(s % 60).padStart(2,'0')}`;
+  const openIdeasBoard = () => {
+    playWhoosh();
+    triggerHaptic('tap');
+    if (onGoToIdeas) {
+      onGoToIdeas();
+    } else {
+      setCurrentStep('proposal');
+    }
+  };
+  const DiscussIdeaButton = () => (
+    <button
+      type="button"
+      className="court-top-idea-btn"
+      onClick={openIdeasBoard}
+      aria-label="Add idea to court discussion"
+      title="Add idea to court discussion"
+    >
+      <Lightbulb size={15} strokeWidth={2.6} />
+      <span>Idea</span>
+    </button>
+  );
 
   // Proposal screen: auto-animate friend votes (pop sounds)
   const [proposalVotedCount, setProposalVotedCount] = useState(0);
@@ -302,6 +327,21 @@ export function TravelCourtCaseFlow({
       setCaseOutcomes(prev => ({ ...prev, [caseIndex]: false }));
     }
   }, [currentStep, caseIndex]);
+
+  useEffect(() => {
+    if (currentStep !== 'verdict-fail' || caseIndex !== 3) {
+      setShowSkippedGachaShowcase(false);
+      return;
+    }
+
+    if (!sealedSkippedIdeas.current.has(activeCase.title)) {
+      sealedSkippedIdeas.current.add(activeCase.title);
+      onSkippedIdeaSealed?.(activeCase.title);
+    }
+    setShowSkippedGachaShowcase(true);
+    const timer = window.setTimeout(() => setShowSkippedGachaShowcase(false), 3600);
+    return () => window.clearTimeout(timer);
+  }, [activeCase.title, currentStep, caseIndex, onSkippedIdeaSealed]);
 
   // Showdown Duel State (Case 2: 2 vs 2 Tiebreaker)
   const [showdownUserStake, setShowdownUserStake] = useState(40);
@@ -843,7 +883,7 @@ export function TravelCourtCaseFlow({
             >
               <ChevronLeft size={22} color="#1e293b" />
             </button>
-            <div style={{ width: 36 }} />
+            <DiscussIdeaButton />
           </header>
 
           <div
@@ -1728,7 +1768,7 @@ export function TravelCourtCaseFlow({
                 <div style={{ height: 4, flex: 1, background: '#e2e8f0', borderRadius: 99 }} />
               </div>
             </div>
-            <div style={{ width: 38 }} />
+            <DiscussIdeaButton />
           </header>
 
           {(() => {
@@ -1739,7 +1779,7 @@ export function TravelCourtCaseFlow({
                 className="court-proposal-screen"
                 style={{
                   position: 'relative',
-                  padding: '2px 16px 112px',
+                  padding: '10px 16px 112px',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
@@ -1798,12 +1838,12 @@ export function TravelCourtCaseFlow({
                   </div>
 
                   {/* Progress bar */}
-                  <div style={{ width: '80%', height: 3, background: '#f1f5f9', borderRadius: 99, margin: '1px 0 0', overflow: 'hidden' }}>
+                  <div style={{ width: '80%', height: 3, background: '#f1f5f9', borderRadius: 99, margin: '3px 0 0', overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${proposalProgress}%`, background: 'linear-gradient(90deg, #800000, #b91c1c)', borderRadius: 99, transition: 'width 0.4s ease' }} />
                   </div>
 
                   {/* Title floats right above judge */}
-                  <div style={{ margin: '4px 0 -8px', textAlign: 'center', lineHeight: 1.12 }}>
+                  <div style={{ margin: '11px 0 7px', textAlign: 'center', lineHeight: 1.12 }}>
                     <span style={{
                       fontSize: '25px', fontWeight: 900, color: '#0f172a',
                       fontFamily: "Georgia, 'Times New Roman', serif",
@@ -1822,7 +1862,7 @@ export function TravelCourtCaseFlow({
                   </div>
 
                   {/* Judge */}
-                  <div style={{ margin: '-2px 0 -22px', display: 'flex', justifyContent: 'center' }}>
+                  <div style={{ margin: '0 0 -18px', display: 'flex', justifyContent: 'center' }}>
                     <DuolingoJudgeBench state="waving" size={100} benchWidth={130} />
                   </div>
                 </div>
@@ -1830,76 +1870,63 @@ export function TravelCourtCaseFlow({
 
                 {/* Stacked Card Deck — back cards peek from ABOVE, anchored to bottom */}
                 {(() => {
-                  const PEEK_HEIGHT = 34; // how many px of each back card peeks above the front card
+                  const PEEK_HEIGHT = 36; // how many px of each back card peeks above the front card
                   const FRONT_CARD_HEIGHT = 224;
                   // Total container height: front card + 2 peek strips
                   const numPeekCards = Math.min(remainingAfter.length, 2);
                   const containerHeight = FRONT_CARD_HEIGHT + numPeekCards * PEEK_HEIGHT;
 
                   return (
-                    <div style={{ position: 'relative', width: '100%', height: containerHeight, flexShrink: 0, marginTop: 46 }}>
+                    <div className="court-proposal-stack" style={{ height: containerHeight, marginTop: 32 }}>
 
                       {/* Back card 2 (furthest behind) — peeks at very top */}
                       {remainingAfter.length >= 2 && (
-                        <div style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 12,
-                          right: 12,
-                          height: FRONT_CARD_HEIGHT + 2 * PEEK_HEIGHT,
-                          background: 'linear-gradient(145deg, rgba(255,255,255,0.42), rgba(222,235,248,0.22))',
-                          backdropFilter: 'blur(24px) saturate(180%)',
-                          WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-                          borderRadius: 20,
-                          boxShadow: 'inset 0 1px 0 rgba(255,255,255,.82), 0 12px 30px rgba(37,62,91,0.10)',
-                          zIndex: 1,
-                          overflow: 'hidden',
-                          border: '1px solid rgba(255,255,255,0.64)',
-                        }}>
+                        <div
+                          className="court-stack-peek-card court-stack-peek-card--back"
+                          style={{ top: 0, height: FRONT_CARD_HEIGHT + 2 * PEEK_HEIGHT }}
+                        >
                           {/* Only the top strip is visible — show peek content */}
-                          <div style={{ padding: '7px 14px', display: 'flex', alignItems: 'center', gap: 10, height: PEEK_HEIGHT, overflow: 'hidden' }}>
-                            <div style={{ width: 23, height: 23, borderRadius: 8, overflow: 'hidden', flexShrink: 0, background: '#cbd5e1' }}>
-                              <img src={remainingAfter[1]?.imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.55 }} />
+                          <div className="court-stack-peek-content" style={{ height: PEEK_HEIGHT }}>
+                            <div className="court-stack-peek-thumb">
+                              <img src={remainingAfter[1]?.imageUrl} alt="" />
                             </div>
-                            <span style={{ fontSize: '12px', fontWeight: 750, color: 'rgba(71,85,105,.66)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                              {remainingAfter[1]?.title}
-                            </span>
+                            <span className="court-stack-case-chip">Case {remainingAfter[1]?.id}</span>
+                            <div className="court-stack-peek-copy">
+                              <b>{remainingAfter[1]?.title}</b>
+                              <span>{remainingAfter[1]?.typeLabel.replace(/^[^\w]+ /, '')}</span>
+                            </div>
+                            <ArrowRight size={14} className="court-stack-peek-arrow" />
                           </div>
                         </div>
                       )}
 
                       {/* Back card 1 (middle) — peeks second from top */}
                       {remainingAfter.length >= 1 && (
-                        <div style={{
-                          position: 'absolute',
-                          top: remainingAfter.length >= 2 ? PEEK_HEIGHT : 0,
-                          left: 6,
-                          right: 6,
-                          height: FRONT_CARD_HEIGHT + PEEK_HEIGHT,
-                          background: 'linear-gradient(145deg, rgba(255,255,255,0.58), rgba(226,238,249,0.30))',
-                          backdropFilter: 'blur(26px) saturate(185%)',
-                          WebkitBackdropFilter: 'blur(26px) saturate(185%)',
-                          borderRadius: 22,
-                          boxShadow: 'inset 0 1px 0 rgba(255,255,255,.9), 0 14px 32px rgba(37,62,91,0.12)',
-                          zIndex: 2,
-                          overflow: 'hidden',
-                          border: '1px solid rgba(255,255,255,0.68)',
-                        }}>
+                        <div
+                          className="court-stack-peek-card court-stack-peek-card--middle"
+                          style={{
+                            top: remainingAfter.length >= 2 ? PEEK_HEIGHT : 0,
+                            height: FRONT_CARD_HEIGHT + PEEK_HEIGHT,
+                          }}
+                        >
                           {/* Only the top strip is visible */}
-                          <div style={{ padding: '7px 14px', display: 'flex', alignItems: 'center', gap: 10, height: PEEK_HEIGHT, overflow: 'hidden' }}>
-                            <div style={{ width: 24, height: 24, borderRadius: 9, overflow: 'hidden', flexShrink: 0, background: '#e2e8f0' }}>
-                              <img src={remainingAfter[0]?.imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.7 }} />
+                          <div className="court-stack-peek-content" style={{ height: PEEK_HEIGHT }}>
+                            <div className="court-stack-peek-thumb">
+                              <img src={remainingAfter[0]?.imageUrl} alt="" />
                             </div>
-                            <span style={{ fontSize: '12.5px', fontWeight: 760, color: 'rgba(71,85,105,.76)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                              {remainingAfter[0]?.title}
-                            </span>
+                            <span className="court-stack-case-chip">Case {remainingAfter[0]?.id}</span>
+                            <div className="court-stack-peek-copy">
+                              <b>{remainingAfter[0]?.title}</b>
+                              <span>{remainingAfter[0]?.typeLabel.replace(/^[^\w]+ /, '')}</span>
+                            </div>
+                            <ArrowRight size={14} className="court-stack-peek-arrow" />
                           </div>
                         </div>
                       )}
 
                       {/* Front card — fully visible, sits at the bottom of the stack */}
                       <div
-                        className={cardExiting ? 'court-card-swipe-out' : ''}
+                        className={`court-stack-front-card ${cardExiting ? 'court-card-swipe-out' : ''}`}
                         style={{
                           position: 'absolute',
                           bottom: 0,
@@ -1907,11 +1934,8 @@ export function TravelCourtCaseFlow({
                           right: 0,
                           height: FRONT_CARD_HEIGHT,
                           background: '#ffffff',
-                          borderRadius: 22,
-                          boxShadow: '0 12px 32px rgba(15,23,42,0.14), 0 1px 4px rgba(0,0,0,0.06)',
                           overflow: 'hidden',
                           zIndex: 10,
-                          border: '1px solid #f1f5f9',
                         }}
                       >
                         {/* Type badge */}
@@ -2019,7 +2043,7 @@ export function TravelCourtCaseFlow({
                 <div style={{ height: 4, flex: 1, background: '#e2e8f0', borderRadius: 99 }} />
               </div>
             </div>
-            <div style={{ width: 38 }} />
+            <DiscussIdeaButton />
           </header>
 
           <div
@@ -2241,7 +2265,7 @@ export function TravelCourtCaseFlow({
                   <div style={{ height: 4, flex: 1, background: caseIndex >= 3 ? '#1877f2' : '#e2e8f0', borderRadius: 99 }} />
                 </div>
               </div>
-              <div style={{ width: 38 }} />
+              <DiscussIdeaButton />
             </header>
 
             <div
@@ -2591,7 +2615,7 @@ export function TravelCourtCaseFlow({
                 <div style={{ height: 4, flex: 1, background: caseIndex >= 3 ? '#1877f2' : '#e2e8f0', borderRadius: 99 }} />
               </div>
             </div>
-            <div style={{ width: 38 }} />
+            <DiscussIdeaButton />
           </header>
 
           {(() => {
@@ -2799,7 +2823,7 @@ export function TravelCourtCaseFlow({
                 <div style={{ height: 4, flex: 1, background: caseIndex >= 3 ? '#1877f2' : '#e2e8f0', borderRadius: 99 }} />
               </div>
             </div>
-            <div style={{ width: 38 }} />
+            <DiscussIdeaButton />
           </header>
 
           {(() => {
@@ -2816,6 +2840,17 @@ export function TravelCourtCaseFlow({
 
             return (
               <div className="court-verdict-page-container">
+                {showSkippedGachaShowcase && (
+                  <div className="court-skipped-gacha-showcase" aria-label="Skipped idea sealed for a future gacha draw">
+                    <div className="court-skipped-gacha-pack">
+                      <div className="court-skipped-gacha-pack__capsule"><i /><b /></div>
+                      <div className="court-skipped-gacha-pack__paper">
+                        <span>Seongsan Cable Car</span>
+                      </div>
+                      <small>Skipped idea sealed for a future gacha draw</small>
+                    </div>
+                  </div>
+                )}
                 {/* Top Section */}
                 <div className="court-verdict-header-block">
                   <div className="court-verdict-subtitle-text">The verdict is...</div>
@@ -3008,7 +3043,7 @@ export function TravelCourtCaseFlow({
                 <div style={{ height: 4, flex: 1, background: caseIndex >= 3 ? '#1877f2' : '#e2e8f0', borderRadius: 99 }} />
               </div>
             </div>
-            <div style={{ width: 38 }} />
+            <DiscussIdeaButton />
           </header>
 
           <div
@@ -3206,7 +3241,7 @@ export function TravelCourtCaseFlow({
               <ChevronLeft size={24} />
             </button>
             <div className="court-nav-title-group" style={{ alignItems: 'center' }}>
-              <span style={{ fontSize: '12px', fontWeight: 700, color: '#dc2626' }}>
+              <span className="court-showdown-nav-title">
                 Case 2 of 3 • 2 vs 2 Showdown
               </span>
               <div style={{ display: 'flex', gap: 4, width: 80, marginTop: 4 }}>
@@ -3215,9 +3250,18 @@ export function TravelCourtCaseFlow({
                 <div style={{ height: 4, flex: 1, background: '#e2e8f0', borderRadius: 99 }} />
               </div>
             </div>
-            <div style={{ width: 38 }} />
+            <DiscussIdeaButton />
           </header>
 
+          {(() => {
+            const resolvedShowdownWinner = showdownWinner ?? (45 + showdownUserStake >= 85 ? 'not-now' : 'go');
+            const teamGoScore = 85;
+            const teamNotNowScore = 45 + showdownUserStake;
+            const totalShowdownScore = teamGoScore + teamNotNowScore;
+            const teamGoShare = (teamGoScore / totalShowdownScore) * 100;
+            const teamNotNowShare = (teamNotNowScore / totalShowdownScore) * 100;
+
+            return (
           <div className="court-showdown-screen">
             {/* Header info card */}
             <div className="court-showdown-header-card">
@@ -3234,29 +3278,19 @@ export function TravelCourtCaseFlow({
                   Eat at Haenyeo Seafood? Stake points to break the tie.
                 </p>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 3, flexShrink: 0 }}>
+              <div className="court-showdown-badge-stack">
                 <div className="court-showdown-sword-badge">
                   <span style={{ fontSize: '18px', lineHeight: 1 }}>⚔️</span>
-                  <span style={{ fontSize: '9px', fontWeight: 900, color: '#ef4444', letterSpacing: '0.4px', marginTop: 2 }}>
-                    SHOWDOWN
-                  </span>
+                  <span>Showdown</span>
                 </div>
-                <span style={{
-                  fontSize: '9.5px',
-                  fontWeight: 800,
-                  color: '#dc2626',
-                  background: '#fef2f2',
-                  padding: '1px 6px',
-                  borderRadius: 6,
-                  border: '1px solid #fee2e2',
-                }}>
+                <span className="court-showdown-rate-pill">
                   1 pt = RM 0.50
                 </span>
               </div>
             </div>
 
             {/* Courtroom Stage Box matching user reference image */}
-            <div className="court-showdown-stage-box">
+            <div className={`court-showdown-stage-box ${showdownStakesLocked ? 'is-locked' : ''}`}>
               <img
                 src="/characters/court_stage_bg.jpg?v=vertical_no_chairs_v6"
                 onError={(e) => {
@@ -3272,7 +3306,7 @@ export function TravelCourtCaseFlow({
                 <Send size={11} style={{ transform: 'rotate(-30deg)' }} /> Team Go
               </div>
               <div className="court-showdown-pill-right">
-                <span style={{ fontSize: '11px', fontWeight: 900 }}>✕</span> Team Not Now
+                <span style={{ fontSize: '11px', fontWeight: 600 }}>✕</span> Team Not Now
               </div>
 
               {/* Left Desk Team (Team Go: Alex & Mavis) */}
@@ -3281,7 +3315,7 @@ export function TravelCourtCaseFlow({
                 style={{
                   position: 'absolute',
                   left: '18%',
-                  top: 135,
+                  top: showdownStakesLocked ? 58 : 131,
                   transform: 'translateX(-50%)',
                   zIndex: 14,
                   display: 'flex',
@@ -3314,7 +3348,7 @@ export function TravelCourtCaseFlow({
                       background: '#10b981',
                       color: '#ffffff',
                       fontSize: '10px',
-                      fontWeight: 900,
+                      fontWeight: 600,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -3335,7 +3369,7 @@ export function TravelCourtCaseFlow({
                 style={{
                   position: 'absolute',
                   left: '34%',
-                  top: 155,
+                  top: showdownStakesLocked ? 76 : 157,
                   transform: 'translateX(-50%)',
                   zIndex: 16,
                   display: 'flex',
@@ -3368,7 +3402,7 @@ export function TravelCourtCaseFlow({
                       background: '#10b981',
                       color: '#ffffff',
                       fontSize: '10px',
-                      fontWeight: 900,
+                      fontWeight: 600,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -3390,7 +3424,7 @@ export function TravelCourtCaseFlow({
                 style={{
                   position: 'absolute',
                   left: '66%',
-                  top: 155,
+                  top: showdownStakesLocked ? 76 : 157,
                   transform: 'translateX(-50%)',
                   zIndex: 14,
                   display: 'flex',
@@ -3423,7 +3457,7 @@ export function TravelCourtCaseFlow({
                       background: '#ef4444',
                       color: '#ffffff',
                       fontSize: '10px',
-                      fontWeight: 900,
+                      fontWeight: 600,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -3444,7 +3478,7 @@ export function TravelCourtCaseFlow({
                 style={{
                   position: 'absolute',
                   left: '82%',
-                  top: 135,
+                  top: showdownStakesLocked ? 58 : 131,
                   transform: 'translateX(-50%)',
                   zIndex: 16,
                   display: 'flex',
@@ -3462,7 +3496,7 @@ export function TravelCourtCaseFlow({
                   <TravelCourtCharacter
                     variant="girl_redhat"
                     vote="no"
-                    state={showdownStakesLocked ? 'celebrate' : 'thinking'}
+                    state="thinking"
                     size={54}
                     animated
                   />
@@ -3477,7 +3511,7 @@ export function TravelCourtCaseFlow({
                       background: '#ef4444',
                       color: '#ffffff',
                       fontSize: '10px',
-                      fontWeight: 900,
+                      fontWeight: 600,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -3497,7 +3531,7 @@ export function TravelCourtCaseFlow({
               {activeLeftBubble && (
                 <div key={activeLeftBubble.id} className="court-debate-bubble-left">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 4 }}>
-                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#0f172a', lineHeight: 1.35 }}>
+                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#0f172a', lineHeight: 1.35 }}>
                       {activeLeftBubble.text}
                     </span>
                     <span style={{ color: '#0d9488', fontSize: '11px', flexShrink: 0, marginTop: -2 }}>🪄</span>
@@ -3508,7 +3542,7 @@ export function TravelCourtCaseFlow({
               {activeRightBubble && (
                 <div key={activeRightBubble.id} className="court-debate-bubble-right">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 4 }}>
-                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#0f172a', lineHeight: 1.35 }}>
+                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#0f172a', lineHeight: 1.35 }}>
                       {activeRightBubble.text}
                     </span>
                     <span style={{ color: '#ef4444', fontSize: '11px', flexShrink: 0, marginTop: -2 }}>🪄</span>
@@ -3518,89 +3552,84 @@ export function TravelCourtCaseFlow({
             </div>
 
             {/* Chat Input for typing debate arguments */}
-            <div className="court-showdown-chat-card">
-              <Edit3 size={17} color="#94a3b8" style={{ flexShrink: 0 }} />
-              <input
-                type="text"
-                placeholder="Type your argument for Team Not Now..."
-                value={showdownDebateChat}
-                onChange={(e) => setShowdownDebateChat(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleSendShowdownChat();
-                }}
-                className="court-showdown-chat-input"
-              />
-              <button
-                type="button"
-                onClick={handleSendShowdownChat}
-                className="court-showdown-send-btn"
-                aria-label="Send argument"
-              >
-                <Send size={15} />
-              </button>
-            </div>
+            {!showdownStakesLocked && (
+              <div className="court-showdown-chat-card">
+                <Edit3 size={17} color="#94a3b8" style={{ flexShrink: 0 }} />
+                <input
+                  type="text"
+                  placeholder="Type your argument for Team Not Now..."
+                  value={showdownDebateChat}
+                  onChange={(e) => setShowdownDebateChat(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSendShowdownChat();
+                  }}
+                  className="court-showdown-chat-input"
+                />
+                <button
+                  type="button"
+                  onClick={handleSendShowdownChat}
+                  className="court-showdown-send-btn"
+                  aria-label="Send argument"
+                >
+                  <Send size={15} />
+                </button>
+              </div>
+            )}
 
             {/* Stake card with slider */}
-            <div className="court-showdown-stake-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a' }}>
-                    Your Stake
-                  </span>
-                  <span style={{
-                    fontSize: '9.5px',
-                    fontWeight: 700,
-                    color: '#64748b',
-                    background: '#f1f5f9',
-                    padding: '2px 6px',
-                    borderRadius: 6,
-                    border: '1px solid #e2e8f0',
-                  }}>
-                    1 pt = RM 0.50
-                  </span>
+            {!showdownStakesLocked ? (
+              <div className="court-showdown-stake-card">
+                <div className="court-showdown-stake-head">
+                  <div className="court-showdown-stake-title">
+                    <span>Your Stake</span>
+                    <small>1 pt = RM 0.50</small>
+                  </div>
+                  <div className="court-showdown-stake-value">
+                    <span className="court-stake-val-pill">
+                      +{showdownUserStake} pts
+                    </span>
+                    <b>
+                      RM {(showdownUserStake * 0.5).toFixed(2)}
+                    </b>
+                  </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <span className="court-stake-val-pill">
-                    +{showdownUserStake} pts
-                  </span>
-                  <span style={{ fontSize: '12px', fontWeight: 800, color: '#ef4444' }}>
-                    ≈ RM {(showdownUserStake * 0.5).toFixed(2)}
-                  </span>
+                <input
+                  type="range"
+                  min={10}
+                  max={100}
+                  step={5}
+                  value={showdownUserStake}
+                  onChange={(e) => setShowdownUserStake(Number(e.target.value))}
+                  className="court-stake-slider"
+                />
+                <div className="court-showdown-slider-labels">
+                  <span>10 pts</span>
+                  <span>50 pts</span>
+                  <span>100 pts</span>
+                </div>
+                <div className="court-showdown-trip-fund-row">
+                  <span>Trip Fund</span>
+                  <span>Losers pay RM {(showdownUserStake * 0.5).toFixed(2)}</span>
                 </div>
               </div>
-              <input
-                type="range"
-                min={10}
-                max={100}
-                step={5}
-                value={showdownUserStake}
-                disabled={showdownStakesLocked}
-                onChange={(e) => setShowdownUserStake(Number(e.target.value))}
-                className="court-stake-slider"
-              />
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10.5px', color: '#94a3b8', fontWeight: 600 }}>
-                <span>10 pts (RM 5)</span>
-                <span>50 pts (RM 25)</span>
-                <span>100 pts (RM 50)</span>
+            ) : (
+              <div className="court-showdown-locked-summary">
+                <div className="court-showdown-locked-copy">
+                  <span>My stake locked</span>
+                  <b>Team Not Now</b>
+                </div>
+                <div className="court-showdown-locked-metrics">
+                  <div>
+                    <span>My points</span>
+                    <b>{showdownUserStake}</b>
+                  </div>
+                  <div>
+                    <span>My value</span>
+                    <b>RM {(showdownUserStake * 0.5).toFixed(2)}</b>
+                  </div>
+                </div>
               </div>
-              <div style={{
-                fontSize: '10.5px',
-                color: '#64748b',
-                background: '#f8fafc',
-                borderRadius: 10,
-                padding: '5px 9px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                border: '1px dashed #e2e8f0',
-                marginTop: 2,
-              }}>
-                <span>💰 Trip Fund (Losers pay)</span>
-                <span style={{ fontWeight: 800, color: '#0f172a' }}>
-                  RM {(showdownUserStake * 0.5).toFixed(2)}
-                </span>
-              </div>
-            </div>
+            )}
 
             {/* Confirm button (No emoji!) or Result announcement */}
             {!showdownStakesLocked ? (
@@ -3612,55 +3641,55 @@ export function TravelCourtCaseFlow({
                 Confirm Stakes & Lock Bet (RM {(showdownUserStake * 0.5).toFixed(2)})
               </button>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }}>
+              <div className="court-showdown-result-wrap">
                 {/* Score balance revealed upon confirmation */}
-                <div style={{
-                  background: '#ffffff',
-                  borderRadius: 16,
-                  border: '1px solid #e2e8f0',
-                  padding: '10px 14px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 6,
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11.5px', fontWeight: 800 }}>
-                    <span style={{ color: '#059669' }}>Team Go: 85 pts (RM 42.50)</span>
-                    <span style={{ color: '#94a3b8', fontSize: '10px' }}>VS</span>
-                    <span style={{ color: '#dc2626' }}>Team Not Now: {45 + showdownUserStake} pts (RM {((45 + showdownUserStake) * 0.5).toFixed(2)})</span>
+                <div className={`court-showdown-result-card ${resolvedShowdownWinner === 'go' ? 'is-go' : 'is-not-now'}`}>
+                  <div className="court-showdown-result-header">
+                    <span className="court-showdown-result-kicker">Court result</span>
+                    <b>
+                      {resolvedShowdownWinner === 'go'
+                        ? <><span className="court-result-team-go">Team Go</span> takes the case</>
+                        : <><span className="court-result-team-not-now">Team Not Now</span> takes the case</>}
+                    </b>
+                    <p className={`court-showdown-outcome-line ${resolvedShowdownWinner === 'go' ? 'is-go' : 'is-not-now'}`}>
+                      {resolvedShowdownWinner === 'go'
+                        ? 'Haenyeo Seafood is approved'
+                        : 'Haenyeo Seafood stays off the plan'}
+                    </p>
                   </div>
-                  <div className="court-showdown-score-track">
-                    <div
-                      className="court-showdown-score-green"
-                      style={{
-                        width: `${(85 / (85 + 45 + showdownUserStake)) * 100}%`,
-                      }}
-                    />
-                    <div
-                      className="court-showdown-score-red"
-                      style={{
-                        width: `${((45 + showdownUserStake) / (85 + 45 + showdownUserStake)) * 100}%`,
-                      }}
-                    />
-                  </div>
-                </div>
 
-                <div
-                  style={{
-                    padding: '10px 14px',
-                    borderRadius: 14,
-                    background: showdownWinner === 'not-now' ? '#fef2f2' : '#ecfdf5',
-                    border: `1.5px solid ${showdownWinner === 'not-now' ? '#fecaca' : '#a7f3d0'}`,
-                    color: showdownWinner === 'not-now' ? '#991b1b' : '#065f46',
-                    fontSize: '12px',
-                    fontWeight: 800,
-                    textAlign: 'center',
-                    lineHeight: 1.4,
-                  }}
-                >
-                  {showdownWinner === 'not-now'
-                    ? `🏆 Team Not Now Wins! Seafood skipped. Team Go pays RM 42.50 to the trip fund.`
-                    : `🏆 Team Go Wins! Seafood approved. Team Not Now pays RM ${((45 + showdownUserStake) * 0.5).toFixed(2)} to the trip fund.`}
+                  <div className="court-showdown-versus-board">
+                    <div className="court-showdown-versus-labels">
+                      <span>Team Go</span>
+                      <span>Team Not Now</span>
+                    </div>
+                    <div className="court-showdown-versus-capsules">
+                      <div
+                        className={`court-versus-capsule is-green ${resolvedShowdownWinner === 'go' ? 'is-winner' : ''}`}
+                        style={{ flexBasis: `${teamGoShare}%` }}
+                      >
+                        <b>{teamGoScore}</b>
+                        <span>RM 42.50</span>
+                      </div>
+                      <div className="court-showdown-versus-or">vs</div>
+                      <div
+                        className={`court-versus-capsule is-red ${resolvedShowdownWinner === 'not-now' ? 'is-winner' : ''}`}
+                        style={{ flexBasis: `${teamNotNowShare}%` }}
+                      >
+                        <b>{teamNotNowScore}</b>
+                        <span>RM {(teamNotNowScore * 0.5).toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="court-showdown-payment-note">
+                    <span>Trip fund consequence</span>
+                    <b>
+                      {resolvedShowdownWinner === 'not-now'
+                        ? 'Team Go pays RM 42.50'
+                        : `Team Not Now pays RM ${((45 + showdownUserStake) * 0.5).toFixed(2)}`}
+                    </b>
+                  </div>
                 </div>
                 <button
                   type="button"
@@ -3684,6 +3713,8 @@ export function TravelCourtCaseFlow({
               </div>
             )}
           </div>
+            );
+          })()}
           <MobileHomeIndicator />
         </div>
       )}

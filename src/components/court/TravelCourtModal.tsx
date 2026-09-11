@@ -10,6 +10,7 @@ export interface TravelCourtModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirmDecision: (decision: string) => void;
+  onSkippedIdeaSealed?: (idea: string) => void;
   initialMode?: 'ideas' | 'case' | 'playground';
   initialStep?: CourtStep;
 }
@@ -18,6 +19,7 @@ export function TravelCourtModal({
   isOpen,
   onClose,
   onConfirmDecision,
+  onSkippedIdeaSealed,
   initialMode = 'case',
   initialStep = 'lobby',
 }: TravelCourtModalProps) {
@@ -77,6 +79,7 @@ export function TravelCourtModal({
           onClose={onClose}
           onBackToIdeas={() => setViewMode('ideas')}
           onGoToIdeas={() => setViewMode('ideas')}
+          onSkippedIdeaSealed={onSkippedIdeaSealed}
           onConfirmPlan={(decision) => {
             onConfirmDecision(decision);
             onClose();
