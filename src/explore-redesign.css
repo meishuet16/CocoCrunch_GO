@@ -2590,16 +2590,19 @@
 
 .tingo-learning-note b {
   display: block;
-  font-size: 10px;
+  font-family: 'Caveat', cursive;
+  font-size: 15px;
+  font-weight: 700;
   color: #15803d;
   margin-bottom: 1px;
 }
 
 .tingo-learning-note p {
   margin: 0;
-  font-size: 11px;
+  font-family: 'Caveat', cursive;
+  font-size: 14px;
   color: #166534;
-  line-height: 1.4;
+  line-height: 1.25;
 }
 
 .keepsake-shelf-note {
