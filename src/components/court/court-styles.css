@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
 
 /* ==========================================================================
    Travel Court (Group Court) - Duolingo-Style Animated Experience Styles
@@ -1340,22 +1341,23 @@ body:has(.court-modal-overlay) {
 }
 
 .court-voting-header h2 {
-  font-size: 28px;
-  font-weight: 800;
-  color: #0f172a;
+  font-size: 32px;
+  font-weight: 700;
+  color: #8b1520;
   margin: 0 0 3px;
-  letter-spacing: -0.025em;
-  line-height: 1.15;
-  font-family: Georgia, 'Times New Roman', serif;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+  font-family: 'Caveat', cursive;
   text-shadow: none;
 }
 
 .court-voting-header p {
-  font-size: 13.5px;
-  color: #64748b;
+  font-size: 15px;
+  color: #7a5840;
   margin: 0;
   font-weight: 600;
-  letter-spacing: -0.01em;
+  font-family: 'Caveat', cursive;
+  letter-spacing: 0.01em;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -1643,7 +1645,7 @@ body:has(.court-modal-overlay) {
   outline: none;
 }
 
-/* Unselected state: raised 3D physical button */
+/* Unselected state: raised 3D physical button in Green & Red */
 .court-vote-circle.go {
   background: linear-gradient(180deg, #10b981 0%, #059669 100%);
   box-shadow: 0 5px 0 #047857, 0 8px 16px -4px rgba(5, 150, 105, 0.35);
@@ -1662,7 +1664,7 @@ body:has(.court-modal-overlay) {
   transform: translateY(5px);
 }
 
-/* Selected state: sunken into the surface and stays pressed in, NO halo ring */
+/* Selected state: sunken into the surface and stays pressed in */
 .court-vote-btn-choice.selected {
   transform: translateY(5px);
   opacity: 1;
@@ -1683,19 +1685,70 @@ body:has(.court-modal-overlay) {
 }
 
 .court-vote-btn-choice span {
-  font-size: 13.5px;
-  font-weight: 750;
-  color: #64748b;
+  font-family: 'Caveat', cursive;
+  font-size: 19px;
+  font-weight: 700;
   white-space: nowrap;
   transition: color 0.16s ease, font-weight 0.16s ease;
 }
 
-.court-vote-btn-choice.selected span {
-  font-weight: 900;
-  color: #0f172a;
+.court-vote-btn-choice .court-vote-circle.go + span {
+  color: #059669;
 }
 
-/* Subtle grey underlined text button for Either */
+.court-vote-btn-choice .court-vote-circle.not-now + span {
+  color: #dc2626;
+}
+
+.court-vote-btn-choice.selected .court-vote-circle.go + span {
+  color: #047857;
+}
+
+.court-vote-btn-choice.selected .court-vote-circle.not-now + span {
+  color: #991b1b;
+}
+
+/* 3D Physical Denim Blue Pill Submit Button */
+.court-vote-submit-btn-3d {
+  width: 100%;
+  height: 50px;
+  border-radius: 99px;
+  border: none;
+  background: linear-gradient(180deg, #4a7ba8 0%, #366088 100%);
+  color: #ffffff;
+  font-family: 'Caveat', cursive;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #244360, 0 8px 18px rgba(74, 123, 168, 0.35);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.15s ease;
+  user-select: none;
+  outline: none;
+}
+
+.court-vote-submit-btn-3d:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 0 #244360, 0 10px 22px rgba(74, 123, 168, 0.42);
+}
+
+.court-vote-submit-btn-3d:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #244360, inset 0 2px 4px rgba(0, 0, 0, 0.35);
+}
+
+.court-vote-submit-btn-3d:disabled {
+  background: linear-gradient(180deg, #b8c8d8 0%, #9cb3c9 100%);
+  box-shadow: 0 3px 0 #7b94ad;
+  color: rgba(255, 255, 255, 0.85);
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+/* Subtle text button for Either */
 .court-vote-either-text-btn {
   background: transparent;
   border: none;
@@ -2022,21 +2075,21 @@ body:has(.court-modal-overlay) {
 }
 
 .court-jury-header h2 {
-  font-size: 26px;
-  font-weight: 900;
-  color: #0f172a;
+  font-size: 32px;
+  font-weight: 700;
+  color: #8b1520;
   margin: 0 0 2px;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  font-family: Georgia, 'Times New Roman', serif;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  font-family: 'Caveat', cursive;
 }
 
 .court-jury-header p {
-  font-size: 12.5px;
-  color: #64748b;
+  font-size: 15px;
+  color: #7a5840;
   margin: 0;
   font-weight: 600;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: 'Caveat', cursive;
 }
 
 /* Courtroom Stage in Jury Live (Matching Figure 2 & 3) */
@@ -2458,44 +2511,50 @@ body:has(.court-modal-overlay) {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 0;
-  border-top: 1px solid #f1f5f9;
+  padding: 6px 8px 6px 14px;
+  background: rgba(255, 253, 247, 0.95);
+  border: 1.5px solid #e8d5b5;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(100, 65, 25, 0.06);
+  margin-top: 6px;
 }
 
 .court-comment-input-bar input {
   flex: 1;
-  height: 42px;
-  border-radius: 999px;
-  border: 1px solid #e2e8f0;
-  padding: 0 16px;
+  height: 38px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
   font-size: 13px;
+  color: #2b1810;
   outline: none;
-  background: #f8fafc;
 }
 
-.court-comment-input-bar input:focus {
-  border-color: #1877f2;
-  background: #ffffff;
+.court-comment-input-bar input::placeholder {
+  color: #8b6b4e;
+  opacity: 0.7;
 }
 
 .court-comment-send-btn {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
   border: none;
-  background: #1877f2;
+  background: linear-gradient(135deg, #4a7ba8 0%, #366088 100%);
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 3px 0 #0f62d1;
+  box-shadow: 0 3px 0 #244360, 0 3px 8px rgba(74, 123, 168, 0.3);
   transition: all 0.12s ease;
+  flex-shrink: 0;
 }
 
 .court-comment-send-btn:active {
   transform: translateY(2px);
-  box-shadow: 0 1px 0 #0f62d1;
+  box-shadow: 0 1px 0 #244360;
 }
 
 /* Screen 8: Trip Plan Summary (Jeju Added!) */
@@ -3225,7 +3284,7 @@ body:has(.court-modal-overlay) {
   height: 100%;
   width: 100%;
   position: relative;
-  background: #ffffff;
+  /* Background now set by shared .court-vintage-chamber / .court-ideas-vintage-page rule above */
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -3247,30 +3306,28 @@ body:has(.court-modal-overlay) {
   height: 0 !important;
 }
 
-/* Vintage Hero Banner with Watercolor Paper Texture */
+/* Vintage Hero Banner — oatmeal paper, no conflicting background override */
 .court-vintage-hero-section {
   position: relative;
   padding: 10px 14px 4px;
-  background:
-    radial-gradient(ellipse at 50% 15%, rgba(254, 252, 247, 0.95) 0%, rgba(251, 247, 239, 0.9) 55%, rgba(240, 245, 252, 0.85) 100%),
-    linear-gradient(180deg, #fdfbf7 0%, #f7f4ed 60%, #eef4fc 100%);
-  overflow: hidden;
+  background: transparent;
+  overflow: visible;
   box-sizing: border-box;
 }
 
-/* Soft watercolor decorative wash */
+/* Soft warm paper spotlight behind the hero title */
 .court-vintage-hero-section::before {
   content: '';
   position: absolute;
-  top: -40px;
-  left: 20%;
-  width: 220px;
-  height: 180px;
-  background: radial-gradient(circle, rgba(186, 230, 253, 0.25) 0%, rgba(254, 215, 170, 0.18) 60%, transparent 80%);
-  filter: blur(28px);
+  top: -20px;
+  left: 10%;
+  width: 80%;
+  height: 200px;
+  background: radial-gradient(ellipse at 50% 30%, rgba(255, 250, 235, 0.7) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
 }
+
 
 /* Title Lockup: Serif Font with Maroon accents */
 .court-vintage-title-lockup {
@@ -3281,12 +3338,12 @@ body:has(.court-modal-overlay) {
 }
 
 .court-vintage-main-title {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 29px;
-  font-weight: 800;
-  color: #162438;
-  line-height: 1.05;
-  letter-spacing: -0.025em;
+  font-family: 'Caveat', cursive;
+  font-size: 36px;
+  font-weight: 700;
+  color: #8b1520;
+  line-height: 1.0;
+  letter-spacing: -0.01em;
   margin: 0;
   display: inline-flex;
   align-items: center;
@@ -3306,30 +3363,31 @@ body:has(.court-modal-overlay) {
 .court-title-accent-ticks span {
   width: 2.5px;
   height: 8px;
-  background: #dc2626;
+  background: #8b1520;
   border-radius: 2px;
   transform: rotate(-22deg);
 }
 
 .court-vintage-sub-title-crimson {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 25px;
-  font-weight: 800;
-  color: #7f1d1d;
+  font-family: 'Caveat', cursive;
+  font-size: 30px;
+  font-weight: 700;
+  color: #8b1520;
   line-height: 1.05;
-  letter-spacing: -0.02em;
-  margin: 2px 0 0;
+  letter-spacing: -0.01em;
+  margin: 1px 0 0;
 }
 
 .court-vintage-body-desc {
-  font-size: 11px;
-  color: #475569;
-  font-weight: 500;
-  line-height: 1.38;
+  font-family: 'Caveat', cursive;
+  font-size: 14.5px;
+  color: #7a5840;
+  font-weight: 600;
+  line-height: 1.35;
   text-align: center;
-  max-width: 275px;
-  margin: 5px auto 10px;
-  letter-spacing: 0.005em;
+  max-width: 285px;
+  margin: 4px auto 8px;
+  letter-spacing: 0.01em;
 }
 
 /* Vintage Cancellation Stamp and Handwritten Script */
@@ -3538,14 +3596,14 @@ body:has(.court-modal-overlay) {
   border: 1px solid #fef08a;
 }
 
-/* Upload Card (White Box with Input & Actions) */
+/* Upload Card — warm cream card on oatmeal paper */
 .court-ideas-upload-box {
-  background: #ffffff;
+  background: var(--vp-card);
   border-radius: 20px;
   padding: 10px 12px 10px;
   margin: 0 12px 12px;
-  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(0,0,0,0.03);
-  border: 1px solid #f1f5f9;
+  box-shadow: 0 6px 20px rgba(100, 65, 25, 0.08), 0 1px 3px rgba(100, 65, 25, 0.04);
+  border: 1px solid var(--vp-border);
   position: relative;
   z-index: 6;
   box-sizing: border-box;
@@ -3555,8 +3613,8 @@ body:has(.court-modal-overlay) {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: rgba(245, 237, 216, 0.5);
+  border: 1px solid var(--vp-border);
   border-radius: 14px;
   padding: 8px 12px;
   margin-bottom: 9px;
@@ -3564,9 +3622,9 @@ body:has(.court-modal-overlay) {
 }
 
 .court-upload-input-wrap:focus-within {
-  background: #ffffff;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+  background: var(--vp-card);
+  border-color: var(--vp-blue);
+  box-shadow: 0 0 0 3px rgba(149, 187, 234, 0.2);
 }
 
 .court-upload-text-input {
@@ -3575,30 +3633,30 @@ body:has(.court-modal-overlay) {
   background: transparent;
   font-size: 12.5px;
   font-weight: 500;
-  color: #0f172a;
+  color: var(--vp-text);
   outline: none;
   padding: 0;
 }
 
 .court-upload-text-input::placeholder {
-  color: #94a3b8;
+  color: #a08870;
   font-weight: 500;
 }
 
-/* Long Shaking Deliberation Pill in Navbar - Redesigned Clean Typography */
+/* Long Shaking Deliberation Pill in Navbar */
 .court-live-deliberating-pill {
   flex: 1;
   min-width: 0;
   height: 50px;
   margin-left: 10px;
   padding: 0 12px 0 10px;
-  background: #ffffff;
-  border: 1px solid #dbeafe;
+  background: var(--vp-card);
+  border: 1px solid var(--vp-border);
   border-radius: 999px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(37, 99, 235, 0.05);
+  box-shadow: 0 2px 10px rgba(100, 65, 25, 0.08), 0 1px 3px rgba(100, 65, 25, 0.04);
   cursor: pointer;
   position: relative;
   overflow: hidden;
@@ -3608,8 +3666,8 @@ body:has(.court-modal-overlay) {
 }
 
 .court-live-deliberating-pill:hover {
-  border-color: #93c5fd;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.14);
+  border-color: var(--vp-blue);
+  box-shadow: 0 4px 14px rgba(149, 187, 234, 0.25);
 }
 
 .court-live-deliberating-pill:active {
@@ -3653,8 +3711,8 @@ body:has(.court-modal-overlay) {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
+  background: rgba(245, 237, 216, 0.8);
+  border: 1px solid var(--vp-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3682,7 +3740,7 @@ body:has(.court-modal-overlay) {
 .court-pill-kicker {
   font-size: 8.5px;
   font-weight: 800;
-  color: #2563eb;
+  color: var(--vp-red);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -3691,12 +3749,14 @@ body:has(.court-modal-overlay) {
 .court-pill-title {
   font-size: 16px;
   font-weight: 900;
-  color: #0f172a;
+  color: var(--vp-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  letter-spacing: -0.03em;
-  font-family: Georgia, 'Times New Roman', serif;
+  letter-spacing: -0.01em;
+  font-family: 'Caveat', cursive;
+  font-size: 17px;
+  font-weight: 700;
   line-height: 1;
 }
 
@@ -3713,17 +3773,17 @@ body:has(.court-modal-overlay) {
   gap: 3px;
   font-size: 10.5px;
   font-weight: 800;
-  color: #e11d48;
-  background: #fff1f2;
+  color: var(--vp-red);
+  background: rgba(139, 13, 9, 0.08);
   padding: 2px 7px;
   border-radius: 99px;
-  border: 1px solid #ffe4e6;
+  border: 1px solid rgba(139, 13, 9, 0.14);
   flex-shrink: 0;
   white-space: nowrap;
 }
 
 .court-pill-arrow-icon {
-  color: #2563eb;
+  color: var(--vp-subtext);
   transition: transform 0.15s ease;
 }
 
@@ -3731,26 +3791,26 @@ body:has(.court-modal-overlay) {
   transform: translateX(2px);
 }
 
-/* Flush Bottom Micro-Progress Bar (Increasing towards limit) */
+/* Flush Bottom Micro-Progress Bar */
 .court-pill-progress-track {
   position: absolute;
   bottom: 0;
   left: 14px;
   right: 14px;
   height: 2.5px;
-  background: #f1f5f9;
+  background: var(--vp-border);
   border-radius: 99px;
   overflow: hidden;
 }
 
 .court-pill-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #800000 0%, #b91c1c 100%);
+  background: linear-gradient(90deg, var(--vp-red) 0%, var(--vp-red-mid) 100%);
   border-radius: 99px;
   transition: width 0.4s ease;
 }
 
-/* Upload Card Redesign: 4 Large Chips Row + Separate Full-Width Upload Button */
+/* Upload Card: 4 Action Chips */
 .court-upload-chips-grid {
   display: flex;
   align-items: center;
@@ -3767,9 +3827,9 @@ body:has(.court-modal-overlay) {
   border-radius: 12px;
   font-size: 12px;
   font-weight: 700;
-  color: #475569;
-  background: #f8fafc;
-  border: 1.5px solid #e2e8f0;
+  color: var(--vp-subtext);
+  background: rgba(245, 237, 216, 0.5);
+  border: 1.5px solid var(--vp-border);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -3780,21 +3840,22 @@ body:has(.court-modal-overlay) {
 }
 
 .court-large-action-chip:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
+  background: rgba(237, 224, 196, 0.7);
+  border-color: var(--vp-paper-dark);
 }
 
 .court-large-action-chip.active {
-  background: #eff6ff;
-  border-color: #3b82f6;
-  color: #1d4ed8;
-  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.15);
+  background: rgba(149, 187, 234, 0.18);
+  border-color: var(--vp-blue);
+  color: #1a4a82;
+  box-shadow: 0 1px 4px rgba(149, 187, 234, 0.3);
 }
 
 .court-upload-btn-row {
   width: 100%;
 }
 
+/* Upload idea button — Sangria red torn-paper strip style */
 .court-upload-btn-full {
   width: 100%;
   height: 42px;
@@ -3802,24 +3863,28 @@ body:has(.court-modal-overlay) {
   font-size: 13.5px;
   font-weight: 800;
   color: #ffffff;
-  background: #1877f2;
+  background: linear-gradient(135deg, var(--vp-red-mid) 0%, var(--vp-red) 100%);
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
-  box-shadow: 0 3px 12px rgba(24, 119, 242, 0.3);
-  transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 3px 12px rgba(139, 13, 9, 0.28), 0 1px 4px rgba(80, 5, 5, 0.18);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .court-upload-btn-full:hover {
-  background: #1d4ed8;
-  box-shadow: 0 4px 16px rgba(24, 119, 242, 0.4);
+  background: linear-gradient(135deg, #ba1810 0%, #8b0d09 100%);
+  box-shadow: 0 5px 18px rgba(139, 13, 9, 0.38);
+  transform: translateY(-1px);
 }
 
 .court-upload-btn-full:active {
-  transform: scale(0.98);
+  transform: scale(0.98) translateY(0);
+  box-shadow: 0 2px 8px rgba(139, 13, 9, 0.22);
 }
 
 /* Feed Section: "Ideas from the group" */
@@ -3837,10 +3902,10 @@ body:has(.court-modal-overlay) {
 }
 
 .court-feed-title-serif {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 18px;
-  font-weight: 800;
-  color: #0f2942;
+  font-family: 'Caveat', cursive;
+  font-size: 24px;
+  font-weight: 700;
+  color: #8b1520;
   margin: 0;
   letter-spacing: -0.01em;
 }
@@ -3851,7 +3916,7 @@ body:has(.court-modal-overlay) {
   gap: 4px;
   font-size: 11px;
   font-weight: 700;
-  color: #64748b;
+  color: var(--vp-subtext);
   cursor: pointer;
   border: none;
   background: transparent;
@@ -3862,12 +3927,12 @@ body:has(.court-modal-overlay) {
 .court-feed-post-card {
   display: flex;
   gap: 12px;
-  background: #ffffff;
+  background: var(--vp-card);
   border-radius: 18px;
   padding: 10px 10px;
   margin-bottom: 10px;
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(0,0,0,0.02);
-  border: 1px solid #f1f5f9;
+  box-shadow: 0 4px 14px rgba(100, 65, 25, 0.07), 0 1px 3px rgba(100, 65, 25, 0.04);
+  border: 1px solid var(--vp-border);
   box-sizing: border-box;
   transition: transform 0.15s, box-shadow 0.15s;
 }
@@ -3883,7 +3948,7 @@ body:has(.court-modal-overlay) {
   overflow: hidden;
   position: relative;
   flex-shrink: 0;
-  background: #f1f5f9;
+  background: var(--vp-paper-mid);
 }
 
 .court-feed-post-thumb-wrap img {
@@ -3897,7 +3962,7 @@ body:has(.court-modal-overlay) {
   position: absolute;
   bottom: 5px;
   left: 5px;
-  background: rgba(15, 23, 42, 0.72);
+  background: rgba(40, 20, 8, 0.7);
   backdrop-filter: blur(4px);
   color: #ffffff;
   border-radius: 99px;
@@ -3936,25 +4001,25 @@ body:has(.court-modal-overlay) {
   height: 20px;
   border-radius: 50%;
   object-fit: cover;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--vp-border);
 }
 
 .court-feed-author-name {
   font-size: 12px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--vp-text);
 }
 
 .court-feed-time-ago {
   font-size: 10.5px;
   font-weight: 500;
-  color: #94a3b8;
+  color: #a08870;
 }
 
 .court-feed-post-title {
   font-size: 13.5px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--vp-text);
   margin: 1px 0 2px;
   letter-spacing: -0.01em;
   white-space: nowrap;
@@ -3964,7 +4029,7 @@ body:has(.court-modal-overlay) {
 
 .court-feed-post-desc {
   font-size: 11px;
-  color: #475569;
+  color: var(--vp-subtext);
   line-height: 1.35;
   margin: 0 0 5px;
   display: -webkit-box;
@@ -3987,13 +4052,14 @@ body:has(.court-modal-overlay) {
 }
 
 .court-feed-tag-pill {
-  background: #eff6ff;
-  color: #2563eb;
+  background: rgba(149, 187, 234, 0.18);
+  color: #1a4a82;
   font-size: 9.5px;
   font-weight: 700;
   border-radius: 6px;
   padding: 2px 5px;
   letter-spacing: -0.01em;
+  border: 1px solid rgba(149, 187, 234, 0.35);
 }
 
 .court-feed-comment-stat {
@@ -4002,7 +4068,7 @@ body:has(.court-modal-overlay) {
   gap: 3px;
   font-size: 11px;
   font-weight: 700;
-  color: #64748b;
+  color: var(--vp-subtext);
   flex-shrink: 0;
   cursor: pointer;
 }
@@ -4014,10 +4080,10 @@ body:has(.court-modal-overlay) {
   left: 0;
   right: 0;
   padding: 10px 14px 6px;
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-top: 1px solid rgba(226, 232, 240, 0.8);
+  background: rgba(245, 237, 216, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid var(--vp-border);
   z-index: 20;
   display: flex;
   flex-direction: column;
@@ -4026,12 +4092,13 @@ body:has(.court-modal-overlay) {
   box-sizing: border-box;
 }
 
+/* "Open Discussion" bottom CTA — matches Sangria torn-paper palette */
 .court-open-discussion-btn {
   width: 100%;
   height: 48px;
   border-radius: 99px;
   border: none;
-  background: #1877f2;
+  background: linear-gradient(135deg, var(--vp-red-mid) 0%, var(--vp-red) 100%);
   color: #ffffff;
   font-size: 15px;
   font-weight: 800;
@@ -4040,17 +4107,24 @@ body:has(.court-modal-overlay) {
   justify-content: center;
   gap: 8px;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(24, 119, 242, 0.35);
-  transition: background-color 0.15s ease, transform 0.15s ease;
+  box-shadow: 0 4px 16px rgba(139, 13, 9, 0.3), 0 1px 4px rgba(80, 5, 5, 0.18);
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .court-open-discussion-btn:hover {
-  background: #1d4ed8;
+  background: linear-gradient(135deg, #ba1810 0%, #8b0d09 100%);
+  box-shadow: 0 6px 20px rgba(139, 13, 9, 0.4);
+  transform: translateY(-1px);
 }
 
 .court-open-discussion-btn:active {
   transform: scale(0.985);
+  box-shadow: 0 2px 8px rgba(139, 13, 9, 0.22);
 }
+
+
 
 /* Card swipe-out animation (after voting, current card flies away) */
 @keyframes court-card-fly-out {
@@ -4246,9 +4320,9 @@ body:has(.court-modal-overlay) {
 }
 
 .court-selected-case-title {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 15px;
-  font-weight: 800;
+  font-family: 'Caveat', cursive;
+  font-size: 19px;
+  font-weight: 700;
   color: #0f172a;
   margin: 3px 0 2px;
   line-height: 1.2;
@@ -4258,6 +4332,7 @@ body:has(.court-modal-overlay) {
 }
 
 .court-selected-case-desc {
+  font-family: 'Inter', sans-serif;
   font-size: 11px;
   color: #64748b;
   line-height: 1.3;
@@ -4277,6 +4352,7 @@ body:has(.court-modal-overlay) {
 .court-selected-case-tag {
   background: #f0f7ff;
   color: #2563eb;
+  font-family: 'Inter', sans-serif;
   font-size: 9.5px;
   font-weight: 600;
   padding: 2px 6px;
@@ -4310,17 +4386,18 @@ body:has(.court-modal-overlay) {
 }
 
 .court-vote-results-title {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 15.5px;
-  font-weight: 800;
+  font-family: 'Caveat', cursive;
+  font-size: 18px;
+  font-weight: 700;
   color: #0f172a;
   margin: 0;
 }
 
 .court-vote-results-count {
+  font-family: 'Inter', sans-serif;
   font-size: 11.5px;
   color: #64748b;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .court-vote-score-row {
@@ -4524,23 +4601,23 @@ body:has(.court-modal-overlay) {
 
 .court-showdown-header-card {
   background: #ffffff;
-  border: 1px solid #e8edf5;
-  border-radius: 18px;
-  padding: 8px 12px;
+  border: 1.5px solid #e8d5b5;
+  border-radius: 16px;
+  padding: 10px 14px;
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 14px rgba(100, 65, 25, 0.08);
 }
 
 .court-showdown-case-thumb {
-  width: 48px;
-  height: 48px;
+  width: 50px;
+  height: 50px;
   border-radius: 12px;
   object-fit: cover;
-  border: 1.5px solid #f1f5f9;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  border: 1.5px solid #e8d5b5;
+  box-shadow: 0 2px 6px rgba(100, 65, 25, 0.1);
   flex-shrink: 0;
 }
 
@@ -4553,20 +4630,20 @@ body:has(.court-modal-overlay) {
 }
 
 .court-showdown-case-title {
-  font-family: "Inter Display", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #0f172a;
+  font-family: 'Caveat', cursive;
+  font-size: 20px;
+  font-weight: 700;
+  color: #8b1520;
   margin: 0;
-  line-height: 1.25;
-  letter-spacing: 0;
+  line-height: 1.15;
 }
 
 .court-showdown-case-sub {
-  font-size: 11px;
-  color: #64748b;
+  font-family: 'Inter', sans-serif;
+  font-size: 11.5px;
+  color: #6d5241;
   margin: 0;
-  line-height: 1.3;
+  line-height: 1.35;
   font-weight: 500;
 }
 
@@ -4583,10 +4660,11 @@ body:has(.court-modal-overlay) {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #fff7f7;
-  border: 1px solid #ffd6d6;
-  border-radius: 14px;
-  padding: 5px 10px;
+  background: linear-gradient(135deg, #a31520 0%, #8b1520 100%);
+  border: 1.5px solid #6f0e16;
+  border-radius: 12px;
+  padding: 6px 10px;
+  box-shadow: 0 3px 10px rgba(139, 21, 32, 0.28);
   flex-shrink: 0;
 }
 
@@ -4614,13 +4692,13 @@ body:has(.court-modal-overlay) {
 .court-showdown-stage-box {
   width: 100%;
   height: 280px;
-  border-radius: 20px;
+  border-radius: 18px;
   overflow: hidden;
   position: relative;
-  border: 1px solid #dbe4ef;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+  border: 1.5px solid #e8d5b5;
+  box-shadow: 0 6px 20px rgba(100, 65, 25, 0.12);
   margin-bottom: 10px;
-  background: #dbeafe;
+  background: #fdfbf7;
 }
 
 .court-showdown-stage-box.is-locked {
@@ -4639,16 +4717,18 @@ body:has(.court-modal-overlay) {
   position: absolute;
   top: 10px;
   left: 10px;
-  background: #059669;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: #ffffff;
-  font-size: 11px;
-  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
   padding: 4px 12px;
   border-radius: 99px;
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  box-shadow: 0 2px 6px rgba(5, 150, 105, 0.3);
+  box-shadow: 0 3px 8px rgba(5, 150, 105, 0.35);
   z-index: 20;
 }
 
@@ -4656,30 +4736,32 @@ body:has(.court-modal-overlay) {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: #ef4444;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: #ffffff;
-  font-size: 11px;
-  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
   padding: 4px 12px;
   border-radius: 99px;
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 3px 8px rgba(239, 68, 68, 0.35);
   z-index: 20;
 }
 
-/* Beautiful Debate Speech Bubbles matching Figure */
+/* Beautiful Debate Speech Bubbles */
 .court-debate-bubble-left {
   position: absolute;
   left: 12px;
   top: 48px;
   width: 142px;
   background: #ffffff;
-  border: 2px solid #0d9488;
-  border-radius: 16px;
+  border: 2px solid #059669;
+  border-radius: 14px;
   padding: 8px 10px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.2);
   z-index: 22;
   animation: showdownBubbleLifecycle 4.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
@@ -4692,8 +4774,8 @@ body:has(.court-modal-overlay) {
   width: 10px;
   height: 10px;
   background: #ffffff;
-  border-right: 2px solid #0d9488;
-  border-bottom: 2px solid #0d9488;
+  border-right: 2px solid #059669;
+  border-bottom: 2px solid #059669;
   transform: rotate(45deg);
 }
 
@@ -4703,10 +4785,10 @@ body:has(.court-modal-overlay) {
   top: 48px;
   width: 142px;
   background: #ffffff;
-  border: 2px solid #ef4444;
-  border-radius: 16px;
+  border: 2px solid #dc2626;
+  border-radius: 14px;
   padding: 8px 10px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.2);
   z-index: 22;
   animation: showdownBubbleLifecycle 4.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
@@ -4719,8 +4801,8 @@ body:has(.court-modal-overlay) {
   width: 10px;
   height: 10px;
   background: #ffffff;
-  border-right: 2px solid #ef4444;
-  border-bottom: 2px solid #ef4444;
+  border-right: 2px solid #dc2626;
+  border-bottom: 2px solid #dc2626;
   transform: rotate(45deg);
 }
 
@@ -4735,26 +4817,26 @@ body:has(.court-modal-overlay) {
 .court-point-bubble {
   position: absolute;
   top: -24px;
-  font-size: 13px;
-  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
   padding: 2px 8px;
   border-radius: 99px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.18);
   z-index: 30;
   animation: pointBubbleLifecycle 4.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  letter-spacing: -0.5px;
 }
 
 .court-point-bubble.bubble-green {
   background: #10b981;
   color: #ffffff;
-  border: 2px solid #ffffff;
+  border: 1.5px solid #ffffff;
 }
 
 .court-point-bubble.bubble-red {
   background: #ef4444;
   color: #ffffff;
-  border: 2px solid #ffffff;
+  border: 1.5px solid #ffffff;
 }
 
 @keyframes pointBubbleLifecycle {
@@ -4764,16 +4846,16 @@ body:has(.court-modal-overlay) {
   100% { transform: translateY(-8px) scale(0.85); opacity: 0; visibility: hidden; }
 }
 
-/* Chat bar card matching Figure */
+/* Chat bar card */
 .court-showdown-chat-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
+  background: rgba(255, 253, 247, 0.95);
+  border: 1.5px solid #e8d5b5;
+  border-radius: 14px;
   padding: 6px 8px 6px 14px;
   display: flex;
   align-items: center;
   gap: 10px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 2px 8px rgba(100, 65, 25, 0.06);
   margin-bottom: 10px;
 }
 
@@ -4782,45 +4864,44 @@ body:has(.court-modal-overlay) {
   height: 38px;
   border: none;
   background: transparent;
-  font-size: 12.5px;
-  color: #0f172a;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #2b1810;
   outline: none;
 }
 
 .court-showdown-chat-input::placeholder {
-  color: #94a3b8;
+  color: #8b6b4e;
+  opacity: 0.7;
 }
 
 .court-showdown-send-btn {
-  width: 42px;
-  height: 40px;
-  border-radius: 12px;
-  background: #ef4444;
+  width: 40px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #4a7ba8 0%, #366088 100%);
   border: none;
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 3px 0 #244360, 0 3px 8px rgba(74, 123, 168, 0.3);
   transition: transform 0.1s, background 0.15s;
 }
 
 .court-showdown-send-btn:active {
-  transform: scale(0.93);
-  background: #dc2626;
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #244360;
 }
 
-/* Stake card matching Figure */
-.court-showdown-stake-card {
+/* Betting Stakes card */
+.court-showdown-betting-box {
   background: #ffffff;
-  border: 1px solid #e8edf5;
-  border-radius: 20px;
+  border: 1.5px solid #e8d5b5;
+  border-radius: 16px;
   padding: 12px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 4px 14px rgba(100, 65, 25, 0.08);
   margin-bottom: 10px;
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -4984,57 +5065,649 @@ body:has(.court-modal-overlay) {
   white-space: nowrap;
 }
 
-.court-stake-slider {
+.court-stake-slider,
+.court-showdown-slider {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 6px;
+  height: 8px;
   border-radius: 99px;
-  background: #fecdd3;
+  background: linear-gradient(90deg, #f5edd8 0%, #e8d5b5 100%);
   outline: none;
-  transition: background 0.2s;
-  margin: 6px 0;
+  margin: 8px 0;
 }
 
-.court-stake-slider::-webkit-slider-thumb {
+.court-showdown-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
-  background: #ef4444;
+  background: linear-gradient(180deg, #a31520 0%, #8b1520 100%);
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 3px 8px rgba(139, 21, 32, 0.4);
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.45);
-  border: 2px solid #ffffff;
-  transition: transform 0.1s;
+  transition: transform 0.12s ease;
 }
 
-.court-stake-slider::-webkit-slider-thumb:active {
+.court-showdown-slider::-webkit-slider-thumb:active {
   transform: scale(1.15);
 }
 
-.court-showdown-confirm-btn {
+/* 3D Physical Confirm Stakes Button */
+.court-showdown-confirm-btn-3d {
   width: 100%;
-  height: 48px;
+  height: 50px;
   border-radius: 99px;
-  background: #ef4444;
   border: none;
+  background: linear-gradient(180deg, #a31520 0%, #8b1520 100%);
   color: #ffffff;
-  font-size: 15px;
-  font-weight: 600;
+  font-family: 'Caveat', cursive;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
-  transition: background 0.15s, transform 0.1s;
-  margin: 6px 0 14px;
+  box-shadow: 0 5px 0 #5c0b14, 0 8px 18px rgba(139, 21, 32, 0.35);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  user-select: none;
+  outline: none;
+  margin: 6px 0 10px;
+}
+
+.court-showdown-confirm-btn-3d:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 0 #5c0b14, 0 10px 22px rgba(139, 21, 32, 0.42);
+}
+
+.court-showdown-confirm-btn-3d:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #5c0b14, inset 0 2px 4px rgba(0, 0, 0, 0.35);
+}
+
+/* ==========================================================================
+   VINTAGE TRAVEL SCRAPBOOK COLLAGE AESTHETIC  ── consistent across all screens
+   Palette (matching reference image 3):
+   - WARM OATMEAL PAPER (#F5EDD8 / #EDE0C4): Light cream scrapbook paper base
+   - SANGRIA DEEP RED  (#8B0D09 / #A31208): Torn paper button & title accents
+   - CORNFLOWER BLUE   (#95BBEA): Washi-tape badge, airplane doodle
+   ========================================================================== */
+
+/* ── Shared paper token ─────────────────────────────────────────────────── */
+:root {
+  --vp-paper:        #f5edd8;   /* main page background  */
+  --vp-paper-mid:   #ede0c4;   /* mid-tone crease       */
+  --vp-paper-dark:  #d9c9a8;   /* shadow crease         */
+  --vp-paper-light: #fdf8ef;   /* highlight crease      */
+  --vp-card:        #fffdf7;   /* memo card background  */
+  --vp-red:         #8b0d09;   /* sangria red           */
+  --vp-red-mid:     #a31208;   /* lighter red stroke    */
+  --vp-blue:        #95bbea;   /* cornflower            */
+  --vp-text:        #2b1810;   /* warm dark text        */
+  --vp-subtext:     #634b39;   /* warm muted text       */
+  --vp-border:      #e8d5b5;   /* warm paper border     */
+}
+
+/* ── Oatmeal paper background with wrinkle-like shading (BOTH screens) ──── */
+.court-vintage-chamber,
+.court-ideas-vintage-page {
+  background-color: var(--vp-paper) !important;
+  /* Layered linear gradients at different angles simulate paper grain & creases */
+  background-image:
+    /* Fine horizontal crease shadows */
+    repeating-linear-gradient(
+      180deg,
+      transparent 0px,
+      transparent 28px,
+      rgba(160, 120, 70, 0.035) 29px,
+      transparent 30px
+    ),
+    /* Diagonal warm fibre grain */
+    repeating-linear-gradient(
+      112deg,
+      transparent 0px,
+      transparent 18px,
+      rgba(180, 140, 80, 0.028) 19px,
+      transparent 20px
+    ),
+    /* Soft tonal mottling – like aged paper */
+    radial-gradient(ellipse at 22% 18%, rgba(255, 248, 225, 0.85) 0%, transparent 55%),
+    radial-gradient(ellipse at 78% 72%, rgba(220, 190, 140, 0.35) 0%, transparent 50%),
+    radial-gradient(ellipse at 55% 95%, rgba(205, 175, 125, 0.28) 0%, transparent 45%),
+    /* Base warm oatmeal colour */
+    linear-gradient(160deg, #f8efd8 0%, #f2e5c8 40%, #ecdbb8 100%) !important;
+  background-size: auto !important;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Paper-edge vignette (darkens at phone corners) */
+.court-vintage-chamber::after,
+.court-ideas-vintage-page::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 50%, transparent 65%, rgba(110, 75, 30, 0.07) 100%);
+  z-index: 0;
+}
+
+/* ── Vintage Serif Title ─────────────────────────────────────────────────── */
+.court-vintage-title {
+  font-family: 'Caveat', cursive !important;
+  font-weight: 700 !important;
+  font-size: 34px !important;
+  color: var(--vp-red) !important;
+  letter-spacing: -0.01em !important;
+  text-shadow: 0 1px 1px rgba(139, 13, 9, 0.1);
+}
+
+.court-vintage-subtitle {
+  font-family: 'Inter', sans-serif !important;
+  font-size: 13px;
+  color: var(--vp-subtext) !important;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* ── Vintage memo / pin-up card ─────────────────────────────────────────── */
+.court-vintage-memo-card {
+  position: relative;
+  background: var(--vp-card) !important;
+  border-radius: 20px !important;
+  border: 1px solid var(--vp-border) !important;
+  box-shadow:
+    0 8px 24px rgba(100, 65, 25, 0.09),
+    0 2px 6px rgba(100, 65, 25, 0.05) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* ── 3-D Pushpin ─────────────────────────────────────────────────────────── */
+.court-vintage-pushpin {
+  position: absolute;
+  top: -9px;
+  right: 18px;
+  width: 22px;
+  height: 22px;
+  z-index: 25;
+  pointer-events: none;
+  filter: drop-shadow(-1.5px 3.5px 4px rgba(70, 20, 10, 0.42));
+}
+
+.court-pushpin-head {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f87171 0%, #dc2626 40%, #8b0d09 85%, #550202 100%);
+  position: relative;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.7);
+}
+
+.court-pushpin-pin {
+  position: absolute;
+  top: 11px;
+  left: 5px;
+  width: 3.5px;
+  height: 7px;
+  background: linear-gradient(135deg, #f1f5f9 0%, #94a3b8 100%);
+  border-radius: 1px;
+  transform: rotate(20deg);
+}
+
+/* ── Cornflower Washi-Tape badge ─────────────────────────────────────────── */
+.court-vintage-washi-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--vp-blue) !important;
+  color: #0c2642 !important;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 10px 3px 9px;
+  border-radius: 4px;
+  transform: rotate(-1deg);
+  box-shadow: 0 2px 5px rgba(25, 60, 110, 0.18);
+  border-left: 2px dashed rgba(255, 255, 255, 0.65);
+  border-right: 2px dashed rgba(255, 255, 255, 0.65);
+  letter-spacing: 0.01em;
+}
+
+/* ── Retro travel-stamp watermark ───────────────────────────────────────── */
+.court-vintage-stamp-mark {
+  position: absolute;
+  border: 1.8px dashed rgba(139, 13, 9, 0.24);
+  border-radius: 50%;
+  color: rgba(139, 13, 9, 0.28);
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  user-select: none;
+  text-transform: uppercase;
+}
+
+
+
+/* ==========================================================================
+   DRAMATIC TORN-EDGE OIL PAINTING BUTTON ("撕边油画风按钮")
+   Rich impasto brushstrokes, palette knife texture, frayed deckled torn edges
+   ========================================================================== */
+
+.court-torn-paper-btn-wrap {
+  width: 100%;
+  position: relative;
+  margin-top: 5px;
+  filter: 
+    drop-shadow(0 6px 14px rgba(139, 13, 9, 0.32))
+    drop-shadow(0 2px 4px rgba(50, 15, 8, 0.22));
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s ease;
+  user-select: none;
+}
+
+.court-torn-paper-btn-wrap:hover {
+  transform: translateY(-2px) rotate(-0.4deg);
+  filter: 
+    drop-shadow(0 9px 20px rgba(139, 13, 9, 0.42))
+    drop-shadow(0 3px 7px rgba(50, 15, 8, 0.26));
+}
+
+.court-torn-paper-btn-wrap:active {
+  transform: translateY(1.5px) scale(0.985);
+  filter: 
+    drop-shadow(0 3px 8px rgba(139, 13, 9, 0.24));
+}
+
+.court-torn-paper-btn {
+  width: 100%;
+  height: 52px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+}
+
+.court-torn-paper-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.court-torn-btn-content {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #fffdf7;
+  font-size: 23px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em;
+  font-family: 'Caveat', cursive !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  user-select: none;
+}
+
+.court-torn-btn-arrow {
+  font-size: 24px !important;
+  line-height: 1;
+  transition: transform 0.18s ease;
+  display: inline-block;
+  font-family: 'Caveat', cursive !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+}
+
+/* ==========================================================================
+   VINTAGE SCRAPBOOK SHARED COMPONENTS — Element Sheet Design System
+   ========================================================================== */
+
+/* Washi tape decorative strip */
+.vp-washi-strip {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 4px 0;
+  z-index: 5;
+}
+
+.vp-washi-strip-inner {
+  width: calc(100% + 16px);
+  margin-left: -8px;
+  height: 20px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255,255,255,0.14) 0px,
+      rgba(255,255,255,0.14) 1px,
+      transparent 1px,
+      transparent 7px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255,255,255,0.14) 0px,
+      rgba(255,255,255,0.14) 1px,
+      transparent 1px,
+      transparent 7px
+    ),
+    linear-gradient(135deg, #4a7ba8 0%, #3d6a95 50%, #4a7ba8 100%);
+  box-shadow: 0 2px 6px rgba(50,80,120,0.22), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+.vp-washi-strip-label {
+  position: absolute;
+  font-family: 'Caveat', cursive;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.92);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  z-index: 6;
+  pointer-events: none;
+}
+
+/* Luggage tag chip */
+.vp-luggage-tag {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  padding: 5px 10px 5px;
+  background: #fffdf7;
+  border: 1.5px solid #e8d5b5;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(100,65,25,0.1);
+  font-family: 'Caveat', cursive;
+  font-size: 14px;
+  font-weight: 700;
+  color: #2b1810;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  min-width: 54px;
+  text-align: center;
+}
+
+.vp-luggage-tag::before {
+  content: '';
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1.5px solid #d4b896;
+  background: #f5edd8;
+  margin-bottom: 3px;
+}
+
+.vp-luggage-tag.active {
+  background: #8b1520;
+  color: #ffffff;
+  border-color: #6b0f19;
+}
+
+.vp-luggage-tag.blue {
+  background: #4a7ba8;
+  color: #ffffff;
+  border-color: #3d6a95;
+}
+
+/* Postmark stamp */
+.vp-postmark {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px dashed rgba(139,21,32,0.3);
+  color: rgba(139,21,32,0.35);
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  pointer-events: none;
+  user-select: none;
+}
+
+.vp-postmark::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  border: 1px dashed rgba(139,21,32,0.2);
+}
+
+.vp-postmark-label {
+  font-size: 6px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  text-align: center;
+}
+
+/* Polaroid frame */
+.vp-polaroid {
+  background: #ffffff;
+  padding: 5px 5px 18px;
+  border-radius: 3px;
+  box-shadow: 0 6px 18px rgba(100,65,25,0.14), 0 2px 5px rgba(100,65,25,0.08);
+  position: relative;
+}
+
+.vp-polaroid-caption {
+  position: absolute;
+  bottom: 2px;
+  left: 0;
+  right: 0;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Caveat', cursive;
+  font-size: 11px;
+  font-weight: 700;
+  color: #554133;
+}
+
+/* Caveat handwriting title */
+.vp-title {
+  font-family: 'Caveat', cursive !important;
+  font-weight: 700;
+  color: #8b1520;
+  line-height: 1.1;
+}
+
+/* Denim blue pill button */
+.vp-btn-blue-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #4a7ba8 0%, #3d6a95 100%);
+  color: #ffffff;
+  font-family: 'Caveat', cursive;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 99px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(74,123,168,0.3);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  letter-spacing: 0.02em;
+}
+
+.vp-btn-blue-pill:hover {
+  box-shadow: 0 6px 18px rgba(74,123,168,0.4);
+  transform: translateY(-1px);
+}
+
+.vp-btn-blue-pill:active { transform: scale(0.97); }
+
+/* Ghost pill button */
+.vp-btn-ghost-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background: rgba(255,253,247,0.9);
+  color: #554133;
+  font-family: 'Caveat', cursive;
+  font-size: 16px;
+  font-weight: 700;
+  border: 1.5px solid #e8d5b5;
+  border-radius: 99px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(100,65,25,0.08);
+  transition: transform 0.15s ease;
+}
+
+.vp-btn-ghost-pill:hover { border-color: #d4b896; }
+.vp-btn-ghost-pill:active { transform: scale(0.97); }
+
+/* Vintage ticket-style button */
+.vp-btn-ticket {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #a31208 0%, #8b1520 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(139,21,32,0.3);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  width: 100%;
+}
+
+.vp-btn-ticket:hover {
+  box-shadow: 0 6px 20px rgba(139,21,32,0.4);
+  transform: translateY(-1px);
+}
+
+.vp-btn-ticket:active { transform: scale(0.97); }
+
+.vp-btn-ticket-icon {
+  width: 50px;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.14);
+  border-right: 1px dashed rgba(255,255,255,0.38);
+  font-size: 22px;
   flex-shrink: 0;
 }
 
-.court-showdown-confirm-btn:active {
-  background: #dc2626;
-  transform: scale(0.985);
+.vp-btn-ticket-text {
+  flex: 1;
+  padding: 10px 14px;
+  text-align: left;
+}
+
+.vp-btn-ticket-title {
+  font-family: 'Caveat', cursive;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.vp-btn-ticket-sub {
+  font-size: 10px;
+  font-weight: 600;
+  opacity: 0.72;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* Sticky note variants */
+.vp-sticky-note {
+  border-radius: 3px;
+  padding: 10px 12px;
+  box-shadow: 2px 4px 10px rgba(100,65,25,0.12);
+  font-family: 'Caveat', cursive;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.vp-sticky-note.yellow { background: #fef3c7; color: #78350f; }
+.vp-sticky-note.blue { background: rgba(149,187,234,0.3); color: #1a4a82; }
+.vp-sticky-note.cream { background: #fffdf7; color: #554133; border: 1px solid #e8d5b5; }
+
+/* Botanical doodle container */
+.vp-botanical {
+  pointer-events: none;
+  user-select: none;
+  position: absolute;
+}
+
+/* Denim Blue ticket button variant */
+.vp-btn-ticket.blue,
+.vp-btn-ticket-blue {
+  background: linear-gradient(135deg, #4a7ba8 0%, #3d6a95 50%, #30587d 100%);
+  box-shadow: 0 4px 16px rgba(74, 123, 168, 0.35);
+}
+
+.vp-btn-ticket.blue:hover,
+.vp-btn-ticket-blue:hover {
+  box-shadow: 0 6px 20px rgba(74, 123, 168, 0.45);
+  transform: translateY(-1px);
+}
+
+.vp-btn-ticket.blue .vp-btn-ticket-icon {
+  background: rgba(255, 255, 255, 0.18);
+  border-right: 1.5px dashed rgba(255, 255, 255, 0.45);
+}
+
+/* Seamless Vintage Navbar — No white strips, no dividing borders, single unified paper background */
+.court-vintage-chamber .court-navbar,
+.court-vintage-chamber .court-vote-navbar {
+  background: transparent !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  padding: 12px 18px 6px !important;
+}
+
+/* Non-overlapping voting submit wrapper in vintage chamber */
+.court-vintage-chamber .court-vote-submit-wrap {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: 100% !important;
+  margin-top: auto !important;
+  padding: 6px 0 2px !important;
+  z-index: 20;
+}
+
+.court-vintage-chamber .court-vote-home-wrap {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: 100% !important;
+  margin-top: 6px !important;
+  padding-bottom: 2px !important;
+  z-index: 19;
 }
 
 .court-showdown-result-wrap {

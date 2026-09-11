@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   ChevronLeft, Check, X, Clock, Heart, Send, Plane, Home,
-  MapPin, Utensils, ArrowRight, Plus, MessageCircle, Edit3, Lightbulb
+  MapPin, Utensils, ArrowRight, Plus, MessageCircle, Edit3, Coins, Lightbulb
 } from 'lucide-react';
 import {
   DuolingoJudge, DuolingoJudgeBench,
@@ -180,6 +180,582 @@ export function BouncingWaveText({ text }: { text: string }) {
     </span>
   );
 }
+
+/* ==========================================================================
+   VINTAGE SCRAPBOOK ELEMENT SHEET COMPONENTS
+   Authentic elements inspired by Image 3:
+   - TornPaperButton (Plan Trip ->, Add to Itinerary, Start Journey ticket)
+   - WashiTapeStrip (denim blue, crimson, khaki)
+   - LuggageTag (rounded-top tag with brass eyelet and string loop)
+   - PostmarkStamp (circular cancellation mark + wavy lines)
+   - PolaroidCard (white photo frame with handwritten Caveat caption)
+   ========================================================================== */
+
+export interface TornPaperButtonProps {
+  onClick?: () => void;
+  children: React.ReactNode;
+  variant?: 'crimson' | 'blue' | 'kraft' | 'ticket' | 'ticket-blue';
+  className?: string;
+  style?: React.CSSProperties;
+  disabled?: boolean;
+  arrow?: boolean;
+  fontFamily?: 'cursive' | 'sans';
+  subText?: string;
+}
+
+let tornPaperCounter = 0;
+
+export function TornPaperButton({
+  onClick,
+  children,
+  variant = 'crimson',
+  className = '',
+  style,
+  disabled = false,
+  arrow = true,
+  fontFamily = 'cursive',
+  subText,
+}: TornPaperButtonProps) {
+  const [btnId] = React.useState(() => `tpb-${++tornPaperCounter}`);
+
+  // Ticket-style button (like "Start Journey / TRAVEL TO A BETTER YOU" in element sheet)
+  if (variant === 'ticket' || variant === 'ticket-blue') {
+    const isBlueTicket = variant === 'ticket-blue';
+    const ticketBg = isBlueTicket
+      ? 'linear-gradient(135deg, #2c5985 0%, #3a72a8 45%, #4c87c2 70%, #265078 100%)'
+      : 'linear-gradient(135deg, #7c1018 0%, #8f1722 45%, #a11c27 70%, #750e15 100%)';
+    const ticketShadow = isBlueTicket
+      ? '0 6px 18px rgba(45, 85, 130, 0.35), 0 2px 5px rgba(20, 40, 65, 0.2)'
+      : '0 6px 18px rgba(139,21,32,0.32), 0 2px 5px rgba(50,10,15,0.2)';
+    const subColor = isBlueTicket ? '#d6e6f7' : '#eed7c5';
+
+    return (
+      <div
+        className={`court-torn-paper-btn-wrap ${className}`}
+        style={{
+          width: '100%',
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          opacity: disabled ? 0.6 : 1,
+          ...style,
+        }}
+        onClick={disabled ? undefined : onClick}
+      >
+        <button
+          type="button"
+          disabled={disabled}
+          style={{
+            width: '100%',
+            height: 52,
+            display: 'flex',
+            alignItems: 'center',
+            background: ticketBg,
+            color: '#ffffff',
+            border: 'none',
+            borderRadius: 14,
+            padding: '0 16px 0 0',
+            cursor: disabled ? 'not-allowed' : 'pointer',
+            boxShadow: ticketShadow,
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Frosted matte paper tooth texture overlay */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              pointerEvents: 'none',
+              backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 1px, transparent 1px)',
+              backgroundSize: '4px 4px',
+              opacity: 0.65,
+              mixBlendMode: 'overlay',
+            }}
+          />
+
+          {/* Left globe/airplane icon stub with dashed separator */}
+          <div
+            style={{
+              width: 52,
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'rgba(255,255,255,0.16)',
+              borderRight: '1.5px dashed rgba(255,255,255,0.42)',
+              fontSize: 22,
+              flexShrink: 0,
+              zIndex: 2,
+            }}
+          >
+            ✈
+          </div>
+          {/* Center content */}
+          <div style={{ flex: 1, padding: '0 14px', textAlign: 'left', minWidth: 0, zIndex: 2 }}>
+            <div
+              style={{
+                fontFamily: "'Caveat', cursive",
+                fontSize: 23,
+                fontWeight: 700,
+                lineHeight: 1.15,
+                color: '#fffdf7',
+                letterSpacing: '0.02em',
+                textShadow: '0 1px 2px rgba(0,0,0,0.4)',
+              }}
+            >
+              {children}
+            </div>
+            <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '9px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', opacity: 0.9, marginTop: 1, color: subColor }}>
+              {subText || 'TRAVEL TO A BETTER YOU'}
+            </div>
+          </div>
+          {arrow && (
+            <div style={{ fontSize: 22, color: '#fffdf7', transform: 'translateX(-2px)', zIndex: 2, fontFamily: "'Caveat', cursive" }}>
+              →
+            </div>
+          )}
+        </button>
+      </div>
+    );
+  }
+
+  // Organic Torn Paper Button (like "Plan Trip ->" and "Add to Itinerary" in element sheet)
+  const isBlue = variant === 'blue';
+  const isKraft = variant === 'kraft';
+
+  // Multi-stop rich oil paint impasto pigments
+  const oilGradStops = isBlue
+    ? [
+        { offset: '0%', color: '#387dc0' },
+        { offset: '22%', color: '#4f96dc' },
+        { offset: '50%', color: '#62a8ed' },
+        { offset: '78%', color: '#478fd4' },
+        { offset: '100%', color: '#2e72b0' },
+      ]
+    : isKraft
+    ? [
+        { offset: '0%', color: '#9e7e56' },
+        { offset: '30%', color: '#b99971' },
+        { offset: '60%', color: '#cbab83' },
+        { offset: '85%', color: '#b3936a' },
+        { offset: '100%', color: '#8f7048' },
+      ]
+    : [
+        { offset: '0%', color: '#740e15' },
+        { offset: '24%', color: '#8b1620' },
+        { offset: '52%', color: '#9e1b26' },
+        { offset: '76%', color: '#88151f' },
+        { offset: '100%', color: '#680b12' },
+      ];
+
+  const shadowColor = isBlue
+    ? 'rgba(50, 120, 190, 0.35)'
+    : isKraft
+    ? 'rgba(90, 60, 25, 0.25)'
+    : 'rgba(120, 15, 22, 0.42)';
+
+  const crestHighlight = isBlue ? '#b8dcfd' : isKraft ? '#ffffff' : '#e0584d';
+
+  // The organic deckled tear path
+  const deckledPath =
+    'M 6 3.5 L 24 2 L 48 4.2 L 74 2.2 L 102 3.8 L 132 1.8 L 164 4.0 L 196 2.0 L 226 3.8 L 258 1.8 L 288 4.0 L 314 2.0 L 334 3.8 L 338 9 L 335 17 L 339 25 L 334 33 L 338 41 L 334 46.5 L 314 45.2 L 288 47.5 L 258 45.2 L 226 47.5 L 196 45.2 L 164 47.5 L 132 45.2 L 102 47.5 L 74 45.2 L 48 47.5 L 24 45.2 L 6 47.0 L 2 41 L 5 33 L 1 25 L 5 17 L 2 9 Z';
+
+  return (
+    <div
+      className={`court-torn-paper-btn-wrap ${className}`}
+      style={{
+        width: '100%',
+        position: 'relative',
+        filter: `drop-shadow(0 6px 14px ${shadowColor}) drop-shadow(0 2px 4px rgba(40,20,10,0.18))`,
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.6 : 1,
+        transition: 'transform 0.18s cubic-bezier(0.34,1.56,0.64,1), filter 0.18s ease',
+        ...style,
+      }}
+      onClick={disabled ? undefined : onClick}
+    >
+      <button
+        type="button"
+        className="court-torn-paper-btn"
+        disabled={disabled}
+        style={{
+          width: '100%',
+          height: 52,
+          background: 'transparent',
+          border: 'none',
+          padding: 0,
+          margin: 0,
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          outline: 'none',
+        }}
+      >
+        <svg
+          viewBox="0 0 340 52"
+          preserveAspectRatio="none"
+          className="court-torn-paper-svg"
+          aria-hidden="true"
+        >
+          <defs>
+            {/* Multi-stop rich oil pigment gradient */}
+            <linearGradient id={`oil-grad-${btnId}`} x1="0%" y1="0%" x2="100%" y2="100%">
+              {oilGradStops.map(s => (
+                <stop key={s.offset} offset={s.offset} stopColor={s.color} />
+              ))}
+            </linearGradient>
+
+            {/* Cold-press matte sand grain pattern (Strictly clipped inside path, ZERO grey outside) */}
+            <pattern id={`matte-tooth-${btnId}`} width="8" height="8" patternUnits="userSpaceOnUse">
+              <circle cx="2" cy="2" r="0.75" fill="#ffffff" opacity="0.28" />
+              <circle cx="6" cy="6" r="0.7" fill="#000000" opacity="0.2" />
+              <circle cx="6" cy="2" r="0.5" fill="#ffffff" opacity="0.2" />
+              <circle cx="2" cy="6" r="0.55" fill="#000000" opacity="0.18" />
+            </pattern>
+          </defs>
+
+          {/* LAYER 1: MAIN OIL PAINT PIGMENT BODY */}
+          <path
+            d={deckledPath}
+            fill={`url(#oil-grad-${btnId})`}
+          />
+
+          {/* LAYER 2: MATTE SAND GRAIN OVERLAY (Same deckled path, 100% transparent outside) */}
+          <path
+            d={deckledPath}
+            fill={`url(#matte-tooth-${btnId})`}
+            style={{ mixBlendMode: 'overlay', opacity: 0.65, pointerEvents: 'none' }}
+          />
+
+          {/* LAYER 3: DRY-BRUSH CHALK HIGHLIGHT (顶部干刷白油画微提亮) */}
+          <path
+            d="M 12 5 Q 90 3 170 4 Q 260 4.8 328 6"
+            stroke={crestHighlight}
+            strokeWidth="1.2"
+            strokeLinecap="round"
+            strokeDasharray="16 4 8 5 22 6"
+            opacity="0.38"
+            fill="none"
+          />
+        </svg>
+
+        <div
+          className="court-torn-btn-content"
+          style={{
+            fontFamily: "'Caveat', cursive",
+            fontSize: '23px',
+            fontWeight: 700,
+            color: isKraft ? '#2b1810' : '#fffdf7',
+            letterSpacing: '0.02em',
+            gap: 8,
+            textShadow: isKraft ? 'none' : '0 1px 2px rgba(0, 0, 0, 0.45)',
+          }}
+        >
+          <span>{children}</span>
+          {arrow && (
+            <span className="court-torn-btn-arrow" style={{ fontFamily: "'Caveat', cursive", fontSize: '24px', display: 'inline-block' }}>
+              →
+            </span>
+          )}
+        </div>
+      </button>
+    </div>
+  );
+}
+
+/* Washi Tape Strip (semi-transparent denim / red / khaki strip) */
+export function WashiTapeStrip({
+  label,
+  color = 'blue',
+  angle = -1,
+  style,
+}: {
+  label?: string;
+  color?: 'blue' | 'red' | 'kraft';
+  angle?: number;
+  style?: React.CSSProperties;
+}) {
+  const bg =
+    color === 'blue'
+      ? 'linear-gradient(135deg, #4a7ba8 0%, #3d6a95 100%)'
+      : color === 'red'
+      ? 'linear-gradient(135deg, #a31520 0%, #8b1520 100%)'
+      : 'linear-gradient(135deg, #c4a882 0%, #b3936a 100%)';
+
+  return (
+    <div
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '3px 12px',
+        background: bg,
+        color: '#ffffff',
+        fontFamily: "'Caveat', cursive",
+        fontSize: '13px',
+        fontWeight: 700,
+        letterSpacing: '0.04em',
+        borderRadius: 2,
+        transform: `rotate(${angle}deg)`,
+        boxShadow: '0 2px 5px rgba(0,0,0,0.12)',
+        borderLeft: '2px dashed rgba(255,255,255,0.65)',
+        borderRight: '2px dashed rgba(255,255,255,0.65)',
+        userSelect: 'none',
+        ...style,
+      }}
+    >
+      {label}
+    </div>
+  );
+}
+
+/* Luggage Tag (Matching the 4 luggage tags in the element sheet) */
+export function LuggageTag({
+  label,
+  icon,
+  active = false,
+  color = 'cream',
+  onClick,
+  style,
+}: {
+  label: string;
+  icon?: React.ReactNode;
+  active?: boolean;
+  color?: 'cream' | 'blue' | 'red';
+  onClick?: () => void;
+  style?: React.CSSProperties;
+}) {
+  const bg =
+    active || color === 'red'
+      ? '#8b1520'
+      : color === 'blue'
+      ? '#4a7ba8'
+      : '#fffdf7';
+
+  const textColor = active || color === 'red' || color === 'blue' ? '#ffffff' : '#2b1810';
+  const borderColor = active || color === 'red' ? '#6f0e16' : color === 'blue' ? '#38638b' : '#e8d5b5';
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        display: 'inline-flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        position: 'relative',
+        padding: '6px 12px 5px',
+        background: bg,
+        border: `1.5px solid ${borderColor}`,
+        borderRadius: '8px 8px 6px 6px',
+        boxShadow: '0 3px 8px rgba(100,65,25,0.10)',
+        cursor: onClick ? 'pointer' : 'default',
+        transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+        minWidth: 54,
+        ...style,
+      }}
+    >
+      {/* Top Eyelet Hole with string loop */}
+      <div style={{ position: 'relative', marginBottom: 3, display: 'flex', justifyContent: 'center' }}>
+        <div
+          style={{
+            width: 7,
+            height: 7,
+            borderRadius: '50%',
+            background: '#f5edd8',
+            border: '1.5px solid #c4a882',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            top: -5,
+            width: 2,
+            height: 5,
+            background: '#a88960',
+            borderRadius: 1,
+          }}
+        />
+      </div>
+
+      {icon && <div style={{ fontSize: 13, marginBottom: 2, color: textColor }}>{icon}</div>}
+
+      <span
+        style={{
+          fontFamily: "'Caveat', cursive",
+          fontSize: '13.5px',
+          fontWeight: 700,
+          color: textColor,
+          whiteSpace: 'nowrap',
+          lineHeight: 1.15,
+        }}
+      >
+        {label}
+      </span>
+    </button>
+  );
+}
+
+/* Circular Cancellation Postmark Stamp */
+export function PostmarkStamp({
+  textTop = 'TRAVEL MORE',
+  textBottom = 'GOOD DAYS',
+  year = '2026',
+  color = '#8b1520',
+  size = 52,
+  style,
+}: {
+  textTop?: string;
+  textBottom?: string;
+  year?: string;
+  color?: string;
+  size?: number;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <div
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 4,
+        pointerEvents: 'none',
+        userSelect: 'none',
+        opacity: 0.85,
+        ...style,
+      }}
+    >
+      <div
+        style={{
+          width: size,
+          height: size,
+          borderRadius: '50%',
+          border: `1.8px dashed ${color}`,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color,
+          fontFamily: "'Inter', sans-serif",
+          fontWeight: 700,
+          textAlign: 'center',
+          position: 'relative',
+          padding: 2,
+          boxSizing: 'border-box',
+        }}
+      >
+        <div
+          style={{
+            width: size - 8,
+            height: size - 8,
+            borderRadius: '50%',
+            border: `1px solid ${color}`,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <span style={{ fontSize: `${Math.max(5, size * 0.12)}px`, fontWeight: 900, letterSpacing: '0.08em', lineHeight: 1 }}>
+            {textTop}
+          </span>
+          <span style={{ fontSize: `${Math.max(10, size * 0.28)}px`, margin: '1px 0', lineHeight: 1 }}>✈</span>
+          <span style={{ fontSize: `${Math.max(5, size * 0.11)}px`, fontWeight: 800, letterSpacing: '0.06em', lineHeight: 1 }}>
+            {textBottom} {year}
+          </span>
+        </div>
+      </div>
+
+      <svg width={size * 0.45} height={size * 0.5} viewBox="0 0 24 20" fill="none">
+        <path d="M 0 4 Q 6 1 12 4 Q 18 7 24 4" stroke={color} strokeWidth="1.3" opacity="0.8" />
+        <path d="M 0 10 Q 6 7 12 10 Q 18 13 24 10" stroke={color} strokeWidth="1.3" opacity="0.8" />
+        <path d="M 0 16 Q 6 13 12 16 Q 18 19 24 16" stroke={color} strokeWidth="1.3" opacity="0.8" />
+      </svg>
+    </div>
+  );
+}
+
+/* Classic Polaroid Photo Frame with Caveat handwritten caption */
+export function PolaroidCard({
+  children,
+  caption,
+  rotation = 0,
+  pushpin = false,
+  style,
+  onClick,
+}: {
+  children: React.ReactNode;
+  caption?: string;
+  rotation?: number;
+  pushpin?: boolean;
+  style?: React.CSSProperties;
+  onClick?: () => void;
+}) {
+  return (
+    <div
+      style={{
+        position: 'relative',
+        background: '#ffffff',
+        padding: '6px 6px 20px',
+        borderRadius: 4,
+        boxShadow: '0 8px 24px rgba(100,65,25,0.14), 0 2px 6px rgba(100,65,25,0.06)',
+        transform: `rotate(${rotation}deg)`,
+        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        cursor: onClick ? 'pointer' : 'default',
+        boxSizing: 'border-box',
+        ...style,
+      }}
+      onClick={onClick}
+    >
+      {pushpin && (
+        <div
+          style={{
+            position: 'absolute',
+            top: -8,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 16,
+            height: 16,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle at 35% 30%, #f87171 0%, #dc2626 45%, #8b0d09 85%)',
+            boxShadow: '0 3px 6px rgba(0,0,0,0.35)',
+            zIndex: 15,
+          }}
+        />
+      )}
+
+      <div style={{ width: '100%', overflow: 'hidden', borderRadius: 2, background: '#f5edd8' }}>
+        {children}
+      </div>
+
+      {caption && (
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 3,
+            left: 6,
+            right: 6,
+            height: 16,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontFamily: "'Caveat', cursive",
+            fontSize: '12px',
+            fontWeight: 700,
+            color: '#554133',
+            textAlign: 'center',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {caption}
+        </div>
+      )}
+    </div>
+  );
+}
+
 
 const CASE_DEFAULT_COMMENTS: Record<number, Array<{ id: string; author: string; avatar: string; text: string; timeAgo: string; likes: number; liked: boolean }>> = {
   1: [
@@ -842,9 +1418,8 @@ export function TravelCourtCaseFlow({
           ==================================================================== */}
       {currentStep === 'lobby' && (
         <div
-          className="court-case-chamber"
+          className="court-case-chamber court-vintage-chamber"
           style={{
-            background: 'linear-gradient(180deg, #dbeafe 0%, #eff6ff 25%, #f8fafc 60%, #ffffff 100%)',
             paddingBottom: 4,
           }}
         >
@@ -871,19 +1446,26 @@ export function TravelCourtCaseFlow({
                 width: 36,
                 height: 36,
                 borderRadius: '50%',
-                border: 'none',
-                background: 'rgba(255, 255, 255, 0.9)',
-                backdropFilter: 'blur(4px)',
+                border: '1.5px solid #e8d5b5',
+                background: 'rgba(255,253,247,0.95)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                boxShadow: '0 2px 8px rgba(110, 70, 30, 0.08)',
                 cursor: 'pointer',
               }}
             >
-              <ChevronLeft size={22} color="#1e293b" />
+              <ChevronLeft size={22} color="#8b1520" />
             </button>
-            <DiscussIdeaButton />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <DiscussIdeaButton />
+              <div className="vp-postmark" style={{ width: 42, height: 42, opacity: 0.8 }}>
+                <div className="vp-postmark-label">
+                  <div>✈ COURT</div>
+                  <div>2026</div>
+                </div>
+              </div>
+            </div>
           </header>
 
           <div
@@ -902,7 +1484,28 @@ export function TravelCourtCaseFlow({
             }}
           >
             {/* Top Group: Master Header Lockup + Central Courtroom Stage */}
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
+              {/* Retro Postmark / Travel Stamp Watermark */}
+              <div
+                className="court-vintage-stamp-mark"
+                style={{
+                  top: 50,
+                  left: -8,
+                  width: 66,
+                  height: 66,
+                  transform: 'rotate(-14deg)',
+                  fontSize: '7px',
+                  fontWeight: 800,
+                  letterSpacing: '0.08em',
+                  lineHeight: 1.25,
+                  zIndex: 0,
+                }}
+              >
+                <span>★ VOYAGE ★</span>
+                <span style={{ fontSize: '8.5px', fontWeight: 900, color: 'rgba(147, 5, 0, 0.32)' }}>COURT</span>
+                <span>JEJU 2026</span>
+              </div>
+
               <div
                 className="court-master-header-wrap"
                 style={{
@@ -918,11 +1521,11 @@ export function TravelCourtCaseFlow({
                   position: 'absolute',
                   top: -4,
                   left: 2,
-                  opacity: 0.4,
+                  opacity: 0.55,
                   pointerEvents: 'none',
                 }}
               >
-                <svg width="50" height="42" viewBox="0 0 60 50" fill="#38bdf8">
+                <svg width="50" height="42" viewBox="0 0 60 50" fill="#95BBEA">
                   <path d="M 12 45 Q 16 28 28 20 Q 18 16 10 18 Q 18 24 20 36 Z" />
                   <path d="M 28 20 Q 32 10 24 4 Q 22 14 26 18 Z" />
                   <path d="M 28 20 Q 40 16 46 22 Q 36 22 30 20 Z" />
@@ -936,18 +1539,18 @@ export function TravelCourtCaseFlow({
                   position: 'absolute',
                   top: 0,
                   right: 4,
-                  opacity: 0.75,
+                  opacity: 0.85,
                   pointerEvents: 'none',
                 }}
               >
                 <svg width="70" height="36" viewBox="0 0 84 42" fill="none">
                   <path
                     d="M 10 32 Q 42 38 66 16"
-                    stroke="#93c5fd"
+                    stroke="#95BBEA"
                     strokeWidth="1.8"
                     strokeDasharray="3 3"
                   />
-                  <text x="67" y="15" fontSize="14" fill="#1877f2">✈</text>
+                  <text x="67" y="15" fontSize="14" fill="#930500">✈</text>
                 </svg>
               </div>
 
@@ -962,14 +1565,15 @@ export function TravelCourtCaseFlow({
                 }}
               >
                 <h2
+                  className="vp-title"
                   style={{
-                    fontSize: '25px',
+                    fontSize: '34px',
                     fontWeight: 900,
-                    color: '#1877f2',
-                    letterSpacing: '-0.03em',
+                    color: '#930500',
+                    letterSpacing: '-0.02em',
                     margin: 0,
                     lineHeight: 1.1,
-                    fontFamily: "Georgia, 'Times New Roman', serif",
+                    fontFamily: "'Caveat', cursive",
                   }}
                 >
                   Travel Court
@@ -986,7 +1590,7 @@ export function TravelCourtCaseFlow({
                   <span
                     style={{
                       fontSize: '22px',
-                      filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.15))',
+                      filter: 'drop-shadow(0 2px 4px rgba(147,5,0,0.25))',
                     }}
                   >
                     🔨
@@ -996,7 +1600,7 @@ export function TravelCourtCaseFlow({
                       position: 'absolute',
                       top: -5,
                       right: -7,
-                      color: '#facc15',
+                      color: '#f59e0b',
                       fontSize: '13px',
                       fontWeight: 900,
                       display: 'flex',
@@ -1011,34 +1615,72 @@ export function TravelCourtCaseFlow({
 
               {/* Subtitle */}
               <p
+                className="court-vintage-subtitle"
                 style={{
-                  fontSize: '12px',
-                  color: '#475569',
+                  fontSize: '15px',
+                  color: '#6d5241',
                   fontWeight: 600,
                   margin: '2px 0 4px',
                   letterSpacing: '0.01em',
+                  fontFamily: "'Caveat', cursive",
                 }}
               >
                 Different opinions? Let's decide together!
               </p>
             </div>
 
-            {/* Dynamic Central Courtroom Hero Card */}
-            <DynamicCourtroomStage
-              members={courtMembers}
-              onCourtClick={() => {
-                playVoteChime(true);
-                triggerHaptic('tap');
-                setMemberNotification('⚖️ The Travel Court is now in session! Waiting for all members to join.');
-                setTimeout(() => setMemberNotification(null), 3000);
-              }}
-              onMemberClick={(m) => {
-                playPop();
-                triggerHaptic('tap');
-                setMemberNotification(`💬 ${m.name}: "${m.speech || 'Present and ready!'}"`);
-                setTimeout(() => setMemberNotification(null), 3000);
-              }}
-            />
+            {/* Dynamic Central Courtroom Hero Card with Scrapbook Washi Tape Corners */}
+            <div style={{ position: 'relative', width: '100%' }}>
+              {/* Top-Left Blue Washi Tape Strip */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: -6,
+                  left: 14,
+                  width: 52,
+                  height: 16,
+                  background: 'linear-gradient(135deg, rgba(74,123,168,0.88) 0%, rgba(61,106,149,0.88) 100%)',
+                  transform: 'rotate(-12deg)',
+                  zIndex: 25,
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.14)',
+                  borderLeft: '2px dashed rgba(255,255,255,0.7)',
+                  borderRight: '2px dashed rgba(255,255,255,0.7)',
+                  pointerEvents: 'none',
+                }}
+              />
+              {/* Top-Right Red Washi Tape Strip */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: -6,
+                  right: 14,
+                  width: 52,
+                  height: 16,
+                  background: 'linear-gradient(135deg, rgba(163,21,32,0.88) 0%, rgba(139,21,32,0.88) 100%)',
+                  transform: 'rotate(14deg)',
+                  zIndex: 25,
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.14)',
+                  borderLeft: '2px dashed rgba(255,255,255,0.7)',
+                  borderRight: '2px dashed rgba(255,255,255,0.7)',
+                  pointerEvents: 'none',
+                }}
+              />
+              <DynamicCourtroomStage
+                members={courtMembers}
+                onCourtClick={() => {
+                  playVoteChime(true);
+                  triggerHaptic('tap');
+                  setMemberNotification('⚖️ The Travel Court is now in session! Waiting for all members to join.');
+                  setTimeout(() => setMemberNotification(null), 3000);
+                }}
+                onMemberClick={(m) => {
+                  playPop();
+                  triggerHaptic('tap');
+                  setMemberNotification(`💬 ${m.name}: "${m.speech || 'Present and ready!'}"`);
+                  setTimeout(() => setMemberNotification(null), 3000);
+                }}
+              />
+            </div>
           </div>
 
           {/* Bottom Group: Members Card + iOS Home Indicator */}
@@ -1053,21 +1695,28 @@ export function TravelCourtCaseFlow({
               justifyContent: 'space-between',
             }}
           >
-            {/* Bottom "{courtMembers.length} members in the court" Card */}
+            {/* Bottom "{courtMembers.length} members in the court" Card (Vintage Scrapbook Memo / Pin-up Card) */}
             <div
-              className="court-lobby-members-card"
+              className="court-lobby-members-card court-vintage-memo-card"
               style={{
                 width: '100%',
-                background: '#ffffff',
+                background: '#fffefa',
                 borderRadius: 20,
-                padding: '10px 12px 10px',
+                padding: '11px 13px 12px',
                 boxShadow:
-                  '0 6px 24px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.04)',
-                border: '1px solid #f1f5f9',
+                  '0 8px 24px rgba(115, 75, 40, 0.08), 0 2px 6px rgba(115, 75, 40, 0.04)',
+                border: '1px solid #f2e3cc',
                 marginTop: 0,
+                position: 'relative',
               }}
             >
-              {/* Header Row: 4 / 6 members joined on left + Bouncing "waiting...." on right */}
+              {/* 3D Red Pushpin Detail (Pins the memo card to the oatmeal paper) */}
+              <div className="court-vintage-pushpin" aria-hidden="true" title="Pinned to Journal">
+                <div className="court-pushpin-pin" />
+                <div className="court-pushpin-head" />
+              </div>
+
+              {/* Header Row: 4 / 6 members joined on left + Washi Tape "waiting...." on right */}
               <div
                 style={{
                   display: 'flex',
@@ -1095,7 +1744,7 @@ export function TravelCourtCaseFlow({
                     style={{
                       fontSize: '13px',
                       fontWeight: 800,
-                      color: '#0f172a',
+                      color: '#2b1810',
                       letterSpacing: '-0.01em',
                     }}
                   >
@@ -1106,13 +1755,13 @@ export function TravelCourtCaseFlow({
                       type="button"
                       onClick={handleResetMembers}
                       style={{
-                        background: '#f1f5f9',
-                        border: '1px solid #e2e8f0',
+                        background: '#fcf4e8',
+                        border: '1px solid #ecd8bf',
                         borderRadius: 99,
                         padding: '1px 6px',
                         fontSize: '9.5px',
                         fontWeight: 700,
-                        color: '#64748b',
+                        color: '#7c5b46',
                         cursor: 'pointer',
                         marginLeft: 2,
                       }}
@@ -1123,21 +1772,8 @@ export function TravelCourtCaseFlow({
                   )}
                 </div>
 
-                {/* Right: Bouncing Wave "waiting...." */}
-                <div
-                  style={{
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    color: '#2563eb',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    background: '#eff6ff',
-                    padding: '2px 8px',
-                    borderRadius: 99,
-                    border: '1px solid #bfdbfe',
-                    letterSpacing: '0.01em',
-                  }}
-                >
+                {/* Right: Cornflower Blue Washi Tape "waiting...." */}
+                <div className="court-vintage-washi-pill">
                   <BouncingWaveText text={courtMembers.length >= 6 ? 'All ready! 🎉' : 'waiting....'} />
                 </div>
               </div>
@@ -1183,8 +1819,8 @@ export function TravelCourtCaseFlow({
                           height: 48,
                           borderRadius: '50%',
                           position: 'relative',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                          background: 'radial-gradient(circle at 50% 35%, #ffffff 0%, #f1f5f9 100%)',
+                          boxShadow: '0 2px 8px rgba(110,70,30,0.08)',
+                          background: 'radial-gradient(circle at 50% 35%, #ffffff 0%, #FFF8E7 100%)',
                           border: '2px solid #ffffff',
                           display: 'flex',
                           alignItems: 'center',
@@ -1208,7 +1844,7 @@ export function TravelCourtCaseFlow({
                             width: 11,
                             height: 11,
                             borderRadius: '50%',
-                            background: m.statusBadgeColor || m.avatarColor || '#3b82f6',
+                            background: m.statusBadgeColor || m.avatarColor || '#95BBEA',
                             border: '2px solid #ffffff',
                             boxShadow: '0 1px 3px rgba(0,0,0,0.25)',
                           }}
@@ -1220,7 +1856,7 @@ export function TravelCourtCaseFlow({
                         style={{
                           fontSize: '11px',
                           fontWeight: 700,
-                          color: '#475569',
+                          color: '#554133',
                           maxWidth: 52,
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
@@ -1247,7 +1883,7 @@ export function TravelCourtCaseFlow({
                             width: 16,
                             height: 16,
                             borderRadius: '50%',
-                            background: '#ef4444',
+                            background: '#930500',
                             color: '#ffffff',
                             border: '1.5px solid #ffffff',
                             fontSize: 9,
@@ -1285,25 +1921,25 @@ export function TravelCourtCaseFlow({
                       width: 48,
                       height: 48,
                       borderRadius: '50%',
-                      border: '1.5px dashed #93c5fd',
-                      background: '#f8fafc',
+                      border: '1.5px dashed #95BBEA',
+                      background: '#fffdf6',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: '#1877f2',
+                      color: '#930500',
                       cursor: 'pointer',
-                      boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+                      boxShadow: '0 2px 6px rgba(110, 70, 30, 0.04)',
                       transition: 'transform 0.15s ease',
                     }}
                     aria-label="Add friend"
                   >
-                    <Plus size={22} strokeWidth={2.6} color="#1877f2" />
+                    <Plus size={22} strokeWidth={2.6} color="#930500" />
                   </button>
                   <span
                     style={{
                       fontSize: '11px',
                       fontWeight: 700,
-                      color: '#64748b',
+                      color: '#7a6252',
                     }}
                   >
                     Add
@@ -1315,9 +1951,9 @@ export function TravelCourtCaseFlow({
               {memberNotification && (
                 <div
                   style={{
-                    background: '#eff6ff',
-                    border: '1px solid #bfdbfe',
-                    color: '#1d4ed8',
+                    background: '#fdf4e7',
+                    border: '1px solid #f6d8ae',
+                    color: '#930500',
                     padding: '6px 10px',
                     borderRadius: 12,
                     fontSize: '11px',
@@ -1325,34 +1961,15 @@ export function TravelCourtCaseFlow({
                     textAlign: 'center',
                     marginBottom: 8,
                     animation: 'court-fade-in 0.2s ease',
-                    boxShadow: '0 2px 6px rgba(37,99,235,0.08)',
+                    boxShadow: '0 2px 6px rgba(147,5,0,0.08)',
                   }}
                 >
                   {memberNotification}
                 </div>
               )}
 
-              {/* Start the Case Button */}
-              <button
-                type="button"
-                className="court-dark-pill-btn"
-                style={{
-                  width: '100%',
-                  background: 'linear-gradient(135deg, #1e293b, #0f172a)',
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: 24,
-                  padding: '11px 18px',
-                  fontSize: '14.5px',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 8,
-                  boxShadow: '0 4px 16px rgba(15, 23, 42, 0.2)',
-                  transition: 'transform 0.15s ease, box-shadow 0.15s ease',
-                }}
+              {/* Start the Case Button: Authentic Sangria Red Torn Paper Strip */}
+              <TornPaperButton
                 onClick={() => {
                   playWhoosh();
                   triggerHaptic('tap');
@@ -1362,10 +1979,10 @@ export function TravelCourtCaseFlow({
                     setCurrentStep('proposal');
                   }
                 }}
+                variant="crimson"
               >
-                <span>Start the case</span>
-                <span style={{ fontSize: '17px' }}>→</span>
-              </button>
+                Start the case
+              </TornPaperButton>
             </div>
 
             {/* Authentic iOS Home Indicator */}
@@ -1741,7 +2358,7 @@ export function TravelCourtCaseFlow({
           SCREEN 2: CASE 1 OF 3 - PROPOSAL PRESENTATION
           ==================================================================== */}
       {currentStep === 'proposal' && (
-        <div className="court-case-chamber">
+        <div className="court-case-chamber court-vintage-chamber">
           <header className="court-navbar">
             <button
               className="court-nav-back-btn"
@@ -1755,17 +2372,21 @@ export function TravelCourtCaseFlow({
                 }
               }}
               aria-label="Back"
+              style={{
+                background: 'rgba(255,253,247,0.95)',
+                border: '1.5px solid #e8d5b5',
+              }}
             >
               <ChevronLeft size={24} />
             </button>
             <div className="court-nav-title-group" style={{ alignItems: 'center' }}>
-              <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>
+              <span style={{ fontSize: '14px', fontWeight: 700, color: '#8b6b4e', fontFamily: "'Caveat', cursive" }}>
                 Case {caseIndex} of 3
               </span>
               <div style={{ display: 'flex', gap: 4, width: 80, marginTop: 4 }}>
-                <div style={{ height: 4, flex: 1, background: '#1877f2', borderRadius: 99 }} />
-                <div style={{ height: 4, flex: 1, background: '#e2e8f0', borderRadius: 99 }} />
-                <div style={{ height: 4, flex: 1, background: '#e2e8f0', borderRadius: 99 }} />
+                <div style={{ height: 4, flex: 1, background: '#8b1520', borderRadius: 99 }} />
+                <div style={{ height: 4, flex: 1, background: '#dece9a', borderRadius: 99 }} />
+                <div style={{ height: 4, flex: 1, background: '#dece9a', borderRadius: 99 }} />
               </div>
             </div>
             <DiscussIdeaButton />
@@ -1831,7 +2452,7 @@ export function TravelCourtCaseFlow({
                           </div>
                         );
                       })}
-                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', marginLeft: 2 }}>
+                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748b', marginLeft: 2, fontFamily: "'Inter', sans-serif" }}>
                         {proposalVotedCount}/{courtMembers.length} voted
                       </span>
                     </div>
@@ -1845,15 +2466,14 @@ export function TravelCourtCaseFlow({
                   {/* Title floats right above judge */}
                   <div style={{ margin: '11px 0 7px', textAlign: 'center', lineHeight: 1.12 }}>
                     <span style={{
-                      fontSize: '25px', fontWeight: 900, color: '#0f172a',
-                      fontFamily: "Georgia, 'Times New Roman', serif",
+                      fontSize: '27px', fontWeight: 900, color: '#8b1520',
+                      fontFamily: "'Caveat', cursive",
                       letterSpacing: '-0.02em',
                     }}>
                       {currentCase.question.split(' ').map((word, i, arr) => {
                         const isLast = i === arr.length - 1;
-                        const isDestWord = i >= arr.length - 2;
                         return (
-                          <span key={i} style={isDestWord ? { color: '#1877f2', fontStyle: 'italic' } : undefined}>
+                          <span key={i}>
                             {word}{!isLast ? ' ' : ''}
                           </span>
                         );
@@ -1934,17 +2554,20 @@ export function TravelCourtCaseFlow({
                           right: 0,
                           height: FRONT_CARD_HEIGHT,
                           background: '#ffffff',
+                          borderRadius: 22,
+                          boxShadow: '0 10px 28px rgba(100,65,25,0.14), 0 2px 6px rgba(100,65,25,0.08)',
                           overflow: 'hidden',
                           zIndex: 10,
+                          border: '1.5px solid #e8d5b5',
                         }}
                       >
                         {/* Type badge */}
                         <div style={{
-                          position: 'absolute', top: 10, left: 10, zIndex: 20,
-                          background: 'rgba(0,0,0,0.52)', backdropFilter: 'blur(6px)',
-                          borderRadius: 99, padding: '3px 9px',
+                          position: 'absolute', top: 0, left: 14, zIndex: 20,
+                          background: 'linear-gradient(135deg, #4a7ba8 0%, #3d6a95 100%)',
+                          borderRadius: '0 0 10px 10px', padding: '3px 9px',
                           fontSize: '10px', fontWeight: 800, color: '#ffffff',
-                          letterSpacing: '0.02em',
+                          letterSpacing: '0.02em', fontFamily: "'Caveat', cursive"
                         }}>
                           {currentCase.typeLabel}
                         </div>
@@ -1959,15 +2582,15 @@ export function TravelCourtCaseFlow({
                         {/* Info */}
                         <div style={{ padding: '10px 14px 12px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 7 }}>
-                            <MapPin size={14} color="#1877f2" />
-                            <span style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a' }}>{currentCase.title}</span>
+                            <MapPin size={13} color="#8b1520" />
+                            <span style={{ fontSize: '16px', fontWeight: 800, color: '#2b1810', fontFamily: "'Caveat', cursive" }}>{currentCase.title}</span>
                           </div>
                           <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                             {currentCase.tags.map(tag => (
                               <span key={tag} style={{
-                                fontSize: '10.5px', fontWeight: 700, color: '#1877f2',
-                                background: '#eff6ff', borderRadius: 99, padding: '3px 8px',
-                                border: '1px solid #bfdbfe',
+                                fontSize: '11px', fontWeight: 600, color: '#4a7ba8',
+                                background: 'rgba(149,187,234,0.2)', borderRadius: 4, padding: '2px 8px',
+                                border: '1px solid rgba(74,123,168,0.3)', fontFamily: "'Inter', sans-serif"
                               }}>{tag}</span>
                             ))}
                           </div>
@@ -1990,8 +2613,7 @@ export function TravelCourtCaseFlow({
                 }}>
                   <button
                     type="button"
-                    className="court-sticky-cta-btn"
-                    style={{ width: '100%' }}
+                    className="vp-btn-ticket blue"
                     onClick={() => {
                       if (voteZooming) return;
                       playWhoosh();
@@ -2003,7 +2625,11 @@ export function TravelCourtCaseFlow({
                       }, 620);
                     }}
                   >
-                    Next to Vote →
+                    <div className="vp-btn-ticket-icon">✈</div>
+                    <div className="vp-btn-ticket-text">
+                      <div className="vp-btn-ticket-title">Next to Vote →</div>
+                      <div className="vp-btn-ticket-sub">Cast your verdict now</div>
+                    </div>
                   </button>
                 </div>
                 <div style={{
@@ -2028,19 +2654,27 @@ export function TravelCourtCaseFlow({
           SCREEN 3: CASE 1 OF 3 - IT'S YOUR TURN! (VOTING)
           ==================================================================== */}
       {currentStep === 'voting' && (
-        <div className="court-case-chamber court-vote-chamber">
+        <div className="court-case-chamber court-vote-chamber court-vintage-chamber">
           <header className="court-navbar court-vote-navbar">
-            <button className="court-nav-back-btn" onClick={() => setCurrentStep('proposal')} aria-label="Back">
-              <ChevronLeft size={24} />
+            <button
+              className="court-nav-back-btn"
+              onClick={() => setCurrentStep('proposal')}
+              aria-label="Back"
+              style={{
+                background: 'rgba(255,253,247,0.95)',
+                border: '1.5px solid #e8d5b5',
+              }}
+            >
+              <ChevronLeft size={22} color="#8b1520" />
             </button>
             <div className="court-nav-title-group" style={{ alignItems: 'center' }}>
-              <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>
+              <span style={{ fontSize: '14px', fontWeight: 700, color: '#8b6b4e', fontFamily: "'Caveat', cursive" }}>
                 Case {caseIndex} of 3
               </span>
               <div style={{ display: 'flex', gap: 4, width: 80, marginTop: 4 }}>
-                <div style={{ height: 4, flex: 1, background: '#1877f2', borderRadius: 99 }} />
-                <div style={{ height: 4, flex: 1, background: '#e2e8f0', borderRadius: 99 }} />
-                <div style={{ height: 4, flex: 1, background: '#e2e8f0', borderRadius: 99 }} />
+                <div style={{ height: 4, flex: 1, background: '#8b1520', borderRadius: 99 }} />
+                <div style={{ height: 4, flex: 1, background: '#dece9a', borderRadius: 99 }} />
+                <div style={{ height: 4, flex: 1, background: '#dece9a', borderRadius: 99 }} />
               </div>
             </div>
             <DiscussIdeaButton />
@@ -2049,7 +2683,7 @@ export function TravelCourtCaseFlow({
           <div
             className="court-voting-screen"
             style={{
-              padding: '8px 18px 0',
+              padding: '4px 18px 0',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -2061,10 +2695,14 @@ export function TravelCourtCaseFlow({
               boxSizing: 'border-box',
             }}
           >
-            <div className="court-vote-focus-area">
-              <div className="court-voting-header">
-                <h2>It's your turn!</h2>
-                <p>What's your vote?</p>
+            <div className="court-vote-focus-area" style={{ width: '100%' }}>
+              <div className="court-voting-header" style={{ textAlign: 'center', margin: '2px 0 4px' }}>
+                <h2 style={{ fontFamily: "'Caveat', cursive", fontSize: '32px', fontWeight: 700, color: '#8b1520', margin: 0, lineHeight: 1.05 }}>
+                  It's your turn!
+                </h2>
+                <p style={{ fontFamily: "'Caveat', cursive", fontSize: '15px', fontWeight: 600, color: '#7a5840', margin: '1px 0 0' }}>
+                  What's your vote?
+                </p>
               </div>
 
               <div className="court-vote-mini-stage">
@@ -2101,29 +2739,52 @@ export function TravelCourtCaseFlow({
                 </div>
               </div>
 
-              <div className="court-vote-case-brief">
+              {/* Case Brief Polaroid Card */}
+              <div
+                className="court-vote-case-brief"
+                style={{
+                  background: '#ffffff',
+                  border: '1.5px solid #e8d5b5',
+                  borderRadius: 16,
+                  boxShadow: '0 4px 14px rgba(100,65,25,0.08)',
+                  padding: '7px 11px',
+                  margin: '6px 0 8px',
+                }}
+              >
                 <img
                   src={activeCase.imageUrl}
                   alt={activeCase.title}
                   className="court-vote-case-thumb"
                   draggable={false}
+                  style={{ width: 62, height: 52, borderRadius: 10, objectFit: 'cover' }}
                 />
                 <div className="court-vote-case-copy">
-                  <div className="court-vote-case-meta">
-                    <span>{activeCase.typeLabel}</span>
-                    <span>Case {caseIndex}</span>
+                  <div className="court-vote-case-meta" style={{ marginBottom: 2 }}>
+                    <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: '#4a7ba8', fontWeight: 600 }}>
+                      {activeCase.typeLabel}
+                    </span>
+                    <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: '#8b6b4e', fontWeight: 500 }}>
+                      Case {caseIndex}
+                    </span>
                   </div>
-                  <h3>{activeCase.question}</h3>
-                  <p>{activeCase.title}</p>
+                  <h3 style={{ fontFamily: "'Caveat', cursive", fontSize: '18px', fontWeight: 700, color: '#8b1520', margin: 0 }}>
+                    {activeCase.question}
+                  </h3>
+                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '12.5px', color: '#2b1810', margin: '1px 0 2px' }}>
+                    {activeCase.title}
+                  </p>
                   <div className="court-vote-case-tags">
                     {activeCase.tags.slice(0, 3).map(tag => (
-                      <span key={tag}>{tag}</span>
+                      <span key={tag} style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, background: 'rgba(149,187,234,0.2)', color: '#4a7ba8', borderRadius: 4, padding: '1px 6px' }}>
+                        {tag}
+                      </span>
                     ))}
                   </div>
                 </div>
               </div>
 
-              <div className="court-dual-vote-buttons">
+              {/* S3 VOTING: Original 3D Physical Circular Vote Buttons (All Denim Blue & Sunken Pressed-in State) */}
+              <div className="court-dual-vote-buttons" style={{ display: 'flex', justifyContent: 'center', gap: 36, margin: '8px 0 10px' }}>
                 <button
                   type="button"
                   className={`court-vote-btn-choice ${userVote === 'go' ? 'selected' : userVote ? 'dimmed' : ''}`}
@@ -2134,7 +2795,7 @@ export function TravelCourtCaseFlow({
                   }}
                 >
                   <div className="court-vote-circle go">
-                    <Check size={34} strokeWidth={3.8} />
+                    <Check size={30} strokeWidth={3.8} />
                   </div>
                   <span>Go!</span>
                 </button>
@@ -2149,14 +2810,14 @@ export function TravelCourtCaseFlow({
                   }}
                 >
                   <div className="court-vote-circle not-now">
-                    <X size={34} strokeWidth={3.8} />
+                    <X size={30} strokeWidth={3.8} />
                   </div>
                   <span>Not now</span>
                 </button>
               </div>
 
-              {/* Either option: subtle grey underlined text button */}
-              <div style={{ display: 'flex', justifyContent: 'center', margin: '-2px 0 10px' }}>
+              {/* Either option: subtle denim blue choice */}
+              <div style={{ display: 'flex', justifyContent: 'center', margin: '0 0 8px' }}>
                 <button
                   type="button"
                   className={`court-vote-either-text-btn ${userVote === 'either' ? 'selected' : ''}`}
@@ -2165,26 +2826,47 @@ export function TravelCourtCaseFlow({
                     triggerHaptic('vote');
                     setUserVote('either');
                   }}
+                  style={{
+                    fontFamily: "'Caveat', cursive",
+                    fontSize: '15px',
+                    fontWeight: 700,
+                    color: userVote === 'either' ? '#244360' : '#4a7ba8',
+                    background: userVote === 'either' ? 'rgba(74,123,168,0.22)' : 'transparent',
+                    border: userVote === 'either' ? '1.5px dashed #4a7ba8' : '1px dashed rgba(74,123,168,0.4)',
+                    borderRadius: 99,
+                    padding: '3px 16px',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                  }}
                 >
-                  I'm fine with either
+                  I'm fine with either ~
                 </button>
               </div>
 
               <input
                 type="text"
                 className="court-reason-input"
-                placeholder="Add a reason (optional)"
+                placeholder="Add a travel note or reason (optional)..."
                 value={userReason}
                 onChange={e => setUserReason(e.target.value)}
+                style={{
+                  background: 'rgba(255,253,247,0.95)',
+                  border: '1.5px solid #e8d5b5',
+                  borderRadius: 14,
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: '13.5px',
+                  color: '#2b1810',
+                  padding: '9px 14px',
+                  width: '100%',
+                  boxSizing: 'border-box',
+                }}
               />
             </div>
 
             {/* Bottom Action Group */}
-            <div className="court-vote-submit-wrap">
-              <button
-                type="button"
-                className="court-sticky-cta-btn"
-                style={{ width: '100%', opacity: userVote ? 1 : 0.6 }}
+            <div className="court-vote-submit-wrap" style={{ width: '100%', padding: '6px 0 0', marginTop: 'auto' }}>
+              <TornPaperButton
+                variant="blue"
                 disabled={!userVote}
                 onClick={() => {
                   playWhoosh();
@@ -2192,12 +2874,10 @@ export function TravelCourtCaseFlow({
 
                   const userEffectiveVote = userVote === 'not-now' ? 'not-now' : 'go';
 
-                  // Update June's vote in liveJurors immediately
                   setLiveJurors(prev =>
                     prev.map(j => (j.id === 'june' ? { ...j, vote: userEffectiveVote } : j))
                   );
 
-                  // Update comments: only add June's comment if user typed a reason!
                   if (userReason.trim()) {
                     setComments(prev => {
                       const clean = prev.filter(c => c.author !== 'June (You)' && c.author !== 'June' && c.author !== 'You');
@@ -2223,10 +2903,10 @@ export function TravelCourtCaseFlow({
                   setCurrentStep('jury-live');
                 }}
               >
-                Submit →
-              </button>
+                Submit Vote
+              </TornPaperButton>
             </div>
-            <div className="court-vote-home-wrap">
+            <div className="court-vote-home-wrap" style={{ width: '100%', padding: '6px 0 2px' }}>
               <MobileHomeIndicator />
             </div>
           </div>
@@ -2249,20 +2929,27 @@ export function TravelCourtCaseFlow({
         const juneJuror = liveJurors.find(j => j.id === 'june') || liveJurors[3];
 
         return (
-          <div className="court-case-chamber">
-            <MobileStatusBar />
+          <div className="court-case-chamber court-vintage-chamber">
             <header className="court-navbar">
-              <button className="court-nav-back-btn" onClick={() => setCurrentStep('voting')} aria-label="Back">
-                <ChevronLeft size={24} />
+              <button
+                className="court-nav-back-btn"
+                onClick={() => setCurrentStep('voting')}
+                aria-label="Back"
+                style={{
+                  background: 'rgba(255,253,247,0.95)',
+                  border: '1.5px solid #e8d5b5',
+                }}
+              >
+                <ChevronLeft size={22} color="#8b1520" />
               </button>
               <div className="court-nav-title-group" style={{ alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>
+                <span style={{ fontSize: '14px', fontWeight: 700, color: '#8b6b4e', fontFamily: "'Caveat', cursive" }}>
                   Case {caseIndex} of 3
                 </span>
                 <div style={{ display: 'flex', gap: 4, width: 80, marginTop: 4 }}>
-                  <div style={{ height: 4, flex: 1, background: '#1877f2', borderRadius: 99 }} />
-                  <div style={{ height: 4, flex: 1, background: caseIndex >= 2 ? '#1877f2' : '#e2e8f0', borderRadius: 99 }} />
-                  <div style={{ height: 4, flex: 1, background: caseIndex >= 3 ? '#1877f2' : '#e2e8f0', borderRadius: 99 }} />
+                  <div style={{ height: 4, flex: 1, background: '#8b1520', borderRadius: 99 }} />
+                  <div style={{ height: 4, flex: 1, background: caseIndex >= 2 ? '#8b1520' : '#dece9a', borderRadius: 99 }} />
+                  <div style={{ height: 4, flex: 1, background: caseIndex >= 3 ? '#8b1520' : '#dece9a', borderRadius: 99 }} />
                 </div>
               </div>
               <DiscussIdeaButton />
@@ -2281,34 +2968,57 @@ export function TravelCourtCaseFlow({
                 boxSizing: 'border-box',
               }}
             >
-              {/* Header (Matching Figure 3) */}
-              <div className="court-jury-header" style={{ margin: '2px 0 10px' }}>
-                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 4, position: 'relative' }}>
-                  <h2>The jury is voting...</h2>
-                  <span style={{ color: '#ef4444', fontSize: '18px', fontWeight: 900, marginTop: -10 }}>″</span>
-                </div>
-                <p style={{ marginTop: 2 }}>Your vote is in. Waiting for the rest of the court.</p>
+              {/* Header in Caveat font */}
+              <div className="court-jury-header" style={{ margin: '2px 0 8px', textAlign: 'center' }}>
+                <h2 style={{ fontFamily: "'Caveat', cursive", fontSize: '32px', fontWeight: 700, color: '#8b1520', margin: 0, lineHeight: 1.05 }}>
+                  The jury is voting...
+                </h2>
+                <p style={{ fontFamily: "'Caveat', cursive", fontSize: '15px', fontWeight: 600, color: '#7a5840', margin: '2px 0 0' }}>
+                  Your vote is in. Waiting for the rest of the court.
+                </p>
               </div>
 
-              {/* Case Brief Card (Matching Figure 3) */}
-              <div className="court-vote-case-brief" style={{ width: '100%', margin: '0 0 12px', minHeight: 68, padding: '8px 11px' }}>
+              {/* Case Brief Polaroid Card (Matching Screen 3 exactly) */}
+              <div
+                className="court-vote-case-brief"
+                style={{
+                  background: '#ffffff',
+                  border: '1.5px solid #e8d5b5',
+                  borderRadius: 16,
+                  boxShadow: '0 4px 14px rgba(100,65,25,0.08)',
+                  padding: '7px 11px',
+                  margin: '0 0 12px',
+                  width: '100%',
+                  boxSizing: 'border-box',
+                }}
+              >
                 <img
                   src={activeCase.imageUrl}
                   alt={activeCase.title}
                   className="court-vote-case-thumb"
-                  style={{ width: 66, height: 56, borderRadius: 12 }}
                   draggable={false}
+                  style={{ width: 62, height: 52, borderRadius: 10, objectFit: 'cover' }}
                 />
                 <div className="court-vote-case-copy">
                   <div className="court-vote-case-meta" style={{ marginBottom: 2 }}>
-                    <span style={{ fontSize: '9px', minHeight: 16, padding: '1px 6px' }}>{activeCase.typeLabel}</span>
-                    <span style={{ fontSize: '9px', minHeight: 16, padding: '1px 6px' }}>Case {caseIndex}</span>
+                    <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: '#4a7ba8', fontWeight: 600 }}>
+                      {activeCase.typeLabel}
+                    </span>
+                    <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: '#8b6b4e', fontWeight: 500 }}>
+                      Case {caseIndex}
+                    </span>
                   </div>
-                  <h3 style={{ fontSize: '13.5px', margin: 0 }}>{activeCase.question}</h3>
-                  <p style={{ fontSize: '11px', margin: '1px 0 3px' }}>{activeCase.title}</p>
+                  <h3 style={{ fontFamily: "'Caveat', cursive", fontSize: '18px', fontWeight: 700, color: '#8b1520', margin: 0 }}>
+                    {activeCase.question}
+                  </h3>
+                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '12.5px', color: '#2b1810', margin: '1px 0 2px' }}>
+                    {activeCase.title}
+                  </p>
                   <div className="court-vote-case-tags">
                     {activeCase.tags.slice(0, 3).map(tag => (
-                      <span key={tag} style={{ fontSize: '9px', padding: '1px 6px' }}>{tag}</span>
+                      <span key={tag} style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, background: 'rgba(149,187,234,0.2)', color: '#4a7ba8', borderRadius: 4, padding: '1px 6px' }}>
+                        {tag}
+                      </span>
                     ))}
                   </div>
                 </div>
@@ -2566,15 +3276,6 @@ export function TravelCourtCaseFlow({
               <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 'auto', paddingTop: 2 }}>
                 <button
                   type="button"
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#64748b',
-                    fontSize: '13px',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    padding: '6px 12px',
-                  }}
                   onClick={() => {
                     const userEffectiveVote = userVote === 'not-now' ? 'not-now' : 'go';
                     if (caseIndex === 2 && userEffectiveVote === 'not-now') {
@@ -2585,6 +3286,24 @@ export function TravelCourtCaseFlow({
                       handleGoToVerdict('pass');
                     }
                   }}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    padding: '8px 16px',
+                    fontSize: '18px',
+                    fontWeight: 700,
+                    fontFamily: "'Caveat', cursive",
+                    color: '#6d5241',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    marginBottom: 6,
+                    outline: 'none',
+                    transition: 'color 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#8b1520')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '#6d5241')}
                 >
                   Skip to verdict →
                 </button>
@@ -2599,20 +3318,27 @@ export function TravelCourtCaseFlow({
           SCREEN 5: CASE 1 OF 3 - VERDICT ACCEPTED ("We're going to Jeju!")
           ==================================================================== */}
       {currentStep === 'verdict-pass' && (
-        <div className="court-case-chamber">
-          <MobileStatusBar />
+        <div className="court-case-chamber court-vintage-chamber">
           <header className="court-navbar">
-            <button className="court-nav-back-btn" onClick={() => setCurrentStep('proposal')} aria-label="Back">
-              <ChevronLeft size={24} />
+            <button
+              className="court-nav-back-btn"
+              onClick={() => setCurrentStep('proposal')}
+              aria-label="Back"
+              style={{
+                background: 'rgba(255,253,247,0.95)',
+                border: '1.5px solid #e8d5b5',
+              }}
+            >
+              <ChevronLeft size={22} color="#8b1520" />
             </button>
             <div className="court-nav-title-group" style={{ alignItems: 'center' }}>
-              <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>
+              <span style={{ fontSize: '14px', fontWeight: 700, color: '#8b6b4e', fontFamily: "'Caveat', cursive" }}>
                 Case {caseIndex} of 3
               </span>
               <div style={{ display: 'flex', gap: 4, width: 80, marginTop: 4 }}>
-                <div style={{ height: 4, flex: 1, background: '#1877f2', borderRadius: 99 }} />
-                <div style={{ height: 4, flex: 1, background: caseIndex >= 2 ? '#1877f2' : '#e2e8f0', borderRadius: 99 }} />
-                <div style={{ height: 4, flex: 1, background: caseIndex >= 3 ? '#1877f2' : '#e2e8f0', borderRadius: 99 }} />
+                <div style={{ height: 4, flex: 1, background: '#8b1520', borderRadius: 99 }} />
+                <div style={{ height: 4, flex: 1, background: caseIndex >= 2 ? '#8b1520' : '#dece9a', borderRadius: 99 }} />
+                <div style={{ height: 4, flex: 1, background: caseIndex >= 3 ? '#8b1520' : '#dece9a', borderRadius: 99 }} />
               </div>
             </div>
             <DiscussIdeaButton />
@@ -2635,28 +3361,40 @@ export function TravelCourtCaseFlow({
 
             return (
               <div className="court-verdict-page-container">
-                {/* Top Section: Subtitle + Dynamic Title with Sparks + Stage Judge Area */}
-                <div className="court-verdict-header-block">
-                  <div className="court-verdict-subtitle-text">The verdict is...</div>
-                  <div className="court-verdict-title-wrap">
-                    {/* Festive confetti sparks */}
-                    <svg width="18" height="18" viewBox="0 0 24 24" style={{ position: 'absolute', left: 4, top: -4 }}>
-                      <path d="M4 14 Q8 10 14 6" stroke="#38bdf8" strokeWidth="3" strokeLinecap="round" fill="none" />
-                    </svg>
-                    <svg width="16" height="16" viewBox="0 0 24 24" style={{ position: 'absolute', left: -6, bottom: 2 }}>
-                      <path d="M6 6 C12 6 14 12 10 16" stroke="#f59e0b" strokeWidth="3" strokeLinecap="round" fill="none" />
-                    </svg>
+                {/* Top Section: Subtitle + Large Red Torn Paper Banner (PASSED!) */}
+                <div className="court-verdict-header-block" style={{ width: '100%', alignItems: 'center' }}>
+                  <div style={{ fontFamily: "'Caveat', cursive", fontSize: '15px', color: '#8b6b4e', fontWeight: 600, textAlign: 'center' }}>
+                    The verdict is...
+                  </div>
 
-                    <h2 className="court-verdict-main-title">
+                  {/* S5: "PASSED! Good Days Ahead" Large Red Torn-Paper Banner */}
+                  <div
+                    style={{
+                      margin: '4px 0 6px',
+                      background: 'linear-gradient(135deg, #a31520 0%, #8b1520 100%)',
+                      borderRadius: 14,
+                      padding: '8px 18px',
+                      boxShadow: '0 6px 20px rgba(139,21,32,0.35)',
+                      transform: 'rotate(-1.2deg)',
+                      textAlign: 'center',
+                      position: 'relative',
+                    }}
+                  >
+                    <div style={{ fontFamily: "'Caveat', cursive", fontSize: '13px', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.85)', textTransform: 'uppercase', fontWeight: 700 }}>
+                      ★ PASSED! GOOD DAYS AHEAD ★
+                    </div>
+                    <h2
+                      style={{
+                        fontFamily: "'Caveat', cursive",
+                        fontSize: '25px',
+                        fontWeight: 700,
+                        color: '#ffffff',
+                        margin: '2px 0 0',
+                        lineHeight: 1.1,
+                      }}
+                    >
                       {currentVerdictTitle}
                     </h2>
-
-                    <svg width="18" height="18" viewBox="0 0 24 24" style={{ position: 'absolute', right: 4, top: -4 }}>
-                      <path d="M4 6 Q10 10 14 14" stroke="#f59e0b" strokeWidth="3" strokeLinecap="round" fill="none" />
-                    </svg>
-                    <svg width="16" height="16" viewBox="0 0 24 24" style={{ position: 'absolute', right: -6, bottom: 2 }}>
-                      <path d="M14 6 C8 6 6 12 10 16" stroke="#38bdf8" strokeWidth="3" strokeLinecap="round" fill="none" />
-                    </svg>
                   </div>
 
                   {/* Stage Area: Sticky Note + Judge + Stamp */}
@@ -2677,7 +3415,7 @@ export function TravelCourtCaseFlow({
                         <span className="court-stamp-label">COURT</span>
                         <Plane size={11} className="court-stamp-plane-icon" />
                       </div>
-                      <svg width="22" height="26" viewBox="0 0 22 26" style={{ marginLeft: 2 }}>
+                      <svg width={22} height={26} viewBox="0 0 22 26" style={{ marginLeft: 2 }}>
                         <path d="M0 5 Q 5 1, 11 5 T 22 5 M0 13 Q 5 9, 11 13 T 22 13 M0 21 Q 5 17, 11 21 T 22 21" stroke="#b91c1c" strokeWidth="1.3" fill="none" opacity="0.65" />
                       </svg>
                     </div>
@@ -2685,7 +3423,7 @@ export function TravelCourtCaseFlow({
                 </div>
 
                 {/* Card 1: Selected Case Card */}
-                <div className="court-selected-case-card">
+                <div className="court-selected-case-card" style={{ background: '#ffffff', border: '1.5px solid #e8d5b5' }}>
                   <img
                     src={activeCase.imageUrl}
                     alt={activeCase.title}
@@ -2694,9 +3432,9 @@ export function TravelCourtCaseFlow({
                   <div className="court-selected-case-info">
                     <div className="court-selected-case-badges">
                       <span className="court-badge-type">{activeCase.typeLabel}</span>
-                      <span className="court-badge-result">Final result</span>
+                      <span className="court-badge-result" style={{ background: '#ecfdf5', color: '#059669' }}>Verdict Approved</span>
                     </div>
-                    <h3 className="court-selected-case-title">
+                    <h3 className="court-selected-case-title" style={{ fontFamily: "'Caveat', cursive", fontSize: '18px', color: '#8b1520' }}>
                       {activeCase.selectedTitle}
                     </h3>
                     <p className="court-selected-case-desc">
@@ -2704,14 +3442,14 @@ export function TravelCourtCaseFlow({
                     </p>
                     <div className="court-selected-case-tags">
                       {activeCase.tags.slice(0, 3).map((tag, idx) => (
-                        <span key={idx} className="court-selected-case-tag">{tag}</span>
+                        <span key={idx} className="court-selected-case-tag" style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, background: 'rgba(149,187,234,0.2)', color: '#4a7ba8', borderRadius: 4, padding: '2px 8px', border: '1px solid rgba(74,123,168,0.3)' }}>{tag}</span>
                       ))}
                     </div>
                   </div>
                 </div>
 
                 {/* Card 2: Vote Results Card */}
-                <div className="court-vote-results-card">
+                <div className="court-vote-results-card" style={{ background: '#ffffff', border: '1.5px solid #e8d5b5' }}>
                   <div className="court-vote-results-header">
                     <div className="court-vote-results-title-group">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -2719,9 +3457,9 @@ export function TravelCourtCaseFlow({
                         <rect x="9.75" y="8" width="4.5" height="13" rx="1.5" fill="#60a5fa" />
                         <rect x="16.5" y="3" width="4.5" height="18" rx="1.5" fill="#1877f2" />
                       </svg>
-                      <h3 className="court-vote-results-title">Vote results</h3>
+                      <h3 className="court-vote-results-title" style={{ fontFamily: "'Caveat', cursive", fontSize: '18px', color: '#2b1810' }}>Vote results</h3>
                     </div>
-                    <span className="court-vote-results-count">4 members voted</span>
+                    <span className="court-vote-results-count" style={{ fontFamily: "'Inter', sans-serif", fontSize: '11.5px', fontWeight: 600, color: '#6d5241' }}>4 members voted</span>
                   </div>
 
                   {/* Score numbers and Split Bar */}
@@ -2737,23 +3475,22 @@ export function TravelCourtCaseFlow({
                   {/* 4 Members */}
                   <div className="court-vote-members-grid">
                     {verdictMembers.map((j) => {
-                      const isYes = j.vote !== 'not-now';
+                      const isYes = j.vote === 'go';
                       return (
-                        <div key={j.id} className="court-vote-member-col">
-                          <div className="court-vote-avatar-container" style={{ background: j.bg }}>
-                            <TravelCourtCharacter
-                              variant={j.variant}
-                              isAvatar
-                              size={46}
-                            />
-                            <div className={`court-vote-member-badge ${isYes ? 'badge-green' : 'badge-red'}`}>
-                              {isYes ? '✓' : '✕'}
-                            </div>
+                        <div key={j.id} className="court-vote-member-cell" style={{ background: j.bg }}>
+                          <TravelCourtCharacter
+                            variant={j.variant}
+                            vote={isYes ? 'yes' : 'no'}
+                            size={34}
+                            isAvatar
+                            animated={false}
+                          />
+                          <div className="court-vote-member-info">
+                            <span className="court-vote-member-name">{j.name}</span>
+                            <span className={`court-vote-member-badge ${isYes ? 'yes' : 'no'}`}>
+                              {isYes ? '✓ Go' : '✕ Not now'}
+                            </span>
                           </div>
-                          <span className="court-vote-member-name">{j.name}</span>
-                          <span className={`court-vote-member-pill ${isYes ? 'pill-green' : 'pill-red'}`}>
-                            {isYes ? 'Go!' : 'Not now'}
-                          </span>
                         </div>
                       );
                     })}
@@ -2761,39 +3498,41 @@ export function TravelCourtCaseFlow({
                 </div>
 
                 {/* Bottom Action Group */}
-                <div className="court-verdict-bottom-actions">
-                  <button
-                    type="button"
-                    className="court-verdict-secondary-btn"
-                    onClick={() => {
-                      playWhoosh();
-                      setCurrentStep('discussion');
-                    }}
-                  >
-                    <MessageCircle size={18} />
-                    <span>View discussion</span>
-                  </button>
+                <div className="court-verdict-bottom-actions" style={{ display: 'flex', gap: 10, width: '100%', marginTop: 8 }}>
+                  <div style={{ flex: 1 }}>
+                    <TornPaperButton
+                      variant="blue"
+                      onClick={() => {
+                        playWhoosh();
+                        setCurrentStep('discussion');
+                      }}
+                      arrow={false}
+                    >
+                      💬 Discussion
+                    </TornPaperButton>
+                  </div>
 
-                  <button
-                    type="button"
-                    className="court-verdict-primary-btn"
-                    onClick={() => {
-                      playWhoosh();
-                      triggerHaptic('tap');
-                      if (caseIndex < CASES.length) {
-                        const nextCase = caseIndex + 1;
-                        setCaseIndex(nextCase);
-                        setUserVote(null);
-                        setUserReason('');
-                        setComments(CASE_DEFAULT_COMMENTS[nextCase] || CASE_DEFAULT_COMMENTS[1]);
-                        setCurrentStep('proposal');
-                      } else {
-                        setCurrentStep('summary');
-                      }
-                    }}
-                  >
-                    <span>{caseIndex < CASES.length ? 'Next case →' : 'View summary →'}</span>
-                  </button>
+                  <div style={{ flex: 1.3 }}>
+                    <TornPaperButton
+                      variant="crimson"
+                      onClick={() => {
+                        playWhoosh();
+                        triggerHaptic('tap');
+                        if (caseIndex < CASES.length) {
+                          const nextCase = caseIndex + 1;
+                          setCaseIndex(nextCase);
+                          setUserVote(null);
+                          setUserReason('');
+                          setComments(CASE_DEFAULT_COMMENTS[nextCase] || CASE_DEFAULT_COMMENTS[1]);
+                          setCurrentStep('proposal');
+                        } else {
+                          setCurrentStep('summary');
+                        }
+                      }}
+                    >
+                      {caseIndex < CASES.length ? 'Next case' : 'View summary'}
+                    </TornPaperButton>
+                  </div>
                 </div>
 
                 <MobileHomeIndicator />
@@ -2807,20 +3546,27 @@ export function TravelCourtCaseFlow({
           SCREEN 6: CASE 2 OF 3 - VERDICT REJECTED ("Not this time!")
           ==================================================================== */}
       {currentStep === 'verdict-fail' && (
-        <div className="court-case-chamber">
-          <MobileStatusBar />
+        <div className="court-case-chamber court-vintage-chamber">
           <header className="court-navbar">
-            <button className="court-nav-back-btn" onClick={() => setCurrentStep('proposal')} aria-label="Back">
-              <ChevronLeft size={24} />
+            <button
+              className="court-nav-back-btn"
+              onClick={() => setCurrentStep('proposal')}
+              aria-label="Back"
+              style={{
+                background: 'rgba(255,253,247,0.95)',
+                border: '1.5px solid #e8d5b5',
+              }}
+            >
+              <ChevronLeft size={22} color="#8b1520" />
             </button>
             <div className="court-nav-title-group" style={{ alignItems: 'center' }}>
-              <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>
+              <span style={{ fontSize: '14px', fontWeight: 700, color: '#8b6b4e', fontFamily: "'Caveat', cursive" }}>
                 Case {caseIndex} of 3
               </span>
               <div style={{ display: 'flex', gap: 4, width: 80, marginTop: 4 }}>
-                <div style={{ height: 4, flex: 1, background: '#1877f2', borderRadius: 99 }} />
-                <div style={{ height: 4, flex: 1, background: caseIndex >= 2 ? '#1877f2' : '#e2e8f0', borderRadius: 99 }} />
-                <div style={{ height: 4, flex: 1, background: caseIndex >= 3 ? '#1877f2' : '#e2e8f0', borderRadius: 99 }} />
+                <div style={{ height: 4, flex: 1, background: '#8b1520', borderRadius: 99 }} />
+                <div style={{ height: 4, flex: 1, background: caseIndex >= 2 ? '#8b1520' : '#dece9a', borderRadius: 99 }} />
+                <div style={{ height: 4, flex: 1, background: caseIndex >= 3 ? '#8b1520' : '#dece9a', borderRadius: 99 }} />
               </div>
             </div>
             <DiscussIdeaButton />
@@ -2851,28 +3597,40 @@ export function TravelCourtCaseFlow({
                     </div>
                   </div>
                 )}
-                {/* Top Section */}
-                <div className="court-verdict-header-block">
-                  <div className="court-verdict-subtitle-text">The verdict is...</div>
-                  <div className="court-verdict-title-wrap">
-                    {/* Subtle sparks */}
-                    <svg width="18" height="18" viewBox="0 0 24 24" style={{ position: 'absolute', left: 4, top: -4 }}>
-                      <path d="M4 14 Q8 10 14 6" stroke="#f87171" strokeWidth="3" strokeLinecap="round" fill="none" />
-                    </svg>
-                    <svg width="16" height="16" viewBox="0 0 24 24" style={{ position: 'absolute', left: -6, bottom: 2 }}>
-                      <path d="M6 6 C12 6 14 12 10 16" stroke="#fbbf24" strokeWidth="3" strokeLinecap="round" fill="none" />
-                    </svg>
+                {/* Top Section: Subtitle + Weathered Torn-Paper REJECTED Banner */}
+                <div className="court-verdict-header-block" style={{ width: '100%', alignItems: 'center' }}>
+                  <div style={{ fontFamily: "'Caveat', cursive", fontSize: '15px', color: '#8b6b4e', fontWeight: 600, textAlign: 'center' }}>
+                    The verdict is...
+                  </div>
 
-                    <h2 className="court-verdict-main-title" style={{ color: '#ef4444' }}>
+                  {/* S6: REJECTED Banner in weathered kraft / deep red */}
+                  <div
+                    style={{
+                      margin: '4px 0 6px',
+                      background: 'linear-gradient(135deg, #c4a882 0%, #a88960 100%)',
+                      borderRadius: 14,
+                      padding: '8px 18px',
+                      boxShadow: '0 6px 20px rgba(100,65,25,0.25)',
+                      transform: 'rotate(1.2deg)',
+                      textAlign: 'center',
+                      position: 'relative',
+                    }}
+                  >
+                    <div style={{ fontFamily: "'Caveat', cursive", fontSize: '13px', letterSpacing: '0.12em', color: '#6f0e16', textTransform: 'uppercase', fontWeight: 800 }}>
+                      ✕ CASE DISMISSED • NOT THIS TIME ✕
+                    </div>
+                    <h2
+                      style={{
+                        fontFamily: "'Caveat', cursive",
+                        fontSize: '25px',
+                        fontWeight: 700,
+                        color: '#2b1810',
+                        margin: '2px 0 0',
+                        lineHeight: 1.1,
+                      }}
+                    >
                       {caseIndex === 3 ? "We're skipping Cable Car!" : "Not this time!"}
                     </h2>
-
-                    <svg width="18" height="18" viewBox="0 0 24 24" style={{ position: 'absolute', right: 4, top: -4 }}>
-                      <path d="M4 6 Q10 10 14 14" stroke="#fbbf24" strokeWidth="3" strokeLinecap="round" fill="none" />
-                    </svg>
-                    <svg width="16" height="16" viewBox="0 0 24 24" style={{ position: 'absolute', right: -6, bottom: 2 }}>
-                      <path d="M14 6 C8 6 6 12 10 16" stroke="#f87171" strokeWidth="3" strokeLinecap="round" fill="none" />
-                    </svg>
                   </div>
 
                   {/* Stage Area: Sticky Note + Slumped Judge + Stamp */}
@@ -2920,7 +3678,7 @@ export function TravelCourtCaseFlow({
                     </p>
                     <div className="court-selected-case-tags">
                       {activeCase.tags.slice(0, 3).map((tag, idx) => (
-                        <span key={idx} className="court-selected-case-tag">{tag}</span>
+                        <span key={idx} className="court-selected-case-tag" style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, background: 'rgba(149,187,234,0.2)', color: '#4a7ba8', borderRadius: 4, padding: '2px 8px', border: '1px solid rgba(74,123,168,0.3)' }}>{tag}</span>
                       ))}
                     </div>
                   </div>
@@ -2937,7 +3695,7 @@ export function TravelCourtCaseFlow({
                       </svg>
                       <h3 className="court-vote-results-title">Vote results</h3>
                     </div>
-                    <span className="court-vote-results-count">4 members voted</span>
+                    <span className="court-vote-results-count" style={{ fontFamily: "'Inter', sans-serif", fontSize: '11.5px', fontWeight: 600, color: '#6d5241' }}>4 members voted</span>
                   </div>
 
                   {/* Score numbers and Split Bar */}
@@ -2977,39 +3735,41 @@ export function TravelCourtCaseFlow({
                 </div>
 
                 {/* Bottom Action Group */}
-                <div className="court-verdict-bottom-actions">
-                  <button
-                    type="button"
-                    className="court-verdict-secondary-btn"
-                    onClick={() => {
-                      playWhoosh();
-                      setCurrentStep('discussion');
-                    }}
-                  >
-                    <MessageCircle size={18} />
-                    <span>View discussion</span>
-                  </button>
+                <div className="court-verdict-bottom-actions" style={{ display: 'flex', gap: 10, width: '100%', marginTop: 8 }}>
+                  <div style={{ flex: 1 }}>
+                    <TornPaperButton
+                      variant="blue"
+                      onClick={() => {
+                        playWhoosh();
+                        setCurrentStep('discussion');
+                      }}
+                      arrow={false}
+                    >
+                      💬 Discussion
+                    </TornPaperButton>
+                  </div>
 
-                  <button
-                    type="button"
-                    className="court-verdict-primary-btn"
-                    onClick={() => {
-                      playWhoosh();
-                      triggerHaptic('tap');
-                      if (caseIndex < CASES.length) {
-                        const nextCase = caseIndex + 1;
-                        setCaseIndex(nextCase);
-                        setUserVote(null);
-                        setUserReason('');
-                        setComments(CASE_DEFAULT_COMMENTS[nextCase] || CASE_DEFAULT_COMMENTS[1]);
-                        setCurrentStep('proposal');
-                      } else {
-                        setCurrentStep('summary');
-                      }
-                    }}
-                  >
-                    <span>{caseIndex < CASES.length ? 'Next case →' : 'View summary →'}</span>
-                  </button>
+                  <div style={{ flex: 1.3 }}>
+                    <TornPaperButton
+                      variant="crimson"
+                      onClick={() => {
+                        playWhoosh();
+                        triggerHaptic('tap');
+                        if (caseIndex < CASES.length) {
+                          const nextCase = caseIndex + 1;
+                          setCaseIndex(nextCase);
+                          setUserVote(null);
+                          setUserReason('');
+                          setComments(CASE_DEFAULT_COMMENTS[nextCase] || CASE_DEFAULT_COMMENTS[1]);
+                          setCurrentStep('proposal');
+                        } else {
+                          setCurrentStep('summary');
+                        }
+                      }}
+                    >
+                      {caseIndex < CASES.length ? 'Next case' : 'View summary'}
+                    </TornPaperButton>
+                  </div>
                 </div>
 
                 <MobileHomeIndicator />
@@ -3022,25 +3782,31 @@ export function TravelCourtCaseFlow({
       {/* ====================================================================
           SCREEN 7: DISCUSSION & VOTES TAB
           ==================================================================== */}
+      {/* ====================================================================
+          SCREEN 7: DISCUSSION & VOTES TAB
+          ==================================================================== */}
       {currentStep === 'discussion' && (
-        <div className="court-case-chamber">
-          <MobileStatusBar />
+        <div className="court-case-chamber court-vintage-chamber">
           <header className="court-navbar">
             <button
               className="court-nav-back-btn"
               onClick={() => setCurrentStep(caseOutcomes[caseIndex] === false ? 'verdict-fail' : 'verdict-pass')}
               aria-label="Back"
+              style={{
+                background: 'rgba(255,253,247,0.95)',
+                border: '1.5px solid #e8d5b5',
+              }}
             >
-              <ChevronLeft size={24} />
+              <ChevronLeft size={22} color="#8b1520" />
             </button>
             <div className="court-nav-title-group" style={{ alignItems: 'center' }}>
-              <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>
+              <span style={{ fontSize: '14px', fontWeight: 700, color: '#8b6b4e', fontFamily: "'Caveat', cursive" }}>
                 Case {caseIndex} of 3
               </span>
               <div style={{ display: 'flex', gap: 4, width: 80, marginTop: 4 }}>
-                <div style={{ height: 4, flex: 1, background: '#1877f2', borderRadius: 99 }} />
-                <div style={{ height: 4, flex: 1, background: caseIndex >= 2 ? '#1877f2' : '#e2e8f0', borderRadius: 99 }} />
-                <div style={{ height: 4, flex: 1, background: caseIndex >= 3 ? '#1877f2' : '#e2e8f0', borderRadius: 99 }} />
+                <div style={{ height: 4, flex: 1, background: '#8b1520', borderRadius: 99 }} />
+                <div style={{ height: 4, flex: 1, background: caseIndex >= 2 ? '#8b1520' : '#dece9a', borderRadius: 99 }} />
+                <div style={{ height: 4, flex: 1, background: caseIndex >= 3 ? '#8b1520' : '#dece9a', borderRadius: 99 }} />
               </div>
             </div>
             <DiscussIdeaButton />
@@ -3059,11 +3825,19 @@ export function TravelCourtCaseFlow({
             }}
           >
             {/* Segmented Control [ Discussion | Votes ] */}
-            <div className="court-segmented-control">
+            <div className="court-segmented-control" style={{ background: 'rgba(255,253,247,0.85)', border: '1.5px solid #e8d5b5', borderRadius: 12, padding: 3 }}>
               <button
                 type="button"
                 className={`court-segment-btn ${segmentedTab === 'discussion' ? 'active' : ''}`}
                 onClick={() => setSegmentedTab('discussion')}
+                style={{
+                  fontFamily: "'Caveat', cursive",
+                  fontSize: '16px',
+                  fontWeight: 700,
+                  borderRadius: 9,
+                  background: segmentedTab === 'discussion' ? '#8b1520' : 'transparent',
+                  color: segmentedTab === 'discussion' ? '#ffffff' : '#8b6b4e',
+                }}
               >
                 Discussion
               </button>
@@ -3071,6 +3845,14 @@ export function TravelCourtCaseFlow({
                 type="button"
                 className={`court-segment-btn ${segmentedTab === 'votes' ? 'active' : ''}`}
                 onClick={() => setSegmentedTab('votes')}
+                style={{
+                  fontFamily: "'Caveat', cursive",
+                  fontSize: '16px',
+                  fontWeight: 700,
+                  borderRadius: 9,
+                  background: segmentedTab === 'votes' ? '#8b1520' : 'transparent',
+                  color: segmentedTab === 'votes' ? '#ffffff' : '#8b6b4e',
+                }}
               >
                 Votes
               </button>
@@ -3079,48 +3861,73 @@ export function TravelCourtCaseFlow({
             {segmentedTab === 'discussion' ? (
               <>
                 <div className="court-comments-stream">
-                  {comments.map(c => (
-                    <div key={c.id} className="court-comment-bubble">
-                      <TravelCourtCharacter
-                        variant={
-                          c.author.includes('Alex') ? 'green' :
-                          c.author.includes('Mavis') ? 'purple' :
-                          c.author.includes('Ken') ? 'blue' :
-                          'coral'
-                        }
-                        isAvatar
-                        size={40}
-                      />
-                      <div className="court-comment-content">
-                        <div className="court-comment-header">
-                          <b style={{ color: (c.author.includes('June') || c.author.includes('You')) ? '#dc2626' : '#0f172a' }}>
-                            {c.author}
-                          </b>
-                          <span>{c.timeAgo}</span>
-                        </div>
-                        <p className="court-comment-text">{c.text}</p>
-                      </div>
-                      <button
-                        type="button"
-                        className={`court-comment-like-btn ${c.liked ? 'liked' : ''}`}
-                        onClick={() => handleLikeComment(c.id)}
+                  {comments.map((c, i) => {
+                    const noteStyles = [
+                      { bg: '#fef9c3', border: '#fde047', text: '#713f12', authorColor: '#854d0e' }, // yellow
+                      { bg: 'rgba(149,187,234,0.25)', border: 'rgba(74,123,168,0.35)', text: '#1e3a8a', authorColor: '#1d4ed8' }, // blue
+                      { bg: '#fffdf7', border: '#e8d5b5', text: '#2b1810', authorColor: '#8b1520' }, // cream
+                    ];
+                    const note = noteStyles[i % 3];
+                    const angle = i % 2 === 0 ? -1 : 1;
+
+                    return (
+                      <div
+                        key={c.id}
+                        className="court-comment-bubble"
+                        style={{
+                          background: note.bg,
+                          border: `1.5px solid ${note.border}`,
+                          borderRadius: 12,
+                          boxShadow: '0 4px 12px rgba(100,65,25,0.08)',
+                          transform: `rotate(${angle}deg)`,
+                          padding: '9px 12px',
+                          margin: '6px 0',
+                        }}
                       >
-                        <Heart size={14} fill={c.liked ? '#f43f5e' : 'none'} />
-                        <span>{c.likes}</span>
-                      </button>
-                    </div>
-                  ))}
+                        <TravelCourtCharacter
+                          variant={
+                            c.author.includes('Alex') ? 'green' :
+                            c.author.includes('Mavis') ? 'purple' :
+                            c.author.includes('Ken') ? 'blue' :
+                            'coral'
+                          }
+                          isAvatar
+                          size={40}
+                        />
+                        <div className="court-comment-content" style={{ marginLeft: 8, flex: 1 }}>
+                          <div className="court-comment-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <b style={{ fontFamily: "'Caveat', cursive", fontSize: '17px', fontWeight: 700, color: note.authorColor }}>
+                              {c.author}
+                            </b>
+                            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: '#8b6b4e' }}>{c.timeAgo}</span>
+                          </div>
+                          <p className="court-comment-text" style={{ fontFamily: "'Inter', sans-serif", fontSize: '13px', fontWeight: 500, color: note.text, margin: '3px 0 0', lineHeight: 1.35 }}>
+                            {c.text}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          className={`court-comment-like-btn ${c.liked ? 'liked' : ''}`}
+                          onClick={() => handleLikeComment(c.id)}
+                        >
+                          <Heart size={14} fill={c.liked ? '#f43f5e' : 'none'} color={c.liked ? '#f43f5e' : '#8b6b4e'} />
+                          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '12px', fontWeight: 600 }}>{c.likes}</span>
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
 
-                <div className="court-comment-input-bar">
+                <div className="court-comment-input-bar" style={{ background: 'rgba(255,253,247,0.95)', border: '1.5px solid #e8d5b5', borderRadius: 16 }}>
                   <input
                     type="text"
-                    placeholder="Add a comment..."
+                    placeholder="Write a travel note..."
                     value={newCommentText}
                     onChange={e => setNewCommentText(e.target.value)}
                     onKeyDown={e => {
                       if (e.key === 'Enter') handleAddComment();
                     }}
+                    style={{ fontFamily: "'Inter', sans-serif", fontSize: '13px', color: '#2b1810' }}
                   />
                   <button
                     type="button"
@@ -3182,8 +3989,8 @@ export function TravelCourtCaseFlow({
                           size={44}
                         />
                         <div style={{ flex: 1, marginLeft: 10 }}>
-                          <b style={{ fontSize: '14px', color: '#0f172a' }}>{j.name}</b>
-                          <div style={{ fontSize: '12px', color: '#64748b' }}>
+                          <b style={{ fontFamily: "'Caveat', cursive", fontSize: '18px', fontWeight: 700, color: '#2b1810' }}>{j.name}</b>
+                          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '12.5px', color: '#6d5241', marginTop: '2px' }}>
                             {isYes ? `Voted Go! (${j.reason})` : `Voted Not now (${j.reason})`}
                           </div>
                         </div>
@@ -3191,10 +3998,12 @@ export function TravelCourtCaseFlow({
                           style={{
                             padding: '4px 10px',
                             borderRadius: 99,
+                            fontFamily: "'Inter', sans-serif",
                             fontSize: '12px',
-                            fontWeight: 800,
+                            fontWeight: 700,
                             background: isYes ? '#edfdf5' : '#fef3f2',
                             color: isYes ? '#12b76a' : '#f04438',
+                            border: isYes ? '1px solid #bbf7d0' : '1px solid #fecaca',
                           }}
                         >
                           {isYes ? 'Go!' : 'Not now'}
@@ -3208,15 +4017,11 @@ export function TravelCourtCaseFlow({
 
             <button
               type="button"
-              className="court-sticky-cta-btn"
+              className="court-vote-submit-btn-3d"
               style={{
                 width: '100%',
-                height: 50,
-                minHeight: 50,
-                maxHeight: 50,
-                borderRadius: 16,
-                flexShrink: 0,
                 margin: '10px 0 6px',
+                flexShrink: 0,
               }}
               onClick={() => {
                 playWhoosh();
@@ -3234,20 +4039,27 @@ export function TravelCourtCaseFlow({
           SCREEN 7.5: CASE 2 TIE SHOWDOWN (2 vs 2 COURT DUEL & BETTING)
           ==================================================================== */}
       {currentStep === 'showdown' && (
-        <div className="court-case-chamber">
-          <MobileStatusBar />
+        <div className="court-case-chamber court-vintage-chamber">
           <header className="court-navbar">
-            <button className="court-nav-back-btn" onClick={() => setCurrentStep('proposal')} aria-label="Back">
-              <ChevronLeft size={24} />
+            <button
+              className="court-nav-back-btn"
+              onClick={() => setCurrentStep('proposal')}
+              aria-label="Back"
+              style={{
+                background: 'rgba(255,253,247,0.95)',
+                border: '1.5px solid #e8d5b5',
+              }}
+            >
+              <ChevronLeft size={22} color="#8b1520" />
             </button>
             <div className="court-nav-title-group" style={{ alignItems: 'center' }}>
-              <span className="court-showdown-nav-title">
+              <span style={{ fontSize: '14px', fontWeight: 700, color: '#8b1520', fontFamily: "'Caveat', cursive" }}>
                 Case 2 of 3 • 2 vs 2 Showdown
               </span>
               <div style={{ display: 'flex', gap: 4, width: 80, marginTop: 4 }}>
-                <div style={{ height: 4, flex: 1, background: '#1877f2', borderRadius: 99 }} />
-                <div style={{ height: 4, flex: 1, background: '#ef4444', borderRadius: 99 }} />
-                <div style={{ height: 4, flex: 1, background: '#e2e8f0', borderRadius: 99 }} />
+                <div style={{ height: 4, flex: 1, background: '#8b1520', borderRadius: 99 }} />
+                <div style={{ height: 4, flex: 1, background: '#8b1520', borderRadius: 99 }} />
+                <div style={{ height: 4, flex: 1, background: '#dece9a', borderRadius: 99 }} />
               </div>
             </div>
             <DiscussIdeaButton />
@@ -3278,19 +4090,18 @@ export function TravelCourtCaseFlow({
                   Eat at Haenyeo Seafood? Stake points to break the tie.
                 </p>
               </div>
-              <div className="court-showdown-badge-stack">
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center', flexShrink: 0 }}>
                 <div className="court-showdown-sword-badge">
-                  <span style={{ fontSize: '18px', lineHeight: 1 }}>⚔️</span>
-                  <span>Showdown</span>
+                  <span style={{ fontSize: '16px', lineHeight: 1 }}>⚔️</span>
+                  <span style={{ fontSize: '9px', fontWeight: 900, color: '#ffffff', letterSpacing: '0.4px', marginTop: 1 }}>
+                    SHOWDOWN
+                  </span>
                 </div>
-                <span className="court-showdown-rate-pill">
-                  1 pt = RM 0.50
-                </span>
               </div>
             </div>
 
-            {/* Courtroom Stage Box matching user reference image */}
-            <div className={`court-showdown-stage-box ${showdownStakesLocked ? 'is-locked' : ''}`}>
+            {/* Courtroom Stage Box with Duel Banners */}
+            <div className="court-showdown-stage-box">
               <img
                 src="/characters/court_stage_bg.jpg?v=vertical_no_chairs_v6"
                 onError={(e) => {
@@ -3301,12 +4112,12 @@ export function TravelCourtCaseFlow({
                 draggable={false}
               />
 
-              {/* Team Banners (No points revealed before confirm) */}
-              <div className="court-showdown-pill-left">
+              {/* Team Banners as Washi Tape Strips */}
+              <div className="court-showdown-pill-left" style={{ fontFamily: "'Inter', sans-serif", fontSize: '11.5px', fontWeight: 800 }}>
                 <Send size={11} style={{ transform: 'rotate(-30deg)' }} /> Team Go
               </div>
-              <div className="court-showdown-pill-right">
-                <span style={{ fontSize: '11px', fontWeight: 600 }}>✕</span> Team Not Now
+              <div className="court-showdown-pill-right" style={{ fontFamily: "'Inter', sans-serif", fontSize: '11.5px', fontWeight: 800 }}>
+                <span style={{ fontSize: '11px', fontWeight: 900 }}>✕</span> Team Not Now
               </div>
 
               {/* Left Desk Team (Team Go: Alex & Mavis) */}
@@ -3368,16 +4179,16 @@ export function TravelCourtCaseFlow({
               <div
                 style={{
                   position: 'absolute',
-                  left: '34%',
-                  top: showdownStakesLocked ? 76 : 157,
+                  left: '32%',
+                  top: 180,
                   transform: 'translateX(-50%)',
-                  zIndex: 16,
+                  zIndex: 15,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   cursor: 'pointer',
                 }}
-                onClick={() => handleTriggerLeftBubble('Abalone hotpot is legendary here in Jeju!')}
+                onClick={() => handleTriggerLeftBubble('We can share the big abalone platter!')}
                 title="Click Mavis to speak"
               >
                 {showPointBubbles && (
@@ -3423,16 +4234,16 @@ export function TravelCourtCaseFlow({
               <div
                 style={{
                   position: 'absolute',
-                  left: '66%',
-                  top: showdownStakesLocked ? 76 : 157,
-                  transform: 'translateX(-50%)',
+                  right: '32%',
+                  top: 135,
+                  transform: 'translateX(50%)',
                   zIndex: 14,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   cursor: 'pointer',
                 }}
-                onClick={() => handleTriggerRightBubble("Let's check other spots instead!")}
+                onClick={() => handleTriggerRightBubble('Seafood can be pricey, let us check cafes!')}
                 title="Click Ken to speak"
               >
                 {showPointBubbles && (
@@ -3477,17 +4288,14 @@ export function TravelCourtCaseFlow({
               <div
                 style={{
                   position: 'absolute',
-                  left: '82%',
-                  top: showdownStakesLocked ? 58 : 131,
-                  transform: 'translateX(-50%)',
-                  zIndex: 16,
+                  right: '18%',
+                  top: 180,
+                  transform: 'translateX(50%)',
+                  zIndex: 15,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  cursor: 'pointer',
                 }}
-                onClick={() => handleTriggerRightBubble(showdownDebateChat.trim() || 'Too raw and pricey! Save money!')}
-                title="Click June to speak"
               >
                 {showPointBubbles && (
                   <div className="court-point-bubble bubble-red">+{showdownUserStake}</div>
@@ -3496,9 +4304,9 @@ export function TravelCourtCaseFlow({
                   <TravelCourtCharacter
                     variant="girl_redhat"
                     vote="no"
-                    state="thinking"
+                    state="idle"
                     size={54}
-                    animated
+                    animated={false}
                   />
                   <div
                     style={{
@@ -3522,19 +4330,19 @@ export function TravelCourtCaseFlow({
                     ✕
                   </div>
                 </div>
-                <span className="tc-character-label" style={{ marginTop: -2, fontSize: '9.5px', padding: '1px 7px', background: '#fee2e2', color: '#991b1b', border: '1px solid #fca5a5' }}>
+                <span className="tc-character-label" style={{ marginTop: -2, fontSize: '9.5px', padding: '1px 7px', background: '#fee2e2', color: '#991b1b', border: '1.5px solid #fca5a5' }}>
                   June (You)
                 </span>
               </div>
 
-              {/* Debate Speech Bubbles matching reference image (auto-dismiss after ~4.2s) */}
+              {/* Debate Speech Bubbles */}
               {activeLeftBubble && (
                 <div key={activeLeftBubble.id} className="court-debate-bubble-left">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 4 }}>
-                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#0f172a', lineHeight: 1.35 }}>
+                    <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, color: '#0f172a', lineHeight: 1.35 }}>
                       {activeLeftBubble.text}
                     </span>
-                    <span style={{ color: '#0d9488', fontSize: '11px', flexShrink: 0, marginTop: -2 }}>🪄</span>
+                    <span style={{ color: '#10b981', fontSize: '11px', flexShrink: 0, marginTop: -2 }}>🪄</span>
                   </div>
                 </div>
               )}
@@ -3542,7 +4350,7 @@ export function TravelCourtCaseFlow({
               {activeRightBubble && (
                 <div key={activeRightBubble.id} className="court-debate-bubble-right">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 4 }}>
-                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#0f172a', lineHeight: 1.35 }}>
+                    <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', fontWeight: 600, color: '#0f172a', lineHeight: 1.35 }}>
                       {activeRightBubble.text}
                     </span>
                     <span style={{ color: '#ef4444', fontSize: '11px', flexShrink: 0, marginTop: -2 }}>🪄</span>
@@ -3551,153 +4359,211 @@ export function TravelCourtCaseFlow({
               )}
             </div>
 
-            {/* Chat Input for typing debate arguments */}
-            {!showdownStakesLocked && (
-              <div className="court-showdown-chat-card">
-                <Edit3 size={17} color="#94a3b8" style={{ flexShrink: 0 }} />
-                <input
-                  type="text"
-                  placeholder="Type your argument for Team Not Now..."
-                  value={showdownDebateChat}
-                  onChange={(e) => setShowdownDebateChat(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleSendShowdownChat();
-                  }}
-                  className="court-showdown-chat-input"
-                />
-                <button
-                  type="button"
-                  onClick={handleSendShowdownChat}
-                  className="court-showdown-send-btn"
-                  aria-label="Send argument"
-                >
-                  <Send size={15} />
-                </button>
-              </div>
-            )}
+            {/* Chat Input for debate */}
+            <div className="court-showdown-chat-card">
+              <Edit3 size={17} color="#8b6b4e" style={{ flexShrink: 0 }} />
+              <input
+                type="text"
+                placeholder="Type your argument for Team Not Now..."
+                value={showdownDebateChat}
+                onChange={(e) => setShowdownDebateChat(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleSendShowdownChat();
+                }}
+                className="court-showdown-chat-input"
+              />
+              <button
+                type="button"
+                onClick={handleSendShowdownChat}
+                className="court-showdown-send-btn"
+                aria-label="Send debate chat"
+              >
+                <Send size={15} />
+              </button>
+            </div>
 
-            {/* Stake card with slider */}
+            {/* Betting Stakes Slider Section */}
             {!showdownStakesLocked ? (
-              <div className="court-showdown-stake-card">
-                <div className="court-showdown-stake-head">
-                  <div className="court-showdown-stake-title">
-                    <span>Your Stake</span>
-                    <small>1 pt = RM 0.50</small>
-                  </div>
-                  <div className="court-showdown-stake-value">
-                    <span className="court-stake-val-pill">
-                      +{showdownUserStake} pts
-                    </span>
-                    <b>
-                      RM {(showdownUserStake * 0.5).toFixed(2)}
-                    </b>
-                  </div>
+              <div className="court-showdown-betting-box">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                  <span style={{ fontFamily: "'Caveat', cursive", fontSize: '18px', fontWeight: 700, color: '#2b1810', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Coins size={17} color="#d97706" /> Back Team Not Now
+                  </span>
+                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '12.5px', fontWeight: 700, color: '#8b1520', background: 'rgba(139,21,32,0.08)', padding: '3px 10px', borderRadius: 99, border: '1px solid rgba(139,21,32,0.2)' }}>
+                    {showdownUserStake} pts (RM {(showdownUserStake * 0.5).toFixed(2)})
+                  </span>
                 </div>
-                <input
-                  type="range"
-                  min={10}
-                  max={100}
-                  step={5}
-                  value={showdownUserStake}
-                  onChange={(e) => setShowdownUserStake(Number(e.target.value))}
-                  className="court-stake-slider"
-                />
-                <div className="court-showdown-slider-labels">
-                  <span>10 pts</span>
-                  <span>50 pts</span>
-                  <span>100 pts</span>
-                </div>
-                <div className="court-showdown-trip-fund-row">
-                  <span>Trip Fund</span>
-                  <span>Losers pay RM {(showdownUserStake * 0.5).toFixed(2)}</span>
-                </div>
-              </div>
-            ) : (
-              <div className="court-showdown-locked-summary">
-                <div className="court-showdown-locked-copy">
-                  <span>My stake locked</span>
-                  <b>Team Not Now</b>
-                </div>
-                <div className="court-showdown-locked-metrics">
-                  <div>
-                    <span>My points</span>
-                    <b>{showdownUserStake}</b>
-                  </div>
-                  <div>
-                    <span>My value</span>
-                    <b>RM {(showdownUserStake * 0.5).toFixed(2)}</b>
-                  </div>
-                </div>
-              </div>
-            )}
 
-            {/* Confirm button (No emoji!) or Result announcement */}
+                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', color: '#6d5241', margin: '0 0 6px', lineHeight: 1.35 }}>
+                  Drag slider to stake trip points. If your team wins, your verdict sticks!
+                </p>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '10.5px', fontWeight: 600, color: '#8b6b4e' }}>10 pts</span>
+                  <input
+                    type="range"
+                    min={10}
+                    max={100}
+                    step={5}
+                    value={showdownUserStake}
+                    onChange={(e) => setShowdownUserStake(Number(e.target.value))}
+                    className="court-showdown-slider"
+                  />
+                  <span style={{ fontFamily: "'Inter', sans-serif", fontSize: '10.5px', fontWeight: 600, color: '#8b6b4e' }}>100 pts</span>
+                </div>
+              </div>
+            ) : null}
+
+            {/* Confirm or Locked Results */}
             {!showdownStakesLocked ? (
               <button
                 type="button"
-                className="court-showdown-confirm-btn"
+                className="court-showdown-confirm-btn-3d"
                 onClick={handleConfirmShowdownStakes}
               >
-                Confirm Stakes & Lock Bet (RM {(showdownUserStake * 0.5).toFixed(2)})
+                Confirm Stakes (RM {(showdownUserStake * 0.5).toFixed(2)}) →
               </button>
             ) : (
-              <div className="court-showdown-result-wrap">
-                {/* Score balance revealed upon confirmation */}
-                <div className={`court-showdown-result-card ${resolvedShowdownWinner === 'go' ? 'is-go' : 'is-not-now'}`}>
-                  <div className="court-showdown-result-header">
-                    <span className="court-showdown-result-kicker">Court result</span>
-                    <b>
-                      {resolvedShowdownWinner === 'go'
-                        ? <><span className="court-result-team-go">Team Go</span> takes the case</>
-                        : <><span className="court-result-team-not-now">Team Not Now</span> takes the case</>}
-                    </b>
-                    <p className={`court-showdown-outcome-line ${resolvedShowdownWinner === 'go' ? 'is-go' : 'is-not-now'}`}>
-                      {resolvedShowdownWinner === 'go'
-                        ? 'Haenyeo Seafood is approved'
-                        : 'Haenyeo Seafood stays off the plan'}
-                    </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 4 }}>
+                {/* Court Result Card matching Image 1 exactly */}
+                <div style={{
+                  background: '#ffffff',
+                  borderRadius: 16,
+                  border: '1px solid #e2e8f0',
+                  padding: '12px 14px 14px',
+                  boxShadow: '0 4px 14px rgba(100,65,25,0.06)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 8,
+                }}>
+                  {/* Top Row: Title + "Court result" */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <h3 style={{
+                        fontFamily: "'Caveat', cursive",
+                        fontSize: '22px',
+                        fontWeight: 700,
+                        margin: 0,
+                        lineHeight: 1.15,
+                      }}>
+                        <span style={{ color: showdownWinner === 'not-now' ? '#ef4444' : '#10b981' }}>
+                          {showdownWinner === 'not-now' ? 'Team Not Now' : 'Team Go'}
+                        </span>
+                        <span style={{ color: '#2b1810' }}> takes the case</span>
+                      </h3>
+                      <div style={{
+                        display: 'inline-block',
+                        background: showdownWinner === 'not-now' ? '#fff1f2' : '#edfdf5',
+                        color: showdownWinner === 'not-now' ? '#ef4444' : '#059669',
+                        fontSize: '15px',
+                        fontWeight: 700,
+                        padding: '2px 10px',
+                        borderRadius: 99,
+                        marginTop: 4,
+                        fontFamily: "'Caveat', cursive",
+                      }}>
+                        {showdownWinner === 'not-now'
+                          ? 'Haenyeo Seafood stays off the plan'
+                          : 'Haenyeo Seafood added to the plan'}
+                      </div>
+                    </div>
+                    <span style={{
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      color: '#94a3b8',
+                      fontFamily: "'Inter', sans-serif",
+                      marginTop: 2,
+                    }}>
+                      Court result
+                    </span>
                   </div>
 
-                  <div className="court-showdown-versus-board">
-                    <div className="court-showdown-versus-labels">
-                      <span>Team Go</span>
-                      <span>Team Not Now</span>
-                    </div>
-                    <div className="court-showdown-versus-capsules">
-                      <div
-                        className={`court-versus-capsule is-green ${resolvedShowdownWinner === 'go' ? 'is-winner' : ''}`}
-                        style={{ flexBasis: `${teamGoShare}%` }}
-                      >
-                        <b>{teamGoScore}</b>
-                        <span>RM 42.50</span>
-                      </div>
-                      <div className="court-showdown-versus-or">vs</div>
-                      <div
-                        className={`court-versus-capsule is-red ${resolvedShowdownWinner === 'not-now' ? 'is-winner' : ''}`}
-                        style={{ flexBasis: `${teamNotNowShare}%` }}
-                      >
-                        <b>{teamNotNowScore}</b>
-                        <span>RM {(teamNotNowScore * 0.5).toFixed(2)}</span>
-                      </div>
-                    </div>
+                  {/* Team Labels Row */}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    fontSize: '11.5px',
+                    fontWeight: 600,
+                    fontFamily: "'Inter', sans-serif",
+                    color: '#64748b',
+                    marginTop: 6,
+                    padding: '0 2px',
+                  }}>
+                    <span>Team Go</span>
+                    <span>Team Not Now</span>
                   </div>
 
-                  <div className="court-showdown-payment-note">
-                    <span>Trip fund consequence</span>
-                    <b>
-                      {resolvedShowdownWinner === 'not-now'
-                        ? 'Team Go pays RM 42.50'
-                        : `Team Not Now pays RM ${((45 + showdownUserStake) * 0.5).toFixed(2)}`}
-                    </b>
+                  {/* Big Green & Red Score Blocks with VS Circle floating in center */}
+                  <div style={{ position: 'relative', display: 'flex', gap: 6, alignItems: 'center' }}>
+                    {/* Left: Green Team Go Block */}
+                    <div style={{
+                      flex: 1,
+                      background: '#10b981',
+                      borderRadius: '16px 6px 6px 16px',
+                      padding: '12px 14px',
+                      color: '#ffffff',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                    }}>
+                      <span style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1, fontFamily: "'Inter', sans-serif", letterSpacing: '-0.02em' }}>
+                        85
+                      </span>
+                      <span style={{ fontSize: '12px', fontWeight: 600, marginTop: 4, color: 'rgba(255,255,255,0.92)', fontFamily: "'Inter', sans-serif" }}>
+                        RM 42.50
+                      </span>
+                    </div>
+
+                    {/* VS Circle in Center */}
+                    <div style={{
+                      position: 'absolute',
+                      left: '50%',
+                      top: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      width: 28,
+                      height: 28,
+                      borderRadius: '50%',
+                      background: '#f8fafc',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+                      border: '2px solid #ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      color: '#64748b',
+                      zIndex: 3,
+                      textTransform: 'lowercase',
+                      fontFamily: "'Inter', sans-serif",
+                    }}>
+                      vs
+                    </div>
+
+                    {/* Right: Red Team Not Now Block */}
+                    <div style={{
+                      flex: 1,
+                      background: '#ff4d4f',
+                      borderRadius: '6px 16px 16px 6px',
+                      padding: '12px 14px',
+                      color: '#ffffff',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'flex-end',
+                      justifyContent: 'center',
+                    }}>
+                      <span style={{ fontSize: '28px', fontWeight: 700, lineHeight: 1, fontFamily: "'Inter', sans-serif", letterSpacing: '-0.02em' }}>
+                        {45 + showdownUserStake}
+                      </span>
+                      <span style={{ fontSize: '12px', fontWeight: 600, marginTop: 4, color: 'rgba(255,255,255,0.92)', fontFamily: "'Inter', sans-serif" }}>
+                        RM {((45 + showdownUserStake) * 0.5).toFixed(2)}
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  className="court-showdown-confirm-btn"
-                  style={{
-                    background: '#1877f2',
-                    boxShadow: '0 4px 14px rgba(24, 119, 242, 0.35)',
-                  }}
+
+                <TornPaperButton
+                  variant="ticket-blue"
+                  subText="CASE 3 OF 3"
                   onClick={() => {
                     playWhoosh();
                     triggerHaptic('tap');
@@ -3708,8 +4574,8 @@ export function TravelCourtCaseFlow({
                     setCurrentStep('proposal');
                   }}
                 >
-                  Proceed to Next Case → (Case 3 of 3)
-                </button>
+                  Proceed to Next Case
+                </TornPaperButton>
               </div>
             )}
           </div>
@@ -3720,18 +4586,24 @@ export function TravelCourtCaseFlow({
       )}
 
       {/* ====================================================================
-          SCREEN 8: TRIP PLAN SUMMARY (JEJU ADDED!)
+          SCREEN 8: TRIP PLAN SUMMARY (JEJU ADDED! — AUTHENTIC SCRAPBOOK)
           ==================================================================== */}
       {currentStep === 'summary' && (
-        <div className="court-case-chamber">
-          <MobileStatusBar />
-          <header className="court-navbar" style={{ justifyContent: 'flex-end' }}>
+        <div className="court-case-chamber court-vintage-chamber">
+          <header className="court-navbar" style={{ justifyContent: 'space-between', padding: '4px 16px' }}>
+            <div style={{ fontFamily: "'Caveat', cursive", fontSize: '18px', fontWeight: 700, color: '#8b1520' }}>
+              ✦ Trip Summary
+            </div>
             <button
               className="court-nav-back-btn"
               onClick={() => onConfirmPlan('Jeju')}
               aria-label="Close"
+              style={{
+                background: 'rgba(255,253,247,0.95)',
+                border: '1.5px solid #e8d5b5',
+              }}
             >
-              <X size={22} />
+              <X size={20} color="#8b1520" />
             </button>
           </header>
 
@@ -3756,7 +4628,7 @@ export function TravelCourtCaseFlow({
               <div
                 className="court-summary-screen"
                 style={{
-                  padding: '8px 18px 2px',
+                  padding: '4px 18px 2px',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
@@ -3767,88 +4639,129 @@ export function TravelCourtCaseFlow({
                   boxSizing: 'border-box',
                 }}
               >
-                {/* Top Section: Illustration + Title + Checklist */}
+                {/* Top Section: Illustration + Title + Authentic Element Sheet Checklist */}
                 <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <div className="court-summary-illustration" style={{ margin: '2px 0 6px' }}>
-                    <DuolingoAirplaneSquad size={210} />
+                  <div className="court-summary-illustration" style={{ margin: '0 0 4px', transform: 'scale(0.92)' }}>
+                    <DuolingoAirplaneSquad size={190} />
                   </div>
 
-                  <div className="court-summary-title" style={{ fontSize: '24px', margin: '0 0 2px' }}>Jeju added!</div>
-                  <div className="court-summary-desc" style={{ fontSize: '13px', margin: '0 0 10px' }}>It's official. Jeju is in our trip plan!</div>
+                  <h2 style={{ fontFamily: "'Caveat', cursive", fontSize: '32px', fontWeight: 700, color: '#8b1520', margin: 0, lineHeight: 1.0 }}>
+                    Jeju added! ✦
+                  </h2>
+                  <p style={{ fontFamily: "'Caveat', cursive", fontSize: '15px', color: '#7a5840', margin: '2px 0 8px', fontWeight: 600 }}>
+                    It's official. Jeju is in our trip plan!
+                  </p>
 
-                  <div className="court-checklist-container" style={{ gap: 7, marginBottom: 0 }}>
-                    {/* Flights */}
-                    <div className={`court-checklist-item ${flightsPlanned ? 'is-planned' : ''}`} style={{ padding: '9px 14px' }}>
-                      <div className="court-check-label">
-                        <Plane size={17} color={flightsPlanned ? '#10b981' : '#1877f2'} /> Flights
+                  {/* Authentic Checklist Card matching bottom-right of Element Sheet (Image 3) */}
+                  <div
+                    style={{
+                      width: '100%',
+                      background: '#fffdf7',
+                      border: '1.5px solid #e8d5b5',
+                      borderRadius: 16,
+                      boxShadow: '0 6px 18px rgba(100,65,25,0.1)',
+                      padding: '10px 14px',
+                      boxSizing: 'border-box',
+                      position: 'relative',
+                    }}
+                  >
+                    {/* Header with Sun Doodle */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, borderBottom: '1px dashed #e8d5b5', paddingBottom: 5 }}>
+                      <div style={{ fontFamily: "'Caveat', cursive", fontSize: '22px', fontWeight: 700, color: '#8b1520', textDecoration: 'underline' }}>
+                        Trip Checklist
                       </div>
-                      {flightsPlanned ? (
-                        <span className="court-check-status planned">
-                          <Check size={12} strokeWidth={3} /> {flightsTitle}
-                        </span>
-                      ) : (
-                        <span className="court-check-status">Not planned</span>
-                      )}
+                      <span style={{ fontSize: '22px', color: '#f59e0b' }}>☼</span>
                     </div>
 
-                    {/* Accommodation */}
-                    <div className={`court-checklist-item ${accommodationPlanned ? 'is-planned' : ''}`} style={{ padding: '9px 14px' }}>
-                      <div className="court-check-label">
-                        <Home size={17} color={accommodationPlanned ? '#10b981' : '#1877f2'} /> Accommodation
-                      </div>
-                      {accommodationPlanned ? (
-                        <span className="court-check-status planned">
-                          <Check size={12} strokeWidth={3} /> {accommodationTitle}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {/* Flights */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '18px', fontFamily: "'Caveat', cursive" }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ color: flightsPlanned ? '#059669' : '#a88960', fontSize: '20px', fontWeight: 700 }}>
+                            {flightsPlanned ? '☑' : '☐'}
+                          </span>
+                          <span style={{ fontWeight: 700, color: '#2b1810' }}>Flights</span>
+                        </div>
+                        <span style={{ color: flightsPlanned ? '#059669' : '#8b6b4e', fontWeight: 700, fontSize: '17px' }}>
+                          {flightsPlanned ? flightsTitle : 'Pending'}
                         </span>
-                      ) : (
-                        <span className="court-check-status">Not planned</span>
-                      )}
-                    </div>
+                      </div>
 
-                    {/* Activities */}
-                    <div className={`court-checklist-item ${activitiesPlanned ? 'is-planned' : ''}`} style={{ padding: '9px 14px' }}>
-                      <div className="court-check-label">
-                        <MapPin size={17} color={activitiesPlanned ? '#10b981' : '#1877f2'} /> Activities
-                      </div>
-                      {activitiesPlanned ? (
-                        <span className="court-check-status planned">
-                          <Check size={12} strokeWidth={3} /> {activitiesTitle}
+                      {/* Accommodation */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '18px', fontFamily: "'Caveat', cursive" }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ color: accommodationPlanned ? '#059669' : '#a88960', fontSize: '20px', fontWeight: 700 }}>
+                            {accommodationPlanned ? '☑' : '☐'}
+                          </span>
+                          <span style={{ fontWeight: 700, color: '#2b1810' }}>Accommodation</span>
+                        </div>
+                        <span style={{ color: accommodationPlanned ? '#059669' : '#8b6b4e', fontWeight: 700, fontSize: '17px' }}>
+                          {accommodationPlanned ? accommodationTitle : 'Pending'}
                         </span>
-                      ) : (
-                        <span className="court-check-status">Not planned</span>
-                      )}
-                    </div>
+                      </div>
 
-                    {/* Food */}
-                    <div className={`court-checklist-item ${foodPlanned ? 'is-planned' : ''}`} style={{ padding: '9px 14px' }}>
-                      <div className="court-check-label">
-                        <Utensils size={17} color={foodPlanned ? '#10b981' : '#1877f2'} /> Food
-                      </div>
-                      {foodPlanned ? (
-                        <span className="court-check-status planned">
-                          <Check size={12} strokeWidth={3} /> {foodTitle}
+                      {/* Activities */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '18px', fontFamily: "'Caveat', cursive" }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ color: activitiesPlanned ? '#059669' : '#a88960', fontSize: '20px', fontWeight: 700 }}>
+                            {activitiesPlanned ? '☑' : '☐'}
+                          </span>
+                          <span style={{ fontWeight: 700, color: '#2b1810' }}>Activities</span>
+                        </div>
+                        <span style={{ color: activitiesPlanned ? '#059669' : '#8b6b4e', fontWeight: 700, fontSize: '17px' }}>
+                          {activitiesPlanned ? activitiesTitle : 'Pending'}
                         </span>
-                      ) : (
-                        <span className="court-check-status">Not planned</span>
-                      )}
+                      </div>
+
+                      {/* Food */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '18px', fontFamily: "'Caveat', cursive" }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ color: foodPlanned ? '#059669' : '#a88960', fontSize: '20px', fontWeight: 700 }}>
+                            {foodPlanned ? '☑' : '☐'}
+                          </span>
+                          <span style={{ fontWeight: 700, color: '#2b1810' }}>Local Food</span>
+                        </div>
+                        <span style={{ color: foodPlanned ? '#059669' : '#8b6b4e', fontWeight: 700, fontSize: '17px' }}>
+                          {foodPlanned ? foodTitle : 'Pending'}
+                        </span>
+                      </div>
                     </div>
+                  </div>
+
+                  {/* Cute Note: Small Steps Big Adventures */}
+                  <div
+                    style={{
+                      marginTop: 8,
+                      background: 'rgba(149,187,234,0.25)',
+                      border: '1px solid rgba(74,123,168,0.3)',
+                      borderRadius: 12,
+                      padding: '6px 14px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      width: '100%',
+                      boxSizing: 'border-box',
+                    }}
+                  >
+                    <span style={{ fontSize: '18px' }}>🐻</span>
+                    <span style={{ fontFamily: "'Caveat', cursive", fontSize: '16px', fontWeight: 700, color: '#1a4a82' }}>
+                      Small steps, big adventures! Ready for takeoff! ♡
+                    </span>
                   </div>
                 </div>
 
-                {/* Bottom Action Group */}
+                {/* Bottom Action Group: Ticket-Style CTA (Start Journey) */}
                 <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 8, paddingTop: 4 }}>
-                  <button
-                    type="button"
-                    className="court-dark-pill-btn"
-                    style={{ width: '100%', marginBottom: 6 }}
+                  <TornPaperButton
+                    variant="ticket"
                     onClick={() => {
                       playVictoryFanfare();
                       triggerHaptic('victory');
                       onConfirmPlan('Jeju');
                     }}
                   >
-                    Continue planning →
-                  </button>
+                    Start Journey
+                  </TornPaperButton>
                   <MobileHomeIndicator />
                 </div>
               </div>
