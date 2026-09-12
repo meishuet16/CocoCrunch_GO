@@ -39,6 +39,14 @@ export type AccommodationBookingState = {
   source: 'email-prototype' | 'quote-prototype';
 };
 
+export type GroupSplitPlan = {
+  memberIds: string[];
+  destination: string;
+  meetingPoint: string;
+  meetingTime: string;
+  suggestionSource: 'prototype-midpoint' | 'manual';
+};
+
 export type CourtOptionState = {
   id: string;
   label: string;
@@ -119,6 +127,7 @@ export type PersistedState = {
   itineraryOrder?: string[];
   groupChannelMessages?: GroupChannelMessage[];
   groupCourtUnreadCount?: number;
+  groupSplitPlan?: GroupSplitPlan;
   flightBooking?: FlightBookingState;
   flightBookingDraft?: string;
   accommodationBooking?: AccommodationBookingState;

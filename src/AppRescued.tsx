@@ -34,7 +34,7 @@ import {
 } from './domain/preferences';
 import { buildLearningProposal, confirmLearningProposal, type LearningProposal } from './domain/learning';
 import { normalizeBudgetActuals, paceEvidenceSummary, rateDecision, updateBudgetActual } from './domain/retrospective';
-import { derivePersistedTripState, loadPersisted, resetTripScopedSharing, savePersisted, type CompletedPaceEvidence, type ConfirmedLearningRecord, type CourtOptionState, type DecisionRecord, type FlightBookingState, type AccommodationBookingState } from './persistence';
+import { derivePersistedTripState, loadPersisted, resetTripScopedSharing, savePersisted, type CompletedPaceEvidence, type ConfirmedLearningRecord, type CourtOptionState, type DecisionRecord, type FlightBookingState, type AccommodationBookingState, type GroupSplitPlan } from './persistence';
 import { RecommendationEvidenceText } from './components/RecommendationEvidenceText';
 import { EverydayGachaMachine } from './components/EverydayGachaMachine';
 import { LuckyDrawReveal } from './components/LuckyDrawReveal';
@@ -75,6 +75,7 @@ import { OnboardingFlow } from './components/OnboardingFlow';
 import { FlightDrawer } from './components/FlightDrawer';
 import { AccommodationDrawer } from './components/AccommodationDrawer';
 import { GroupChannel, type GroupChannelMessage } from './components/GroupChannel';
+import { GroupSplit } from './components/GroupSplit';
 import foodieHunter from './assets/coco/personas/foodie_hunter.png';
 import masterPlanner from './assets/coco/personas/master_planner.png';
 import transitNavigator from './assets/coco/personas/transit_navigator.png';
@@ -444,6 +445,7 @@ export default function AppRescued() {
   const [replanApplied, setReplanApplied] = useState(Boolean(stored.appliedRepair));
   const [mood, setMood] = useState<Mood>(storedPace?.mood ?? null);
   const [split, setSplit] = useState(false);
+  const [groupSplitPlan, setGroupSplitPlan] = useState<GroupSplitPlan>(stored.groupSplitPlan ?? { memberIds: [], destination: '', meetingPoint: '', meetingTime: '', suggestionSource: 'prototype-midpoint' });
   const [privacy, setPrivacy] = useState<Privacy>(stored.privacy ?? 'status');
   const [continuousLocation, setContinuousLocation] = useState(Boolean(stored.continuousLocation));
   const [reported, setReported] = useState(false);
@@ -676,9 +678,9 @@ export default function AppRescued() {
       recommendations: recommendations.map(({ name, saved, added }) => ({ name, saved, added })),
       tripIntent,
       worthIt, profileLearned, learningProposal: learningProposal?.status === 'confirmed' ? undefined : learningProposal ?? undefined, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, onboardingCountryCode, onboardingBirthday, basePackingPreferences, tripCreated, tripPhase,
-      members, memberPreferenceProfiles, backupCandidates, appliedRepair: appliedRepair ?? undefined, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, revivedWishIds: ghostWishes.filter(wish => wish.status === 'revived').map(wish => wish.id), destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, itineraryOrder, groupChannelMessages, groupCourtUnreadCount, flightBooking, flightBookingDraft, accommodationBooking, accommodationBookingDraft,
+      members, memberPreferenceProfiles, backupCandidates, appliedRepair: appliedRepair ?? undefined, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, revivedWishIds: ghostWishes.filter(wish => wish.status === 'revived').map(wish => wish.id), destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, itineraryOrder, groupChannelMessages, groupCourtUnreadCount, groupSplitPlan, flightBooking, flightBookingDraft, accommodationBooking, accommodationBookingDraft,
     });
-  }, [mode, destination, readyConfirmed, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals, delay, mood, arrivalChecked, privacy, continuousLocation, recommendations, tripIntent, worthIt, profileLearned, learningProposal, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, onboardingCountryCode, onboardingBirthday, basePackingPreferences, tripCreated, tripPhase, members, memberPreferenceProfiles, backupCandidates, appliedRepair, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, ghostWishes, destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, itineraryOrder, groupChannelMessages, groupCourtUnreadCount, flightBooking, flightBookingDraft, accommodationBooking, accommodationBookingDraft]);
+  }, [mode, destination, readyConfirmed, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals, delay, mood, arrivalChecked, privacy, continuousLocation, recommendations, tripIntent, worthIt, profileLearned, learningProposal, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, onboardingCountryCode, onboardingBirthday, basePackingPreferences, tripCreated, tripPhase, members, memberPreferenceProfiles, backupCandidates, appliedRepair, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, ghostWishes, destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, itineraryOrder, groupChannelMessages, groupCourtUnreadCount, groupSplitPlan, flightBooking, flightBookingDraft, accommodationBooking, accommodationBookingDraft]);
 
   function setProfileField(field: keyof TravelProfile, value: string) {
     setProfile(current => ({ ...current, [field]: value }));
@@ -1123,6 +1125,7 @@ export default function AppRescued() {
     setMood(null);
     setArrivalChecked(false);
     setSplit(false);
+    setGroupSplitPlan({ memberIds: [], destination: '', meetingPoint: '', meetingTime: '', suggestionSource: 'prototype-midpoint' });
     setBackupCandidates([]);
     setCourtOptions(defaultCourtOptions);
     setCourtVotes(defaultVotes);
@@ -1336,7 +1339,7 @@ export default function AppRescued() {
       <section className="arrival-check"><div><span>PROGRESS CHECK</span><b>{arrivalChecked ? `Arrived at ${anchorItem?.name ?? 'the anchor'}.` : `Has the group reached ${anchorItem?.name ?? 'the morning anchor'}?`}</b><small>Manual check-in is always available; location permission is not required.</small></div><button onClick={() => setArrivalChecked(!arrivalChecked)}>{arrivalChecked ? 'Undo check-in' : 'Mark arrived'}</button></section>
       <section className="energy-check"><span>HOW’S THE GROUP?</span><div>{(['great', 'okay', 'tired'] as const).map(value => <button key={value} className={mood === value ? 'active' : ''} onClick={() => setMood(value)}>{value === 'great' ? '⚡ Great' : value === 'okay' ? '🙂 Okay' : '🥱 Tired'}</button>)}</div>{mood === 'tired' && <small>Coco suggests dropping one floating item and adding 45 min rest. Anchors stay untouched.</small>}</section>
       {mode === 'group' && <section className="heartbeat"><span>GROUP HEARTBEAT</span><b>{delay ? 'Needs a decision' : split ? 'Can reunite on time' : arrivalChecked ? 'Together at the anchor' : 'Status check pending'}</b><small>Only shared status is shown. Exact group coordinates stay hidden by default.</small></section>}
-      {mode === 'group' && <section className="split-note"><div><span>SMART SPLIT</span><b>{split ? '2 café · 2 shopping' : 'Different energy levels?'}</b><small>{split ? 'Reunion · 19:30 · ±15 min · official shared state' : 'Preview is harmless; creating the official split requires Group Court.'}</small>{split && <div className="split-timelines"><span>Mei + Zi Shan · café · {floatingItem?.timeLabel ?? 'time pending'}</span><span>JH + Alex · shopping · {floatingItem?.timeLabel ?? 'time pending'}</span></div>}</div><button onClick={() => openGovernedAction(split ? 'split-off' : 'split-on')}>{split ? 'Request reunion' : 'Propose split'}</button></section>}
+      {mode === 'group' && <GroupSplit members={members} value={groupSplitPlan} active={split} onChange={setGroupSplitPlan} onRequest={() => openGovernedAction('split-on')} onRequestReunion={() => openGovernedAction('split-off')} />}
       <details className="during-tools secondary-launcher"><summary>More tools · sharing, reunion, safety & play</summary><div className="contextual-section-heading"><span>WHEN YOU NEED A HAND</span><small>These tools stay secondary to Today, conditions, and repair.</small></div><div className="during-tool-group"><span className="tool-group-label">SHARE & SAFETY</span><MiniTool icon={Send} label="Family Window" note={reported ? 'Latest reassurance sent' : 'Reassurance, not surveillance'} onClick={() => setDrawer('family')} /><MiniTool icon={MapPin} label="Location privacy" note="Permission and provider boundary" onClick={() => setDrawer('location')} /><MiniTool icon={Users} label="Reunion agreement" note={`${reunion.place} · ${reunion.time} · ±${reunion.tolerance} min`} onClick={() => setDrawer('commitments')} /><MiniTool icon={Heart} label="Safety + local help" note="Prototype contact and nearby useful info" onClick={() => setDrawer('safety')} /></div><div className="during-tool-group"><span className="tool-group-label">EXPLAIN & PLAY</span><MiniTool icon={Sparkles} label="Ask Coco" note={assistantApplied ? 'Suggestion applied · undo available' : 'Read-only until you confirm'} onClick={() => setDrawer('assistant')} /><MiniTool icon={Sparkles} label="Everyday Gacha" note="Real choice · never governance" onClick={() => setDrawer('gacha')} /><MiniTool icon={Sparkles} label="Lucky Draw" note="Entertainment only · isolated from decisions" onClick={() => setDrawer('lucky')} /></div></details>
       <TripSpatialView
         mode="traveling"

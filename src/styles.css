@@ -6831,6 +6831,25 @@ main {
 .spatial-service-pins span { color: var(--sangria); font-size: 8px; font-weight: 950; letter-spacing: .08em; }
 .spatial-service-pins a { color: var(--blue-ink); font-size: 9px; font-weight: 800; }
 
+.split-member-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.split-member-picker label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 10px;
+  font-weight: 800;
+}
+
 .onboarding-shell {
   min-height: 100dvh;
 }
