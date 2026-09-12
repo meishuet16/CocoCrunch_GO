@@ -980,8 +980,11 @@ export default function AppRescued() {
     setConstraints(current => [...current.filter(item => item.type !== type), { id: `${type}-${Date.now()}`, type, value: value.trim(), source: 'member' }]);
   }
 
-  function inviteMember() {
-    setMembers(current => current.some(member => member.id === 'alex' && member.inviteStatus === 'pending') ? current.map(member => member.id === 'alex' ? { ...member, inviteStatus: 'joined' } : member) : [...current, { id: `guest-${current.length}`, name: 'Guest', role: 'New traveller', inviteStatus: 'pending', pace: 'steady' }]);
+  function openGroupInviteFlow() {
+    setMode('group');
+    setTripSetupModeChoice(false);
+    setGroupSetupStep(2);
+    setDrawer('tripSetup');
   }
 
   function runLuckyDraw() {
@@ -1108,6 +1111,10 @@ export default function AppRescued() {
     setGroupMemberDestinations({});
     setGroupUsernameSearch('');
     setDrawer('tripSetup');
+  }
+
+  function inviteMember() {
+    openGroupInviteFlow();
   }
 
   function addGroupMemberFromUsername(username: string) {
@@ -1795,6 +1802,8 @@ export default function AppRescued() {
 {drawer === 'tingo' && renderTingoAssessment()}
       {drawer === 'flight' && <FlightDrawer mode={mode} booking={flightBooking} draft={flightBookingDraft} onDraftChange={setFlightBookingDraft} onConfirm={setFlightBooking} onClose={() => setDrawer(null)} />}
       {drawer === 'accommodation' && <AccommodationDrawer mode={mode} booking={accommodationBooking} draft={accommodationBookingDraft} onDraftChange={setAccommodationBookingDraft} onConfirm={confirmAccommodationBooking} onClose={() => setDrawer(null)} />}
+      {drawer === 'tripSetup' && !tripSetupModeChoice && mode === 'group' && groupSetupStep === 3 && <p className="adapter-note">Leader choice rule: confirming a destination and dates makes them read-only for members later. Skip only to send competing member candidates to Group Court.</p>}
+      {drawer === 'tripSetup' && !tripSetupModeChoice && mode === 'group' && groupSetupStep === 6 && <p className="adapter-note">{destinationLockedByLeader ? 'Read-only for members: the leader locked this shared destination and schedule in Step 3.' : 'No candidate is adopted directly: member destinations go to Group Court, with Gacha only if Court reaches a tie.'}</p>}
       {drawer === 'tripSetup' && tripSetupModeChoice && tripSetupReference && <section className="trip-setup-wizard"><span className="drawer-kicker">COPY THIS TRIP · PUBLIC REFERENCE</span><h3>How are you travelling?</h3><p className="drawer-copy">{tripSetupReference.title} supplies a starting vibe and estimated budget. Location is already copied; you can change every prefilled value.</p><div className="onboarding-actions"><button className="primary" onClick={() => startReferenceTrip('solo')}>Solo trip</button><button className="secondary" onClick={() => startReferenceTrip('group')}>Group trip</button></div></section>}
       {drawer === 'tripSetup' && !tripSetupModeChoice && mode === 'group' && <section className="trip-setup-wizard"><div className="trip-setup-progress"><span>NEW GROUP TRIP</span><b>Step {groupSetupStep} of 6</b><div><i style={{ width: `${groupSetupStep * (100 / 6)}%` }} /></div></div>
         {groupSetupStep === 1 && <><span className="drawer-kicker">STEP 1 · GROUP LEADER</span><h3>Who is leading this trip?</h3><label className="setup-field"><span>Leader name</span><input className="big-input" value={onboardingName} onChange={event => setOnboardingName(event.target.value)} placeholder="Your name" /></label></>}
