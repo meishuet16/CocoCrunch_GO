@@ -5153,7 +5153,7 @@ body:has(.court-modal-overlay) {
 /* ── Oatmeal paper background with wrinkle-like shading (BOTH screens) ──── */
 .court-vintage-chamber,
 .court-ideas-vintage-page {
-  background-color: var(--vp-paper) !important;
+  background-color: var(--vp-paper);
   /* Layered linear gradients at different angles simulate paper grain & creases */
   background-image:
     /* Fine horizontal crease shadows */
@@ -5177,8 +5177,8 @@ body:has(.court-modal-overlay) {
     radial-gradient(ellipse at 78% 72%, rgba(220, 190, 140, 0.35) 0%, transparent 50%),
     radial-gradient(ellipse at 55% 95%, rgba(205, 175, 125, 0.28) 0%, transparent 45%),
     /* Base warm oatmeal colour */
-    linear-gradient(160deg, #f8efd8 0%, #f2e5c8 40%, #ecdbb8 100%) !important;
-  background-size: auto !important;
+    linear-gradient(160deg, var(--paper-solid) 0%, var(--cream-deep) 40%, var(--cream-deep) 100%);
+  background-size: auto;
   position: relative;
   overflow: hidden;
 }
@@ -5215,12 +5215,12 @@ body:has(.court-modal-overlay) {
 /* ── Vintage memo / pin-up card ─────────────────────────────────────────── */
 .court-vintage-memo-card {
   position: relative;
-  background: var(--vp-card) !important;
-  border-radius: 20px !important;
-  border: 1px solid var(--vp-border) !important;
+  background: var(--vp-card);
+  border-radius: 20px;
+  border: 1px solid var(--vp-border);
   box-shadow:
     0 8px 24px rgba(100, 65, 25, 0.09),
-    0 2px 6px rgba(100, 65, 25, 0.05) !important;
+    0 2px 6px rgba(100, 65, 25, 0.05);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -5240,7 +5240,7 @@ body:has(.court-modal-overlay) {
   width: 15px;
   height: 15px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #f87171 0%, #dc2626 40%, #8b0d09 85%, #550202 100%);
+  background: radial-gradient(circle at 35% 30%, var(--sangria) 0%, var(--sangria) 40%, var(--sangria-deep) 85%, var(--sangria-deep) 100%);
   position: relative;
   box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.7);
 }
@@ -5251,7 +5251,7 @@ body:has(.court-modal-overlay) {
   left: 5px;
   width: 3.5px;
   height: 7px;
-  background: linear-gradient(135deg, #f1f5f9 0%, #94a3b8 100%);
+  background: linear-gradient(135deg, var(--paper-solid) 0%, var(--muted) 100%);
   border-radius: 1px;
   transform: rotate(20deg);
 }
@@ -5261,8 +5261,8 @@ body:has(.court-modal-overlay) {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: var(--vp-blue) !important;
-  color: #0c2642 !important;
+  background: var(--vp-blue);
+  color: var(--blue-ink);
   font-size: 11px;
   font-weight: 800;
   padding: 3px 10px 3px 9px;
@@ -5353,7 +5353,7 @@ body:has(.court-modal-overlay) {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  color: #fffdf7;
+  color: var(--paper-solid);
   font-size: 23px !important;
   font-weight: 700 !important;
   letter-spacing: 0.02em;
@@ -5405,7 +5405,7 @@ body:has(.court-modal-overlay) {
       transparent 1px,
       transparent 7px
     ),
-    linear-gradient(135deg, #4a7ba8 0%, #3d6a95 50%, #4a7ba8 100%);
+    linear-gradient(135deg, var(--blue-deep) 0%, var(--blue-deep) 50%, var(--blue-deep) 100%);
   box-shadow: 0 2px 6px rgba(50,80,120,0.22), inset 0 1px 0 rgba(255,255,255,0.2);
 }
 
@@ -5428,14 +5428,14 @@ body:has(.court-modal-overlay) {
   align-items: center;
   position: relative;
   padding: 5px 10px 5px;
-  background: #fffdf7;
-  border: 1.5px solid #e8d5b5;
+  background: var(--paper-solid);
+  border: 1.5px solid var(--cream-deep);
   border-radius: 6px;
   box-shadow: 0 2px 6px rgba(100,65,25,0.1);
   font-family: 'Caveat', cursive;
   font-size: 14px;
   font-weight: 700;
-  color: #2b1810;
+  color: var(--ink);
   cursor: pointer;
   transition: transform 0.15s ease;
   min-width: 54px;
@@ -5448,21 +5448,21 @@ body:has(.court-modal-overlay) {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  border: 1.5px solid #d4b896;
-  background: #f5edd8;
+  border: 1.5px solid var(--warning);
+  background: var(--paper-solid);
   margin-bottom: 3px;
 }
 
 .vp-luggage-tag.active {
-  background: #8b1520;
-  color: #ffffff;
-  border-color: #6b0f19;
+  background: var(--sangria-deep);
+  color: var(--paper-solid);
+  border-color: var(--sangria-deep);
 }
 
 .vp-luggage-tag.blue {
-  background: #4a7ba8;
-  color: #ffffff;
-  border-color: #3d6a95;
+  background: var(--blue-deep);
+  color: var(--paper-solid);
+  border-color: var(--blue-deep);
 }
 
 /* Postmark stamp */
@@ -5502,7 +5502,7 @@ body:has(.court-modal-overlay) {
 
 /* Polaroid frame */
 .vp-polaroid {
-  background: #ffffff;
+  background: var(--paper-solid);
   padding: 5px 5px 18px;
   border-radius: 3px;
   box-shadow: 0 6px 18px rgba(100,65,25,0.14), 0 2px 5px rgba(100,65,25,0.08);
@@ -5521,14 +5521,14 @@ body:has(.court-modal-overlay) {
   font-family: 'Caveat', cursive;
   font-size: 11px;
   font-weight: 700;
-  color: #554133;
+  color: var(--ink);
 }
 
 /* Caveat handwriting title */
 .vp-title {
   font-family: 'Caveat', cursive !important;
   font-weight: 700;
-  color: #8b1520;
+  color: var(--sangria-deep);
   line-height: 1.1;
 }
 
@@ -5539,8 +5539,8 @@ body:has(.court-modal-overlay) {
   justify-content: center;
   gap: 6px;
   padding: 10px 20px;
-  background: linear-gradient(135deg, #4a7ba8 0%, #3d6a95 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--blue-deep) 0%, var(--blue-deep) 100%);
+  color: var(--paper-solid);
   font-family: 'Caveat', cursive;
   font-size: 16px;
   font-weight: 700;
@@ -5567,26 +5567,26 @@ body:has(.court-modal-overlay) {
   gap: 6px;
   padding: 10px 20px;
   background: rgba(255,253,247,0.9);
-  color: #554133;
+  color: var(--ink);
   font-family: 'Caveat', cursive;
   font-size: 16px;
   font-weight: 700;
-  border: 1.5px solid #e8d5b5;
+  border: 1.5px solid var(--cream-deep);
   border-radius: 99px;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(100,65,25,0.08);
   transition: transform 0.15s ease;
 }
 
-.vp-btn-ghost-pill:hover { border-color: #d4b896; }
+.vp-btn-ghost-pill:hover { border-color: var(--warning); }
 .vp-btn-ghost-pill:active { transform: scale(0.97); }
 
 /* Vintage ticket-style button */
 .vp-btn-ticket {
   display: flex;
   align-items: center;
-  background: linear-gradient(135deg, #a31208 0%, #8b1520 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--sangria-deep) 0%, var(--sangria-deep) 100%);
+  color: var(--paper-solid);
   border: none;
   border-radius: 14px;
   overflow: hidden;
@@ -5647,9 +5647,9 @@ body:has(.court-modal-overlay) {
   line-height: 1.4;
 }
 
-.vp-sticky-note.yellow { background: #fef3c7; color: #78350f; }
-.vp-sticky-note.blue { background: rgba(149,187,234,0.3); color: #1a4a82; }
-.vp-sticky-note.cream { background: #fffdf7; color: #554133; border: 1px solid #e8d5b5; }
+.vp-sticky-note.yellow { background: var(--cream-deep); color: var(--ink-soft); }
+.vp-sticky-note.blue { background: rgba(149,187,234,0.3); color: var(--blue-ink); }
+.vp-sticky-note.cream { background: var(--paper-solid); color: var(--ink); border: 1px solid var(--cream-deep); }
 
 /* Botanical doodle container */
 .vp-botanical {
@@ -5661,7 +5661,7 @@ body:has(.court-modal-overlay) {
 /* Denim Blue ticket button variant */
 .vp-btn-ticket.blue,
 .vp-btn-ticket-blue {
-  background: linear-gradient(135deg, #4a7ba8 0%, #3d6a95 50%, #30587d 100%);
+  background: linear-gradient(135deg, var(--blue-deep) 0%, var(--blue-deep) 50%, var(--blue-ink) 100%);
   box-shadow: 0 4px 16px rgba(74, 123, 168, 0.35);
 }
 
