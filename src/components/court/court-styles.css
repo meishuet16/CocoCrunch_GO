@@ -582,44 +582,6 @@ body:has(.court-modal-overlay) {
   gap: 8px;
 }
 
-.court-chip-buttons {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-}
-
-.court-chip-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--paper-solid);
-  background: var(--paper-solid);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--ink);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  white-space: nowrap;
-}
-
-.court-chip-btn:hover {
-  background: var(--paper-solid);
-  border-color: var(--muted);
-}
-
-.court-chip-btn:active {
-  transform: scale(0.95);
-}
-
-.court-chip-btn.photo svg { color: var(--success); }
-.court-chip-btn.place svg { color: var(--sangria); }
-.court-chip-btn.note svg { color: var(--warning); }
-.court-chip-btn.link svg { color: var(--blue-deep); }
-
 /* ==========================================================================
    Scrapbook Polaroid Styles (Matching media_1789054848249.jpg)
    ========================================================================== */
