@@ -1823,7 +1823,7 @@ body:has(.court-modal-overlay) {
   inset: 0;
   z-index: 80;
   overflow: hidden;
-  background: linear-gradient(180deg, #dbeafe 0%, #eff6ff 55%, #ffffff 100%);
+  background: linear-gradient(180deg, var(--paper-solid) 0%, var(--paper-solid) 55%, var(--paper-solid) 100%);
   animation: court-vote-overlay-fade 0.64s cubic-bezier(0.2, 0.85, 0.2, 1) both;
 }
 
@@ -1832,7 +1832,7 @@ body:has(.court-modal-overlay) {
   inset: 0;
   overflow: hidden;
   border-radius: 42px;
-  background: #dbeafe;
+  background: var(--paper-solid);
   transform-origin: 84% 72%;
   animation: court-vote-scene-zoom 0.64s cubic-bezier(0.18, 0.85, 0.2, 1) both;
 }
@@ -2077,7 +2077,7 @@ body:has(.court-modal-overlay) {
 .court-jury-header h2 {
   font-size: 32px;
   font-weight: 700;
-  color: #8b1520;
+  color: var(--sangria-deep);
   margin: 0 0 2px;
   line-height: 1.05;
   letter-spacing: -0.01em;
@@ -2086,7 +2086,7 @@ body:has(.court-modal-overlay) {
 
 .court-jury-header p {
   font-size: 15px;
-  color: #7a5840;
+  color: var(--ink-soft);
   margin: 0;
   font-weight: 600;
   font-family: 'Caveat', cursive;
@@ -2100,9 +2100,9 @@ body:has(.court-modal-overlay) {
   position: relative;
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12), inset 0 0 0 1.5px rgba(255, 255, 255, 0.9);
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--muted);
   flex-shrink: 0;
-  background: #dbeafe;
+  background: var(--paper-solid);
   user-select: none;
   margin: 0 0 10px;
 }
@@ -2136,7 +2136,7 @@ body:has(.court-modal-overlay) {
 .court-jury-votes-count {
   font-size: 15px;
   font-weight: 900;
-  color: #1877f2;
+  color: var(--blue-deep);
   line-height: 1.1;
   display: flex;
   align-items: center;
@@ -2147,7 +2147,7 @@ body:has(.court-modal-overlay) {
 .court-jury-votes-label {
   font-size: 9.5px;
   font-weight: 700;
-  color: #64748b;
+  color: var(--blue-deep);
   margin-top: 1px;
 }
 
@@ -2157,8 +2157,8 @@ body:has(.court-modal-overlay) {
   top: -24px;
   left: 50%;
   transform: translateX(-50%);
-  background: #10b981;
-  color: #ffffff;
+  background: var(--success);
+  color: var(--paper-solid);
   border-radius: 999px;
   padding: 2.5px 8px;
   font-size: 9px;
@@ -2168,7 +2168,7 @@ body:has(.court-modal-overlay) {
   align-items: center;
   gap: 3px;
   box-shadow: 0 3px 8px rgba(16, 185, 129, 0.38);
-  border: 1.5px solid #ffffff;
+  border: 1.5px solid var(--paper-solid);
   animation: court-badge-spring 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   z-index: 30;
 }
@@ -2180,7 +2180,7 @@ body:has(.court-modal-overlay) {
   left: 50%;
   transform: translateX(-50%);
   background: rgba(255, 255, 255, 0.94);
-  color: #3b82f6;
+  color: var(--blue-deep);
   border-radius: 999px;
   padding: 2.5px 8px;
   font-size: 9px;
@@ -2190,7 +2190,7 @@ body:has(.court-modal-overlay) {
   align-items: center;
   gap: 3px;
   box-shadow: 0 2px 7px rgba(15, 23, 42, 0.08);
-  border: 1.5px solid #bfdbfe;
+  border: 1.5px solid var(--blue-soft);
   animation: court-june-breathe-2d 2s ease-in-out infinite;
   z-index: 30;
 }
@@ -2198,7 +2198,7 @@ body:has(.court-modal-overlay) {
 /* Waiting Card (Matching Figure 3 exactly) */
 .court-jury-waiting-card {
   width: 100%;
-  background: #ffffff;
+  background: var(--paper-solid);
   border: 1px solid rgba(226, 232, 240, 0.85);
   border-radius: 20px;
   padding: 13px 16px 12px;
@@ -2209,7 +2209,7 @@ body:has(.court-modal-overlay) {
 .court-jury-progress-track {
   width: 100%;
   height: 5px;
-  background: #edf2f7;
+  background: var(--paper-solid);
   border-radius: 999px;
   margin: 9px 0 11px;
   overflow: hidden;
@@ -2217,7 +2217,7 @@ body:has(.court-modal-overlay) {
 
 .court-jury-progress-fill {
   height: 100%;
-  background: #1877f2;
+  background: var(--blue-deep);
   border-radius: 999px;
   transition: width 0.4s ease;
 }
@@ -2239,7 +2239,7 @@ body:has(.court-modal-overlay) {
 .court-verdict-subtitle {
   font-size: 15px;
   font-weight: 700;
-  color: #64748b;
+  color: var(--blue-deep);
   margin: 0 0 2px;
 }
 
@@ -2251,11 +2251,11 @@ body:has(.court-modal-overlay) {
 }
 
 .court-verdict-title.accepted {
-  color: #12b76a;
+  color: var(--success);
 }
 
 .court-verdict-title.rejected {
-  color: #f04438;
+  color: var(--sangria);
 }
 
 /* Gavel Strike Keyframe */
@@ -2326,13 +2326,13 @@ body:has(.court-modal-overlay) {
 .court-score-green {
   font-size: 26px;
   font-weight: 900;
-  color: #12b76a;
+  color: var(--success);
 }
 
 .court-score-red {
   font-size: 26px;
   font-weight: 900;
-  color: #f04438;
+  color: var(--sangria);
 }
 
 .court-score-split-bar {
@@ -2341,16 +2341,16 @@ body:has(.court-modal-overlay) {
   border-radius: 999px;
   display: flex;
   overflow: hidden;
-  background: #e2e8f0;
+  background: var(--paper-solid);
 }
 
 .court-score-bar-green {
-  background: #12b76a;
+  background: var(--success);
   transition: width 0.6s ease;
 }
 
 .court-score-bar-red {
-  background: #f04438;
+  background: var(--sangria);
   transition: width 0.6s ease;
 }
 
@@ -2384,13 +2384,13 @@ body:has(.court-modal-overlay) {
   align-items: center;
   justify-content: center;
   font-size: 11px;
-  color: #ffffff;
+  color: var(--paper-solid);
   margin-top: -8px;
-  border: 2px solid #ffffff;
+  border: 2px solid var(--paper-solid);
 }
 
-.court-score-avatar-badge.green { background: #12b76a; }
-.court-score-avatar-badge.red { background: #f04438; }
+.court-score-avatar-badge.green { background: var(--success); }
+.court-score-avatar-badge.red { background: var(--sangria); }
 
 /* Screen 7: Discussion / Votes Tab */
 .court-discussion-screen {
@@ -2405,7 +2405,7 @@ body:has(.court-modal-overlay) {
 
 .court-segmented-control {
   display: flex;
-  background: #f1f5f9;
+  background: var(--paper-solid);
   border-radius: 999px;
   padding: 4px;
   margin: 12px 0 16px;
@@ -2418,15 +2418,15 @@ body:has(.court-modal-overlay) {
   border: none;
   font-size: 14px;
   font-weight: 700;
-  color: #64748b;
+  color: var(--blue-deep);
   background: transparent;
   cursor: pointer;
   transition: all 0.18s ease;
 }
 
 .court-segment-btn.active {
-  background: #ffffff;
-  color: #0f172a;
+  background: var(--paper-solid);
+  color: var(--ink);
   box-shadow: 0 2px 6px rgba(0,0,0,0.06);
 }
 
@@ -2444,7 +2444,7 @@ body:has(.court-modal-overlay) {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  background: #ffffff;
+  background: var(--paper-solid);
   border-radius: 16px;
   padding: 10px 12px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.04);
@@ -2471,17 +2471,17 @@ body:has(.court-modal-overlay) {
 .court-comment-header b {
   font-size: 13px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--ink);
 }
 
 .court-comment-header span {
   font-size: 10px;
-  color: #94a3b8;
+  color: var(--muted);
 }
 
 .court-comment-text {
   font-size: 13px;
-  color: #334155;
+  color: var(--ink);
   margin: 0;
 }
 
@@ -2493,14 +2493,14 @@ body:has(.court-modal-overlay) {
   background: transparent;
   font-size: 12px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--blue-deep);
   cursor: pointer;
   padding: 4px;
   transition: all 0.15s ease;
 }
 
 .court-comment-like-btn.liked {
-  color: #f43f5e;
+  color: var(--sangria);
 }
 
 .court-comment-like-btn:active {
@@ -2513,7 +2513,7 @@ body:has(.court-modal-overlay) {
   gap: 8px;
   padding: 6px 8px 6px 14px;
   background: rgba(255, 253, 247, 0.95);
-  border: 1.5px solid #e8d5b5;
+  border: 1.5px solid var(--cream-deep);
   border-radius: 16px;
   box-shadow: 0 2px 8px rgba(100, 65, 25, 0.06);
   margin-top: 6px;
@@ -2527,12 +2527,12 @@ body:has(.court-modal-overlay) {
   padding: 0;
   font-family: 'Inter', sans-serif;
   font-size: 13px;
-  color: #2b1810;
+  color: var(--ink);
   outline: none;
 }
 
 .court-comment-input-bar input::placeholder {
-  color: #8b6b4e;
+  color: var(--ink-soft);
   opacity: 0.7;
 }
 
@@ -2541,20 +2541,20 @@ body:has(.court-modal-overlay) {
   height: 38px;
   border-radius: 10px;
   border: none;
-  background: linear-gradient(135deg, #4a7ba8 0%, #366088 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--blue-deep) 0%, var(--blue-ink) 100%);
+  color: var(--paper-solid);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 3px 0 #244360, 0 3px 8px rgba(74, 123, 168, 0.3);
+  box-shadow: 0 3px 0 var(--blue-ink), 0 3px 8px rgba(74, 123, 168, 0.3);
   transition: all 0.12s ease;
   flex-shrink: 0;
 }
 
 .court-comment-send-btn:active {
   transform: translateY(2px);
-  box-shadow: 0 1px 0 #244360;
+  box-shadow: 0 1px 0 var(--blue-ink);
 }
 
 /* Screen 8: Trip Plan Summary (Jeju Added!) */
@@ -2579,13 +2579,13 @@ body:has(.court-modal-overlay) {
 .court-summary-title {
   font-size: 28px;
   font-weight: 900;
-  color: #0f172a;
+  color: var(--ink);
   margin: 0 0 4px;
 }
 
 .court-summary-desc {
   font-size: 14px;
-  color: #64748b;
+  color: var(--blue-deep);
   margin: 0 0 20px;
 }
 
@@ -2601,16 +2601,16 @@ body:has(.court-modal-overlay) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--paper-solid);
+  border: 1px solid var(--paper-solid);
   border-radius: 14px;
   padding: 12px 16px;
   transition: all 0.2s ease;
 }
 
 .court-checklist-item.is-planned {
-  background: #ffffff;
-  border-color: #a7f3d0;
+  background: var(--paper-solid);
+  border-color: var(--cream-soft);
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08);
 }
 
@@ -2620,23 +2620,23 @@ body:has(.court-modal-overlay) {
   gap: 10px;
   font-size: 14px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--ink);
 }
 
 .court-check-status {
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--muted);
   font-weight: 600;
 }
 
 .court-check-status.planned {
-  color: #059669;
+  color: var(--success);
   font-weight: 750;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: #ecfdf5;
-  border: 1px solid #a7f3d0;
+  background: var(--paper-solid);
+  border: 1px solid var(--cream-soft);
   padding: 3px 10px;
   border-radius: 8px;
   font-size: 12px;
@@ -2657,7 +2657,7 @@ body:has(.court-modal-overlay) {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  color: #102047;
+  color: var(--blue-ink);
   position: relative;
   transition: transform 0.2s ease;
 }
@@ -2669,7 +2669,7 @@ body:has(.court-modal-overlay) {
   height: 7px;
   border-radius: 99px;
   bottom: 20px;
-  background: #1877f2;
+  background: var(--blue-deep);
   opacity: 0.22;
 }
 
@@ -2686,7 +2686,7 @@ body:has(.court-modal-overlay) {
   font-size: 11px;
   font-weight: 800;
   background: rgba(255, 255, 255, 0.95);
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--paper-solid);
   border-radius: 99px;
   padding: 2px 8px;
   z-index: 8;
@@ -3051,7 +3051,7 @@ body:has(.court-modal-overlay) {
   height: min(58vh, 420px);
   display: grid;
   place-items: center;
-  color: #7b2b31;
+  color: var(--sangria-deep);
   filter: drop-shadow(0 26px 42px rgba(0,0,0,.34));
   animation: courtGachaProductFloat 3600ms cubic-bezier(.2,.8,.2,1) both;
 }
@@ -3099,8 +3099,8 @@ body:has(.court-modal-overlay) {
   left: 0;
   width: 144px;
   height: 72px;
-  border: 5px solid #7b2b31;
-  background: #e7bb6f;
+  border: 5px solid var(--sangria-deep);
+  background: var(--warning);
   box-shadow: inset -14px -10px 0 rgba(123, 43, 49, .12), inset 12px 10px 0 rgba(255, 255, 255, .24);
 }
 
@@ -3114,7 +3114,7 @@ body:has(.court-modal-overlay) {
 .court-skipped-gacha-pack__capsule b {
   bottom: 0;
   border-radius: 0 0 86px 86px;
-  background: #fff5dc;
+  background: var(--paper-solid);
 }
 
 .court-skipped-gacha-pack__paper {
@@ -3124,10 +3124,10 @@ body:has(.court-modal-overlay) {
   max-width: 160px;
   padding: 12px 14px;
   z-index: 3;
-  border: 2px solid #d9a56d;
+  border: 2px solid var(--warning);
   border-radius: 12px;
-  background: #fffaf0;
-  color: #7b2b31;
+  background: var(--paper-solid);
+  color: var(--sangria-deep);
   font-size: 15px;
   font-weight: 900;
   line-height: 1.15;
@@ -3149,7 +3149,7 @@ body:has(.court-modal-overlay) {
   z-index: 4;
   width: min(82vw, 330px);
   transform: translateX(-50%);
-  color: #fff5dc;
+  color: var(--paper-solid);
   font-size: 16px;
   font-weight: 950;
   letter-spacing: 0;
@@ -3252,21 +3252,21 @@ body:has(.court-modal-overlay) {
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  border: 2px dashed #94a3b8;
-  background: #f8fafc;
+  border: 2px dashed var(--muted);
+  background: var(--paper-solid);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #475569;
+  color: var(--ink);
   cursor: pointer;
   transition: all 0.18s ease;
   box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
 .court-lobby-add-btn:hover {
-  border-color: #1877f2;
-  color: #1877f2;
-  background: #eff6ff;
+  border-color: var(--blue-deep);
+  color: var(--blue-deep);
+  background: var(--paper-solid);
   transform: scale(1.06);
 }
 
