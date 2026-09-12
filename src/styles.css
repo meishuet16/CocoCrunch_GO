@@ -6806,6 +6806,12 @@ main {
   fill: var(--cream);
 }
 
+.spatial-service-pin circle { fill: var(--paper); stroke: var(--sangria); stroke-width: 1.5; }
+.spatial-service-pin text { fill: var(--sangria); font-size: 8px; font-weight: 950; pointer-events: none; }
+.spatial-service-pin.pharmacy circle { stroke: var(--blue-deep); }
+.spatial-service-pin.pharmacy text { fill: var(--blue-deep); }
+.spatial-service-pin:hover circle { fill: var(--cream-deep); }
+
 .spatial-live-route {
   display: flex;
   justify-content: space-between;
@@ -6820,6 +6826,10 @@ main {
 .spatial-live-route span { color: var(--blue-ink); font-size: 8px; font-weight: 950; letter-spacing: .08em; }
 .spatial-live-route b { font-size: 11px; line-height: 1.3; }
 .spatial-live-route small { color: var(--muted); font-size: 9px; line-height: 1.35; text-align: right; }
+
+.spatial-service-pins { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.spatial-service-pins span { color: var(--sangria); font-size: 8px; font-weight: 950; letter-spacing: .08em; }
+.spatial-service-pins a { color: var(--blue-ink); font-size: 9px; font-weight: 800; }
 
 .onboarding-shell {
   min-height: 100dvh;

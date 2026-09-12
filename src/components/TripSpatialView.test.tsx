@@ -128,6 +128,7 @@ describe('TripSpatialView', () => {
           timelineLabel: 'Mark arrival to advance the local route',
           weatherLabel: 'Weather refreshes in the panel above · Open-Meteo',
         }}
+        servicePins={[{ id: 'hospital', label: 'Hospital', kind: 'hospital', query: 'hospital near Tokyo' }]}
       />,
     );
 
@@ -144,6 +145,8 @@ describe('TripSpatialView', () => {
     expect(html).toContain('Last manual check-in → Scenic cafe block');
     expect(html).toContain('Weather refreshes in the panel above · Open-Meteo');
     expect(html).toContain('no device location, traffic, or turn-by-turn navigation connected');
+    expect(html).toContain('NEARBY HELP · PROTOTYPE');
+    expect(html).toContain('https://maps.google.com/?q=hospital%20near%20Tokyo');
   });
 
   it('describes only supplied traveling context in the saved-context cue', async () => {

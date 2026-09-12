@@ -31,6 +31,13 @@ export type SpatialLiveRoute = {
   weatherLabel: string;
 };
 
+export type SpatialServicePin = {
+  id: string;
+  label: string;
+  query: string;
+  kind: 'hospital' | 'pharmacy' | 'luggage';
+};
+
 type TripSpatialViewProps = {
   mode: SpatialMode;
   destination: string;
@@ -44,6 +51,7 @@ type TripSpatialViewProps = {
   disruptionLabel?: string;
   photoSummary?: SpatialPhotoSummary;
   liveRoute?: SpatialLiveRoute;
+  servicePins?: SpatialServicePin[];
   overlay?: ReactNode;
 };
 
@@ -87,6 +95,7 @@ export function TripSpatialView({
   disruptionLabel,
   photoSummary,
   liveRoute,
+  servicePins = [],
   overlay,
 }: TripSpatialViewProps) {
   const visibleStops = plan.items.filter(item => item.kind !== 'buffer').slice(0, stopPositions.length);
@@ -134,6 +143,14 @@ export function TripSpatialView({
             <circle cx="72" cy="112" r="8" />
             <circle cx="72" cy="112" r="3" />
           </g>}
+          {mode === 'traveling' && servicePins.map((pin, index) => {
+            const point = [{ x: 250, y: 122 }, { x: 290, y: 142 }, { x: 174, y: 135 }][index];
+            if (!point) return null;
+            return <a className={`spatial-service-pin ${pin.kind}`} href={`https://maps.google.com/?q=${encodeURIComponent(pin.query)}`} target="_blank" rel="noreferrer" key={pin.id} aria-label={`Navigate to ${pin.label} in a map app (prototype link)`}>
+              <circle cx={point.x} cy={point.y} r="8" />
+              <text x={point.x} y={point.y + 3} textAnchor="middle">{pin.kind === 'hospital' ? 'H' : pin.kind === 'pharmacy' ? 'P' : 'L'}</text>
+            </a>;
+          })}
         </svg>
         {overlay && <div className="spatial-overlay">{overlay}</div>}
       </div>
@@ -190,6 +207,10 @@ export function TripSpatialView({
             <div><span>LIVE ROUTING · PROTOTYPE</span><b>{liveRoute.currentLocation} → {liveRoute.target}</b><small>{liveRoute.eta} · {liveRoute.timelineLabel}</small></div>
             <small>{liveRoute.weatherLabel}</small>
           </section>}
+          {servicePins.length > 0 && <div className="spatial-service-pins" aria-label="Nearby service prototype pins">
+            <span>NEARBY HELP · PROTOTYPE</span>
+            {servicePins.map(pin => <a href={`https://maps.google.com/?q=${encodeURIComponent(pin.query)}`} target="_blank" rel="noreferrer" key={pin.id}>{pin.label} ↗</a>)}
+          </div>}
           {canPreviewWalk && <CocoPathPreview
             from={{ x: stopPositions[previewFromIndex].x / 340 * 100, y: stopPositions[previewFromIndex].y / 180 * 100, label: visibleStops[previewFromIndex].name }}
             to={{ x: stopPositions[previewToIndex].x / 340 * 100, y: stopPositions[previewToIndex].y / 180 * 100, label: visibleStops[previewToIndex].name }}

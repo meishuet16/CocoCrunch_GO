@@ -1355,6 +1355,11 @@ export default function AppRescued() {
           timelineLabel: arrivalChecked ? 'Timeline is progressing' : 'Mark arrival to advance the local route',
           weatherLabel: 'Weather refreshes in the panel above · Open-Meteo',
         }}
+        servicePins={[
+          { id: 'hospital', label: 'Hospital', kind: 'hospital', query: `hospital near ${destination}` },
+          { id: 'pharmacy', label: 'Pharmacy', kind: 'pharmacy', query: `pharmacy near ${destination}` },
+          { id: 'luggage', label: 'Luggage', kind: 'luggage', query: `luggage storage near ${destination}` },
+        ]}
         overlay={<Coco tiny mood={delay ? 'panic' : 'happy'} context="travel" />}
       />
     </>;

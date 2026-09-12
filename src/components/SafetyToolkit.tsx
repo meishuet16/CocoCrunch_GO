@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-type SafetyService = 'hospital' | 'pharmacy' | 'luggage';
+export type SafetyService = 'hospital' | 'pharmacy' | 'luggage';
 
 const localResults: Record<SafetyService, { name: string; note: string }[]> = {
   hospital: [
@@ -31,6 +31,6 @@ export function SafetyToolkit({ destination }: { destination: string }) {
       <div><b>Nearby useful places</b><small>Choose the kind of help you need in {destination}.</small><span className="inline-actions"><button onClick={() => setService('hospital')}>Hospital</button><button onClick={() => setService('pharmacy')}>Pharmacy</button><button onClick={() => setService('luggage')}>Luggage</button></span></div>
       <div><b>Emergency contact</b><small>{contactReady ? 'A local prototype contact card is ready to review.' : 'Keep a contact card ready before you need it.'}</small><button className="secondary" onClick={() => setContactReady(true)}>{contactReady ? 'Contact card ready' : 'Prepare contact card'}</button></div>
     </div>
-    {service && <section className="adapter-note" aria-live="polite"><b>{service[0].toUpperCase() + service.slice(1)} suggestions</b>{localResults[service].map(result => <small key={result.name}>{result.name} · {result.note}</small>)}<small>Live search will replace this list when a provider is connected.</small></section>}
+    {service && <section className="adapter-note" aria-live="polite"><b>{service[0].toUpperCase() + service.slice(1)} suggestions</b>{localResults[service].map(result => <div key={result.name}><small>{result.name} · {result.note}</small><a href={`https://maps.google.com/?q=${encodeURIComponent(`${result.name}, ${destination}`)}`} target="_blank" rel="noreferrer">Open map navigation ↗</a></div>)}<small>Map links and pins are prototype handoffs. Live search will replace this list when a provider is connected.</small></section>}
   </>;
 }
