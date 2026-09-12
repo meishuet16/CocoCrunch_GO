@@ -76,7 +76,7 @@ Tools such as **TripIt** are useful for consolidating booking confirmations into
 
 CocoCrunch focuses on that gap.
 
-> **Core problem statement:**
+> **Core problem statement:**  
 > How might we help solo and group travellers move from scattered inspiration, preferences, bookings, and constraints to one realistic trip that can still adapt transparently when reality changes?
 
 ---
@@ -452,6 +452,20 @@ The building phase focuses first on preserving the complete end-to-end user jour
 
 **Provider-dependent scope:** direct booking/checkout, arbitrary external-site parsing, and commercial inventory depend on API access and are implemented only where the provider permits it.
 
+### Resource & Time Awareness
+
+NJHL is a **four-member student team working within a three-week development period**, so we prioritise a complete end-to-end journey before replacing every prototype adapter with a live service.
+
+| Constraint | Impact on the project | Our response |
+| --- | --- | --- |
+| **Limited development time** | Connecting every service at once could leave the core journey incomplete. | Build and validate the full before → during → after experience first, then connect the highest-value services. |
+| **Small team size** | Design, frontend development, testing, integration, and presentation work compete for the same capacity. | Keep ownership focused and reuse a consistent typed domain model across the product. |
+| **API access & commercial approval** | Live travel inventory, booking, and some external platforms may require approval, quotas, or partner agreements. | Keep provider-dependent capabilities behind adapters so the core product remains demonstrable even when a live provider is unavailable. |
+| **Usage cost** | AI, maps, storage, messaging, and travel-provider services can introduce usage-based fees. | Start with free or low-cost tiers where suitable, limit unnecessary requests, and prioritise integrations with the clearest user value. |
+| **Privacy & security** | Location, emergency contacts, group chat, and shared photos contain sensitive user data. | Keep sharing opt-in, separate permissions by feature/contact, and move secrets and protected data behind authenticated backend services in the connected architecture. |
+
+This keeps the scope **ambitious but buildable**: the current prototype demonstrates the complete product logic and journey, while the target architecture shows how live services can be added responsibly when time, budget, and provider access allow.
+
 ---
 
 ## 5.4 Reach & Scalability
@@ -460,4 +474,4 @@ CocoCrunch can begin with **solo travellers and small friend groups**, where pla
 
 The scalable asset is not only the itinerary. It is the connected structure of **preferences → protected commitments → proposals → decisions → adjustments → memories → reusable public trips**.
 
-With the target architecture, shared state moves from one browser into authenticated database records, group events become realtime, media moves into access-controlled storage, and travel providers sit behind backend adapters. This allows new destinations, partners, and provider integrations to be added without redesigning the user journey.
+With the target architecture, shared state moves from one browser into authenticated database records, group events become realtime, media moves into access-controlled storage, and travel providers sit behind backend adapters. This allows CocoCrunch to grow from student and friend-group travel into family and larger-group use cases, while adding new destinations, partners, and provider integrations without redesigning the core journey.
