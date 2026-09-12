@@ -6811,6 +6811,8 @@ main {
 .spatial-service-pin.pharmacy circle { stroke: var(--blue-deep); }
 .spatial-service-pin.pharmacy text { fill: var(--blue-deep); }
 .spatial-service-pin:hover circle { fill: var(--cream-deep); }
+.spatial-photo-pin circle { fill: var(--sangria); stroke: var(--cream); stroke-width: 2; }
+.spatial-photo-pin text { fill: var(--cream); font-size: 9px; pointer-events: none; }
 
 .spatial-live-route {
   display: flex;
@@ -6830,6 +6832,11 @@ main {
 .spatial-service-pins { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
 .spatial-service-pins span { color: var(--sangria); font-size: 8px; font-weight: 950; letter-spacing: .08em; }
 .spatial-service-pins a { color: var(--blue-ink); font-size: 9px; font-weight: 800; }
+.spatial-photo-pins { display: grid; gap: 3px; padding: 9px 11px; border-left: 3px solid var(--sangria); background: var(--paper); }
+.spatial-photo-pins span { color: var(--sangria); font-size: 8px; font-weight: 950; letter-spacing: .08em; }
+.spatial-photo-pins small { color: var(--muted); font-size: 9px; }
+.photo-audience { display: flex; gap: 10px; margin: 0; border: 0; padding: 0; font-size: 10px; }
+.photo-audience legend { color: var(--muted); font-size: 9px; }
 
 .split-member-picker {
   display: flex;

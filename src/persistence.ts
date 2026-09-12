@@ -47,6 +47,15 @@ export type GroupSplitPlan = {
   suggestionSource: 'prototype-midpoint' | 'manual';
 };
 
+export type PhotoMemoryArtifact = {
+  id: string;
+  title: string;
+  body: string;
+  source: string;
+  locationLabel: string;
+  audience: 'personal' | 'group';
+};
+
 export type CourtOptionState = {
   id: string;
   label: string;
@@ -128,6 +137,7 @@ export type PersistedState = {
   groupChannelMessages?: GroupChannelMessage[];
   groupCourtUnreadCount?: number;
   groupSplitPlan?: GroupSplitPlan;
+  photoMemoryArtifacts?: PhotoMemoryArtifact[];
   flightBooking?: FlightBookingState;
   flightBookingDraft?: string;
   accommodationBooking?: AccommodationBookingState;

@@ -38,6 +38,13 @@ export type SpatialServicePin = {
   kind: 'hospital' | 'pharmacy' | 'luggage';
 };
 
+export type SpatialPhotoPin = {
+  id: string;
+  title: string;
+  locationLabel: string;
+  audience: 'personal' | 'group';
+};
+
 type TripSpatialViewProps = {
   mode: SpatialMode;
   destination: string;
@@ -52,6 +59,7 @@ type TripSpatialViewProps = {
   photoSummary?: SpatialPhotoSummary;
   liveRoute?: SpatialLiveRoute;
   servicePins?: SpatialServicePin[];
+  photoPins?: SpatialPhotoPin[];
   overlay?: ReactNode;
 };
 
@@ -96,6 +104,7 @@ export function TripSpatialView({
   photoSummary,
   liveRoute,
   servicePins = [],
+  photoPins = [],
   overlay,
 }: TripSpatialViewProps) {
   const visibleStops = plan.items.filter(item => item.kind !== 'buffer').slice(0, stopPositions.length);
@@ -150,6 +159,14 @@ export function TripSpatialView({
               <circle cx={point.x} cy={point.y} r="8" />
               <text x={point.x} y={point.y + 3} textAnchor="middle">{pin.kind === 'hospital' ? 'H' : pin.kind === 'pharmacy' ? 'P' : 'L'}</text>
             </a>;
+          })}
+          {mode === 'traveling' && photoPins.slice(0, 3).map((pin, index) => {
+            const point = [{ x: 152, y: 62 }, { x: 232, y: 58 }, { x: 286, y: 90 }][index];
+            if (!point) return null;
+            return <g className="spatial-photo-pin" key={pin.id} aria-label={`${pin.title} photo pin at ${pin.locationLabel}`}>
+              <circle cx={point.x} cy={point.y} r="7" />
+              <text x={point.x} y={point.y + 3} textAnchor="middle">●</text>
+            </g>;
           })}
         </svg>
         {overlay && <div className="spatial-overlay">{overlay}</div>}
@@ -211,6 +228,7 @@ export function TripSpatialView({
             <span>NEARBY HELP · PROTOTYPE</span>
             {servicePins.map(pin => <a href={`https://maps.google.com/?q=${encodeURIComponent(pin.query)}`} target="_blank" rel="noreferrer" key={pin.id}>{pin.label} ↗</a>)}
           </div>}
+          {photoPins.length > 0 && <div className="spatial-photo-pins" aria-label="Saved photo memory pins"><span>PHOTO PINS</span>{photoPins.map(pin => <small key={pin.id}>{pin.title} · {pin.locationLabel} · {pin.audience === 'group' ? 'shared album' : 'personal memory'}</small>)}</div>}
           {canPreviewWalk && <CocoPathPreview
             from={{ x: stopPositions[previewFromIndex].x / 340 * 100, y: stopPositions[previewFromIndex].y / 180 * 100, label: visibleStops[previewFromIndex].name }}
             to={{ x: stopPositions[previewToIndex].x / 340 * 100, y: stopPositions[previewToIndex].y / 180 * 100, label: visibleStops[previewToIndex].name }}

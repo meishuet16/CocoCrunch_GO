@@ -34,7 +34,7 @@ import {
 } from './domain/preferences';
 import { buildLearningProposal, confirmLearningProposal, type LearningProposal } from './domain/learning';
 import { normalizeBudgetActuals, paceEvidenceSummary, rateDecision, updateBudgetActual } from './domain/retrospective';
-import { derivePersistedTripState, loadPersisted, resetTripScopedSharing, savePersisted, type CompletedPaceEvidence, type ConfirmedLearningRecord, type CourtOptionState, type DecisionRecord, type FlightBookingState, type AccommodationBookingState, type GroupSplitPlan } from './persistence';
+import { derivePersistedTripState, loadPersisted, resetTripScopedSharing, savePersisted, type CompletedPaceEvidence, type ConfirmedLearningRecord, type CourtOptionState, type DecisionRecord, type FlightBookingState, type AccommodationBookingState, type GroupSplitPlan, type PhotoMemoryArtifact } from './persistence';
 import { RecommendationEvidenceText } from './components/RecommendationEvidenceText';
 import { EverydayGachaMachine } from './components/EverydayGachaMachine';
 import { LuckyDrawReveal } from './components/LuckyDrawReveal';
@@ -446,6 +446,7 @@ export default function AppRescued() {
   const [mood, setMood] = useState<Mood>(storedPace?.mood ?? null);
   const [split, setSplit] = useState(false);
   const [groupSplitPlan, setGroupSplitPlan] = useState<GroupSplitPlan>(stored.groupSplitPlan ?? { memberIds: [], destination: '', meetingPoint: '', meetingTime: '', suggestionSource: 'prototype-midpoint' });
+  const [photoMemoryArtifacts, setPhotoMemoryArtifacts] = useState<PhotoMemoryArtifact[]>(stored.photoMemoryArtifacts ?? []);
   const [privacy, setPrivacy] = useState<Privacy>(stored.privacy ?? 'status');
   const [continuousLocation, setContinuousLocation] = useState(Boolean(stored.continuousLocation));
   const [reported, setReported] = useState(false);
@@ -678,9 +679,9 @@ export default function AppRescued() {
       recommendations: recommendations.map(({ name, saved, added }) => ({ name, saved, added })),
       tripIntent,
       worthIt, profileLearned, learningProposal: learningProposal?.status === 'confirmed' ? undefined : learningProposal ?? undefined, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, onboardingCountryCode, onboardingBirthday, basePackingPreferences, tripCreated, tripPhase,
-      members, memberPreferenceProfiles, backupCandidates, appliedRepair: appliedRepair ?? undefined, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, revivedWishIds: ghostWishes.filter(wish => wish.status === 'revived').map(wish => wish.id), destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, itineraryOrder, groupChannelMessages, groupCourtUnreadCount, groupSplitPlan, flightBooking, flightBookingDraft, accommodationBooking, accommodationBookingDraft,
+      members, memberPreferenceProfiles, backupCandidates, appliedRepair: appliedRepair ?? undefined, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, revivedWishIds: ghostWishes.filter(wish => wish.status === 'revived').map(wish => wish.id), destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, itineraryOrder, groupChannelMessages, groupCourtUnreadCount, groupSplitPlan, photoMemoryArtifacts, flightBooking, flightBookingDraft, accommodationBooking, accommodationBookingDraft,
     });
-  }, [mode, destination, readyConfirmed, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals, delay, mood, arrivalChecked, privacy, continuousLocation, recommendations, tripIntent, worthIt, profileLearned, learningProposal, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, onboardingCountryCode, onboardingBirthday, basePackingPreferences, tripCreated, tripPhase, members, memberPreferenceProfiles, backupCandidates, appliedRepair, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, ghostWishes, destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, itineraryOrder, groupChannelMessages, groupCourtUnreadCount, groupSplitPlan, flightBooking, flightBookingDraft, accommodationBooking, accommodationBookingDraft]);
+  }, [mode, destination, readyConfirmed, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals, delay, mood, arrivalChecked, privacy, continuousLocation, recommendations, tripIntent, worthIt, profileLearned, learningProposal, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, onboardingCountryCode, onboardingBirthday, basePackingPreferences, tripCreated, tripPhase, members, memberPreferenceProfiles, backupCandidates, appliedRepair, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, ghostWishes, destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, itineraryOrder, groupChannelMessages, groupCourtUnreadCount, groupSplitPlan, photoMemoryArtifacts, flightBooking, flightBookingDraft, accommodationBooking, accommodationBookingDraft]);
 
   function setProfileField(field: keyof TravelProfile, value: string) {
     setProfile(current => ({ ...current, [field]: value }));
@@ -1126,6 +1127,7 @@ export default function AppRescued() {
     setArrivalChecked(false);
     setSplit(false);
     setGroupSplitPlan({ memberIds: [], destination: '', meetingPoint: '', meetingTime: '', suggestionSource: 'prototype-midpoint' });
+    setPhotoMemoryArtifacts([]);
     setBackupCandidates([]);
     setCourtOptions(defaultCourtOptions);
     setCourtVotes(defaultVotes);
@@ -1340,7 +1342,7 @@ export default function AppRescued() {
       <section className="energy-check"><span>HOW’S THE GROUP?</span><div>{(['great', 'okay', 'tired'] as const).map(value => <button key={value} className={mood === value ? 'active' : ''} onClick={() => setMood(value)}>{value === 'great' ? '⚡ Great' : value === 'okay' ? '🙂 Okay' : '🥱 Tired'}</button>)}</div>{mood === 'tired' && <small>Coco suggests dropping one floating item and adding 45 min rest. Anchors stay untouched.</small>}</section>
       {mode === 'group' && <section className="heartbeat"><span>GROUP HEARTBEAT</span><b>{delay ? 'Needs a decision' : split ? 'Can reunite on time' : arrivalChecked ? 'Together at the anchor' : 'Status check pending'}</b><small>Only shared status is shown. Exact group coordinates stay hidden by default.</small></section>}
       {mode === 'group' && <GroupSplit members={members} value={groupSplitPlan} active={split} onChange={setGroupSplitPlan} onRequest={() => openGovernedAction('split-on')} onRequestReunion={() => openGovernedAction('split-off')} />}
-      <details className="during-tools secondary-launcher"><summary>More tools · sharing, reunion, safety & play</summary><div className="contextual-section-heading"><span>WHEN YOU NEED A HAND</span><small>These tools stay secondary to Today, conditions, and repair.</small></div><div className="during-tool-group"><span className="tool-group-label">SHARE & SAFETY</span><MiniTool icon={Send} label="Family Window" note={reported ? 'Latest reassurance sent' : 'Reassurance, not surveillance'} onClick={() => setDrawer('family')} /><MiniTool icon={MapPin} label="Location privacy" note="Permission and provider boundary" onClick={() => setDrawer('location')} /><MiniTool icon={Users} label="Reunion agreement" note={`${reunion.place} · ${reunion.time} · ±${reunion.tolerance} min`} onClick={() => setDrawer('commitments')} /><MiniTool icon={Heart} label="Safety + local help" note="Prototype contact and nearby useful info" onClick={() => setDrawer('safety')} /></div><div className="during-tool-group"><span className="tool-group-label">EXPLAIN & PLAY</span><MiniTool icon={Sparkles} label="Ask Coco" note={assistantApplied ? 'Suggestion applied · undo available' : 'Read-only until you confirm'} onClick={() => setDrawer('assistant')} /><MiniTool icon={Sparkles} label="Everyday Gacha" note="Real choice · never governance" onClick={() => setDrawer('gacha')} /><MiniTool icon={Sparkles} label="Lucky Draw" note="Entertainment only · isolated from decisions" onClick={() => setDrawer('lucky')} /></div></details>
+      <details className="during-tools secondary-launcher"><summary>More tools · sharing, reunion, safety & play</summary><div className="contextual-section-heading"><span>WHEN YOU NEED A HAND</span><small>These tools stay secondary to Today, conditions, and repair.</small></div><div className="during-tool-group"><span className="tool-group-label">SHARE & SAFETY</span><MiniTool icon={Send} label="Family Window" note={reported ? 'Latest reassurance sent' : 'Reassurance, not surveillance'} onClick={() => setDrawer('family')} /><MiniTool icon={MapPin} label="Location privacy" note="Permission and provider boundary" onClick={() => setDrawer('location')} /><MiniTool icon={Users} label="Reunion agreement" note={`${reunion.place} · ${reunion.time} · ±${reunion.tolerance} min`} onClick={() => setDrawer('commitments')} /><MiniTool icon={Heart} label="Safety + local help" note="Prototype contact and nearby useful info" onClick={() => setDrawer('safety')} /><MiniTool icon={Image} label="Photo pin + memory" note="Local metadata prototype; no upload" onClick={() => setDrawer('import')} /></div><div className="during-tool-group"><span className="tool-group-label">EXPLAIN & PLAY</span><MiniTool icon={Sparkles} label="Ask Coco" note={assistantApplied ? 'Suggestion applied · undo available' : 'Read-only until you confirm'} onClick={() => setDrawer('assistant')} /><MiniTool icon={Sparkles} label="Everyday Gacha" note="Real choice · never governance" onClick={() => setDrawer('gacha')} /><MiniTool icon={Sparkles} label="Lucky Draw" note="Entertainment only · isolated from decisions" onClick={() => setDrawer('lucky')} /></div></details>
       <TripSpatialView
         mode="traveling"
         destination={destination}
@@ -1363,6 +1365,7 @@ export default function AppRescued() {
           { id: 'pharmacy', label: 'Pharmacy', kind: 'pharmacy', query: `pharmacy near ${destination}` },
           { id: 'luggage', label: 'Luggage', kind: 'luggage', query: `luggage storage near ${destination}` },
         ]}
+        photoPins={photoMemoryArtifacts}
         overlay={<Coco tiny mood={delay ? 'panic' : 'happy'} context="travel" />}
       />
     </>;
@@ -1371,6 +1374,7 @@ export default function AppRescued() {
   function renderMemories() {
     const keepsakes = [
       ...decisionHistory.map(record => ({ id: record.id, title: record.topic, body: record.decision, source: `Recorded ${record.kind} decision · ${record.createdAt}` })),
+      ...photoMemoryArtifacts,
       ...(ritualRecords.authoredMemoryNote ? [{ id: 'authored-note', title: 'My memory note', body: ritualRecords.authoredMemoryNote, source: 'Explicitly saved personal note' }] : []),
     ];
     const photoMetadata = photoImport ? importPhotoMetadata() : null;
@@ -1902,7 +1906,7 @@ export default function AppRescued() {
       {drawer === 'family' && <FamilyWindowPanel privacy={privacy} continuousLocation={continuousLocation} reported={reported} delayed={delay} destination={destination} onReviewLocation={() => setDrawer('location')} onSendReassurance={() => setReported(true)} />}
       {drawer === 'location' && <LocationPrivacyPanel privacy={privacy} continuousLocation={continuousLocation} onOpenFamily={() => setDrawer('family')} onPrivacyChange={setPrivacy} />}
       {drawer === 'community' && <CommunityPublishPanel published={published} onChange={setPublished} />}
-      {drawer === 'import' && <PhotoJournalCapture destination={destination} onIndex={() => { setPhotoIndexed(true); setPhotoImport(true); setDrawer(null); }} />}
+      {drawer === 'import' && <PhotoJournalCapture destination={destination} groupMode={mode === 'group'} onIndex={() => { setPhotoIndexed(true); setPhotoImport(true); }} onSaveMoment={(entry, audience) => { setPhotoMemoryArtifacts(current => [...current, { id: `photo-${Date.now()}-${current.length}`, title: entry.name, body: `${entry.note || 'A selected trip moment.'}\n\nPrototype metadata: ${entry.takenAt} · ${destination} photo pin.`, source: `Explicitly saved ${audience === 'group' ? 'shared album' : 'personal'} photo memory · local prototype metadata`, locationLabel: `${destination} photo pin`, audience }]); setDrawer(null); }} />}
       {drawer === 'memoryCard' && <section className="memory-card-drawer"><h3>Memory Sticker Card</h3><p>Make one moment collectible.</p><button className="primary" onClick={() => setDrawer(null)}>Collect sticker</button></section>}
       {drawer === 'all-personas' && (
         <section className="me-all-personas-drawer">
