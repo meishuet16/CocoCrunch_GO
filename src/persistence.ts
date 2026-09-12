@@ -16,6 +16,17 @@ export type PersistedRecommendation = {
   added: boolean;
 };
 
+export type FlightBookingState = {
+  flightNumber: string;
+  departureTime: string;
+  arrivalTime: string;
+  checkInTime: string;
+  provider?: string;
+  voucherCode?: string;
+  sharedWithGroup: boolean;
+  source: 'email-prototype' | 'quote-prototype';
+};
+
 export type CourtOptionState = {
   id: string;
   label: string;
@@ -91,6 +102,8 @@ export type PersistedState = {
   groupMemberBudgets?: Record<string, number>;
   groupMemberVibes?: Record<string, string>;
   groupMemberDestinations?: Record<string, string>;
+  flightBooking?: FlightBookingState;
+  flightBookingDraft?: string;
   members?: TripMember[];
   memberPreferenceProfiles?: Record<string, MemberPreferenceProfile>;
   backupCandidates?: BackupCandidate[];

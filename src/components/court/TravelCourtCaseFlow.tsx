@@ -19,6 +19,7 @@ import {
 } from './courtSoundAndHaptics';
 import './court-styles.css';
 import type { CocoContext } from '../coco/assets';
+import type { FlightBookingState } from '../../persistence';
 
 export type CourtStep =
   | 'lobby'       // Screen 1: Intro / Lobby
@@ -87,6 +88,7 @@ export interface TravelCourtCaseFlowProps {
   courtMembers?: DynamicCourtMember[];
   onUpdateMembers?: (members: DynamicCourtMember[]) => void;
   onCocoContextChange?: (context: Extract<CocoContext, 'court' | 'courtTie'>) => void;
+  flightBooking?: FlightBookingState;
 }
 
 export function MobileStatusBar({ light = false }: { light?: boolean }) {
@@ -787,6 +789,7 @@ export function TravelCourtCaseFlow({
   courtMembers: externalMembers,
   onUpdateMembers,
   onCocoContextChange,
+  flightBooking,
 }: TravelCourtCaseFlowProps) {
   const [currentStep, setCurrentStep] = useState<CourtStep>(initialStep);
 
@@ -4624,8 +4627,8 @@ export function TravelCourtCaseFlow({
             const activitiesTitle = activitiesCase ? activitiesCase.title : '';
 
             const flightsCase = CASES.find(c => c.type === 'flight' && caseOutcomes[c.id]);
-            const flightsPlanned = Boolean(flightsCase);
-            const flightsTitle = flightsCase ? flightsCase.title : '';
+            const flightsPlanned = Boolean(flightBooking ?? flightsCase);
+            const flightsTitle = flightBooking ? `${flightBooking.flightNumber} · ${flightBooking.departureTime} → ${flightBooking.arrivalTime}` : flightsCase ? flightsCase.title : '';
 
             const accommodationCase = CASES.find(c => (c.type === 'hotel' || c.type === 'accommodation') && caseOutcomes[c.id]);
             const accommodationPlanned = Boolean(accommodationCase);

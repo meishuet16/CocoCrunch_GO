@@ -7066,6 +7066,52 @@ main {
   font-family: var(--font-editorial, Georgia, serif);
 }
 
+.trip-add-menu {
+  position: fixed;
+  right: 18px;
+  bottom: calc(76px + env(safe-area-inset-bottom));
+  z-index: 15;
+}
+
+.trip-add-menu summary {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--sangria);
+  color: var(--paper-solid);
+  cursor: pointer;
+  font-size: 28px;
+  font-weight: 400;
+  box-shadow: 0 8px 20px rgba(43, 33, 31, .2);
+}
+
+.trip-add-menu > div {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 8px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--paper-solid);
+  box-shadow: 0 8px 20px rgba(43, 33, 31, .15);
+}
+
+.trip-add-menu button { border: 0; border-radius: 9px; padding: 9px 12px; background: var(--paper); color: var(--ink); text-align: left; }
+
+.flight-drawer { display: grid; gap: 13px; }
+.flight-drawer details { display: grid; gap: 10px; padding: 11px; border: 1px solid var(--line); border-radius: 14px; background: var(--paper); }
+.flight-drawer summary { cursor: pointer; color: var(--ink); font-weight: 800; }
+.flight-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.flight-detail-grid span, .flight-quote { display: grid; gap: 3px; padding: 10px; border: 1px solid var(--line); border-radius: 11px; background: var(--paper); }
+.flight-detail-grid span { color: var(--muted); font-size: 10px; }
+.flight-detail-grid b { color: var(--ink); font-size: 11px; }
+.flight-quote { grid-template-columns: 1fr auto; align-items: center; }
+.flight-quote small { color: var(--muted); }
+.flight-quote button { grid-column: 1 / -1; }
+.flight-share { display: flex; gap: 8px; align-items: center; color: var(--ink); font-weight: 750; }
+
 @media (max-width: 390px) {
   .trip-setup-methods { grid-template-columns: 1fr; }
   .trip-date-grid { grid-template-columns: 1fr; }

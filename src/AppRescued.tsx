@@ -34,7 +34,7 @@ import {
 } from './domain/preferences';
 import { buildLearningProposal, confirmLearningProposal, type LearningProposal } from './domain/learning';
 import { normalizeBudgetActuals, paceEvidenceSummary, rateDecision, updateBudgetActual } from './domain/retrospective';
-import { derivePersistedTripState, loadPersisted, resetTripScopedSharing, savePersisted, type CompletedPaceEvidence, type ConfirmedLearningRecord, type CourtOptionState, type DecisionRecord } from './persistence';
+import { derivePersistedTripState, loadPersisted, resetTripScopedSharing, savePersisted, type CompletedPaceEvidence, type ConfirmedLearningRecord, type CourtOptionState, type DecisionRecord, type FlightBookingState } from './persistence';
 import { RecommendationEvidenceText } from './components/RecommendationEvidenceText';
 import { EverydayGachaMachine } from './components/EverydayGachaMachine';
 import { LuckyDrawReveal } from './components/LuckyDrawReveal';
@@ -71,6 +71,7 @@ import { CocoAssistantPrompt } from './components/CocoAssistantPrompt';
 import { CommunityPublishPanel } from './components/CommunityPublishPanel';
 import { PhotoJournalCapture } from './components/PhotoJournalCapture';
 import { OnboardingFlow } from './components/OnboardingFlow';
+import { FlightDrawer } from './components/FlightDrawer';
 import foodieHunter from './assets/coco/personas/foodie_hunter.png';
 import masterPlanner from './assets/coco/personas/master_planner.png';
 import transitNavigator from './assets/coco/personas/transit_navigator.png';
@@ -94,7 +95,7 @@ type TripMode = 'group' | 'solo';
 type Mood = 'great' | 'okay' | 'tired' | null;
 type Privacy = 'status' | 'area' | 'exact';
 type CourtView = 'upload' | 'discussion' | 'voting';
-type Drawer = 'group' | 'backup' | 'budget' | 'family' | 'location' | 'community' | 'import' | 'discover' | 'tingo' | 'tripSetup' | 'compare' | 'feasibility' | 'reminders' | 'commitments' | 'safety' | 'assistant' | 'gacha' | 'lucky' | 'memoryCard' | 'all-personas' | null;
+type Drawer = 'group' | 'backup' | 'budget' | 'family' | 'location' | 'community' | 'import' | 'discover' | 'tingo' | 'tripSetup' | 'compare' | 'feasibility' | 'reminders' | 'commitments' | 'safety' | 'assistant' | 'gacha' | 'lucky' | 'memoryCard' | 'all-personas' | 'flight' | null;
 type CommunityTrip = { id: number; title: string; author: string; match: number; saved: boolean };
 type PlaceRecommendation = DiscoveryPlace & { id: number; saved: boolean; added: boolean };
 type GhostWish = { id: number; name: string; reason: string; status: 'resting' | 'revived' | 'released' };
@@ -441,6 +442,8 @@ export default function AppRescued() {
   const [groupMemberVibes, setGroupMemberVibes] = useState<Record<string, string>>(stored.groupMemberVibes ?? {});
   const [groupMemberDestinations, setGroupMemberDestinations] = useState<Record<string, string>>(stored.groupMemberDestinations ?? {});
   const [groupUsernameSearch, setGroupUsernameSearch] = useState('');
+  const [flightBooking, setFlightBooking] = useState<FlightBookingState | undefined>(stored.flightBooking);
+  const [flightBookingDraft, setFlightBookingDraft] = useState(stored.flightBookingDraft ?? '');
   const [members, setMembers] = useState<TripMember[]>(() => {
     const loadedMembers = stored.members ?? defaultMembers;
     return loadedMembers.map(member => {
@@ -637,9 +640,9 @@ export default function AppRescued() {
       recommendations: recommendations.map(({ name, saved, added }) => ({ name, saved, added })),
       tripIntent,
       worthIt, profileLearned, learningProposal: learningProposal?.status === 'confirmed' ? undefined : learningProposal ?? undefined, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, basePackingPreferences, tripCreated, tripPhase,
-      members, memberPreferenceProfiles, backupCandidates, appliedRepair: appliedRepair ?? undefined, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, revivedWishIds: ghostWishes.filter(wish => wish.status === 'revived').map(wish => wish.id), destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations,
+      members, memberPreferenceProfiles, backupCandidates, appliedRepair: appliedRepair ?? undefined, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, revivedWishIds: ghostWishes.filter(wish => wish.status === 'revived').map(wish => wish.id), destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, flightBooking, flightBookingDraft,
     });
-  }, [mode, destination, readyConfirmed, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals, delay, mood, arrivalChecked, privacy, continuousLocation, recommendations, tripIntent, worthIt, profileLearned, learningProposal, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, basePackingPreferences, tripCreated, tripPhase, members, memberPreferenceProfiles, backupCandidates, appliedRepair, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, ghostWishes, destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations]);
+  }, [mode, destination, readyConfirmed, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals, delay, mood, arrivalChecked, privacy, continuousLocation, recommendations, tripIntent, worthIt, profileLearned, learningProposal, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, basePackingPreferences, tripCreated, tripPhase, members, memberPreferenceProfiles, backupCandidates, appliedRepair, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, ghostWishes, destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, flightBooking, flightBookingDraft]);
 
   function setProfileField(field: keyof TravelProfile, value: string) {
     setProfile(current => ({ ...current, [field]: value }));
@@ -1232,6 +1235,7 @@ export default function AppRescued() {
         {mode === 'group' && <section className="group-signal-summary paper-sheet"><div><span>PEOPLE · GROUP DNA</span><h3>{groupDNA.conflicts.length ? `${groupDNA.conflicts.length} decision${groupDNA.conflicts.length === 1 ? '' : 's'} remain visible.` : 'Shared signals are explicit, not averaged.'}</h3><p>{groupDNA.sharedPriorities[0]?.label ?? 'No shared priority yet'} · {groupDNA.budgetSensitivity} budget sensitivity</p></div><button className="secondary" onClick={() => setDrawer('group')}>Open people <ChevronRight size={14} /></button></section>}
       </section>
       <section className="trip-plan-intent-fields paper-sheet"><span>PLAN DETAILS · EDIT HERE</span><h3>Protect what matters, then leave room to move.</h3><div className="setup-fields"><label><span>Must-Go anchor</span><input value={tripInputs.mustGo} onChange={event => setTripInputField('mustGo', event.target.value)} /></label><label><span>Deal breaker</span><input value={tripInputs.dealBreaker} onChange={event => setTripInputField('dealBreaker', event.target.value)} /></label><label><span>Preference</span><input value={tripInputs.preference} onChange={event => setTripInputField('preference', event.target.value)} /></label><label><span>Flexible</span><input value={tripInputs.flexible} onChange={event => setTripInputField('flexible', event.target.value)} /></label></div></section>
+      <details className="trip-add-menu"><summary aria-label="Add to trip">+</summary><div><button onClick={() => setDrawer('flight')}>Flight</button><button disabled>Accommodation · next</button><button onClick={() => setDrawer(null)}>Plan</button></div></details>
       {mode === 'group' && <section className="conflict-ticket"><span>{courtConfirmed ? 'COURT DECISION RECORDED' : 'UNRESOLVED CONFLICT'}</span><b>{activeConflict}</b><small>{first?.label ?? 'Option A'} {firstCount} · {second?.label ?? 'Option B'} {secondCount} · {tally.tied ? 'tie · Gacha is eligible' : `${optionLabel(tally.majority)} has majority`}</small><button className="ritual-trigger" onClick={() => openCourt()}>{courtConfirmed ? 'Review Group Court' : 'Open Group Court'} <Gavel size={18} /></button></section>}
       <div className="planning-plan">
         <div className="planning-itinerary-primary">
@@ -1772,6 +1776,7 @@ export default function AppRescued() {
     return <div className={`overlay ${drawer === 'tingo' ? 'tingo-overlay' : ''}`} onMouseDown={() => { if (drawer !== 'tingo' || onboardingComplete) setDrawer(null); }}><section className={`drawer ${drawer === 'tingo' ? 'tingo-flow-drawer' : ''}`} onMouseDown={e => e.stopPropagation()}>{drawer !== 'tingo' && <button className="close" aria-label="Close drawer" onClick={() => setDrawer(null)}><X size={20} /></button>}
       {drawer === 'discover' && <><span className="drawer-kicker">DISCOVER · COCO PICKS</span><h3>Where are we going?</h3><p className="drawer-copy">Search Tokyo, Kyoto or Osaka for destination-aware prototype data. Unknown destinations are explicitly marked as fallback examples. Ranking uses your current Tingo dimensions.</p><div className="discover-search"><input className="big-input" value={exploreDestination} onChange={e => { setExploreDestination(e.target.value); setDestinationSearched(false); }} placeholder="Tokyo, Kyoto, Osaka…" /><button className="primary" onClick={searchDestination}>Search</button></div>{destinationSearched && <div className="discover-results"><span className="drawer-kicker">FOR YOUR {exploreDestination.toUpperCase()} TRIP · {tingoBehavior.recommendationBias.toUpperCase()} BIAS</span>{recommendations.map(place => <article className="community-row discover-row" key={place.id}><div><b>{place.name}</b><small>{place.match}% Tingo-adjusted match · {place.type}</small><small>{place.cost} · {place.duration}</small><small><strong>Why Coco picked this:</strong> {place.why}</small><small>{place.source === 'prototype-catalog' ? 'Local prototype catalog' : 'Fallback example · not live destination data'}</small><div className="inline-actions"><button onClick={() => toggleRecommendation(place.id, 'save')}>{place.saved ? '✓ Saved' : 'Save idea'}</button><button onClick={() => toggleRecommendation(place.id, 'add')}>{mode === 'group' ? (place.added ? '✓ Suggested to group' : 'Suggest to group') : (place.added ? '✓ In plan' : 'Add to plan')}</button></div>{mode === 'group' && <small>Suggestion only · the official Group itinerary changes only after group confirmation.</small>}</div></article>)}</div>}</>}
 {drawer === 'tingo' && renderTingoAssessment()}
+      {drawer === 'flight' && <FlightDrawer mode={mode} booking={flightBooking} draft={flightBookingDraft} onDraftChange={setFlightBookingDraft} onConfirm={setFlightBooking} onClose={() => setDrawer(null)} />}
       {drawer === 'tripSetup' && mode === 'group' && <section className="trip-setup-wizard"><div className="trip-setup-progress"><span>NEW GROUP TRIP</span><b>Step {groupSetupStep} of 6</b><div><i style={{ width: `${groupSetupStep * (100 / 6)}%` }} /></div></div>
         {groupSetupStep === 1 && <><span className="drawer-kicker">STEP 1 · GROUP LEADER</span><h3>Who is leading this trip?</h3><label className="setup-field"><span>Leader name</span><input className="big-input" value={onboardingName} onChange={event => setOnboardingName(event.target.value)} placeholder="Your name" /></label></>}
         {groupSetupStep === 2 && <><span className="drawer-kicker">STEP 2 · INVITE FRIENDS</span><h3>Bring the right people in.</h3><div className="group-invite-link"><input readOnly value="https://cococrunch.app/join/group-tokyo-demo" /><button className="secondary" onClick={() => void navigator.clipboard?.writeText('https://cococrunch.app/join/group-tokyo-demo')}>Copy link</button></div><small className="adapter-note">Prototype share link · no invitation is sent outside this local app.</small><label className="setup-field"><span>Add by username</span><input value={groupUsernameSearch} onChange={event => setGroupUsernameSearch(event.target.value)} placeholder="alex, hana, or noah" /></label><button className="secondary" disabled={!/^(alex|hana|noah)$/i.test(groupUsernameSearch.trim())} onClick={() => addGroupMemberFromUsername(groupUsernameSearch.trim())}>Add matching username</button><div className="group-setup-members">{members.map(member => <div key={member.id}><b>{member.name}</b><small>{member.inviteStatus === 'joined' ? 'Joined' : 'Invite pending'} · {member.role}</small>{member.inviteStatus === 'pending' && <button onClick={() => setMembers(current => current.map(item => item.id === member.id ? { ...item, inviteStatus: 'joined' } : item))}>Mark joined (prototype)</button>}</div>)}</div></>}
@@ -1857,6 +1862,7 @@ export default function AppRescued() {
         initialMode={courtInitialMode}
         initialStep={courtInitialStep}
         onCocoContextChange={setCourtCocoContext}
+        flightBooking={flightBooking}
         onSkippedIdeaSealed={(idea) => setSealedCourtIdeas(current => current.includes(idea) ? current : [idea, ...current])}
         onConfirmDecision={(decision) => {
           setCourtDecision(decision);

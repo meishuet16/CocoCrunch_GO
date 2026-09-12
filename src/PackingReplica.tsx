@@ -6,6 +6,7 @@ import {
 import { subscribeExperience, emitExperience } from './experience';
 import { playSound } from './sound';
 import { getItemVisualConfig } from './components/LuggageLineArt';
+import { loadPersisted } from './persistence';
 import './packing-replica.css';
 
 export type PackItem = {
@@ -106,6 +107,11 @@ export default function PackingReplica({ visible, onClose }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [sheetExpanded, setSheetExpanded] = useState(false);
   const [topZ, setTopZ] = useState(10);
+  const [flightNumber, setFlightNumber] = useState(() => loadPersisted().flightBooking?.flightNumber ?? 'FLIGHT 772');
+
+  useEffect(() => {
+    if (visible) setFlightNumber(loadPersisted().flightBooking?.flightNumber ?? 'FLIGHT 772');
+  }, [visible]);
 
   // Active Drag Info
   const [drag, setDrag] = useState<DragInfo>(null);
@@ -614,7 +620,7 @@ export default function PackingReplica({ visible, onClose }: Props) {
 
                   <div className="cover-sticker sticker-haneda">
                     <b>HND</b>
-                    <span>TOKYO · FLIGHT 772</span>
+                    <span>TOKYO · {flightNumber}</span>
                   </div>
 
                   <div className="cover-sticker sticker-fragile">
