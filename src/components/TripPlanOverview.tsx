@@ -27,6 +27,15 @@ function SortableItineraryRow({ item, label, flexible, onOpenWhy }: { item: Trip
   </button>;
 }
 
+function TransitDetail({ from, to }: { from: TripPlan['items'][number]; to: TripPlan['items'][number] }) {
+  const walkingMinutes = Math.max(5, Math.round(to.walkingKm * 14));
+  const walk = to.walkingKm <= 1.2;
+  const transport = walk ? `Walk · about ${walkingMinutes} min` : `Local transit · about ${to.transferMinutes || 18} min · RM ${Math.max(3, Math.round(to.estimatedCost * .08))}`;
+  const perPerson = to.estimatedCost ? `RM ${to.estimatedCost} per person` : 'No entry cost in prototype catalog';
+  const hours = to.kind === 'open' ? 'Flexible window · no venue hours' : to.kind === 'buffer' ? 'Buffer · no venue hours' : 'Prototype hours · 09:00–18:00';
+  return <div className="itinerary-transit-detail" aria-label={`Travel details from ${from.name} to ${to.name}`}><span>{transport}</span><small>{perPerson} · {hours}</small><em>Prototype route details · not live provider data</em></div>;
+}
+
 export function TripPlanOverview({ plan, planHealth, tripIntent, onOpenWhy, onOpenHealth, onReorder = () => undefined }: TripPlanOverviewProps) {
   const itemLabels = {
     anchor: 'Must-Go anchor',
@@ -58,7 +67,7 @@ export function TripPlanOverview({ plan, planHealth, tripIntent, onOpenWhy, onOp
         <p className="adapter-note">Drag flexible itinerary items to reschedule. Plan Health and feasibility use the reordered timeline.</p>
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={plan.items.map(item => item.id)} strategy={verticalListSortingStrategy}>
-            <div className="itinerary-timeline" aria-label="Trip timeline">{plan.items.map(item => <SortableItineraryRow key={item.id} item={item} label={itemLabels[item.kind]} flexible={tripIntent.flexible} onOpenWhy={onOpenWhy} />)}</div>
+            <div className="itinerary-timeline" aria-label="Trip timeline">{plan.items.map((item, index) => <div key={item.id}><SortableItineraryRow item={item} label={itemLabels[item.kind]} flexible={tripIntent.flexible} onOpenWhy={onOpenWhy} />{plan.items[index + 1] && <TransitDetail from={item} to={plan.items[index + 1]} />}</div>)}</div>
           </SortableContext>
         </DndContext>
       </section>
