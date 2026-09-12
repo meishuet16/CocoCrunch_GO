@@ -2863,23 +2863,6 @@
 .xr-practical-info span svg { color: var(--ink-soft); }
 .xr-practical-info b { overflow: hidden; color: var(--ink); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 
-.xr-match {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--success-soft);
-  color: var(--blue-deep);
-  font-weight: 800;
-  border-radius: 12px;
-  padding: 10px 12px;
-  margin: 14px 0;
-  font-size: 13px;
-}
-
-.xr-match span {
-  margin-left: auto;
-}
-
 .xr-detail-body h3 {
   font-size: 15px;
   font-weight: 750;
