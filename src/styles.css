@@ -7112,6 +7112,8 @@ main {
 .flight-quote button { grid-column: 1 / -1; }
 .flight-share { display: flex; gap: 8px; align-items: center; color: var(--ink); font-weight: 750; }
 
+.full-trip-marker { color: var(--sangria); font-size: 8px; font-weight: 900; letter-spacing: .09em; }
+
 @media (max-width: 390px) {
   .trip-setup-methods { grid-template-columns: 1fr; }
   .trip-date-grid { grid-template-columns: 1fr; }

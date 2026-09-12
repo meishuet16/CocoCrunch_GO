@@ -83,6 +83,7 @@ export const CommunityTripCard: React.FC<CommunityTripCardProps> = ({
             )}
           </div>
           <div className="author-meta">
+            <span className="full-trip-marker">FULL SHARED TRIP</span>
             <div className="author-name-row">
               <span className="author-name">{trip.author}</span>
               <span className="author-badge">Explicitly shared</span>
@@ -209,7 +210,7 @@ export const CommunityTripCard: React.FC<CommunityTripCardProps> = ({
           className="view-plan-cta"
           onClick={() => onCopyTrip(trip)}
         >
-          <span>Use as a starting point</span>
+          <span>Copy this trip</span>
           <ChevronRight size={14} />
         </button>}
       </footer>
