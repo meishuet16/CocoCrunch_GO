@@ -5,6 +5,7 @@ import {
   ReceiptText, RotateCcw, Send, Sparkles, Users, X
 } from 'lucide-react';
 import { emitExperience } from './experience';
+import { isPastPlannedCheckIn } from './during-deviation';
 import { playSound } from './sound';
 import { GlobalNav, type GlobalTab } from './components/GlobalNav';
 import { PostmarkStamp } from './components/PostmarkStamp';
@@ -440,6 +441,7 @@ export default function AppRescued() {
   const [courtConfirmed, setCourtConfirmed] = useState(Boolean(stored.courtConfirmed));
   const [decisionHistory, setDecisionHistory] = useState<DecisionRecord[]>(stored.decisionHistory ?? []);
   const [delay, setDelay] = useState(Boolean(storedPace?.delayed));
+  const [automaticDeviationPrompted, setAutomaticDeviationPrompted] = useState(Boolean(stored.automaticDeviationPrompted));
   const [replanPreview, setReplanPreview] = useState(false);
   const [emergencyApproved, setEmergencyApproved] = useState(false);
   const [replanApplied, setReplanApplied] = useState(Boolean(stored.appliedRepair));
@@ -622,6 +624,17 @@ export default function AppRescued() {
   const tingoComplete = tingoCompletion(tingoAnswers) === 100;
   const tripLifecycleStatus = deriveTripLifecycleStatus({ tripCreated, readyConfirmed, dates: tripIntent.dates, phase: tripPhase });
   const workspacePhase: TripPhase = tripLifecycleStatus === 'ongoing' ? 'traveling' : tripLifecycleStatus === 'completed' ? 'completed' : 'planning';
+  const automaticDeviationDetected = workspacePhase === 'traveling' && !arrivalChecked && !delay && Boolean(failedPlanItem && isPastPlannedCheckIn(new Date(), failedPlanItem.endMinutes));
+  useEffect(() => {
+    if (!automaticDeviationDetected || automaticDeviationPrompted) return;
+    setAutomaticDeviationPrompted(true);
+    setDelay(true);
+    setReplanPreview(false);
+    setAppliedRepair(null);
+    setReplanApplied(false);
+    setEmergencyApproved(false);
+    setDrawer('assistant');
+  }, [automaticDeviationDetected, automaticDeviationPrompted]);
   const outcomeReviewed = actualPaceCopy !== 'No completed pace signal yet' || Object.keys(itemReviews).length > 0;
   const expressiveAvailable = memoryEligible(outcomeReviewed, worthIt, profileLearned, learningProposal?.status);
   const journeyState = useMemo(() => deriveJourneyState({
@@ -674,14 +687,14 @@ export default function AppRescued() {
       version: 1, mode, destination, readyConfirmed, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision,
       courtOptions, activeConflict, decisionHistory,
       groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals,
-      completedPaceEvidence,
+      completedPaceEvidence, automaticDeviationPrompted,
       privacy, continuousLocation,
       recommendations: recommendations.map(({ name, saved, added }) => ({ name, saved, added })),
       tripIntent,
       worthIt, profileLearned, learningProposal: learningProposal?.status === 'confirmed' ? undefined : learningProposal ?? undefined, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, onboardingCountryCode, onboardingBirthday, basePackingPreferences, tripCreated, tripPhase,
       members, memberPreferenceProfiles, backupCandidates, appliedRepair: appliedRepair ?? undefined, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, revivedWishIds: ghostWishes.filter(wish => wish.status === 'revived').map(wish => wish.id), destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, itineraryOrder, groupChannelMessages, groupCourtUnreadCount, groupSplitPlan, photoMemoryArtifacts, flightBooking, flightBookingDraft, accommodationBooking, accommodationBookingDraft,
     });
-  }, [mode, destination, readyConfirmed, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals, delay, mood, arrivalChecked, privacy, continuousLocation, recommendations, tripIntent, worthIt, profileLearned, learningProposal, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, onboardingCountryCode, onboardingBirthday, basePackingPreferences, tripCreated, tripPhase, members, memberPreferenceProfiles, backupCandidates, appliedRepair, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, ghostWishes, destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, itineraryOrder, groupChannelMessages, groupCourtUnreadCount, groupSplitPlan, photoMemoryArtifacts, flightBooking, flightBookingDraft, accommodationBooking, accommodationBookingDraft]);
+  }, [mode, destination, readyConfirmed, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals, delay, mood, arrivalChecked, privacy, continuousLocation, recommendations, tripIntent, worthIt, profileLearned, learningProposal, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, onboardingCountryCode, onboardingBirthday, basePackingPreferences, tripCreated, tripPhase, members, memberPreferenceProfiles, backupCandidates, appliedRepair, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, ghostWishes, destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, itineraryOrder, groupChannelMessages, groupCourtUnreadCount, groupSplitPlan, photoMemoryArtifacts, automaticDeviationPrompted, flightBooking, flightBookingDraft, accommodationBooking, accommodationBookingDraft]);
 
   function setProfileField(field: keyof TravelProfile, value: string) {
     setProfile(current => ({ ...current, [field]: value }));
@@ -1119,6 +1132,7 @@ export default function AppRescued() {
     setTripCreated(false);
     setTripPhase('planning');
     setDelay(false);
+    setAutomaticDeviationPrompted(false);
     setReplanPreview(false);
     setEmergencyApproved(false);
     setReplanApplied(false);
@@ -1335,7 +1349,7 @@ export default function AppRescued() {
       <SectionTitle kicker="DURING · LIVE TRIP" title={delay ? 'Reality changed.' : 'The trip is moving.'} copy="Coco watches the plan, not your every step." />
       <WeatherGlance destination={destination} compact />
       <TodayTimeline items={visibleTripPlan.items} delay={delay} arrivalChecked={arrivalChecked} appliedRepair={replanApplied} />
-      <TripConditions delay={delay} failedItemName={failedPlanItem?.name} repairAvailable={Boolean(repairPreview?.applicable)} repairStrategy={repairPreview?.strategy} onSimulateDisruption={() => { setDelay(true); setReplanPreview(false); setAppliedRepair(null); setReplanApplied(false); setEmergencyApproved(false); }} />
+      <TripConditions delay={delay} failedItemName={failedPlanItem?.name} repairAvailable={Boolean(repairPreview?.applicable)} repairStrategy={repairPreview?.strategy} automaticDeviationDetected={automaticDeviationPrompted} onSimulateDisruption={() => { setDelay(true); setReplanPreview(false); setAppliedRepair(null); setReplanApplied(false); setEmergencyApproved(false); }} />
       {delay && !replanApplied && <section className="disruption-stage"><div className="disruption-head"><CloudRain size={26} /><div><span>TRIP CHANGE</span><b>{failedPlanItem?.timeLabel ?? 'Current'} {failedPlanItem?.name ?? 'item'} no longer fits today.</b><small>Demo condition · not a live weather alert.</small></div></div>{!replanPreview ? <><div className="ghost-suggestion"><span>SAFEST ADJUSTMENT</span><b>{repairPreview?.replacement?.name ?? (repairPreview?.strategy === 'open-recovery' ? 'Leave this time open for recovery' : 'No safe repair available')}</b><small>{repairPreview?.replacement ? `${repairPreview.replacement.support} supporters · ${repairPreview.impact.costDelta >= 0 ? '+' : ''}RM${repairPreview.impact.costDelta} · ${repairPreview.impact.timeDeltaMinutes >= 0 ? '+' : ''}${repairPreview.impact.timeDeltaMinutes} min` : repairPreview?.strategy === 'open-recovery' ? 'No direct Backup candidate; recovery time can protect the anchor.' : repairPreview?.reasons[repairPreview.reasons.length - 1] ?? 'No repair result available.'}</small></div><button className="primary" disabled={!repairPreview?.applicable} onClick={() => setReplanPreview(true)}>See the safest adjustment</button></> : <><div className="repair-impact-head"><span>REVIEW BEFORE APPLY</span><b>Protect what matters, soften the rest.</b></div><div className="repair-diff"><div><span>WHAT STAYS</span><b>{tripInputs.mustGo || anchorItem?.name || 'Must-Go anchor'}</b><small>Protected before flexible blocks move.</small></div><div><span>WHAT CHANGES</span><b>{repairPreview?.replacement?.name ?? (repairPreview?.strategy === 'open-recovery' ? 'Recovery time' : 'No replacement')}</b><small>{repairPreview?.replacement ? `${repairPreview.replacement.support} supporters` : 'No direct Backup candidate is required for recovery time.'}</small></div><div><span>IMPACT</span><b>{repairPreview ? `${repairPreview.impact.costDelta >= 0 ? '+' : ''}RM${repairPreview.impact.costDelta} · ${repairPreview.impact.timeDeltaMinutes >= 0 ? '+' : ''}${repairPreview.impact.timeDeltaMinutes} min` : 'No computed impact'}</b><small>Calculated from the repair result.</small></div></div><div className="change-ticket">{repairPreview?.preview.map(line => <div key={line}><span>PLAN CHANGE</span><b>{line}</b></div>)}</div>{repairPreview?.reasons.map(reason => <small className="adapter-note" key={reason}>{reason}</small>)}{mode === 'group' && repairPreview?.requiresGroupConfirmation && <div className="emergency-court"><span>EMERGENCY COURT · 90 SEC</span><b>{emergencyApproved ? 'Approved for this repair' : 'Group approval required'}</b><button onClick={() => setEmergencyApproved(true)}>{emergencyApproved ? '✓ Approved' : 'Simulate group approval'}</button></div>}<div className="action-row"><button className="secondary" onClick={() => setReplanPreview(false)}>Not now</button><button className="primary" disabled={!repairPreview?.applicable || (repairPreview.requiresGroupConfirmation && !emergencyApproved)} onClick={applyRepair}>Apply repair</button></div></>}</section>}
       {replanApplied && <section className="success-note"><Check size={21} /><div><b>Plan repaired.</b><small>{appliedRepair?.preview.join(' · ')} · undo available</small></div><button onClick={undoRepair}>Undo</button></section>}
       <section className="arrival-check"><div><span>PROGRESS CHECK</span><b>{arrivalChecked ? `Arrived at ${anchorItem?.name ?? 'the anchor'}.` : `Has the group reached ${anchorItem?.name ?? 'the morning anchor'}?`}</b><small>Manual check-in is always available; location permission is not required.</small></div><button onClick={() => setArrivalChecked(!arrivalChecked)}>{arrivalChecked ? 'Undo check-in' : 'Mark arrived'}</button></section>

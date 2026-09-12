@@ -138,6 +138,7 @@ export type PersistedState = {
   groupCourtUnreadCount?: number;
   groupSplitPlan?: GroupSplitPlan;
   photoMemoryArtifacts?: PhotoMemoryArtifact[];
+  automaticDeviationPrompted?: boolean;
   flightBooking?: FlightBookingState;
   flightBookingDraft?: string;
   accommodationBooking?: AccommodationBookingState;
