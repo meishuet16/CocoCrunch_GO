@@ -30,6 +30,8 @@
   --warning: #d79241;
   --warning-soft: #fff4cf;
   --pink: #ff5b91;
+  --font-editorial: Georgia, "Times New Roman", serif;
+  --font-handwritten: 'Caveat', cursive;
 }
 
 * {
@@ -198,7 +200,7 @@ main {
 .page-title h2 {
   margin: 6px 0 7px;
   max-width: 370px;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-editorial);
   font-size: clamp(29px, 7vw, 36px);
   line-height: 1.02;
   letter-spacing: -.035em;
@@ -211,6 +213,18 @@ main {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.55;
+}
+
+.page-title > span,
+.home-trip-context > span,
+.home-trip-phase > span,
+.journey-progress-heading > span,
+.status-strip--home span {
+  font-family: var(--font-handwritten);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .03em;
+  text-transform: none;
 }
 
 .paper-sheet {
@@ -427,7 +441,7 @@ main {
 
 .journey-status h3 {
   margin: 0;
-  font-family: Georgia, serif;
+  font-family: var(--font-editorial);
   font-size: 24px;
   line-height: 1.08;
 }
@@ -483,7 +497,7 @@ main {
 
 .home-hero h2 {
   margin: 5px 0 8px;
-  font-family: Georgia, serif;
+  font-family: var(--font-editorial);
   font-size: 30px;
   line-height: 1;
 }
@@ -2107,7 +2121,7 @@ main {
 
 .home-trip-context>b {
   overflow: hidden;
-  font-family: Georgia, serif;
+  font-family: var(--font-editorial);
   font-size: 17px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2860,7 +2874,7 @@ main {
 .bottom-nav button {
   border: 0;
   background: transparent;
-  color: var(--sangria);
+  color: var(--muted);
   display: grid;
   place-items: center;
   align-content: center;
