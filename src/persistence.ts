@@ -27,6 +27,17 @@ export type FlightBookingState = {
   source: 'email-prototype' | 'quote-prototype';
 };
 
+export type AccommodationBookingState = {
+  propertyName: string;
+  checkInTime: string;
+  checkOutTime: string;
+  notes: string;
+  cancellationDeadline: string;
+  provider?: string;
+  sharedWithGroup: boolean;
+  source: 'email-prototype' | 'quote-prototype';
+};
+
 export type CourtOptionState = {
   id: string;
   label: string;
@@ -104,6 +115,8 @@ export type PersistedState = {
   groupMemberDestinations?: Record<string, string>;
   flightBooking?: FlightBookingState;
   flightBookingDraft?: string;
+  accommodationBooking?: AccommodationBookingState;
+  accommodationBookingDraft?: string;
   members?: TripMember[];
   memberPreferenceProfiles?: Record<string, MemberPreferenceProfile>;
   backupCandidates?: BackupCandidate[];

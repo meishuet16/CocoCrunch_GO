@@ -7,6 +7,7 @@ import { CourtCharacterPlayground } from './CourtCharacterPlayground';
 import { playWhoosh, triggerHaptic } from './courtSoundAndHaptics';
 import './court-styles.css';
 import type { FlightBookingState } from '../../persistence';
+import type { AccommodationBookingState } from '../../persistence';
 
 export interface TravelCourtModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export interface TravelCourtModalProps {
   initialStep?: CourtStep;
   onCocoContextChange?: (context: Extract<CocoContext, 'court' | 'courtTie'>) => void;
   flightBooking?: FlightBookingState;
+  accommodationBooking?: AccommodationBookingState;
 }
 
 export function TravelCourtModal({
@@ -28,6 +30,7 @@ export function TravelCourtModal({
   initialStep = 'lobby',
   onCocoContextChange,
   flightBooking,
+  accommodationBooking,
 }: TravelCourtModalProps) {
   const [viewMode, setViewMode] = useState<'ideas' | 'case' | 'playground'>(initialMode);
   const [caseStep, setCaseStep] = useState<CourtStep>(initialStep);
@@ -92,6 +95,7 @@ export function TravelCourtModal({
           onSkippedIdeaSealed={onSkippedIdeaSealed}
           onCocoContextChange={onCocoContextChange}
           flightBooking={flightBooking}
+          accommodationBooking={accommodationBooking}
           onConfirmPlan={(decision) => {
             onConfirmDecision(decision);
             onClose();

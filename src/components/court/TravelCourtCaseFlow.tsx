@@ -20,6 +20,7 @@ import {
 import './court-styles.css';
 import type { CocoContext } from '../coco/assets';
 import type { FlightBookingState } from '../../persistence';
+import type { AccommodationBookingState } from '../../persistence';
 
 export type CourtStep =
   | 'lobby'       // Screen 1: Intro / Lobby
@@ -89,6 +90,7 @@ export interface TravelCourtCaseFlowProps {
   onUpdateMembers?: (members: DynamicCourtMember[]) => void;
   onCocoContextChange?: (context: Extract<CocoContext, 'court' | 'courtTie'>) => void;
   flightBooking?: FlightBookingState;
+  accommodationBooking?: AccommodationBookingState;
 }
 
 export function MobileStatusBar({ light = false }: { light?: boolean }) {
@@ -790,6 +792,7 @@ export function TravelCourtCaseFlow({
   onUpdateMembers,
   onCocoContextChange,
   flightBooking,
+  accommodationBooking,
 }: TravelCourtCaseFlowProps) {
   const [currentStep, setCurrentStep] = useState<CourtStep>(initialStep);
 
@@ -4631,8 +4634,8 @@ export function TravelCourtCaseFlow({
             const flightsTitle = flightBooking ? `${flightBooking.flightNumber} · ${flightBooking.departureTime} → ${flightBooking.arrivalTime}` : flightsCase ? flightsCase.title : '';
 
             const accommodationCase = CASES.find(c => (c.type === 'hotel' || c.type === 'accommodation') && caseOutcomes[c.id]);
-            const accommodationPlanned = Boolean(accommodationCase);
-            const accommodationTitle = accommodationCase ? accommodationCase.title : '';
+            const accommodationPlanned = Boolean(accommodationBooking ?? accommodationCase);
+            const accommodationTitle = accommodationBooking ? `${accommodationBooking.propertyName} · check-in ${accommodationBooking.checkInTime}` : accommodationCase ? accommodationCase.title : '';
 
             return (
               <div

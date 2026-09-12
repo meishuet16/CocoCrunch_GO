@@ -36,8 +36,12 @@ export const defaultMembers: TripMember[] = [
   { id: 'alex', name: 'Alex', role: 'Transit buddy', inviteStatus: 'pending', pace: 'steady', preferenceProfile: { tingoAssessed: false, preferences: [] } },
 ];
 
+export function accommodationCancellationReminder(cancellationDeadline = 'Oct 08 · 23:59'): TripReminder {
+  return { id: 'hotel-cancel', label: 'Accommodation cancellation window', date: cancellationDeadline, kind: 'cancel', done: false };
+}
+
 export const defaultReminders: TripReminder[] = [
-  { id: 'hotel-cancel', label: 'Hotel cancellation window', date: 'Oct 08 · 23:59', kind: 'cancel', done: false },
+  accommodationCancellationReminder(),
   { id: 'rail-deposit', label: 'Rail pass deposit', date: 'Oct 05 · RM120', kind: 'deposit', done: false },
   { id: 'arrival', label: 'Arrival check-in', date: 'Oct 12 · 16:00', kind: 'arrival', done: false },
 ];
