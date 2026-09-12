@@ -9,6 +9,7 @@ import {
 } from '../domain/tingo';
 import { cocoAsset } from './coco/assets';
 import { type TripPhase } from './TripWorkspace';
+import { PostmarkStamp } from './PostmarkStamp';
 import foodieHunter from '../assets/coco/personas/foodie_hunter.png';
 import masterPlanner from '../assets/coco/personas/master_planner.png';
 import transitNavigator from '../assets/coco/personas/transit_navigator.png';
@@ -386,10 +387,7 @@ export function MeScreen({
       {/* 2. CURRENT TRIP CARD (Jeju In Amber) */}
       <section className="me-trip-card redesign-trip paper-sheet">
         <div className="me-trip-hero-section">
-          <div className="me-postmark-stamp">
-            <b>JEJU</b>
-            <small>SOUTH KOREA</small>
-          </div>
+          <PostmarkStamp label="JEJU" detail="SOUTH KOREA" />
 
           <div className="me-good-journeys-note">
             <span>Good<br />Journeys<br />Ahead</span>

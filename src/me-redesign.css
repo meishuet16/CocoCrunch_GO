@@ -4,7 +4,7 @@
 
 /* Layout Container */
 .tab-me {
-  background: #f7f5ef !important;
+  background: var(--cream) !important;
   padding: 12px 14px calc(80px + env(safe-area-inset-bottom)) !important;
 }
 
@@ -14,7 +14,7 @@
   gap: 12px !important;
   padding: 0 0 16px !important;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
-  color: #0c2b5c !important;
+  color: var(--blue-ink) !important;
 }
 
 /* ==========================================================================
@@ -34,7 +34,7 @@
 }
 
 .tab-me .wordmark b {
-  color: #0b3c82;
+  color: var(--blue-ink);
   font-size: 24px;
   font-weight: 900;
   letter-spacing: -0.03em;
@@ -42,7 +42,7 @@
 }
 
 .tab-me .wordmark small {
-  color: #2b7cd8;
+  color: var(--blue-deep);
   font-size: 11px;
   font-weight: 500;
   letter-spacing: -0.01em;
@@ -57,7 +57,7 @@
   bottom: -3px;
   width: 38px;
   height: 3px;
-  background: #ff3344;
+  background: var(--sangria);
   border-radius: 999px;
   transform: rotate(-2deg);
 }
@@ -82,8 +82,8 @@
   max-height: 38px !important;
   border: 1px solid rgba(11, 60, 130, 0.14) !important;
   border-radius: 50% !important;
-  background: #ffffff !important;
-  color: #0b3c82 !important;
+  background: var(--paper-solid) !important;
+  color: var(--blue-ink) !important;
   display: grid !important;
   place-items: center !important;
   position: relative !important;
@@ -97,9 +97,9 @@
   right: 8px;
   width: 7px;
   height: 7px;
-  background: #ff3344;
+  background: var(--sangria);
   border-radius: 50%;
-  border: 1.5px solid #ffffff;
+  border: 1.5px solid var(--paper-solid);
 }
 
 .topbar-actions .user-profile-avatar-btn {
@@ -132,7 +132,7 @@
   aspect-ratio: 1 / 1 !important;
   flex: 0 0 38px !important;
   object-fit: cover !important;
-  border: 1.5px solid #ffffff !important;
+  border: 1.5px solid var(--paper-solid) !important;
   box-shadow: 0 2px 8px rgba(11, 60, 130, 0.15) !important;
   display: block !important;
 }
@@ -145,24 +145,24 @@
    2. CARD 1: MY TINGO CARD (MATCHING IMAGE 1: BIGGER & CENTERED)
    ========================================================================== */
 .tab-me .me-tingo-card.redesign-card {
-  position: relative !important;
+  position: relative;
   background:
     radial-gradient(ellipse 260px 180px at 85% 15%, rgba(180, 218, 255, 0.5) 0%, transparent 70%),
     radial-gradient(ellipse 200px 140px at 15% 85%, rgba(205, 232, 255, 0.35) 0%, transparent 65%),
-    linear-gradient(135deg, #e8f4fe 0%, #f4faff 35%, #ffffff 60%, #eef6fd 100%) !important;
-  border-radius: 22px !important;
-  padding: 16px 14px 16px 16px !important;
-  box-shadow: 0 8px 24px rgba(12, 45, 95, 0.07) !important;
-  border: 1px solid rgba(195, 222, 250, 0.75) !important;
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.06fr) !important;
-  gap: 8px !important;
-  align-items: center !important;
-  overflow: hidden !important;
-  min-height: 0 !important;
-  height: auto !important;
-  max-height: none !important;
-  box-sizing: border-box !important;
+    linear-gradient(135deg, var(--blue-soft) 0%, var(--blue-pale) 35%, var(--paper-solid) 60%, var(--blue-pale) 100%);
+  border-radius: 22px;
+  padding: 16px 14px 16px 16px;
+  box-shadow: 0 8px 24px rgba(12, 45, 95, 0.07);
+  border: 1px solid rgba(195, 222, 250, 0.75);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.06fr);
+  gap: 8px;
+  align-items: center;
+  overflow: hidden;
+  min-height: 0;
+  height: auto;
+  max-height: none;
+  box-sizing: border-box;
 }
 
 /* Background map & plane trajectory */
@@ -194,7 +194,7 @@
   font-size: 16px !important;
   font-weight: 700 !important;
   letter-spacing: 0.05em !important;
-  color: #3b82f6 !important;
+  color: var(--blue-deep) !important;
   text-transform: uppercase !important;
   margin: 0 0 4px 0 !important;
   display: block !important;
@@ -210,7 +210,7 @@
   font-size: 32px !important;
   line-height: 1.05 !important;
   font-weight: 700 !important;
-  color: #0a2d64 !important;
+  color: var(--blue-ink) !important;
   margin: 0 0 6px 0 !important;
   letter-spacing: -0.01em !important;
 }
@@ -219,7 +219,7 @@
   font-family: 'Caveat', cursive !important;
   font-size: 14.5px !important;
   line-height: 1.25 !important;
-  color: #2e4a73 !important;
+  color: var(--blue-ink) !important;
   margin: 0 0 10px 0 !important;
   max-width: 185px !important;
 }
@@ -234,10 +234,10 @@
 
 .tab-me .me-tingo-card.redesign-card .me-chip-row small {
   padding: 3px 8.5px !important;
-  background: #edf5fc !important;
-  border: 1px solid #d4e7f8 !important;
+  background: var(--paper-solid) !important;
+  border: 1px solid var(--paper-solid) !important;
   border-radius: 999px !important;
-  color: #1765be !important;
+  color: var(--blue-deep) !important;
   font-family: 'Inter', sans-serif !important;
   font-size: 10.5px !important;
   font-weight: 600 !important;
@@ -255,55 +255,55 @@
 }
 
 .tab-me .me-tingo-card.redesign-card .me-all-types-link {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 5px !important;
-  color: #1766c2 !important;
-  font-family: 'Caveat', cursive !important;
-  font-size: 16px !important;
-  font-weight: 700 !important;
-  background: transparent !important;
-  border: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  min-height: 0 !important;
-  min-width: 0 !important;
-  height: auto !important;
-  cursor: pointer !important;
-  text-align: left !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--blue-deep);
+  font-family: 'Caveat', cursive;
+  font-size: 16px;
+  font-weight: 700;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  min-height: 0;
+  min-width: 0;
+  height: auto;
+  cursor: pointer;
+  text-align: left;
 }
 
 .tab-me .me-tingo-card.redesign-card .me-all-types-link svg {
-  color: #1766c2 !important;
-  flex-shrink: 0 !important;
+  color: var(--blue-deep);
+  flex-shrink: 0;
 }
 
 .tab-me .me-tingo-card.redesign-card .me-all-types-link .arrow {
-  font-size: 15px !important;
-  margin-left: 1px !important;
+  font-size: 15px;
+  margin-left: 1px;
 }
 
 .tab-me .me-tingo-card.redesign-card .me-retake-link {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 5px !important;
-  color: #4b78a6 !important;
-  font-family: 'Caveat', cursive !important;
-  font-size: 14.5px !important;
-  font-weight: 600 !important;
-  background: transparent !important;
-  border: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  min-height: 0 !important;
-  min-width: 0 !important;
-  height: auto !important;
-  cursor: pointer !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--blue-deep);
+  font-family: 'Caveat', cursive;
+  font-size: 14.5px;
+  font-weight: 600;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  min-height: 0;
+  min-width: 0;
+  height: auto;
+  cursor: pointer;
 }
 
 .tab-me .me-tingo-card.redesign-card .me-retake-link svg {
-  color: #4b78a6 !important;
-  flex-shrink: 0 !important;
+  color: var(--blue-deep);
+  flex-shrink: 0;
 }
 
 /* Right Column: Mini Card & Profile Button (Big & Centered) */
@@ -328,7 +328,7 @@
   right: 16px !important;
   z-index: 4 !important;
   font-family: 'Caveat', 'Segoe Script', 'Comic Sans MS', cursive, sans-serif !important;
-  color: #1a6ac9 !important;
+  color: var(--blue-deep) !important;
   font-size: 13.5px !important;
   font-weight: 700 !important;
   line-height: 1.05 !important;
@@ -340,7 +340,7 @@
 }
 
 .me-handwritten-note-top .sparks {
-  color: #ff3344 !important;
+  color: var(--sangria) !important;
   font-size: 15px !important;
   line-height: 0.8 !important;
   font-style: normal !important;
@@ -348,21 +348,21 @@
 }
 
 .me-floating-mini-card {
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
-  width: 100% !important;
-  max-width: 188px !important;
-  background: #ffffff !important;
-  border-radius: 18px !important;
-  padding: 10px 8px 12px !important;
-  box-shadow: 0 10px 26px rgba(10, 45, 95, 0.12), 0 2px 6px rgba(10, 45, 95, 0.04) !important;
-  border: 1px solid rgba(255, 255, 255, 0.95) !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  text-align: center !important;
-  transform: rotate(-1deg) !important;
-  box-sizing: border-box !important;
+  margin-top: 0;
+  margin-bottom: 0;
+  width: 100%;
+  max-width: 188px;
+  background: var(--paper-solid);
+  border-radius: 18px;
+  padding: 10px 8px 12px;
+  box-shadow: 0 10px 26px rgba(10, 45, 95, 0.12), 0 2px 6px rgba(10, 45, 95, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transform: rotate(-1deg);
+  box-sizing: border-box;
 }
 
 .me-floating-mini-card .me-persona-art {
@@ -374,8 +374,8 @@
 
 .me-floating-mini-card .me-persona-badge {
   margin-top: 6px !important;
-  background: #fdf3e9 !important;
-  color: #2b1f15 !important;
+  background: var(--cream-soft) !important;
+  color: var(--ink) !important;
   font-family: 'Caveat', cursive !important;
   font-size: 15px !important;
   font-weight: 700 !important;
@@ -390,33 +390,33 @@
   margin-top: 3.5px !important;
   font-family: 'Caveat', cursive !important;
   font-size: 13px !important;
-  color: #635447 !important;
+  color: var(--ink) !important;
   line-height: 1.15 !important;
   display: block !important;
 }
 
 .me-view-profile-btn {
-  margin-top: 0 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 6px !important;
-  width: 100% !important;
-  max-width: 180px !important;
-  height: 38px !important;
-  min-height: 0 !important;
-  min-width: 0 !important;
-  padding: 0 16px !important;
-  border-radius: 999px !important;
-  background: #ff3344 !important;
-  color: #ffffff !important;
-  border: none !important;
-  font-family: 'Caveat', cursive !important;
-  font-size: 17px !important;
-  font-weight: 700 !important;
-  box-shadow: 0 5px 16px rgba(255, 38, 55, 0.35) !important;
-  cursor: pointer !important;
-  white-space: nowrap !important;
+  margin-top: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  max-width: 180px;
+  height: 38px;
+  min-height: 0;
+  min-width: 0;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: var(--sangria);
+  color: var(--paper-solid);
+  border: none;
+  font-family: 'Caveat', cursive;
+  font-size: 17px;
+  font-weight: 700;
+  box-shadow: 0 5px 16px rgba(255, 38, 55, 0.35);
+  cursor: pointer;
+  white-space: nowrap;
 }
 
 .me-view-profile-btn .arrow {
@@ -428,7 +428,7 @@
   display: inline-flex !important;
   align-items: center !important;
   gap: 4.5px !important;
-  color: #0284c7 !important;
+  color: var(--blue-deep) !important;
   font-size: 10px !important;
   font-weight: 700 !important;
   margin-top: 2px !important;
@@ -436,13 +436,13 @@
 }
 
 .me-quiz-badge-note svg {
-  color: #f59e0b !important;
+  color: var(--warning) !important;
   flex-shrink: 0 !important;
 }
 
 .me-floating-mini-card--unassessed {
   border: 1.5px dashed rgba(186, 230, 253, 0.9) !important;
-  background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%) !important;
+  background: linear-gradient(180deg, var(--paper-solid) 0%, var(--blue-pale) 100%) !important;
 }
 
 .me-floating-mini-card--unassessed .me-persona-art {
@@ -450,20 +450,20 @@
 }
 
 .me-floating-mini-card--unassessed .me-persona-badge {
-  background: #fef3c7 !important;
-  color: #92400e !important;
-  border: 1px solid #fde68a !important;
+  background: var(--warning-soft) !important;
+  color: var(--warning) !important;
+  border: 1px solid var(--cream-deep) !important;
 }
 
 .me-floating-mini-card--unassessed .me-persona-subtag {
-  color: #0369a1 !important;
+  color: var(--blue-deep) !important;
   font-weight: 700 !important;
 }
 
 .me-start-assessment-btn {
-  background: linear-gradient(135deg, #ff3344 0%, #e11d48 100%) !important;
-  box-shadow: 0 5px 18px rgba(225, 29, 72, 0.38) !important;
-  animation: mePulseCta 2.4s ease-in-out infinite alternate !important;
+  background: linear-gradient(135deg, var(--sangria) 0%, var(--sangria-soft) 100%);
+  box-shadow: 0 5px 18px rgba(225, 29, 72, 0.38);
+  animation: mePulseCta 2.4s ease-in-out infinite alternate;
 }
 
 @keyframes mePulseCta {
@@ -472,9 +472,9 @@
 }
 
 .tab-me .me-tingo-card.redesign-card .me-chip-row--unassessed small {
-  background: #f0fdf4 !important;
-  border-color: #bbf7d0 !important;
-  color: #166534 !important;
+  background: var(--success-soft) !important;
+  border-color: var(--success-soft) !important;
+  color: var(--success) !important;
 }
 
 /* ==========================================================================
@@ -482,7 +482,7 @@
    ========================================================================== */
 .me-trip-card.redesign-trip {
   position: relative;
-  background: #ffffff;
+  background: var(--paper-solid);
   border-radius: 22px;
   overflow: hidden;
   box-shadow: 0 8px 24px rgba(12, 45, 95, 0.07);
@@ -498,7 +498,7 @@
     linear-gradient(90deg, rgba(8, 30, 68, 0.82) 0%, rgba(8, 30, 68, 0.5) 52%, rgba(8, 30, 68, 0.12) 100%),
     url('https://images.unsplash.com/photo-1548115184-bc6544d06a58?w=900&auto=format&fit=crop&q=85') center 65% / cover;
   padding: 16px 16px 24px;
-  color: #ffffff;
+  color: var(--paper-solid);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -531,7 +531,7 @@
   font-size: 9.5px;
   font-weight: 800;
   letter-spacing: 0.1em;
-  color: #ffffff;
+  color: var(--paper-solid);
   text-transform: uppercase;
   margin-bottom: 8px;
 }
@@ -540,7 +540,7 @@
   font-family: Georgia, "Playfair Display", serif;
   font-size: 27px;
   font-weight: 800;
-  color: #ffffff;
+  color: var(--paper-solid);
   margin: 0 0 8px;
   line-height: 1.05;
   text-shadow: 0 2px 10px rgba(0, 20, 50, 0.4);
@@ -559,13 +559,13 @@
   gap: 6px;
   font-size: 11.5px;
   font-weight: 500;
-  color: #ffffff;
+  color: var(--paper-solid);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
 .me-trip-meta-item svg {
   flex-shrink: 0;
-  color: #ffffff;
+  color: var(--paper-solid);
 }
 
 .me-trip-blurb {
@@ -585,8 +585,8 @@
   height: 35px;
   padding: 0 18px;
   border-radius: 999px;
-  background: linear-gradient(135deg, #ff3644, #ff2337);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--sangria), var(--sangria-soft));
+  color: var(--paper-solid);
   border: none;
   font-size: 12px;
   font-weight: 700;
@@ -598,47 +598,12 @@
   font-size: 14px;
 }
 
-/* Jeju Postmark Stamp (Top Right) */
-.me-postmark-stamp {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 66px;
-  height: 52px;
-  background: rgba(255, 255, 255, 0.88);
-  border-radius: 4px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #0e5baa;
-  transform: rotate(-6deg);
-  box-shadow: 0 4px 12px rgba(0, 20, 50, 0.15);
-  border: 2px dashed rgba(14, 91, 170, 0.4);
-  padding: 3px;
-}
-
-.me-postmark-stamp b {
-  font-family: Georgia, serif;
-  font-size: 14px;
-  letter-spacing: 0.04em;
-  line-height: 1;
-}
-
-.me-postmark-stamp small {
-  font-size: 6.5px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  margin-top: 3px;
-  opacity: 0.85;
-}
-
 /* Good Journeys Ahead Cursive Note (Bottom Right) */
 .me-good-journeys-note {
   position: absolute;
   right: 16px;
   bottom: 22px;
-  color: #ffffff;
+  color: var(--paper-solid);
   font-family: 'Caveat', 'Segoe Script', 'Brush Script MT', cursive;
   font-size: 19px;
   font-weight: 700;
@@ -652,7 +617,7 @@
 }
 
 .me-good-journeys-note .sparks {
-  color: #ff3344;
+  color: var(--sangria);
   font-size: 14px;
   position: absolute;
   top: -2px;
@@ -662,14 +627,14 @@
 .me-good-journeys-note .underline {
   width: 44px;
   height: 2px;
-  background: #ff3344;
+  background: var(--sangria);
   border-radius: 999px;
   margin-top: 2px;
 }
 
 /* 4-Step Phase Tracker */
 .me-phase-tracker-bar {
-  background: #ffffff;
+  background: var(--paper-solid);
   padding: 12px 14px 10px;
   position: relative;
 }
@@ -688,7 +653,7 @@
   left: 36px;
   right: 36px;
   height: 1px;
-  border-top: 1.5px dashed #4b89d8;
+  border-top: 1.5px dashed var(--blue-deep);
   opacity: 0.7;
   z-index: 1;
 }
@@ -712,7 +677,7 @@
   height: 32px;
   display: grid;
   place-items: center;
-  color: #123e78;
+  color: var(--blue-ink);
 }
 
 .me-step-check-dot {
@@ -722,11 +687,11 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #ff3344;
-  color: #ffffff;
+  background: var(--sangria);
+  color: var(--paper-solid);
   display: grid;
   place-items: center;
-  border: 1.5px solid #ffffff;
+  border: 1.5px solid var(--paper-solid);
 }
 
 .me-step-check-dot svg {
@@ -737,8 +702,8 @@
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: #1976d2;
-  color: #ffffff;
+  background: var(--blue-deep);
+  color: var(--paper-solid);
   box-shadow: 0 4px 12px rgba(25, 118, 210, 0.35);
   margin-top: -3px;
 }
@@ -746,12 +711,12 @@
 .me-phase-step-btn span {
   font-size: 10.5px;
   font-weight: 600;
-  color: #123e78;
+  color: var(--blue-ink);
 }
 
 .me-phase-step-btn.is-active span {
   font-weight: 800;
-  color: #1976d2;
+  color: var(--blue-deep);
 }
 
 /* ==========================================================================
@@ -759,7 +724,7 @@
    ========================================================================== */
 .me-summary-card.redesign-summary {
   position: relative;
-  background: linear-gradient(135deg, #ffffff 65%, #f2f7fd 100%);
+  background: linear-gradient(135deg, var(--paper-solid) 65%, var(--paper-solid) 100%);
   border-radius: 22px;
   padding: 14px 14px 14px 18px;
   box-shadow: 0 8px 24px rgba(12, 45, 95, 0.06);
@@ -798,7 +763,7 @@
   font-family: Georgia, serif;
   font-size: 19px;
   font-weight: 800;
-  color: #0b2e63;
+  color: var(--blue-ink);
   margin: 0;
   letter-spacing: -0.02em;
 }
@@ -806,13 +771,13 @@
 .me-summary-pct {
   font-size: 13.5px;
   font-weight: 800;
-  color: #1a75d5;
+  color: var(--blue-deep);
 }
 
 .me-progress-bar-track {
   width: 100%;
   height: 7.5px;
-  background: #dceaf9;
+  background: var(--paper-solid);
   border-radius: 999px;
   overflow: hidden;
   margin-bottom: 6px;
@@ -820,7 +785,7 @@
 
 .me-progress-bar-fill {
   height: 100%;
-  background: #1b74e2;
+  background: var(--blue-deep);
   border-radius: 999px;
   transition: width 0.4s ease;
 }
@@ -828,17 +793,17 @@
 .me-summary-subtext {
   font-size: 11px;
   font-weight: 600;
-  color: #2b4974;
+  color: var(--blue-ink);
   margin-bottom: 7px;
 }
 
 .me-summary-pill {
   align-self: flex-start;
   padding: 3.5px 9.5px;
-  background: #e8f3fc;
-  border: 1px solid #d4e8fa;
+  background: var(--paper-solid);
+  border: 1px solid var(--blue-soft);
   border-radius: 999px;
-  color: #1766c2;
+  color: var(--blue-deep);
   font-size: 10.5px;
   font-weight: 600;
   line-height: 1;
@@ -869,8 +834,8 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #e2effd;
-  color: #1766c2;
+  background: var(--paper-solid);
+  color: var(--blue-deep);
   border: none;
   display: grid;
   place-items: center;
@@ -883,7 +848,7 @@
    ========================================================================== */
 .me-history-card.redesign-history {
   position: relative;
-  background: linear-gradient(135deg, #ffffff 65%, #fdf8f2 100%);
+  background: linear-gradient(135deg, var(--paper-solid) 65%, var(--paper-warm) 100%);
   border-radius: 22px;
   padding: 14px 14px 14px 18px;
   box-shadow: 0 8px 24px rgba(12, 45, 95, 0.06);
@@ -907,7 +872,7 @@
   font-family: Georgia, serif;
   font-size: 19px;
   font-weight: 800;
-  color: #0b2e63;
+  color: var(--blue-ink);
   margin: 0 0 5px;
   letter-spacing: -0.02em;
 }
@@ -915,7 +880,7 @@
 .me-history-content p {
   font-size: 11px;
   line-height: 1.35;
-  color: #2b4974;
+  color: var(--blue-ink);
   margin: 0 0 8px;
   max-width: 190px;
 }
@@ -932,7 +897,7 @@
   position: absolute;
   width: 50px;
   height: 58px;
-  background: #ffffff;
+  background: var(--paper-solid);
   border-radius: 2px;
   padding: 3px 3px 10px;
   box-shadow: 0 4px 10px rgba(10, 35, 75, 0.16);
@@ -962,14 +927,14 @@
   position: absolute;
   bottom: 0px;
   right: -2px;
-  background: #ffffff;
+  background: var(--paper-solid);
   border-radius: 1.5px;
   padding: 3px 5px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   font-family: 'Caveat', 'Segoe Script', cursive;
   font-size: 8.5px;
   font-weight: 700;
-  color: #0c529f;
+  color: var(--blue-ink);
   line-height: 0.95;
   text-align: center;
   transform: rotate(3deg);
@@ -999,7 +964,7 @@
   font-family: 'Caveat', cursive !important;
   font-size: 16px !important;
   font-weight: 700 !important;
-  color: #1976d2 !important;
+  color: var(--blue-deep) !important;
   display: block;
   letter-spacing: 0.04em;
 }
@@ -1009,7 +974,7 @@
   font-size: 30px !important;
   line-height: 1.1 !important;
   font-weight: 700 !important;
-  color: #0a2d64 !important;
+  color: var(--blue-ink) !important;
   margin: 2px 0 6px !important;
 }
 
@@ -1017,7 +982,7 @@
   font-family: 'Caveat', cursive !important;
   font-size: 15px !important;
   line-height: 1.25 !important;
-  color: #3b5577 !important;
+  color: var(--blue-ink) !important;
   margin: 0 0 12px !important;
 }
 
@@ -1029,7 +994,7 @@
 }
 
 .me-persona-grid-card {
-  background: #ffffff;
+  background: var(--paper-solid);
   border-radius: 16px;
   border: 1px solid rgba(210, 230, 250, 0.7);
   box-shadow: 0 4px 12px rgba(12, 45, 95, 0.05);
@@ -1041,8 +1006,8 @@
 }
 
 .me-persona-grid-card.is-current {
-  border: 2px solid #1976d2;
-  background: #f6fafe;
+  border: 2px solid var(--blue-deep);
+  background: var(--paper-solid);
 }
 
 .me-grid-img-wrap {
@@ -1065,8 +1030,8 @@
   position: absolute;
   top: 0;
   right: 0;
-  background: #1976d2;
-  color: #ffffff;
+  background: var(--blue-deep);
+  color: var(--paper-solid);
   font-family: 'Inter', sans-serif !important;
   font-size: 8px;
   font-weight: 800;
@@ -1079,14 +1044,14 @@
   font-family: 'Caveat', cursive !important;
   font-size: 17px !important;
   font-weight: 700 !important;
-  color: #0a2d64;
+  color: var(--blue-ink);
   display: block;
 }
 
 .me-grid-tagline {
   font-family: 'Caveat', cursive !important;
   font-size: 13.5px !important;
-  color: #7b624f;
+  color: var(--ink-soft);
   font-weight: 700;
   display: block;
   margin-bottom: 5px;
@@ -1096,7 +1061,7 @@
   font-family: 'Caveat', cursive !important;
   font-size: 13px !important;
   line-height: 1.25 !important;
-  color: #3b5577;
+  color: var(--blue-ink);
   margin: 0 0 8px;
 }
 
@@ -1111,8 +1076,8 @@
   font-family: 'Inter', sans-serif !important;
   font-size: 9.5px !important;
   font-weight: 600 !important;
-  background: #eef6fc;
-  color: #1765be;
+  background: var(--paper-solid);
+  color: var(--blue-deep);
   padding: 2.5px 7px;
   border-radius: 999px;
 }
@@ -1121,31 +1086,31 @@
    7. BOTTOM NAV ME ACTIVE STATE
    ========================================================================== */
 .tab-me .bottom-nav button[aria-current="page"] {
-  color: #1976d2;
+  color: var(--blue-deep);
 }
 
 .tab-me .bottom-nav button[aria-current="page"]::before {
-  background: #ff3344;
+  background: var(--sangria);
 }
 
 /* Responsive adjustments for narrow screens */
 @media (max-width: 380px) {
   .tab-me .me-tingo-card.redesign-card {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr) !important;
-    padding: 14px 10px 14px 12px !important;
-    gap: 6px !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    padding: 14px 10px 14px 12px;
+    gap: 6px;
   }
   .tab-me .me-floating-mini-card {
-    max-width: 165px !important;
-    transform: rotate(-1deg) !important;
+    max-width: 165px;
+    transform: rotate(-1deg);
   }
   .tab-me .me-floating-mini-card .me-persona-art {
     height: 84px !important;
   }
   .tab-me .me-view-profile-btn {
-    max-width: 160px !important;
-    height: 36px !important;
-    font-size: 12px !important;
+    max-width: 160px;
+    height: 36px;
+    font-size: 12px;
   }
   .tab-me .me-summary-card.redesign-summary,
   .tab-me .me-history-card.redesign-history {

@@ -7,6 +7,7 @@ import {
 import { emitExperience } from './experience';
 import { playSound } from './sound';
 import { GlobalNav, type GlobalTab } from './components/GlobalNav';
+import { PostmarkStamp } from './components/PostmarkStamp';
 import { TripJourneyStatus } from './components/TripJourneyStatus';
 import { JourneyProgress } from './components/JourneyProgress';
 import { TripSpatialView } from './components/TripSpatialView';
@@ -1401,10 +1402,7 @@ export default function AppRescued() {
 
       <section className="me-trip-card redesign-trip paper-sheet">
         <div className="me-trip-hero-section">
-          <div className="me-postmark-stamp">
-            <b>JEJU</b>
-            <small>SOUTH KOREA</small>
-          </div>
+          <PostmarkStamp label="JEJU" detail="SOUTH KOREA" />
 
           <div className="me-good-journeys-note">
             <span>Good<br />Journeys<br />Ahead</span>
