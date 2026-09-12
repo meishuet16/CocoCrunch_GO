@@ -56,6 +56,8 @@ export type PhotoMemoryArtifact = {
   audience: 'personal' | 'group';
 };
 
+export type EmergencyContact = { id: string; name: string; contact: string; permission: 'location' | 'message' | 'both' };
+
 export type CourtOptionState = {
   id: string;
   label: string;
@@ -141,6 +143,9 @@ export type PersistedState = {
   automaticDeviationPrompted?: boolean;
   completedTodayItemIds?: string[];
   tripEndPromptDismissed?: boolean;
+  emergencyContacts?: EmergencyContact[];
+  emergencyCheckInFrequency?: number;
+  selectedEmergencyContactId?: string;
   flightBooking?: FlightBookingState;
   flightBookingDraft?: string;
   accommodationBooking?: AccommodationBookingState;
