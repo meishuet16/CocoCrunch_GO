@@ -23,9 +23,9 @@
   border: 3px solid var(--sangria);
   border-radius: 26px 26px 18px 18px;
   background:
-    radial-gradient(circle at 28% 34%, var(--blue) 0 12px, #fff8e7 13px 15px, transparent 16px),
-    radial-gradient(circle at 64% 28%, #fff8e7 0 11px, var(--sangria) 12px 14px, transparent 15px),
-    radial-gradient(circle at 52% 66%, var(--sangria) 0 10px, #fff8e7 11px 13px, transparent 14px),
+    radial-gradient(circle at 28% 34%, var(--blue) 0 12px, var(--cream-soft) 13px 15px, transparent 16px),
+    radial-gradient(circle at 64% 28%, var(--cream-soft) 0 11px, var(--sangria) 12px 14px, transparent 15px),
+    radial-gradient(circle at 52% 66%, var(--sangria) 0 10px, var(--cream-soft) 11px 13px, transparent 14px),
     rgba(255,255,255,.58);
   box-shadow: 0 12px 0 rgba(147,5,0,.09), 0 22px 32px rgba(77,43,35,.12);
 }
@@ -49,15 +49,15 @@
   position: relative;
   isolation: isolate;
   min-height: 54px;
-  border: 0 !important;
-  border-radius: 18px !important;
-  padding: 0 20px !important;
-  background: linear-gradient(180deg, #a9140d, var(--sangria)) !important;
-  color: var(--cream) !important;
-  box-shadow: 0 8px 0 #64120f, 0 16px 24px rgba(82,27,22,.18) !important;
-  font-weight: 950 !important;
+  border: 0;
+  border-radius: 18px;
+  padding: 0 20px;
+  background: linear-gradient(180deg, var(--sangria), var(--sangria));
+  color: var(--cream);
+  box-shadow: 0 8px 0 var(--sangria), 0 16px 24px rgba(82,27,22,.18);
+  font-weight: 950;
   letter-spacing: .02em;
-  transition: transform 160ms cubic-bezier(.2,.8,.2,1), box-shadow 160ms ease-out !important;
+  transition: transform 160ms cubic-bezier(.2,.8,.2,1), box-shadow 160ms ease-out;
 }
 .gacha-machine::before {
   content: '';
@@ -82,8 +82,8 @@
   transform: rotate(-35deg);
   opacity: .82;
 }
-.gacha-machine:hover { transform: translateY(-1px); box-shadow: 0 9px 0 #64120f, 0 18px 28px rgba(82,27,22,.2) !important; }
-.gacha-machine:active { transform: translateY(6px) scale(.995) !important; box-shadow: 0 2px 0 #64120f, 0 8px 14px rgba(82,27,22,.16) !important; }
+.gacha-machine:hover { transform: translateY(-1px); box-shadow: 0 9px 0 var(--sangria), 0 18px 28px rgba(82,27,22,.2); }
+.gacha-machine:active { transform: translateY(6px) scale(.995); box-shadow: 0 2px 0 var(--sangria), 0 8px 14px rgba(82,27,22,.16); }
 
 /* Court Gacha sits on the dark ritual stage but remains the same physical object. */
 .court-stage .gacha-machine { margin-top: 8px; outline: 1px solid rgba(255,248,231,.22); }
@@ -103,5 +103,5 @@
 
 @media (prefers-reduced-motion: reduce) {
   .gacha-machine,
-  .verdict { animation:none !important; transition:none !important; }
+  .verdict { animation:none; transition:none; }
 }

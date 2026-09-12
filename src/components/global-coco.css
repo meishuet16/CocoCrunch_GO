@@ -1,10 +1,10 @@
 .global-coco { position:fixed; z-index:120; transform:translateY(-50%); display:grid; gap:8px; align-items:center; padding:6px; }
 .global-coco--left { left:max(8px, env(safe-area-inset-left)); }.global-coco--right { right:max(8px, env(safe-area-inset-right)); }
-.global-coco__button { width:74px; height:74px; padding:0; border:1px solid #a65f40; border-radius:50%; background:#fff8e7; box-shadow:0 8px 24px #4b342238; cursor:grab; }
+.global-coco__button { width:74px; height:74px; padding:0; border:1px solid var(--sangria); border-radius:50%; background:var(--cream-soft); box-shadow:0 8px 24px var(--line); cursor:grab; }
 .global-coco__button:active { cursor:grabbing; }.global-coco__button img { width:64px; height:64px; mix-blend-mode:multiply; }
 
-.global-coco__menu { display:grid; gap:6px; width:156px; padding:10px; border:1px solid #d4b990; border-radius:16px; background:#fff8e7; box-shadow:0 12px 30px #4b342238; }
+.global-coco__menu { display:grid; gap:6px; width:156px; padding:10px; border:1px solid var(--muted); border-radius:16px; background:var(--cream-soft); box-shadow:0 12px 30px var(--line); }
 .global-coco__menu--left { margin-left:4px; }.global-coco__menu--right { margin-right:4px; }
-.global-coco__menu button { min-height:40px; padding:8px 10px; border:1px solid #b86b45; border-radius:10px; background:#fffdf5; color:#752d32; text-align:left; font-weight:800; }
-.global-coco__sub { display:grid; gap:5px; padding-top:5px; border-top:1px dashed #d4b990; color:#8b542f; font-size:11px; }.global-coco__sub button { font-size:11px; }
+.global-coco__menu button { min-height:40px; padding:8px 10px; border:1px solid var(--sangria); border-radius:10px; background:var(--cream-soft); color:var(--sangria); text-align:left; font-weight:800; }
+.global-coco__sub { display:grid; gap:5px; padding-top:5px; border-top:1px dashed var(--muted); color:var(--sangria); font-size:11px; }.global-coco__sub button { font-size:11px; }
 @media(prefers-reduced-motion:reduce){.global-coco *{transition:none!important;animation:none!important}}
