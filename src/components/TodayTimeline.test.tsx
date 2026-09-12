@@ -87,4 +87,10 @@ describe('TodayTimeline presentation', () => {
     expect(html).toContain('Recovery applied');
     expect(html).toContain('Delay noted');
   });
+
+  it('shows explicit completion controls when the app supplies a persisted item state', () => {
+    const html = renderToStaticMarkup(<TodayTimeline items={items} delay={false} arrivalChecked={false} appliedRepair={false} completedItemIds={['anchor-tsukiji']} onToggleComplete={() => undefined} />);
+    expect(html).toContain('Undo complete');
+    expect(html).toContain('Mark complete');
+  });
 });

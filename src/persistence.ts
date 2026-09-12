@@ -139,6 +139,8 @@ export type PersistedState = {
   groupSplitPlan?: GroupSplitPlan;
   photoMemoryArtifacts?: PhotoMemoryArtifact[];
   automaticDeviationPrompted?: boolean;
+  completedTodayItemIds?: string[];
+  tripEndPromptDismissed?: boolean;
   flightBooking?: FlightBookingState;
   flightBookingDraft?: string;
   accommodationBooking?: AccommodationBookingState;

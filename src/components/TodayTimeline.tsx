@@ -5,6 +5,8 @@ export type TodayTimelineProps = {
   delay: boolean;
   arrivalChecked: boolean;
   appliedRepair: boolean;
+  completedItemIds?: string[];
+  onToggleComplete?: (id: string) => void;
 };
 
 type TimelineStatus = 'Current' | 'Next' | 'Later' | 'Completed';
@@ -17,7 +19,7 @@ function statusForItem(index: number, arrivalChecked: boolean): TimelineStatus {
   return 'Later';
 }
 
-export function TodayTimeline({ items, delay, arrivalChecked, appliedRepair }: TodayTimelineProps) {
+export function TodayTimeline({ items, delay, arrivalChecked, appliedRepair, completedItemIds = [], onToggleComplete }: TodayTimelineProps) {
   return (
     <section className={`today-timeline${delay ? ' is-delayed' : ''}`} aria-labelledby="today-timeline-heading">
       <div className="today-timeline-heading">
@@ -33,7 +35,8 @@ export function TodayTimeline({ items, delay, arrivalChecked, appliedRepair }: T
       </div>
       <ol className="today-timeline-list">
         {items.map((item, index) => {
-          const status = statusForItem(index, arrivalChecked);
+          const isComplete = completedItemIds.includes(item.id);
+          const status = isComplete ? 'Completed' : statusForItem(index, arrivalChecked);
           return (
             <li className={`today-timeline-item today-timeline-item--${item.kind} today-timeline-item--${status.toLowerCase()}`} key={item.id}>
               <time dateTime={item.timeLabel}>{item.timeLabel}</time>
@@ -43,6 +46,7 @@ export function TodayTimeline({ items, delay, arrivalChecked, appliedRepair }: T
                   <span className="today-timeline-status">{status}</span>
                 </div>
                 <span className={`today-timeline-kind today-timeline-kind--${item.kind}`}>{item.kind}</span>
+                {onToggleComplete && item.kind !== 'buffer' && <button type="button" className="secondary" onClick={() => onToggleComplete(item.id)}>{isComplete ? 'Undo complete' : 'Mark complete'}</button>}
               </div>
             </li>
           );
