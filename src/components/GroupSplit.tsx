@@ -27,7 +27,7 @@ export function GroupSplit({ members, value, active, onChange, onRequest, onRequ
   }
 
   return <section className="split-note" aria-label="Group split prototype">
-    <div><span>GROUP SPLIT · PROTOTYPE</span><b>{active ? 'Split is active.' : 'Make a split explicit before the group votes.'}</b><small>Choose the people going together, then agree a meeting point. This uses a local midpoint example, not live member locations.</small></div>
+    <div><span>GROUP SPLIT</span><b>{active ? 'Split is active.' : 'Make a split explicit before the group votes.'}</b><small>Choose the people going together, then agree a meeting point. This uses a local midpoint example, not live member locations.</small></div>
     {!active && <>
       <div className="split-member-picker" aria-label="Choose members for this split">{joined.map(member => <label key={member.id}><input type="checkbox" checked={value.memberIds.includes(member.id)} onChange={() => toggleMember(member.id)} />{member.name}</label>)}</div>
       <label className="setup-field"><span>Where does this group want to go?</span><input value={value.destination} onChange={event => onChange({ ...value, destination: event.target.value })} placeholder="e.g. Kappabashi kitchen street" /></label>

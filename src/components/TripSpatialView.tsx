@@ -223,11 +223,11 @@ export function TripSpatialView({
       {mode === 'traveling' && (
         <>
           {liveRoute && <section className="spatial-live-route" aria-label="Live routing prototype">
-            <div><span>{liveRoute.locationStatus === 'live' ? 'CURRENT LOCATION · BROWSER GPS' : 'ROUTING · SCHEMATIC FALLBACK'}</span><b>{liveRoute.currentLocation} → {liveRoute.target}</b><small>{liveRoute.eta} · {liveRoute.timelineLabel}</small>{liveRoute.coordinates && <small>{liveRoute.coordinates.latitude.toFixed(5)}, {liveRoute.coordinates.longitude.toFixed(5)} · local session only</small>}</div>
+            <div><span>{liveRoute.locationStatus === 'live' ? 'CURRENT LOCATION' : 'SAMPLE ROUTE'}</span><b>{liveRoute.currentLocation} → {liveRoute.target}</b><small>{liveRoute.eta} · {liveRoute.timelineLabel}</small>{liveRoute.coordinates && <small>{liveRoute.coordinates.latitude.toFixed(5)}, {liveRoute.coordinates.longitude.toFixed(5)} · local session only</small>}</div>
             <small>{liveRoute.weatherLabel}</small>
           </section>}
           {servicePins.length > 0 && <div className="spatial-service-pins" aria-label="Nearby service prototype pins">
-            <span>NEARBY HELP · PROTOTYPE</span>
+            <span>NEARBY HELP</span>
             {servicePins.map(pin => <a href={`https://maps.google.com/?q=${encodeURIComponent(pin.query)}`} target="_blank" rel="noreferrer" key={pin.id}>{pin.label} ↗</a>)}
           </div>}
           {photoPins.length > 0 && <div className="spatial-photo-pins" aria-label="Saved photo memory pins"><span>PHOTO PINS</span>{photoPins.map(pin => <small key={pin.id}>{pin.title} · {pin.locationLabel} · {pin.audience === 'group' ? 'shared album' : 'personal memory'}</small>)}</div>}

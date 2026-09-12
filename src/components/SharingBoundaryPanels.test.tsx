@@ -20,7 +20,7 @@ describe('sharing boundary presentation', () => {
 
     expect(html).toContain('FAMILY WINDOW');
     expect(html).toContain('Choose what family can see.');
-    expect(html).toMatch(/Preview for family/i);
+    expect(html).toContain('FAMILY PREVIEW');
     expect(html).toContain('Review location privacy');
     expect(html).not.toContain('Exact location');
   });

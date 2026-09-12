@@ -4,7 +4,7 @@ import { CompletedKeepLauncher } from './CompletedKeepLauncher';
 
 it('keeps Completed artifact access compact without rendering artifact internals', () => {
   const html = renderToStaticMarkup(<CompletedKeepLauncher active={null} onOpen={() => undefined}/>);
-  expect(html).toContain('KEEP THE TRIP');
+  expect(html).toContain('KEEP TRIP');
   expect(html).toContain('Memory Trunk');
   expect(html).toContain('Photo Map');
   expect(html).toContain('Ghost Wishes');

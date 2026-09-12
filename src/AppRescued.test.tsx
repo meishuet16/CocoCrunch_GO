@@ -57,7 +57,7 @@ describe('AppRescued journey status integration', () => {
 
     const html = renderToStaticMarkup(<AppRescued />);
 
-    expect(html).toContain('WELCOME TO COCOCRUNCH');
+    expect(html).toContain('WELCOME');
     expect(html).toContain('Login');
     expect(html).toContain('Sign up');
     expect(html).not.toContain('HOME · ACTIVE TRIP');
@@ -139,13 +139,13 @@ describe('AppRescued journey status integration', () => {
     expect(html).toContain('✦ All Categories');
 
     // Bottom Section (Community Post Feed)
-    expect(html).toContain('COMMUNITY TRIP FEED');
+    expect(html).toContain('COMMUNITY TRIPS');
     expect(html).toContain('Tokyo: slow food + vintage streets');
     expect(html).toContain('Explicitly shared');
     expect(html).toContain('View Full Plan');
 
     // Place Discovery
-    expect(html).toContain('PLACES FOR YOUR TRIP');
+    expect(html).toContain('TRIP PLACES');
     expect(html).toContain('Tsukiji Outer Market');
     expect(html).toContain('Daikanyama');
     expect(html).toContain('Suggest to group');

@@ -140,11 +140,11 @@ describe('TripSpatialView', () => {
     expect(html).toContain('Shibuya crossing · 19:30 · ±15 min');
     expect(html).toContain('Sharing: status only');
     expect(html).toContain('Saved current · next · reunion context');
-    expect(html).toContain('ROUTING · SCHEMATIC FALLBACK');
+    expect(html).toContain('SAMPLE ROUTE');
     expect(html).toContain('Last manual check-in → Scenic cafe block');
     expect(html).toContain('Weather refreshes in the panel above · Open-Meteo');
     expect(html).toContain('Real traffic navigation and ETA require Google Routes or an equivalent Directions API plus a backend key proxy');
-    expect(html).toContain('NEARBY HELP · PROTOTYPE');
+    expect(html).toContain('NEARBY HELP');
     expect(html).toContain('https://maps.google.com/?q=hospital%20near%20Tokyo');
   });
 
@@ -172,7 +172,7 @@ describe('TripSpatialView', () => {
       />,
     );
 
-    expect(html).toContain('CURRENT LOCATION · BROWSER GPS');
+    expect(html).toContain('CURRENT LOCATION');
     expect(html).toContain('1.23456, 2.34567 · local session only');
   });
 

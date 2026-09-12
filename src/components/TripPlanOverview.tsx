@@ -70,12 +70,12 @@ export function TripPlanOverview({ plan, planHealth, tripIntent, onOpenWhy, onOp
   return (
     <section className="trip-plan-overview">
       <div className="trip-promise paper-strip">
-        <span>TRIP PROMISE</span>
+        <span>TRIP GOAL</span>
         <b>{plan.tripPromise}</b>
       </div>
       <section className="itinerary-sheet paper-sheet">
         <div className="sheet-heading">
-          <div><span>GENERATED PLAN</span><h3>{plan.destination} · reviewable timeline</h3></div>
+          <div><span>ITINERARY</span><h3>{plan.destination} · reviewable timeline</h3></div>
           <div className="score-stamp">{planHealth.overall}</div>
         </div>
         <p className="adapter-note">Drag flexible itinerary items to reschedule. Plan Health and feasibility use the reordered timeline.</p>
@@ -91,7 +91,7 @@ export function TripPlanOverview({ plan, planHealth, tripIntent, onOpenWhy, onOp
       </section>
       <section className="plan-health plan-health--overview">
         <button className="section-rule" onClick={onOpenHealth}>
-          <span>PLAN HEALTH · {planHealth.overall}/100</span>
+          <span>PLAN HEALTH</span>
           <span>View reasons <span aria-hidden="true">›</span></span>
         </button>
         <p>{planHealth.reasons[0] ?? 'No current deductions; inputs fit the generated structure.'}</p>

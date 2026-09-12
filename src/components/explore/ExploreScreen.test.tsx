@@ -254,7 +254,7 @@ describe('ExploreScreen (Community Trip Explore)', () => {
     // Floating review window beside the globe
     expect(html).toContain('floating-review-window');
     expect(html).toContain('floating-review-close-btn');
-    expect(html).toContain('PAST TRIP RETROSPECTIVE');
+    expect(html).toContain('TRIP REVIEW');
     expect(html).toContain('Tokyo');
     expect(html).toContain('Tokyo: Slow Food &amp; Small Discoveries');
 

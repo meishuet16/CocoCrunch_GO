@@ -78,13 +78,13 @@ export function OnboardingFlow({ initialStep = 'entry', initialAccount, onAccoun
     <main className="onboarding-flow" aria-label="CocoCrunch onboarding">
       <section className="onboarding-card">
         <div className="onboarding-progress" aria-label={`Onboarding step ${displayStep} of 4`}>
-          <span>GETTING STARTED</span>
+          <span>SETUP</span>
           <b>{displayStep}/4</b>
           <div><i style={{ width: `${displayStep * 25}%` }} /></div>
         </div>
 
         {step === 'entry' && <>
-          <span className="drawer-kicker">WELCOME TO COCOCRUNCH</span>
+          <span className="drawer-kicker">WELCOME</span>
           <h1>Plan trips that still feel like yours.</h1>
           <p>Start with the route that fits you. This is a local frontend prototype.</p>
           <div className="onboarding-actions">
@@ -94,7 +94,7 @@ export function OnboardingFlow({ initialStep = 'entry', initialAccount, onAccoun
         </>}
 
         {step === 'login' && <>
-          <span className="drawer-kicker">LOGIN · PROTOTYPE</span>
+          <span className="drawer-kicker">LOGIN</span>
           <h1>Welcome back.</h1>
           <p className="adapter-note">Prototype verification only — no real SMS is sent. Enter any 4–6 digit OTP to continue.</p>
           <label className="setup-field"><span>Phone number</span><input value={phone} inputMode="tel" onChange={event => setPhone(event.target.value)} placeholder="012 345 6789" /></label>
@@ -104,7 +104,7 @@ export function OnboardingFlow({ initialStep = 'entry', initialAccount, onAccoun
         </>}
 
         {step === 'signup' && <>
-          <span className="drawer-kicker">SIGN UP · PROTOTYPE</span>
+          <span className="drawer-kicker">SIGN UP</span>
           <h1>Set up your travel profile.</h1>
           <p className="adapter-note">Prototype verification only — no real SMS is sent. Enter any 4–6 digit OTP after sending it.</p>
           <label className="setup-field"><span>Name</span><input value={name} onChange={event => updateAccount({ name: event.target.value })} placeholder="Your name" /></label>

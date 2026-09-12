@@ -185,7 +185,7 @@ export const EarthFullscreenModal: React.FC<EarthFullscreenModalProps> = ({
                 <div className="floating-header-left">
                   <span className="floating-flag">{selectedTrip.flag}</span>
                   <div>
-                    <span className="floating-kicker">PAST TRIP RETROSPECTIVE</span>
+                    <span className="floating-kicker">TRIP REVIEW</span>
                     <h3 className="floating-dest-title">{selectedTrip.destination}</h3>
                   </div>
                 </div>

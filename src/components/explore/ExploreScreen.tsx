@@ -526,7 +526,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
       {/* 1. Header Section */}
       <header className="explore-page-header">
         <div className="explore-header-lockup">
-          <span className="explore-kicker">EXPLORE · TRAVEL DISCOVERY</span>
+          <span className="explore-kicker">EXPLORE</span>
           <h2 className="explore-title">Borrow a feeling, make it yours.</h2>
           <p className="explore-subtitle">
             Discover places and itineraries shared by travellers. Save candidates for your trip, or suggest them to the group.
@@ -811,7 +811,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
         <section className="explore-places-section" aria-label="Place recommendations">
           <div className="explore-section-heading">
             <div className="heading-title-group">
-              <span>PLACES FOR YOUR TRIP</span>
+              <span>TRIP PLACES</span>
               <small>Tingo-ranked candidates</small>
             </div>
             <span className="provenance-quiet-tag">Truthful provenance</span>
@@ -848,7 +848,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
         <section className="explore-community-feed-section" aria-label="Community trip itineraries">
           <div className="explore-section-heading">
             <div className="heading-title-group">
-              <span>COMMUNITY TRIP FEED</span>
+              <span>COMMUNITY TRIPS</span>
               <small>Shared travel notebooks</small>
             </div>
             <span className="community-shared-badge">Explicitly shared</span>

@@ -48,12 +48,12 @@ export function TripRetrospective({
   const memoryAvailable = outcomeRecorded && Boolean(worthIt) && learningTerminal;
   return <section className="trip-retrospective" aria-label="Trip retrospective">
     <div className="retrospective-step">
-      <span>1 · ACTUAL OUTCOME</span>
+      <span>1 · OUTCOME</span>
       <b>{actualSummary.pace} · RM {actualSummary.spent} spent · {actualSummary.decisions} decisions</b>
       <small>{outcomeRecorded ? 'Recorded trip evidence can now inform reflection.' : 'Record a check-in, stop review, or other actual outcome before reflecting.'}</small>
     </div>
     <div className="retrospective-step">
-      <span>2 · WORTH IT?</span>
+      <span>2 · REVIEW</span>
       <div className="retrospective-choices">
         {(['yes', 'mixed', 'no'] as TripReview[]).map(value => <button
           type="button"
@@ -66,7 +66,7 @@ export function TripRetrospective({
       {!outcomeRecorded && <small>Reflection stays closed until actual outcome evidence exists.</small>}
     </div>
     <div className="retrospective-step">
-      <span>3 · PROPOSED LEARNING</span>
+      <span>3 · LEARNING</span>
       {proposal ? <>
         <b>{proposal.changes.length > 0 ? proposal.changes[0].reason : 'Coco found no answer change to propose from this reflection.'}</b>
         {proposal.changes.length > 0 && <details className="retrospective-evidence"><summary>Learning evidence</summary>{proposal.changes.map(change => <p key={change.questionId}><b>{change.questionId}</b>: {change.beforeOptionId ?? 'none'} → {change.afterOptionId} · {change.reason}</p>)}</details>}

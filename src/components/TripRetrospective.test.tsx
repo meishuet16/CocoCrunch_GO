@@ -33,8 +33,8 @@ describe('TripRetrospective', () => {
       />,
     );
 
-    expect(html.indexOf('ACTUAL OUTCOME')).toBeLessThan(html.indexOf('WORTH IT?'));
-    expect(html.indexOf('WORTH IT?')).toBeLessThan(html.indexOf('PROPOSED LEARNING'));
+    expect(html.indexOf('1 · OUTCOME')).toBeLessThan(html.indexOf('2 · REVIEW'));
+    expect(html.indexOf('2 · REVIEW')).toBeLessThan(html.indexOf('3 · LEARNING'));
     expect(html).toContain('Slower than planned · RM 480 spent · 2 decisions');
     expect(html).toContain('Confirm this learning');
     expect(html).toContain('Learning evidence');

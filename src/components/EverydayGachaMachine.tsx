@@ -25,7 +25,7 @@ export function EverydayGachaMachine({ result, onTurn, candidates }: EverydayGac
     turn();
   };
   return <section className="everyday-gacha-machine random-ritual" data-stage={stage} aria-labelledby="everyday-gacha-title">
-    <header className="everyday-gacha-machine__header"><span>GACHA · EVERYDAY INDECISION</span><h3 id="everyday-gacha-title">Choose a small everyday move.</h3></header>
+    <header className="everyday-gacha-machine__header"><span>EVERYDAY GACHA</span><h3 id="everyday-gacha-title">Choose a small everyday move.</h3></header>
     <div className="random-ritual__companion"><CocoCompanion context="gacha" pose={revealed && result ? 'expression-happy' : undefined} size={88}/></div>
     <div className="travel-machine" data-turnable={canTurn ? 'true' : 'false'} aria-label="Travel capsule machine">
       <div className="travel-machine__roof">LITTLE DETOURS</div>
@@ -33,7 +33,6 @@ export function EverydayGachaMachine({ result, onTurn, candidates }: EverydayGac
         ? candidates.map((candidate, i) => <i className="drum-ball" title={candidate} key={`${i}-${candidate}`}><span>{i + 1}</span></i>)
         : Array.from({ length: 7 }, (_, i) => <i className={`drum-ball ball-${i}`} key={i}/>)}</div>
       <div className="travel-machine__base">
-        <span>TURN FOR A LITTLE ADVENTURE</span>
         <div className="travel-machine__knob" role="button" tabIndex={canTurn ? 0 : -1} aria-label="Turn the gacha knob" aria-disabled={!canTurn} onClick={turn} onKeyDown={turnWithKey}/>
         <div className="travel-machine__slot"/>
       </div>
@@ -48,7 +47,7 @@ export function EverydayGachaMachine({ result, onTurn, candidates }: EverydayGac
     <button className="everyday-gacha-machine__button" type="button" disabled={!canTurn} onClick={turn}>{revealed ? 'Turn again' : 'Turn the Gacha'}</button>
     <div className="random-ritual__status" role="status" aria-live="polite">
       {stage === 'held' ? 'Your capsule is ready. Open it to see the choice.' : ritual.busy ? 'Choosing a little adventure…' : null}
-      {revealed && (result ? <div className="everyday-gacha-machine__result"><span>EVERYDAY RESULT</span><b>{result}</b></div> : 'Waiting for the selected result…')}
+      {revealed && (result ? <div className="everyday-gacha-machine__result"><span>RESULT</span><b>{result}</b></div> : 'Waiting for the selected result…')}
     </div>
   </section>;
 }

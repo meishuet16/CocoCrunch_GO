@@ -22,7 +22,7 @@ export function SafetyToolkit({ destination }: { destination: string }) {
   const [service, setService] = useState<SafetyService | null>(null);
 
   return <>
-    <span className="drawer-kicker">SAFETY · SOLO+ TOOLKIT</span>
+    <span className="drawer-kicker">SAFETY TOOLS</span>
     <h3>Useful when the day gets uncomfortable.</h3>
     <p className="drawer-copy">These are local prototype suggestions, not live emergency or availability data.</p>
     <div className="safety-list">

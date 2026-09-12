@@ -6,7 +6,7 @@ export function CompletedKeepLauncher({ active, onOpen }: { active: CompletedPan
   const open = (panel: Exclude<CompletedPanel, null>) => onOpen(panel);
   return <>
     <section className="completed-keep" aria-label="Keep the trip">
-      <div><span>KEEP THE TRIP</span><h3>Choose what you want to carry forward.</h3></div>
+      <div><span>KEEP TRIP</span><h3>Choose what you want to carry forward.</h3></div>
       <div className="completed-keep-grid">
         <button className={active === 'trunk' ? 'active' : ''} onClick={() => open('trunk')}><Box size={18}/><b>Memory Trunk</b></button>
         <button className={active === 'photo' ? 'active' : ''} onClick={() => open('photo')}><Map size={18}/><b>Photo Map</b></button>

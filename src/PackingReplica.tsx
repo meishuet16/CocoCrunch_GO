@@ -615,7 +615,6 @@ export default function PackingReplica({ visible, onClose }: Props) {
                   {/* High Quality Travel Stickers */}
                   <div className="cover-sticker sticker-airmail">
                     <div className="airmail-stripes" />
-                    <span>PAR AVION · AIR MAIL</span>
                   </div>
 
                   <div className="cover-sticker sticker-haneda">
@@ -630,13 +629,11 @@ export default function PackingReplica({ visible, onClose }: Props) {
 
                   <div className="cover-sticker sticker-postage-stamp">
                     <div className="stamp-serrated" />
-                    <span>JEJU IN AMBER</span>
                   </div>
 
                   {/* Tap to Unlock Hint */}
                   <div className="tap-to-open-hint">
                     <Sparkles size={13} />
-                    <span>TAP TO UNLOCK TRUNK</span>
                   </div>
                 </div>
               </div>
@@ -653,7 +650,7 @@ export default function PackingReplica({ visible, onClose }: Props) {
                     <span className="zipper-leather-pull" />
                   </div>
                   <div className="mesh-pocket-label">
-                    <span>ORGANIZER · QUICK ACCESS</span>
+                    <span>QUICK ACCESS</span>
                   </div>
                 </div>
 

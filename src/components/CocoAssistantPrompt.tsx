@@ -11,7 +11,7 @@ export function CocoAssistantPrompt({ mode, destination, onReviewProposal }: Coc
   const [answered, setAnswered] = useState(false);
   const cleanPrompt = prompt.trim();
   return <>
-    <span className="drawer-kicker">ASK COCO · REVIEW BEFORE APPLY</span>
+    <span className="drawer-kicker">ASK COCO</span>
     <h3>Ask about this trip in your own words.</h3>
     <p className="drawer-copy">Coco reads only the current local plan. It can prepare a reversible suggestion, but it does not make the change for you.</p>
     <label className="setup-field"><span>Your question</span><textarea aria-label="Ask Coco about this trip" value={prompt} onChange={event => { setPrompt(event.target.value); setAnswered(false); }}/></label>

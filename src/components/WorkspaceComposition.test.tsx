@@ -86,11 +86,11 @@ describe('workspace composition', () => {
     );
 
     expect(html).toContain('Keep the one thing everyone cares about');
-    expect(html).toContain('GENERATED PLAN');
-    expect(html).toContain('TRIP PROMISE');
+    expect(html).toContain('ITINERARY');
+    expect(html).toContain('TRIP GOAL');
     expect(html).toContain('Must-Go · protected · cannot be AI-replaced');
     expect(html).toContain('constraint: Tsukiji food walk');
-    expect(html).toContain('PLAN HEALTH · 92/100');
+    expect(html).toContain('PLAN HEALTH');
   });
 
   it('keeps the workspace identity honest for solo and group trips', () => {
