@@ -24,9 +24,9 @@
 | **Project Name** | CocoCrunch |
 | **Team** | **NJHL** — Wong Jia Hui, Lee Mei Shuet, Bong Zi Shan, Jasmine Khoo Jia Chee |
 | **Problem Statement** | Lifestyle Track — Planning an Escape: **Travel Planner** |
-| **Public GitHub Repository** | [github.com/meishuet16/CocoCrunch_GO](https://github.com/meishuet16/CocoCrunch_GO) |
+| **Public GitHub Repository** | [CocoCrunch GitHub Repository](https://github.com/meishuet16/CocoCrunch_GO) |
 | **Video Presentation** | — |
-| **Presentation Slides** | — |
+| **Presentation Slides** | [CocoCrunch Presentation Slides](https://docs.google.com/presentation/d/1YB8I9-LLAYUdCpCPrLHCBnmvgW9vGhfmZWbKVdZdXAc/edit?usp=sharing) |
 | **UI Prototype / Deployed App** | — |
 | **Ideation Boards** | Embedded in [Section 2.2](#22-ideation-boards) |
 
