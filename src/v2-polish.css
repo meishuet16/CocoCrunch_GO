@@ -710,6 +710,12 @@ button {
   }
 }
 
+@media (max-width: 520px) {
+  .itinerary-row { grid-template-columns: 38px minmax(0, 1fr) 46px; gap: 9px; }
+  .itinerary-row-thumb { width: 46px; height: 46px; }
+  .itinerary-row em { grid-column: 2 / -1; justify-self: start; max-width: none; text-align: left; }
+}
+
 .court-stage {
   display: grid;
   grid-template-rows: auto auto 1fr;
@@ -1143,6 +1149,16 @@ select:focus-visible {
 .itinerary-row.buffer::before { border-color: rgba(149,187,234,.95); background: rgba(149,187,234,.38); }
 .itinerary-row.open::before { border-color: var(--blue-deep); background: var(--surface-raised); }
 .itinerary-row b { letter-spacing: -.01em; }
+.itinerary-day-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 0 14px 12px; padding: 4px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper); }
+.itinerary-day-tabs button { min-height: 36px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--muted); font: inherit; font-size: 11px; font-weight: 750; }
+.itinerary-day-tabs button.active { background: var(--paper-solid); box-shadow: var(--shadow-sm); color: var(--ink); }
+.itinerary-map-card { margin: 0 14px 12px; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+.itinerary-map-card .trip-spatial-view { margin: 0; border: 0; border-radius: 0; box-shadow: none; }
+.itinerary-map-card .spatial-stage, .itinerary-map-card .spatial-stage svg { min-height: 156px; height: 156px; }
+.itinerary-timeline { border-top: 1px solid var(--line); }
+.itinerary-row { grid-template-columns: 42px minmax(0, 1fr) 52px auto; border-bottom: 1px solid var(--line); }
+.itinerary-row-thumb { width: 52px; height: 52px; align-self: center; border-radius: var(--radius-sm); object-fit: cover; }
+.itinerary-row:last-child { border-bottom: 0; }
 .trip-plan-overview .plan-health { padding-top: 16px; }
 .plan-health--overview { margin-top: 0; }
 .planning-itinerary-primary,

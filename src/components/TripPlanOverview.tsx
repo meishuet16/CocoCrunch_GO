@@ -1,7 +1,13 @@
+import { useState } from 'react';
+import { DndContext, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import type { PlanHealth } from '../domain/plan-health';
 import type { TripPlan } from '../domain/itinerary';
 import type { TripIntent } from '../domain/trip-intent';
 import { RecommendationEvidenceText } from './RecommendationEvidenceText';
+import { TripSpatialView, type SpatialCandidate, type SpatialSource } from './TripSpatialView';
+import { getStopThumbnail } from './explore/explorePhotos';
 
 type TripPlanOverviewProps = {
   plan: TripPlan;
@@ -10,6 +16,8 @@ type TripPlanOverviewProps = {
   onOpenWhy: (itemId: string) => void;
   onOpenHealth: () => void;
   onReorder?: (itemIds: string[]) => void;
+  mapSource?: SpatialSource;
+  mapCandidates?: SpatialCandidate[];
 };
 
 function SortableItineraryRow({ item, label, flexible, onOpenWhy }: { item: TripPlan['items'][number]; label: string; flexible: string; onOpenWhy: (itemId: string) => void }) {
@@ -23,6 +31,7 @@ function SortableItineraryRow({ item, label, flexible, onOpenWhy }: { item: Trip
       <small>{item.kind === 'anchor' ? 'Must-Go · protected · cannot be AI-replaced' : `${item.kind} · ${flexible || 'flexible time'}`}</small>
       <small><strong>Why this?</strong> <RecommendationEvidenceText evidence={item.evidence} /></small>
     </span>
+    <img className="itinerary-row-thumb" src={getStopThumbnail(item.name)} alt="" />
     <em>{label}</em>
   </button>;
 }
@@ -36,13 +45,18 @@ function TransitDetail({ from, to }: { from: TripPlan['items'][number]; to: Trip
   return <div className="itinerary-transit-detail" aria-label={`Travel details from ${from.name} to ${to.name}`}><span>{transport}</span><small>{perPerson} · {hours}</small><em>Prototype route details · not live provider data</em></div>;
 }
 
-export function TripPlanOverview({ plan, planHealth, tripIntent, onOpenWhy, onOpenHealth, onReorder = () => undefined }: TripPlanOverviewProps) {
+export function TripPlanOverview({ plan, planHealth, tripIntent, onOpenWhy, onOpenHealth, onReorder = () => undefined, mapSource, mapCandidates }: TripPlanOverviewProps) {
   const itemLabels = {
     anchor: 'Must-Go anchor',
     floating: 'Floating time',
     buffer: 'Buffer / breathing room',
     open: 'Open time',
   } as const;
+
+  const dayCount = Math.min(3, Math.max(1, Math.ceil(plan.items.length / 2)));
+  const [activeDay, setActiveDay] = useState(0);
+  const itemsPerDay = Math.ceil(plan.items.length / dayCount);
+  const visibleItems = plan.items.slice(activeDay * itemsPerDay, (activeDay + 1) * itemsPerDay);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
@@ -65,9 +79,13 @@ export function TripPlanOverview({ plan, planHealth, tripIntent, onOpenWhy, onOp
           <div className="score-stamp">{planHealth.overall}</div>
         </div>
         <p className="adapter-note">Drag flexible itinerary items to reschedule. Plan Health and feasibility use the reordered timeline.</p>
+        <div className="itinerary-day-tabs" role="tablist" aria-label="Trip days">
+          {Array.from({ length: dayCount }, (_, index) => <button type="button" role="tab" aria-selected={activeDay === index} className={activeDay === index ? 'active' : ''} key={index} onClick={() => setActiveDay(index)}>Day {index + 1}</button>)}
+        </div>
+        <div className="itinerary-map-card"><TripSpatialView mode="planning" destination={plan.destination} source={mapSource} candidates={mapCandidates} plan={plan} /></div>
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={plan.items.map(item => item.id)} strategy={verticalListSortingStrategy}>
-            <div className="itinerary-timeline" aria-label="Trip timeline">{plan.items.map((item, index) => <div key={item.id}><SortableItineraryRow item={item} label={itemLabels[item.kind]} flexible={tripIntent.flexible} onOpenWhy={onOpenWhy} />{plan.items[index + 1] && <TransitDetail from={item} to={plan.items[index + 1]} />}</div>)}</div>
+          <SortableContext items={visibleItems.map(item => item.id)} strategy={verticalListSortingStrategy}>
+            <div className="itinerary-timeline" aria-label={`Day ${activeDay + 1} trip timeline`}>{visibleItems.map((item, index) => <div key={item.id}><SortableItineraryRow item={item} label={itemLabels[item.kind]} flexible={tripIntent.flexible} onOpenWhy={onOpenWhy} />{visibleItems[index + 1] && <TransitDetail from={item} to={visibleItems[index + 1]} />}</div>)}</div>
           </SortableContext>
         </DndContext>
       </section>
@@ -88,6 +106,3 @@ export function TripPlanOverview({ plan, planHealth, tripIntent, onOpenWhy, onOp
     </section>
   );
 }
-import { DndContext, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
-import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';

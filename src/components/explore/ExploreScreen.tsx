@@ -1096,23 +1096,16 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
               <h2>{place.name}</h2>
               <p>{place.type} · {dest}</p>
 
-              <div className="xr-match">
-                ♥ {place.match}% match for your group <span>👩🏻‍🦰👩🏻👩🏻‍🦱</span>
-              </div>
+              <div className="xr-place-meta" aria-label="Place details"><span><Heart size={15} />{place.match}% fit</span><span><MapPin size={15} />Easy access</span><span><Clock size={15} />{place.duration || '1.5 - 2 hrs'}</span></div>
+              <p className="xr-place-description">{place.why || 'This stop is a local prototype recommendation for your current trip.'}</p>
 
-              <h3>Why this fits your trip</h3>
-              <ul>
-                <li><Heart size={16} />Matches your café / food preferences</li>
-                <li><Clock size={16} />Fits your {place.duration || '1.5 - 2 hrs'} window</li>
-                <li><Wallet size={16} />Within your current budget style ({place.cost || 'moderate'})</li>
-                <li><Users size={16} />Works with the group’s shared signals</li>
-                <li><CloudRain size={16} />Good flexible stop if plans change</li>
-              </ul>
-
-              <blockquote>
-                “{place.why || 'A wonderful stop carefully matched with your travel profile.'}”
-                <small>— Coco</small>
-              </blockquote>
+              <section className="xr-practical-info" aria-label="Practical information">
+                <h3>Practical information</h3>
+                <div><span><Clock size={16} />Time</span><b>{place.duration || '1.5 - 2 hrs'}</b></div>
+                <div><span><Wallet size={16} />Budget</span><b>{place.cost || 'Moderate'}</b></div>
+                <div><span><MapPin size={16} />Area</span><b>{dest}</b></div>
+                <div><span><Users size={16} />Type</span><b>{place.type}</b></div>
+              </section>
 
               <div className="xr-detail-actions">
                 <button

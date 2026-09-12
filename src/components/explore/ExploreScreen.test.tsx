@@ -520,10 +520,10 @@ describe('ExploreScreen (Community Trip Explore)', () => {
     expect(html).toContain('xr-fullscreen');
     expect(html).toContain('xr-detail');
     expect(html).toContain(place.name);
-    expect(html).toContain(`${place.match}% match for your group`);
-    expect(html).toContain('Why this fits your trip');
-    expect(html).toContain('Matches your café / food preferences');
-    expect(html).toContain('— Coco');
+    expect(html).toContain(`${place.match}% fit`);
+    expect(html).toContain('xr-place-meta');
+    expect(html).toContain('Practical information');
+    expect(html).toContain('xr-practical-info');
     expect(html).toContain('Suggest to group');
   });
 });

@@ -108,7 +108,7 @@ const tripIntent: TripIntent = {
 };
 
 describe('TripPlanOverview', () => {
-  it('labels the travel timeline while keeping evidence and Why this? available', () => {
+  it('renders the active day timeline with its map, thumbnail, and evidence', () => {
     const html = renderToStaticMarkup(
       <TripPlanOverview
         plan={samplePlan}
@@ -121,16 +121,16 @@ describe('TripPlanOverview', () => {
     );
 
     expect(html).toContain('Must-Go anchor');
-    expect(html).toContain('Floating time');
     expect(html).toContain('Buffer / breathing room');
-    expect(html).toContain('Open time');
+    expect(html).toContain('Day 1');
+    expect(html).toContain('Day 2');
+    expect(html).toContain('MAP · TOKYO');
+    expect(html).toContain('itinerary-row-thumb');
     expect(html).toContain('10:00');
     expect(html).toContain('Why this?');
     expect(html).toContain('constraint: Tsukiji food walk');
-    expect(html).toContain('candidate: Fits a slower food day');
     expect(html).toContain('drag to reschedule');
     expect(html).toContain('Prototype route details · not live provider data');
-    expect(html).toContain('per person');
-    expect(html).toContain('Prototype hours');
+    expect(html).toContain('Buffer · no venue hours');
   });
 });
