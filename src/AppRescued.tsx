@@ -74,6 +74,7 @@ import { PhotoJournalCapture } from './components/PhotoJournalCapture';
 import { OnboardingFlow } from './components/OnboardingFlow';
 import { FlightDrawer } from './components/FlightDrawer';
 import { AccommodationDrawer } from './components/AccommodationDrawer';
+import { GroupChannel, type GroupChannelMessage } from './components/GroupChannel';
 import foodieHunter from './assets/coco/personas/foodie_hunter.png';
 import masterPlanner from './assets/coco/personas/master_planner.png';
 import transitNavigator from './assets/coco/personas/transit_navigator.png';
@@ -456,6 +457,8 @@ export default function AppRescued() {
   const [tingoRevealed, setTingoRevealed] = useState(() => tingoCompletion(stored.tingoAnswers ?? []) === 100);
   const [basePackingPreferences, setBasePackingPreferences] = useState<string[]>(stored.basePackingPreferences ?? ['comfortable walking shoes', 'portable charger', 'light rain layer']);
   const [itineraryOrder, setItineraryOrder] = useState<string[]>(stored.itineraryOrder ?? []);
+  const [groupChannelMessages, setGroupChannelMessages] = useState<GroupChannelMessage[]>(stored.groupChannelMessages ?? []);
+  const [groupCourtUnreadCount, setGroupCourtUnreadCount] = useState(stored.groupCourtUnreadCount ?? 0);
   const [tripCreated, setTripCreated] = useState(stored.tripCreated ?? true);
   const [tripSetupStep, setTripSetupStep] = useState<TripSetupStep>(1);
   const [tripSetupLocationMethod, setTripSetupLocationMethod] = useState<TripSetupLocationMethod>('manual');
@@ -673,9 +676,9 @@ export default function AppRescued() {
       recommendations: recommendations.map(({ name, saved, added }) => ({ name, saved, added })),
       tripIntent,
       worthIt, profileLearned, learningProposal: learningProposal?.status === 'confirmed' ? undefined : learningProposal ?? undefined, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, onboardingCountryCode, onboardingBirthday, basePackingPreferences, tripCreated, tripPhase,
-      members, memberPreferenceProfiles, backupCandidates, appliedRepair: appliedRepair ?? undefined, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, revivedWishIds: ghostWishes.filter(wish => wish.status === 'revived').map(wish => wish.id), destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, itineraryOrder, flightBooking, flightBookingDraft, accommodationBooking, accommodationBookingDraft,
+      members, memberPreferenceProfiles, backupCandidates, appliedRepair: appliedRepair ?? undefined, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, revivedWishIds: ghostWishes.filter(wish => wish.status === 'revived').map(wish => wish.id), destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, itineraryOrder, groupChannelMessages, groupCourtUnreadCount, flightBooking, flightBookingDraft, accommodationBooking, accommodationBookingDraft,
     });
-  }, [mode, destination, readyConfirmed, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals, delay, mood, arrivalChecked, privacy, continuousLocation, recommendations, tripIntent, worthIt, profileLearned, learningProposal, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, onboardingCountryCode, onboardingBirthday, basePackingPreferences, tripCreated, tripPhase, members, memberPreferenceProfiles, backupCandidates, appliedRepair, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, ghostWishes, destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, itineraryOrder, flightBooking, flightBookingDraft, accommodationBooking, accommodationBookingDraft]);
+  }, [mode, destination, readyConfirmed, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals, delay, mood, arrivalChecked, privacy, continuousLocation, recommendations, tripIntent, worthIt, profileLearned, learningProposal, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, onboardingCountryCode, onboardingBirthday, basePackingPreferences, tripCreated, tripPhase, members, memberPreferenceProfiles, backupCandidates, appliedRepair, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, ghostWishes, destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, itineraryOrder, groupChannelMessages, groupCourtUnreadCount, flightBooking, flightBookingDraft, accommodationBooking, accommodationBookingDraft]);
 
   function setProfileField(field: keyof TravelProfile, value: string) {
     setProfile(current => ({ ...current, [field]: value }));
@@ -730,10 +733,14 @@ export default function AppRescued() {
   function openCourt(
     view: CourtView = 'upload',
     step: CourtStep = 'lobby',
-    mode?: 'ideas' | 'case' | 'playground'
+    courtMode?: 'ideas' | 'case' | 'playground'
   ) {
+    if (tripIntent.mode === 'group') {
+      setGroupChannelMessages(messages => [...messages, { id: `court-${Date.now()}`, author: 'CocoCrunch', text: 'Group Court is open. Everyone has been asked to review and vote.', system: true, createdAt: 'Now' }]);
+      setGroupCourtUnreadCount(count => count + 1);
+    }
     setCourtView(view);
-    setCourtInitialMode(mode ?? 'case');
+    setCourtInitialMode(courtMode ?? 'case');
     setCourtInitialStep(step);
     setCourtOpen(true);
   }
@@ -1300,6 +1307,7 @@ export default function AppRescued() {
       <section className="trip-plan-intent-fields paper-sheet"><span>PLAN DETAILS · EDIT HERE</span><h3>Protect what matters, then leave room to move.</h3><div className="setup-fields"><label><span>Must-Go anchor</span><input value={tripInputs.mustGo} onChange={event => setTripInputField('mustGo', event.target.value)} /></label><label><span>Deal breaker</span><input value={tripInputs.dealBreaker} onChange={event => setTripInputField('dealBreaker', event.target.value)} /></label><label><span>Preference</span><input value={tripInputs.preference} onChange={event => setTripInputField('preference', event.target.value)} /></label><label><span>Flexible</span><input value={tripInputs.flexible} onChange={event => setTripInputField('flexible', event.target.value)} /></label></div></section>
       <details className="trip-add-menu"><summary aria-label="Add to trip">+</summary><div><button onClick={() => setDrawer('flight')}>Flight</button><button onClick={() => setDrawer('accommodation')}>Accommodation</button><button onClick={() => setDrawer(null)}>Plan</button></div></details>
       {mode === 'group' && <section className="conflict-ticket"><span>{courtConfirmed ? 'COURT DECISION RECORDED' : 'UNRESOLVED CONFLICT'}</span><b>{activeConflict}</b><small>{first?.label ?? 'Option A'} {firstCount} · {second?.label ?? 'Option B'} {secondCount} · {tally.tied ? 'tie · Gacha is eligible' : `${optionLabel(tally.majority)} has majority`}</small><button className="ritual-trigger" onClick={() => openCourt()}>{courtConfirmed ? 'Review Group Court' : 'Open Group Court'} <Gavel size={18} /></button></section>}
+      {mode === 'group' && <GroupChannel messages={groupChannelMessages} unreadCount={groupCourtUnreadCount} onMarkRead={() => setGroupCourtUnreadCount(0)} onSend={text => setGroupChannelMessages(messages => [...messages, { id: `message-${Date.now()}`, author: onboardingName || 'You', text, createdAt: 'Now' }])} />}
       <div className="planning-plan">
         <div className="planning-itinerary-primary">
           <TripPlanOverview plan={visibleTripPlan} planHealth={planHealth} tripIntent={tripIntent} onOpenWhy={setPlanWhyItemId} onOpenHealth={() => setDrawer('feasibility')} onReorder={setItineraryOrder} />

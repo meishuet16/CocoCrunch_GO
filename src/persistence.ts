@@ -7,6 +7,7 @@ import { scoreTingo, type TingoAnswer, type TingoDimensions } from './domain/tin
 import type { HumanCommitment, ReunionAgreement, TripConstraint, TripMember, TripReminder } from './domain/trip';
 import type { MemberPreferenceProfile } from './domain/group-dna';
 import type { BackupCandidate, RepairResult } from './domain/backup-repair';
+import type { GroupChannelMessage } from './components/GroupChannel';
 
 const STORAGE_KEY = 'cococrunch:v1';
 
@@ -116,6 +117,8 @@ export type PersistedState = {
   groupMemberVibes?: Record<string, string>;
   groupMemberDestinations?: Record<string, string>;
   itineraryOrder?: string[];
+  groupChannelMessages?: GroupChannelMessage[];
+  groupCourtUnreadCount?: number;
   flightBooking?: FlightBookingState;
   flightBookingDraft?: string;
   accommodationBooking?: AccommodationBookingState;
