@@ -6841,6 +6841,11 @@ main {
 .trip-end-prompt { display: grid; gap: 12px; text-align: center; }
 .trip-end-prompt .coco-companion { margin-inline: auto; }
 .trip-end-prompt h3 { margin: 0; font-family: Georgia, serif; }
+.photo-archive-timeline, .photo-archive-day { display: grid; gap: 8px; }
+.photo-archive-day { padding: 10px; border-left: 3px solid var(--blue); background: var(--paper); }
+.photo-archive-day article { display: flex; justify-content: space-between; gap: 8px; font-size: 10px; }
+.photo-archive-day article div { display: grid; gap: 2px; }
+.photo-archive-day small { color: var(--muted); font-size: 9px; }
 
 .split-member-picker {
   display: flex;
