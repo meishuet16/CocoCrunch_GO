@@ -1,7 +1,7 @@
 .coco-path-preview .coco-path-track{position:relative;height:140px;margin:38px 40px}
 .coco-path-preview .coco-path-track svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.coco-path-preview .coco-path-track line{stroke:#a88c65;stroke-width:1;stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
-.coco-path-preview .coco-path-track circle{fill:#806342}
+.coco-path-preview .coco-path-track line{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
+.coco-path-preview .coco-path-track circle{fill:var(--sangria-deep)}
 .coco-path-preview .coco-path-sprite{position:absolute;display:flex;transform:translate(-50%,-50%);pointer-events:none}
 .coco-path-preview .coco-path-track .coco-path-sprite .coco-companion{left:0;transition:none}
 .coco-path-preview .coco-path-track .coco-companion img{animation:none}

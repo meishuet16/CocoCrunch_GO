@@ -1,11 +1,11 @@
 .court-tie-ritual {
   position: relative;
   overflow: hidden;
-  color: #07152f;
+  color: var(--blue-deep);
   background:
     radial-gradient(circle at 18% 16%, rgba(187, 223, 255, .7), transparent 21%),
     radial-gradient(circle at 88% 18%, rgba(255, 228, 207, .86), transparent 24%),
-    linear-gradient(180deg, #fff 0%, #f7fbff 46%, #fff8f1 100%);
+    linear-gradient(180deg, var(--paper-solid) 0%, var(--paper-solid) 46%, var(--cream-soft) 100%);
   border: 1px solid rgba(122, 155, 194, .16);
   border-radius: 8px;
   padding: 16px;
@@ -34,11 +34,11 @@
 .court-tie-ritual__progress i {
   height: 10px;
   border-radius: 999px;
-  background: #dfe6ef;
+  background: var(--muted);
 }
 
 .court-tie-ritual__progress i:first-child {
-  background: linear-gradient(90deg, #1c8ef7, #37a7ff);
+  background: linear-gradient(90deg, var(--blue-deep), var(--blue-deep));
   box-shadow: 0 4px 10px rgba(26, 132, 239, .25);
 }
 
@@ -46,7 +46,7 @@
   margin: 4px 0 0;
   padding: 14px 22px 17px;
   border-radius: 28px;
-  background: #fff;
+  background: var(--paper-solid);
   box-shadow: 0 12px 28px rgba(34, 58, 91, .12);
   font-size: clamp(1.2rem, 4.8vw, 1.65rem);
   line-height: 1.05;
@@ -58,14 +58,14 @@
   width: 22px;
   height: 22px;
   margin: 7px auto -24px;
-  background: #fff;
+  background: var(--paper-solid);
   transform: rotate(45deg);
 }
 
 .court-tie-ritual__heading p,
 .court-tie-ritual__boundary {
   margin: 0;
-  color: #5a6a86;
+  color: var(--blue-deep);
   font-size: .82rem;
   line-height: 1.45;
 }
@@ -77,8 +77,8 @@
   border-radius: 8px;
   background:
     linear-gradient(180deg, transparent 0 34%, rgba(255, 232, 219, .55) 34% 100%),
-    radial-gradient(circle at 10% 86%, #d8edff 0 18%, transparent 19%),
-    radial-gradient(circle at 84% 80%, #cde6ff 0 16%, transparent 17%);
+    radial-gradient(circle at 10% 86%, var(--blue-soft) 0 18%, transparent 19%),
+    radial-gradient(circle at 84% 80%, var(--blue-soft) 0 16%, transparent 17%);
 }
 
 .court-tie-ritual__judge {
@@ -99,9 +99,9 @@
   height: 55px;
   border-radius: 48% 48% 42% 42%;
   background:
-    radial-gradient(circle at 20% 42%, #f4eee9 0 18px, transparent 19px),
-    radial-gradient(circle at 52% 34%, #fff7f0 0 24px, transparent 25px),
-    radial-gradient(circle at 80% 45%, #f0e7de 0 19px, transparent 20px);
+    radial-gradient(circle at 20% 42%, var(--cream-soft) 0 18px, transparent 19px),
+    radial-gradient(circle at 52% 34%, var(--cream-soft) 0 24px, transparent 25px),
+    radial-gradient(circle at 80% 45%, var(--cream-soft) 0 19px, transparent 20px);
 }
 
 .court-tie-ritual__face {
@@ -111,7 +111,7 @@
   width: 49px;
   height: 45px;
   border-radius: 45% 45% 48% 48%;
-  background: #ffb07b;
+  background: var(--warning);
   box-shadow: inset 0 -8px 0 rgba(255, 133, 93, .16);
 }
 
@@ -121,7 +121,7 @@
   width: 8px;
   height: 14px;
   border-radius: 999px;
-  background: #06132a;
+  background: var(--blue-deep);
 }
 
 .court-tie-ritual__face i:first-child { left: 12px; }
@@ -134,7 +134,7 @@
   width: 10px;
   height: 7px;
   border-radius: 0 0 12px 12px;
-  background: #06132a;
+  background: var(--blue-deep);
 }
 
 .court-tie-ritual__robe {
@@ -144,7 +144,7 @@
   width: 64px;
   height: 66px;
   border-radius: 26px 26px 8px 8px;
-  background: #15171d;
+  background: var(--ink-strong);
 }
 
 .court-tie-ritual__robe::before {
@@ -154,7 +154,7 @@
   top: 0;
   border-left: 9px solid transparent;
   border-right: 9px solid transparent;
-  border-top: 26px solid #fff;
+  border-top: 26px solid var(--paper-solid);
 }
 
 .court-tie-ritual__gavel {
@@ -164,7 +164,7 @@
   width: 18px;
   height: 62px;
   border-radius: 999px;
-  background: #8a512c;
+  background: var(--sangria);
   transform: rotate(-34deg);
   transform-origin: 50% 90%;
   animation: court-gavel-idle 1.2s ease-in-out infinite;
@@ -177,7 +177,7 @@
   width: 42px;
   height: 22px;
   border-radius: 9px;
-  background: linear-gradient(90deg, #5b321c, #a7673c);
+  background: linear-gradient(90deg, var(--sangria-deep), var(--sangria));
 }
 
 .court-tie-ritual__bench {
@@ -187,7 +187,7 @@
   top: 155px;
   height: 92px;
   border-radius: 9px 9px 8px 8px;
-  background: linear-gradient(180deg, #c88652, #9d5f37);
+  background: linear-gradient(180deg, var(--warning), var(--sangria));
   box-shadow: inset 0 10px 0 rgba(255, 231, 207, .24), 0 14px 20px rgba(87, 48, 26, .18);
   z-index: 4;
 }
@@ -217,7 +217,7 @@
   width: 52px;
   height: 58px;
   border-radius: 45% 45% 42% 42%;
-  background: #ffb07b;
+  background: var(--warning);
   box-shadow: inset 0 -6px 0 rgba(242, 99, 85, .12);
   animation: court-character-bob 1.25s ease-in-out infinite;
 }
@@ -227,7 +227,7 @@
   position: absolute;
   inset: -12px 7px 32px;
   border-radius: 50% 50% 42% 42%;
-  background: var(--hair, #2c7df0);
+  background: var(--hair, var(--blue-deep));
 }
 
 .court-tie-ritual__juror::after {
@@ -238,8 +238,8 @@
   width: 7px;
   height: 10px;
   border-radius: 999px;
-  background: #06132a;
-  box-shadow: 19px 0 0 #06132a;
+  background: var(--blue-deep);
+  box-shadow: 19px 0 0 var(--blue-deep);
 }
 
 .court-tie-ritual__juror i {
@@ -251,20 +251,20 @@
   height: 31px;
   place-items: center;
   border-radius: 50%;
-  background: #fff;
-  color: #24bd62;
+  background: var(--paper-solid);
+  color: var(--success);
   font-style: normal;
   font-weight: 950;
   box-shadow: 0 8px 18px rgba(31, 60, 100, .14);
 }
 
-.court-tie-ritual__juror:nth-child(even) i { color: #ff536a; }
-.juror-1 { left: 6%; top: 15px; --hair: #21bf78; }
-.juror-2 { left: 25%; top: 50px; --hair: #2e3646; }
-.juror-3 { left: 48%; top: 44px; --hair: #225ce1; }
-.juror-4 { right: 7%; top: 12px; --hair: #2a82ff; }
-.juror-5 { right: 28%; top: 74px; --hair: #ffd56e; }
-.juror-6 { left: 2%; top: 78px; --hair: #f04955; }
+.court-tie-ritual__juror:nth-child(even) i { color: var(--sangria-soft); }
+.juror-1 { left: 6%; top: 15px; --hair: var(--success); }
+.juror-2 { left: 25%; top: 50px; --hair: var(--ink-strong); }
+.juror-3 { left: 48%; top: 44px; --hair: var(--blue-deep); }
+.juror-4 { right: 7%; top: 12px; --hair: var(--blue-deep); }
+.juror-5 { right: 28%; top: 74px; --hair: var(--warning); }
+.juror-6 { left: 2%; top: 78px; --hair: var(--sangria-soft); }
 
 .court-tie-ritual__clerk {
   position: absolute;
@@ -290,7 +290,7 @@
   width: 38px;
   height: 26px;
   border-radius: 8px;
-  background: #fff;
+  background: var(--paper-solid);
   box-shadow: 0 8px 18px rgba(31, 60, 100, .15);
   transform: rotate(calc((var(--n, 0) - 2) * 12deg));
 }
@@ -315,24 +315,24 @@
 }
 
 .court-tie-ritual__vote-bar b {
-  color: #21b96a;
+  color: var(--success);
   font-size: 1.9rem;
 }
 
-.court-tie-ritual__vote-bar b:last-child { color: #ff465e; }
+.court-tie-ritual__vote-bar b:last-child { color: var(--sangria-soft); }
 
 .court-tie-ritual__vote-bar span {
   height: 22px;
   overflow: hidden;
   border-radius: 999px;
-  background: #ff465e;
+  background: var(--sangria-soft);
 }
 
 .court-tie-ritual__vote-bar span i {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: #23c36f;
+  background: var(--success);
 }
 
 .court-tie-ritual__selected-slip {
@@ -343,7 +343,7 @@
   width: min(210px, 78%);
   padding: 14px;
   border-radius: 28px;
-  background: #fff;
+  background: var(--paper-solid);
   box-shadow: 0 14px 32px rgba(24, 56, 96, .16);
   transform: translate(-50%, 28px) scale(.92);
   opacity: 0;
@@ -351,13 +351,13 @@
 
 .court-tie-ritual__selected-slip small {
   display: block;
-  color: #52637e;
+  color: var(--blue-deep);
   font-size: .77rem;
 }
 
 .court-tie-ritual__selected-slip strong {
   display: block;
-  color: #20a760;
+  color: var(--success);
   font-size: clamp(1.15rem, 5.2vw, 1.7rem);
   line-height: 1.05;
 }
@@ -395,14 +395,14 @@
   width: 9px;
   height: 34px;
   border-radius: 999px;
-  background: #ffbe3d;
+  background: var(--warning);
   opacity: 0;
 }
 
 .court-tie-ritual__burst i:nth-child(1) { left: 18%; top: 56px; transform: rotate(-38deg); }
-.court-tie-ritual__burst i:nth-child(2) { right: 18%; top: 56px; transform: rotate(38deg); background: #29a0ff; }
-.court-tie-ritual__burst i:nth-child(3) { left: 26%; top: 22px; transform: rotate(42deg); background: #ff6577; }
-.court-tie-ritual__burst i:nth-child(4) { right: 28%; top: 20px; transform: rotate(-32deg); background: #3ccb7c; }
+.court-tie-ritual__burst i:nth-child(2) { right: 18%; top: 56px; transform: rotate(38deg); background: var(--blue-deep); }
+.court-tie-ritual__burst i:nth-child(3) { left: 26%; top: 22px; transform: rotate(42deg); background: var(--sangria-soft); }
+.court-tie-ritual__burst i:nth-child(4) { right: 28%; top: 20px; transform: rotate(-32deg); background: var(--success); }
 
 .court-tie-ritual__options-wrap {
   display: grid;
@@ -432,13 +432,13 @@
   width: 31px;
   height: 31px;
   border-radius: 50%;
-  background: radial-gradient(circle at 50% 54%, #ffad7a 0 42%, transparent 43%), linear-gradient(#1f8cff 0 45%, #fff 46% 100%);
+  background: radial-gradient(circle at 50% 54%, var(--warning) 0 42%, transparent 43%), linear-gradient(var(--blue-deep) 0 45%, var(--paper-solid) 46% 100%);
   box-shadow: 0 6px 13px rgba(31, 61, 100, .12);
   animation: court-character-bob 1.45s ease-in-out infinite;
 }
 
 .court-tie-ritual__mini-avatars span.no {
-  background: radial-gradient(circle at 50% 54%, #ffad7a 0 42%, transparent 43%), linear-gradient(#ff566b 0 45%, #fff 46% 100%);
+  background: radial-gradient(circle at 50% 54%, var(--warning) 0 42%, transparent 43%), linear-gradient(var(--sangria-soft) 0 45%, var(--paper-solid) 46% 100%);
 }
 
 .court-tie-ritual__actions {
@@ -450,17 +450,17 @@
   min-height: 46px;
   border: 0;
   border-radius: 999px;
-  background: linear-gradient(180deg, #2f9cff, #257cea);
-  color: #fff;
+  background: linear-gradient(180deg, var(--blue-deep), var(--blue-deep));
+  color: var(--paper-solid);
   font: inherit;
   font-weight: 900;
   cursor: pointer;
-  box-shadow: 0 7px 0 #1460bf, 0 16px 28px rgba(34, 126, 233, .25);
+  box-shadow: 0 7px 0 var(--blue-deep), 0 16px 28px rgba(34, 126, 233, .25);
 }
 
 .court-tie-ritual__action:active {
   transform: translateY(4px);
-  box-shadow: 0 3px 0 #1460bf, 0 8px 18px rgba(34, 126, 233, .2);
+  box-shadow: 0 3px 0 var(--blue-deep), 0 8px 18px rgba(34, 126, 233, .2);
 }
 
 .court-tie-ritual__action:disabled {
@@ -471,14 +471,14 @@
 }
 
 .court-tie-ritual__action:focus-visible {
-  outline: 3px solid #091733;
+  outline: 3px solid var(--blue-deep);
   outline-offset: 3px;
 }
 
 .court-tie-ritual__status {
   min-height: 45px;
   margin-top: 12px;
-  color: #4b5b76;
+  color: var(--blue-deep);
   font-size: .86rem;
   line-height: 1.45;
   overflow-wrap: anywhere;
@@ -486,7 +486,7 @@
 
 .court-tie-ritual__status > span {
   display: block;
-  color: #247bea;
+  color: var(--blue-deep);
   font-size: .66rem;
   font-weight: 950;
   letter-spacing: .12em;
@@ -494,7 +494,7 @@
 
 .court-tie-ritual__status strong {
   display: block;
-  color: #19a95d;
+  color: var(--success);
   font-size: 1.3rem;
   margin-top: 5px;
 }
@@ -605,7 +605,7 @@
 }
 
 .court-page--voting .court-tie-ritual__judge .coco-companion {
-  width: 88px !important;
+  width: 88px;
 }
 
 .court-page--voting .court-tie-ritual__bench {
@@ -689,7 +689,7 @@
 
 .court-page--voting .court-tie-ritual__action {
   min-height: 38px;
-  box-shadow: 0 4px 0 #1460bf;
+  box-shadow: 0 4px 0 var(--blue-deep);
   font-size: .82rem;
 }
 
