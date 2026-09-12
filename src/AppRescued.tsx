@@ -451,6 +451,13 @@ export default function AppRescued() {
   const [emergencyContacts, setEmergencyContacts] = useState<EmergencyContact[]>(stored.emergencyContacts ?? []);
   const [emergencyCheckInFrequency, setEmergencyCheckInFrequency] = useState(stored.emergencyCheckInFrequency ?? 60);
   const [selectedEmergencyContactId, setSelectedEmergencyContactId] = useState(stored.selectedEmergencyContactId ?? '');
+  const [browserLocation, setBrowserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [browserLocationError, setBrowserLocationError] = useState<string | null>(null);
+  useEffect(() => {
+    if (!navigator.geolocation) { setBrowserLocationError('This browser does not support location.'); return; }
+    const watchId = navigator.geolocation.watchPosition(position => { setBrowserLocation({ latitude: position.coords.latitude, longitude: position.coords.longitude }); setBrowserLocationError(null); }, error => setBrowserLocationError(error.code === error.PERMISSION_DENIED ? 'Location permission was not granted.' : 'Current location is unavailable.'), { enableHighAccuracy: true, maximumAge: 30000, timeout: 10000 });
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, []);
   const [replanPreview, setReplanPreview] = useState(false);
   const [emergencyApproved, setEmergencyApproved] = useState(false);
   const [replanApplied, setReplanApplied] = useState(Boolean(stored.appliedRepair));
@@ -1387,11 +1394,13 @@ export default function AppRescued() {
         privacy={privacy}
         disruptionLabel={delay ? 'Floating block needs repair review.' : undefined}
         liveRoute={{
-          currentLocation: arrivalChecked ? (anchorItem?.name ?? 'Checked-in stop') : 'Last manual check-in',
+          currentLocation: browserLocation ? 'Current browser location' : browserLocationError ?? 'Location permission is being requested',
           target: floatingItem?.name ?? anchorItem?.name ?? 'Next saved stop',
           eta: arrivalChecked ? 'ETA 12 min' : 'ETA needs a check-in',
           timelineLabel: arrivalChecked ? 'Timeline is progressing' : 'Mark arrival to advance the local route',
           weatherLabel: 'Weather refreshes in the panel above · Open-Meteo',
+          coordinates: browserLocation ?? undefined,
+          locationStatus: browserLocation ? 'live' : 'unavailable',
         }}
         servicePins={[
           { id: 'hospital', label: 'Hospital', kind: 'hospital', query: `hospital near ${destination}` },

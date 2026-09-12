@@ -29,6 +29,8 @@ export type SpatialLiveRoute = {
   eta: string;
   timelineLabel: string;
   weatherLabel: string;
+  coordinates?: { latitude: number; longitude: number };
+  locationStatus?: 'live' | 'unavailable';
 };
 
 export type SpatialServicePin = {
@@ -148,7 +150,7 @@ export function TripSpatialView({
               </g>
             );
           })}
-          {mode === 'traveling' && liveRoute && <g className="spatial-live-marker" aria-label={`Current prototype location: ${liveRoute.currentLocation}`}>
+          {mode === 'traveling' && liveRoute && <g className="spatial-live-marker" aria-label={`Current ${liveRoute.locationStatus === 'live' ? 'browser' : 'schematic'} location: ${liveRoute.currentLocation}`}>
             <circle cx="72" cy="112" r="8" />
             <circle cx="72" cy="112" r="3" />
           </g>}
@@ -221,7 +223,7 @@ export function TripSpatialView({
       {mode === 'traveling' && (
         <>
           {liveRoute && <section className="spatial-live-route" aria-label="Live routing prototype">
-            <div><span>LIVE ROUTING · PROTOTYPE</span><b>{liveRoute.currentLocation} → {liveRoute.target}</b><small>{liveRoute.eta} · {liveRoute.timelineLabel}</small></div>
+            <div><span>{liveRoute.locationStatus === 'live' ? 'CURRENT LOCATION · BROWSER GPS' : 'ROUTING · SCHEMATIC FALLBACK'}</span><b>{liveRoute.currentLocation} → {liveRoute.target}</b><small>{liveRoute.eta} · {liveRoute.timelineLabel}</small>{liveRoute.coordinates && <small>{liveRoute.coordinates.latitude.toFixed(5)}, {liveRoute.coordinates.longitude.toFixed(5)} · local session only</small>}</div>
             <small>{liveRoute.weatherLabel}</small>
           </section>}
           {servicePins.length > 0 && <div className="spatial-service-pins" aria-label="Nearby service prototype pins">
@@ -264,7 +266,7 @@ export function TripSpatialView({
           )}
           <div className="adapter-note">
             <b>{liveRoute ? 'Prototype routing boundary' : 'Travel context only'}</b>
-            <small>{liveRoute ? 'Current and next stops come from saved trip state and manual check-ins only. The route is a local schematic; weather is refreshed by Open-Meteo above, with no device location, traffic, or turn-by-turn navigation connected.' : 'Current and next stops come from saved trip state and manual check-ins only.'}</small>
+            <small>{liveRoute ? 'Real traffic navigation and ETA require Google Routes or an equivalent Directions API plus a backend key proxy; this prototype is not connected. Route and ETA remain schematic.' : 'Current and next stops come from saved trip state and manual check-ins only.'}</small>
           </div>
         </>
       )}

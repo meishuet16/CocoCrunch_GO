@@ -139,14 +139,41 @@ describe('TripSpatialView', () => {
     expect(html).toContain('Scenic cafe block');
     expect(html).toContain('Shibuya crossing · 19:30 · ±15 min');
     expect(html).toContain('Sharing: status only');
-    expect(html).toContain('Current and next stops come from saved trip state and manual check-ins only.');
     expect(html).toContain('Saved current · next · reunion context');
-    expect(html).toContain('LIVE ROUTING · PROTOTYPE');
+    expect(html).toContain('ROUTING · SCHEMATIC FALLBACK');
     expect(html).toContain('Last manual check-in → Scenic cafe block');
     expect(html).toContain('Weather refreshes in the panel above · Open-Meteo');
-    expect(html).toContain('no device location, traffic, or turn-by-turn navigation connected');
+    expect(html).toContain('Real traffic navigation and ETA require Google Routes or an equivalent Directions API plus a backend key proxy');
     expect(html).toContain('NEARBY HELP · PROTOTYPE');
     expect(html).toContain('https://maps.google.com/?q=hospital%20near%20Tokyo');
+  });
+
+  it('labels browser GPS coordinates separately from the schematic route', async () => {
+    const mod = await loadTripSpatialView();
+
+    expect(mod).not.toBeNull();
+
+    const { TripSpatialView } = mod!;
+    const html = renderToStaticMarkup(
+      <TripSpatialView
+        mode="traveling"
+        destination="Tokyo"
+        source="local-schematic"
+        plan={samplePlan}
+        liveRoute={{
+          currentLocation: 'Current browser location',
+          target: 'Scenic cafe block',
+          eta: 'ETA 12 min · illustrative',
+          timelineLabel: 'Live coordinate in this browser session',
+          weatherLabel: 'Weather refreshes in the panel above · Open-Meteo',
+          coordinates: { latitude: 1.23456, longitude: 2.34567 },
+          locationStatus: 'live',
+        }}
+      />,
+    );
+
+    expect(html).toContain('CURRENT LOCATION · BROWSER GPS');
+    expect(html).toContain('1.23456, 2.34567 · local session only');
   });
 
   it('describes only supplied traveling context in the saved-context cue', async () => {
