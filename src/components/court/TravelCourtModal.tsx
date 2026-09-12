@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TravelCourtIdeasBoard } from './TravelCourtIdeasBoard';
 import { TravelCourtCaseFlow, DEFAULT_COURT_MEMBERS, type CourtStep } from './TravelCourtCaseFlow';
 import { type DynamicCourtMember } from './DynamicCourtroomStage';
+import type { CocoContext } from '../coco/assets';
 import { CourtCharacterPlayground } from './CourtCharacterPlayground';
 import { playWhoosh, triggerHaptic } from './courtSoundAndHaptics';
 import './court-styles.css';
@@ -13,6 +14,7 @@ export interface TravelCourtModalProps {
   onSkippedIdeaSealed?: (idea: string) => void;
   initialMode?: 'ideas' | 'case' | 'playground';
   initialStep?: CourtStep;
+  onCocoContextChange?: (context: Extract<CocoContext, 'court' | 'courtTie'>) => void;
 }
 
 export function TravelCourtModal({
@@ -22,6 +24,7 @@ export function TravelCourtModal({
   onSkippedIdeaSealed,
   initialMode = 'case',
   initialStep = 'lobby',
+  onCocoContextChange,
 }: TravelCourtModalProps) {
   const [viewMode, setViewMode] = useState<'ideas' | 'case' | 'playground'>(initialMode);
   const [caseStep, setCaseStep] = useState<CourtStep>(initialStep);
@@ -41,6 +44,10 @@ export function TravelCourtModal({
       };
     }
   }, [isOpen, initialMode, initialStep]);
+
+  useEffect(() => {
+    if (isOpen) onCocoContextChange?.('court');
+  }, [isOpen, onCocoContextChange]);
 
   if (!isOpen) return null;
 
@@ -80,6 +87,7 @@ export function TravelCourtModal({
           onBackToIdeas={() => setViewMode('ideas')}
           onGoToIdeas={() => setViewMode('ideas')}
           onSkippedIdeaSealed={onSkippedIdeaSealed}
+          onCocoContextChange={onCocoContextChange}
           onConfirmPlan={(decision) => {
             onConfirmDecision(decision);
             onClose();

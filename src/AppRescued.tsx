@@ -56,7 +56,7 @@ import {
   type ReunionAgreement, type TripConstraint, type TripMember, type TripReminder,
 } from './domain/trip';
 import { CocoCompanion } from './components/coco/CocoCompanion';
-import { cocoAsset } from './components/coco/assets';
+import { cocoAsset, type CocoContext } from './components/coco/assets';
 import { commitRitualState, loadRitualState, memoryEligible } from './ritualState';
 import { MemoryTrunk } from './components/MemoryTrunk';
 import { TravelCourtModal } from './components/court/TravelCourtModal';
@@ -341,6 +341,7 @@ export default function AppRescued() {
   });
   const [plannerTurn, setPlannerTurn] = useState(stored.plannerTurn ?? 'Mei');
   const [courtOpen, setCourtOpen] = useState(false);
+  const [courtCocoContext, setCourtCocoContext] = useState<'court' | 'courtTie'>('court');
   const [courtInitialMode, setCourtInitialMode] = useState<'ideas' | 'case' | 'playground'>('case');
   const [courtInitialStep, setCourtInitialStep] = useState<CourtStep>('lobby');
   const [courtView, setCourtView] = useState<CourtView>('upload');
@@ -1721,6 +1722,7 @@ export default function AppRescued() {
         isOpen={courtOpen}
         onClose={() => {
           setCourtOpen(false);
+          setCourtCocoContext('court');
           if (typeof window !== 'undefined' && window.location.search.includes('court=')) {
             const url = new URL(window.location.href);
             url.searchParams.delete('court');
@@ -1729,6 +1731,7 @@ export default function AppRescued() {
         }}
         initialMode={courtInitialMode}
         initialStep={courtInitialStep}
+        onCocoContextChange={setCourtCocoContext}
         onSkippedIdeaSealed={(idea) => setSealedCourtIdeas(current => current.includes(idea) ? current : [idea, ...current])}
         onConfirmDecision={(decision) => {
           setCourtDecision(decision);
@@ -1738,6 +1741,28 @@ export default function AppRescued() {
       />
     );
   }
+
+  const globalCocoContext: CocoContext = courtOpen
+    ? courtCocoContext
+    : drawer === 'gacha'
+      ? 'gacha'
+      : drawer === 'lucky'
+        ? 'lucky'
+        : tab === 'memories'
+          ? 'memory'
+          : tab === 'explore'
+            ? 'map'
+            : tab === 'trips'
+              ? tripWorkspaceOpen
+                ? tripPhase === 'traveling'
+                  ? 'traveling'
+                  : tripPhase === 'completed'
+                    ? 'memory'
+                    : 'planning'
+                : 'planning'
+              : tab === 'me'
+                ? 'empty'
+                : 'home';
 
   return (
     <div className={`app-shell tab-${tab}`}>
@@ -1760,7 +1785,7 @@ export default function AppRescued() {
       {renderCourt()}
       {renderDrawer()}
 
-      <GlobalCocoCompanion onAsk={() => { setTripWorkspaceOpen(true); setTripPhase('traveling'); setTab('trips'); setDrawer('assistant'); }} onPray={() => emitExperience({ type: 'open-prayer', source: 'user-reported', uncertainty: 'Personal prayer only; no weather, itinerary, or provider claim.' })} onNext={() => handleJourneyAction(journeyState.nextAction?.target ?? 'trip')} onEveryday={() => { setTripWorkspaceOpen(true); setTripPhase('traveling'); setTab('trips'); setDrawer('gacha'); }} onLucky={() => { setTripWorkspaceOpen(true); setTripPhase('traveling'); setTab('trips'); setDrawer('lucky'); }} />
+      <GlobalCocoCompanion context={globalCocoContext} onAsk={() => { setTripWorkspaceOpen(true); setTripPhase('traveling'); setTab('trips'); setDrawer('assistant'); }} onPray={() => emitExperience({ type: 'open-prayer', source: 'user-reported', uncertainty: 'Personal prayer only; no weather, itinerary, or provider claim.' })} onNext={() => handleJourneyAction(journeyState.nextAction?.target ?? 'trip')} onEveryday={() => { setTripWorkspaceOpen(true); setTripPhase('traveling'); setTab('trips'); setDrawer('gacha'); }} onLucky={() => { setTripWorkspaceOpen(true); setTripPhase('traveling'); setTab('trips'); setDrawer('lucky'); }} />
     </div>
   );
 }

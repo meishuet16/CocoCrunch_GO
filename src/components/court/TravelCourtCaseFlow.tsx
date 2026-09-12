@@ -18,6 +18,7 @@ import {
   playPop, playWhoosh, triggerHaptic, triggerScreenShake
 } from './courtSoundAndHaptics';
 import './court-styles.css';
+import type { CocoContext } from '../coco/assets';
 
 export type CourtStep =
   | 'lobby'       // Screen 1: Intro / Lobby
@@ -85,6 +86,7 @@ export interface TravelCourtCaseFlowProps {
   onSkippedIdeaSealed?: (idea: string) => void;
   courtMembers?: DynamicCourtMember[];
   onUpdateMembers?: (members: DynamicCourtMember[]) => void;
+  onCocoContextChange?: (context: Extract<CocoContext, 'court' | 'courtTie'>) => void;
 }
 
 export function MobileStatusBar({ light = false }: { light?: boolean }) {
@@ -784,12 +786,17 @@ export function TravelCourtCaseFlow({
   onSkippedIdeaSealed,
   courtMembers: externalMembers,
   onUpdateMembers,
+  onCocoContextChange,
 }: TravelCourtCaseFlowProps) {
   const [currentStep, setCurrentStep] = useState<CourtStep>(initialStep);
 
   useEffect(() => {
     setCurrentStep(initialStep);
   }, [initialStep]);
+
+  useEffect(() => {
+    onCocoContextChange?.(currentStep === 'showdown' ? 'courtTie' : 'court');
+  }, [currentStep, onCocoContextChange]);
 
   const [caseIndex, setCaseIndex] = useState(1); // 1 of 3, 2 of 3, 3 of 3
   const [cardExiting, setCardExiting] = useState(false);
