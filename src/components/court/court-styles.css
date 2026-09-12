@@ -3341,7 +3341,7 @@ body:has(.court-modal-overlay) {
   font-family: 'Caveat', cursive;
   font-size: 36px;
   font-weight: 700;
-  color: #8b1520;
+  color: var(--sangria-deep);
   line-height: 1.0;
   letter-spacing: -0.01em;
   margin: 0;
@@ -3363,7 +3363,7 @@ body:has(.court-modal-overlay) {
 .court-title-accent-ticks span {
   width: 2.5px;
   height: 8px;
-  background: #8b1520;
+  background: var(--sangria-deep);
   border-radius: 2px;
   transform: rotate(-22deg);
 }
@@ -3372,7 +3372,7 @@ body:has(.court-modal-overlay) {
   font-family: 'Caveat', cursive;
   font-size: 30px;
   font-weight: 700;
-  color: #8b1520;
+  color: var(--sangria-deep);
   line-height: 1.05;
   letter-spacing: -0.01em;
   margin: 1px 0 0;
@@ -3381,7 +3381,7 @@ body:has(.court-modal-overlay) {
 .court-vintage-body-desc {
   font-family: 'Caveat', cursive;
   font-size: 14.5px;
-  color: #7a5840;
+  color: var(--ink-soft);
   font-weight: 600;
   line-height: 1.35;
   text-align: center;
@@ -3414,14 +3414,14 @@ body:has(.court-modal-overlay) {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  border: 1.5px dashed #991b1b;
+  border: 1.5px dashed var(--sangria-deep);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 3px;
   box-sizing: border-box;
-  color: #991b1b;
+  color: var(--sangria-deep);
   position: relative;
   background: rgba(254, 242, 242, 0.4);
 }
@@ -3430,7 +3430,7 @@ body:has(.court-modal-overlay) {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 1px solid #991b1b;
+  border: 1px solid var(--sangria-deep);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -3477,7 +3477,7 @@ body:has(.court-modal-overlay) {
   font-family: 'Caveat', 'Dancing Script', cursive;
   font-size: 17px;
   font-weight: 700;
-  color: #78350f;
+  color: var(--ink-soft);
   line-height: 1.05;
   text-align: right;
   transform: rotate(-7deg);
@@ -3500,7 +3500,7 @@ body:has(.court-modal-overlay) {
 
 .court-polaroid-frame {
   position: absolute;
-  background: #ffffff;
+  background: var(--paper-solid);
   padding: 5px 5px 16px;
   border-radius: 3px;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.13), 0 2px 6px rgba(0, 0, 0, 0.07);
@@ -3521,7 +3521,7 @@ body:has(.court-modal-overlay) {
   overflow: hidden;
   border-radius: 2px;
   position: relative;
-  background: #f1f5f9;
+  background: var(--paper-solid);
 }
 
 .court-polaroid-photo-box img {
@@ -3535,7 +3535,7 @@ body:has(.court-modal-overlay) {
   margin-top: 5px;
   font-size: 8px;
   font-weight: 800;
-  color: #64748b;
+  color: var(--blue-deep);
   letter-spacing: 0.05em;
   text-align: center;
   display: flex;
@@ -3556,13 +3556,13 @@ body:has(.court-modal-overlay) {
 }
 
 .court-glossy-pushpin.red {
-  background: radial-gradient(circle at 35% 35%, #fca5a5 0%, #ef4444 55%, #991b1b 100%);
-  border: 1px solid #7f1d1d;
+  background: radial-gradient(circle at 35% 35%, var(--sangria-tint) 0%, var(--sangria) 55%, var(--sangria-deep) 100%);
+  border: 1px solid var(--sangria-deep);
 }
 
 .court-glossy-pushpin.blue {
-  background: radial-gradient(circle at 35% 35%, #93c5fd 0%, #2563eb 55%, #1e3a8a 100%);
-  border: 1px solid #1e3a8a;
+  background: radial-gradient(circle at 35% 35%, var(--blue-deep) 0%, var(--blue-deep) 55%, var(--blue-ink) 100%);
+  border: 1px solid var(--blue-ink);
 }
 
 /* Sticky notes pasted on polaroids */
@@ -3579,21 +3579,21 @@ body:has(.court-modal-overlay) {
 }
 
 .court-sticky-blue {
-  background: #e0f2fe;
-  color: #0369a1;
-  border: 1px solid #bae6fd;
+  background: var(--paper-solid);
+  color: var(--blue-ink);
+  border: 1px solid var(--blue-soft);
 }
 
 .court-sticky-yellow {
-  background: #fef9c3;
-  color: #854d0e;
-  border: 1px solid #fef08a;
+  background: var(--cream-deep);
+  color: var(--ink-soft);
+  border: 1px solid var(--warning);
 }
 
 .court-sticky-ivory {
-  background: #fefce8;
-  color: #713f12;
-  border: 1px solid #fef08a;
+  background: var(--paper-solid);
+  color: var(--ink-soft);
+  border: 1px solid var(--warning);
 }
 
 /* Upload Card — warm cream card on oatmeal paper */
@@ -3639,7 +3639,7 @@ body:has(.court-modal-overlay) {
 }
 
 .court-upload-text-input::placeholder {
-  color: #a08870;
+  color: var(--warning);
   font-weight: 500;
 }
 
@@ -3723,7 +3723,7 @@ body:has(.court-modal-overlay) {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #10b981;
+  background: var(--success);
   box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
   animation: court-dot-pulse 1.6s infinite;
   flex-shrink: 0;
@@ -3847,7 +3847,7 @@ body:has(.court-modal-overlay) {
 .court-large-action-chip.active {
   background: rgba(149, 187, 234, 0.18);
   border-color: var(--vp-blue);
-  color: #1a4a82;
+  color: var(--blue-ink);
   box-shadow: 0 1px 4px rgba(149, 187, 234, 0.3);
 }
 
@@ -3862,7 +3862,7 @@ body:has(.court-modal-overlay) {
   border-radius: 99px;
   font-size: 13.5px;
   font-weight: 800;
-  color: #ffffff;
+  color: var(--paper-solid);
   background: linear-gradient(135deg, var(--vp-red-mid) 0%, var(--vp-red) 100%);
   border: none;
   cursor: pointer;
@@ -3877,7 +3877,7 @@ body:has(.court-modal-overlay) {
 }
 
 .court-upload-btn-full:hover {
-  background: linear-gradient(135deg, #ba1810 0%, #8b0d09 100%);
+  background: linear-gradient(135deg, var(--sangria-deep) 0%, var(--sangria-deep) 100%);
   box-shadow: 0 5px 18px rgba(139, 13, 9, 0.38);
   transform: translateY(-1px);
 }
@@ -3905,7 +3905,7 @@ body:has(.court-modal-overlay) {
   font-family: 'Caveat', cursive;
   font-size: 24px;
   font-weight: 700;
-  color: #8b1520;
+  color: var(--sangria-deep);
   margin: 0;
   letter-spacing: -0.01em;
 }
@@ -3964,7 +3964,7 @@ body:has(.court-modal-overlay) {
   left: 5px;
   background: rgba(40, 20, 8, 0.7);
   backdrop-filter: blur(4px);
-  color: #ffffff;
+  color: var(--paper-solid);
   border-radius: 99px;
   padding: 2px 6px;
   font-size: 9.5px;
@@ -4013,7 +4013,7 @@ body:has(.court-modal-overlay) {
 .court-feed-time-ago {
   font-size: 10.5px;
   font-weight: 500;
-  color: #a08870;
+  color: var(--warning);
 }
 
 .court-feed-post-title {
@@ -4053,7 +4053,7 @@ body:has(.court-modal-overlay) {
 
 .court-feed-tag-pill {
   background: rgba(149, 187, 234, 0.18);
-  color: #1a4a82;
+  color: var(--blue-ink);
   font-size: 9.5px;
   font-weight: 700;
   border-radius: 6px;
@@ -4099,7 +4099,7 @@ body:has(.court-modal-overlay) {
   border-radius: 99px;
   border: none;
   background: linear-gradient(135deg, var(--vp-red-mid) 0%, var(--vp-red) 100%);
-  color: #ffffff;
+  color: var(--paper-solid);
   font-size: 15px;
   font-weight: 800;
   display: flex;
@@ -4114,7 +4114,7 @@ body:has(.court-modal-overlay) {
 }
 
 .court-open-discussion-btn:hover {
-  background: linear-gradient(135deg, #ba1810 0%, #8b0d09 100%);
+  background: linear-gradient(135deg, var(--sangria-deep) 0%, var(--sangria-deep) 100%);
   box-shadow: 0 6px 20px rgba(139, 13, 9, 0.4);
   transform: translateY(-1px);
 }
@@ -4155,7 +4155,7 @@ body:has(.court-modal-overlay) {
   padding: 4px 16px 8px;
   overflow: hidden;
   box-sizing: border-box;
-  background: linear-gradient(180deg, #f0f7ff 0%, #ffffff 40%, #f8fafc 100%);
+  background: linear-gradient(180deg, var(--paper-solid) 0%, var(--paper-solid) 40%, var(--paper-solid) 100%);
 }
 
 .court-verdict-header-block {
@@ -4169,7 +4169,7 @@ body:has(.court-modal-overlay) {
 .court-verdict-subtitle-text {
   font-size: 13.5px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--blue-deep);
   letter-spacing: 0.02em;
   margin: 0 0 2px;
 }
@@ -4186,7 +4186,7 @@ body:has(.court-modal-overlay) {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 24px;
   font-weight: 900;
-  color: #1877f2;
+  color: var(--blue-deep);
   letter-spacing: -0.01em;
   margin: 0;
   text-align: center;
@@ -4208,14 +4208,14 @@ body:has(.court-modal-overlay) {
   position: absolute;
   left: 0;
   top: 4px;
-  background: #fefce8;
-  border: 1px solid #fef08a;
+  background: var(--paper-solid);
+  border: 1px solid var(--warning);
   border-radius: 4px;
   padding: 6px 8px;
   font-family: 'Caveat', cursive, sans-serif;
   font-size: 13px;
   font-weight: 700;
-  color: #854d0e;
+  color: var(--ink-soft);
   line-height: 1.15;
   transform: rotate(-7deg);
   box-shadow: 0 3px 8px rgba(0,0,0,0.08);
@@ -4238,7 +4238,7 @@ body:has(.court-modal-overlay) {
 .court-stamp-circle {
   width: 52px;
   height: 52px;
-  border: 1.5px dashed #b91c1c;
+  border: 1.5px dashed var(--sangria);
   border-radius: 50%;
   display: flex;
   flex-direction: column;
@@ -4251,13 +4251,13 @@ body:has(.court-modal-overlay) {
 .court-stamp-label {
   font-size: 6.5px;
   font-weight: 800;
-  color: #b91c1c;
+  color: var(--sangria);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .court-stamp-plane-icon {
-  color: #b91c1c;
+  color: var(--sangria);
   margin-top: 2px;
   transform: rotate(-25deg);
 }
@@ -4265,14 +4265,14 @@ body:has(.court-modal-overlay) {
 /* Card 1: Selected Case Card */
 .court-selected-case-card {
   width: 100%;
-  background: #ffffff;
+  background: var(--paper-solid);
   border-radius: 18px;
   padding: 10px 12px;
   display: flex;
   gap: 12px;
   align-items: center;
   box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--paper-solid);
   box-sizing: border-box;
   margin-bottom: 8px;
 }
@@ -4300,8 +4300,8 @@ body:has(.court-modal-overlay) {
 }
 
 .court-badge-type {
-  background: #e0f2fe;
-  color: #0284c7;
+  background: var(--paper-solid);
+  color: var(--blue-deep);
   font-size: 10px;
   font-weight: 700;
   padding: 2px 7px;
@@ -4310,8 +4310,8 @@ body:has(.court-modal-overlay) {
 }
 
 .court-badge-result {
-  background: #dcfce7;
-  color: #16a34a;
+  background: var(--paper-solid);
+  color: var(--success);
   font-size: 10px;
   font-weight: 700;
   padding: 2px 7px;
@@ -4323,7 +4323,7 @@ body:has(.court-modal-overlay) {
   font-family: 'Caveat', cursive;
   font-size: 19px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--ink);
   margin: 3px 0 2px;
   line-height: 1.2;
   white-space: nowrap;
@@ -4334,7 +4334,7 @@ body:has(.court-modal-overlay) {
 .court-selected-case-desc {
   font-family: 'Inter', sans-serif;
   font-size: 11px;
-  color: #64748b;
+  color: var(--blue-deep);
   line-height: 1.3;
   margin: 0 0 5px;
   display: -webkit-box;
@@ -4350,8 +4350,8 @@ body:has(.court-modal-overlay) {
 }
 
 .court-selected-case-tag {
-  background: #f0f7ff;
-  color: #2563eb;
+  background: var(--paper-solid);
+  color: var(--blue-deep);
   font-family: 'Inter', sans-serif;
   font-size: 9.5px;
   font-weight: 600;
@@ -4363,11 +4363,11 @@ body:has(.court-modal-overlay) {
 /* Card 2: Vote Results Card */
 .court-vote-results-card {
   width: 100%;
-  background: #ffffff;
+  background: var(--paper-solid);
   border-radius: 18px;
   padding: 12px 14px 12px;
   box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--paper-solid);
   box-sizing: border-box;
   margin-bottom: 8px;
 }
@@ -4389,14 +4389,14 @@ body:has(.court-modal-overlay) {
   font-family: 'Caveat', cursive;
   font-size: 18px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--ink);
   margin: 0;
 }
 
 .court-vote-results-count {
   font-family: 'Inter', sans-serif;
   font-size: 11.5px;
-  color: #64748b;
+  color: var(--blue-deep);
   font-weight: 600;
 }
 
@@ -4410,14 +4410,14 @@ body:has(.court-modal-overlay) {
 .court-vote-num-green {
   font-size: 24px;
   font-weight: 800;
-  color: #10b981;
+  color: var(--success);
   min-width: 20px;
 }
 
 .court-vote-num-red {
   font-size: 24px;
   font-weight: 800;
-  color: #ef4444;
+  color: var(--sangria);
   min-width: 20px;
   text-align: right;
 }
@@ -4428,18 +4428,18 @@ body:has(.court-modal-overlay) {
   border-radius: 99px;
   overflow: hidden;
   display: flex;
-  background: #f1f5f9;
+  background: var(--paper-solid);
   margin: 0 10px;
 }
 
 .court-vote-progress-green {
-  background: #10b981;
+  background: var(--success);
   height: 100%;
   transition: width 0.5s ease;
 }
 
 .court-vote-progress-red {
-  background: #ef4444;
+  background: var(--sangria);
   height: 100%;
   transition: width 0.5s ease;
 }
@@ -4466,7 +4466,7 @@ body:has(.court-modal-overlay) {
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
-  border: 1.5px solid #ffffff;
+  border: 1.5px solid var(--paper-solid);
 }
 
 .court-vote-member-badge {
@@ -4481,24 +4481,24 @@ body:has(.court-modal-overlay) {
   justify-content: center;
   font-size: 9.5px;
   font-weight: 900;
-  color: #ffffff;
-  border: 1.5px solid #ffffff;
+  color: var(--paper-solid);
+  border: 1.5px solid var(--paper-solid);
   box-shadow: 0 1px 3px rgba(0,0,0,0.15);
   z-index: 5;
 }
 
 .court-vote-member-badge.badge-green {
-  background: #10b981;
+  background: var(--success);
 }
 
 .court-vote-member-badge.badge-red {
-  background: #ef4444;
+  background: var(--sangria);
 }
 
 .court-vote-member-name {
   font-size: 11.5px;
   font-weight: 600;
-  color: #334155;
+  color: var(--ink);
   margin: 4px 0 2px;
 }
 
@@ -4511,13 +4511,13 @@ body:has(.court-modal-overlay) {
 }
 
 .court-vote-member-pill.pill-green {
-  background: #dcfce7;
-  color: #16a34a;
+  background: var(--paper-solid);
+  color: var(--success);
 }
 
 .court-vote-member-pill.pill-red {
-  background: #fee2e2;
-  color: #ef4444;
+  background: var(--paper-solid);
+  color: var(--sangria);
 }
 
 /* Bottom Action Buttons */
@@ -4534,9 +4534,9 @@ body:has(.court-modal-overlay) {
   flex: 1;
   height: 46px;
   border-radius: 99px;
-  background: #ffffff;
-  border: 1.5px solid #e2e8f0;
-  color: #1e293b;
+  background: var(--paper-solid);
+  border: 1.5px solid var(--paper-solid);
+  color: var(--ink);
   font-size: 13.5px;
   font-weight: 700;
   display: flex;
@@ -4549,7 +4549,7 @@ body:has(.court-modal-overlay) {
 }
 
 .court-verdict-secondary-btn:active {
-  background: #f8fafc;
+  background: var(--paper-solid);
   transform: scale(0.985);
 }
 
@@ -4557,9 +4557,9 @@ body:has(.court-modal-overlay) {
   flex: 1;
   height: 46px;
   border-radius: 99px;
-  background: #1877f2;
+  background: var(--blue-deep);
   border: none;
-  color: #ffffff;
+  color: var(--paper-solid);
   font-size: 13.5px;
   font-weight: 700;
   display: flex;
@@ -4572,7 +4572,7 @@ body:has(.court-modal-overlay) {
 }
 
 .court-verdict-primary-btn:active {
-  background: #1d4ed8;
+  background: var(--blue-deep);
   transform: scale(0.985);
 }
 
@@ -4592,7 +4592,7 @@ body:has(.court-modal-overlay) {
 }
 
 .court-showdown-nav-title {
-  color: #dc2626;
+  color: var(--sangria);
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 12px;
   font-weight: 600;
@@ -4600,8 +4600,8 @@ body:has(.court-modal-overlay) {
 }
 
 .court-showdown-header-card {
-  background: #ffffff;
-  border: 1.5px solid #e8d5b5;
+  background: var(--paper-solid);
+  border: 1.5px solid var(--cream-deep);
   border-radius: 16px;
   padding: 10px 14px;
   display: flex;
@@ -4616,7 +4616,7 @@ body:has(.court-modal-overlay) {
   height: 50px;
   border-radius: 12px;
   object-fit: cover;
-  border: 1.5px solid #e8d5b5;
+  border: 1.5px solid var(--cream-deep);
   box-shadow: 0 2px 6px rgba(100, 65, 25, 0.1);
   flex-shrink: 0;
 }
@@ -4633,7 +4633,7 @@ body:has(.court-modal-overlay) {
   font-family: 'Caveat', cursive;
   font-size: 20px;
   font-weight: 700;
-  color: #8b1520;
+  color: var(--sangria-deep);
   margin: 0;
   line-height: 1.15;
 }
@@ -4641,7 +4641,7 @@ body:has(.court-modal-overlay) {
 .court-showdown-case-sub {
   font-family: 'Inter', sans-serif;
   font-size: 11.5px;
-  color: #6d5241;
+  color: var(--ink-soft);
   margin: 0;
   line-height: 1.35;
   font-weight: 500;
@@ -4660,8 +4660,8 @@ body:has(.court-modal-overlay) {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #a31520 0%, #8b1520 100%);
-  border: 1.5px solid #6f0e16;
+  background: linear-gradient(135deg, var(--sangria-deep) 0%, var(--sangria-deep) 100%);
+  border: 1.5px solid var(--sangria-deep);
   border-radius: 12px;
   padding: 6px 10px;
   box-shadow: 0 3px 10px rgba(139, 21, 32, 0.28);
@@ -4669,7 +4669,7 @@ body:has(.court-modal-overlay) {
 }
 
 .court-showdown-sword-badge span:last-child {
-  color: #ef4444;
+  color: var(--sangria);
   font-size: 9px;
   font-weight: 600;
   letter-spacing: 0;
@@ -4678,9 +4678,9 @@ body:has(.court-modal-overlay) {
 }
 
 .court-showdown-rate-pill {
-  color: #dc2626;
-  background: #fff7f7;
-  border: 1px solid #ffd6d6;
+  color: var(--sangria);
+  background: var(--paper-solid);
+  border: 1px solid var(--sangria-tint);
   border-radius: 8px;
   padding: 2px 7px;
   font-size: 9.5px;
@@ -4695,10 +4695,10 @@ body:has(.court-modal-overlay) {
   border-radius: 18px;
   overflow: hidden;
   position: relative;
-  border: 1.5px solid #e8d5b5;
+  border: 1.5px solid var(--cream-deep);
   box-shadow: 0 6px 20px rgba(100, 65, 25, 0.12);
   margin-bottom: 10px;
-  background: #fdfbf7;
+  background: var(--paper-solid);
 }
 
 .court-showdown-stage-box.is-locked {
@@ -4717,8 +4717,8 @@ body:has(.court-modal-overlay) {
   position: absolute;
   top: 10px;
   left: 10px;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--success) 0%, var(--success) 100%);
+  color: var(--paper-solid);
   font-family: 'Inter', sans-serif;
   font-size: 11.5px;
   font-weight: 800;
@@ -4736,8 +4736,8 @@ body:has(.court-modal-overlay) {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--sangria) 0%, var(--sangria) 100%);
+  color: var(--paper-solid);
   font-family: 'Inter', sans-serif;
   font-size: 11.5px;
   font-weight: 800;
@@ -4757,8 +4757,8 @@ body:has(.court-modal-overlay) {
   left: 12px;
   top: 48px;
   width: 142px;
-  background: #ffffff;
-  border: 2px solid #059669;
+  background: var(--paper-solid);
+  border: 2px solid var(--success);
   border-radius: 14px;
   padding: 8px 10px;
   box-shadow: 0 4px 14px rgba(5, 150, 105, 0.2);
@@ -4773,9 +4773,9 @@ body:has(.court-modal-overlay) {
   left: 24px;
   width: 10px;
   height: 10px;
-  background: #ffffff;
-  border-right: 2px solid #059669;
-  border-bottom: 2px solid #059669;
+  background: var(--paper-solid);
+  border-right: 2px solid var(--success);
+  border-bottom: 2px solid var(--success);
   transform: rotate(45deg);
 }
 
@@ -4784,8 +4784,8 @@ body:has(.court-modal-overlay) {
   right: 12px;
   top: 48px;
   width: 142px;
-  background: #ffffff;
-  border: 2px solid #dc2626;
+  background: var(--paper-solid);
+  border: 2px solid var(--sangria);
   border-radius: 14px;
   padding: 8px 10px;
   box-shadow: 0 4px 14px rgba(220, 38, 38, 0.2);
@@ -4800,9 +4800,9 @@ body:has(.court-modal-overlay) {
   right: 24px;
   width: 10px;
   height: 10px;
-  background: #ffffff;
-  border-right: 2px solid #dc2626;
-  border-bottom: 2px solid #dc2626;
+  background: var(--paper-solid);
+  border-right: 2px solid var(--sangria);
+  border-bottom: 2px solid var(--sangria);
   transform: rotate(45deg);
 }
 
@@ -4828,15 +4828,15 @@ body:has(.court-modal-overlay) {
 }
 
 .court-point-bubble.bubble-green {
-  background: #10b981;
-  color: #ffffff;
-  border: 1.5px solid #ffffff;
+  background: var(--success);
+  color: var(--paper-solid);
+  border: 1.5px solid var(--paper-solid);
 }
 
 .court-point-bubble.bubble-red {
-  background: #ef4444;
-  color: #ffffff;
-  border: 1.5px solid #ffffff;
+  background: var(--sangria);
+  color: var(--paper-solid);
+  border: 1.5px solid var(--paper-solid);
 }
 
 @keyframes pointBubbleLifecycle {
@@ -4849,7 +4849,7 @@ body:has(.court-modal-overlay) {
 /* Chat bar card */
 .court-showdown-chat-card {
   background: rgba(255, 253, 247, 0.95);
-  border: 1.5px solid #e8d5b5;
+  border: 1.5px solid var(--cream-deep);
   border-radius: 14px;
   padding: 6px 8px 6px 14px;
   display: flex;
@@ -4866,12 +4866,12 @@ body:has(.court-modal-overlay) {
   background: transparent;
   font-family: 'Inter', sans-serif;
   font-size: 13px;
-  color: #2b1810;
+  color: var(--ink);
   outline: none;
 }
 
 .court-showdown-chat-input::placeholder {
-  color: #8b6b4e;
+  color: var(--ink-soft);
   opacity: 0.7;
 }
 
@@ -4879,26 +4879,26 @@ body:has(.court-modal-overlay) {
   width: 40px;
   height: 38px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #4a7ba8 0%, #366088 100%);
+  background: linear-gradient(135deg, var(--blue-deep) 0%, var(--blue-ink) 100%);
   border: none;
-  color: #ffffff;
+  color: var(--paper-solid);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 3px 0 #244360, 0 3px 8px rgba(74, 123, 168, 0.3);
+  box-shadow: 0 3px 0 var(--blue-ink), 0 3px 8px rgba(74, 123, 168, 0.3);
   transition: transform 0.1s, background 0.15s;
 }
 
 .court-showdown-send-btn:active {
   transform: translateY(2px);
-  box-shadow: 0 1px 0 #244360;
+  box-shadow: 0 1px 0 var(--blue-ink);
 }
 
 /* Betting Stakes card */
 .court-showdown-betting-box {
-  background: #ffffff;
-  border: 1.5px solid #e8d5b5;
+  background: var(--paper-solid);
+  border: 1.5px solid var(--cream-deep);
   border-radius: 16px;
   padding: 12px 14px;
   box-shadow: 0 4px 14px rgba(100, 65, 25, 0.08);
@@ -4921,16 +4921,16 @@ body:has(.court-modal-overlay) {
 }
 
 .court-showdown-stake-title span {
-  color: #0f172a;
+  color: var(--ink);
   font-size: 14.5px;
   font-weight: 600;
   white-space: nowrap;
 }
 
 .court-showdown-stake-title small {
-  color: #64748b;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  color: var(--blue-deep);
+  background: var(--paper-solid);
+  border: 1px solid var(--paper-solid);
   border-radius: 8px;
   padding: 3px 7px;
   font-size: 9.5px;
@@ -4947,7 +4947,7 @@ body:has(.court-modal-overlay) {
 }
 
 .court-showdown-stake-value b {
-  color: #0f172a;
+  color: var(--ink);
   font-size: 11.5px;
   font-weight: 600;
   white-space: nowrap;
@@ -4956,7 +4956,7 @@ body:has(.court-modal-overlay) {
 .court-showdown-slider-labels {
   display: flex;
   justify-content: space-between;
-  color: #94a3b8;
+  color: var(--muted);
   font-size: 10.5px;
   font-weight: 500;
   line-height: 1;
@@ -4964,30 +4964,30 @@ body:has(.court-modal-overlay) {
 
 .court-showdown-trip-fund-row {
   font-size: 10.5px;
-  color: #64748b;
-  background: #f8fafc;
+  color: var(--blue-deep);
+  background: var(--paper-solid);
   border-radius: 12px;
   padding: 7px 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid #e8edf5;
+  border: 1px solid var(--paper-solid);
   margin-top: 2px;
 }
 
 .court-showdown-trip-fund-row span:last-child {
   font-weight: 600;
-  color: #0f172a;
+  color: var(--ink);
 }
 
 .court-stake-val-pill {
-  background: #fff7ed;
-  color: #ea580c;
+  background: var(--paper-solid);
+  color: var(--warning);
   font-size: 12px;
   font-weight: 600;
   padding: 4px 10px;
   border-radius: 99px;
-  border: 1px solid #fed7aa;
+  border: 1px solid var(--cream-soft);
   white-space: nowrap;
 }
 
@@ -4996,8 +4996,8 @@ body:has(.court-modal-overlay) {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
-  background: #ffffff;
-  border: 1px solid #e8edf5;
+  background: var(--paper-solid);
+  border: 1px solid var(--paper-solid);
   border-radius: 20px;
   padding: 12px 13px;
   margin-bottom: 10px;
@@ -5013,14 +5013,14 @@ body:has(.court-modal-overlay) {
 }
 
 .court-showdown-locked-copy span {
-  color: #64748b;
+  color: var(--blue-deep);
   font-size: 10.5px;
   font-weight: 500;
   line-height: 1;
 }
 
 .court-showdown-locked-copy b {
-  color: #0f172a;
+  color: var(--ink);
   font-family: "Inter Display", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 16px;
   font-weight: 600;
@@ -5040,8 +5040,8 @@ body:has(.court-modal-overlay) {
 .court-showdown-locked-metrics div {
   min-width: 64px;
   border-radius: 15px;
-  background: #f8fafc;
-  border: 1px solid #e8edf5;
+  background: var(--paper-solid);
+  border: 1px solid var(--paper-solid);
   padding: 7px 9px;
   display: flex;
   flex-direction: column;
@@ -5049,7 +5049,7 @@ body:has(.court-modal-overlay) {
 }
 
 .court-showdown-locked-metrics span {
-  color: #64748b;
+  color: var(--blue-deep);
   font-size: 9px;
   font-weight: 500;
   line-height: 1;
@@ -5057,7 +5057,7 @@ body:has(.court-modal-overlay) {
 }
 
 .court-showdown-locked-metrics b {
-  color: #0f172a;
+  color: var(--ink);
   font-family: "Inter Display", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 13px;
   font-weight: 600;
@@ -5072,7 +5072,7 @@ body:has(.court-modal-overlay) {
   width: 100%;
   height: 8px;
   border-radius: 99px;
-  background: linear-gradient(90deg, #f5edd8 0%, #e8d5b5 100%);
+  background: linear-gradient(90deg, var(--paper-solid) 0%, var(--cream-deep) 100%);
   outline: none;
   margin: 8px 0;
 }
@@ -5083,8 +5083,8 @@ body:has(.court-modal-overlay) {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: linear-gradient(180deg, #a31520 0%, #8b1520 100%);
-  border: 2.5px solid #ffffff;
+  background: linear-gradient(180deg, var(--sangria-deep) 0%, var(--sangria-deep) 100%);
+  border: 2.5px solid var(--paper-solid);
   box-shadow: 0 3px 8px rgba(139, 21, 32, 0.4);
   cursor: pointer;
   transition: transform 0.12s ease;
@@ -5100,8 +5100,8 @@ body:has(.court-modal-overlay) {
   height: 50px;
   border-radius: 99px;
   border: none;
-  background: linear-gradient(180deg, #a31520 0%, #8b1520 100%);
-  color: #ffffff;
+  background: linear-gradient(180deg, var(--sangria-deep) 0%, var(--sangria-deep) 100%);
+  color: var(--paper-solid);
   font-family: 'Caveat', cursive;
   font-size: 22px;
   font-weight: 700;
@@ -5110,7 +5110,7 @@ body:has(.court-modal-overlay) {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 5px 0 #5c0b14, 0 8px 18px rgba(139, 21, 32, 0.35);
+  box-shadow: 0 5px 0 var(--sangria-deep), 0 8px 18px rgba(139, 21, 32, 0.35);
   transition: transform 0.12s ease, box-shadow 0.12s ease;
   user-select: none;
   outline: none;
@@ -5119,35 +5119,35 @@ body:has(.court-modal-overlay) {
 
 .court-showdown-confirm-btn-3d:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 0 #5c0b14, 0 10px 22px rgba(139, 21, 32, 0.42);
+  box-shadow: 0 6px 0 var(--sangria-deep), 0 10px 22px rgba(139, 21, 32, 0.42);
 }
 
 .court-showdown-confirm-btn-3d:active {
   transform: translateY(4px);
-  box-shadow: 0 1px 0 #5c0b14, inset 0 2px 4px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 1px 0 var(--sangria-deep), inset 0 2px 4px rgba(0, 0, 0, 0.35);
 }
 
 /* ==========================================================================
    VINTAGE TRAVEL SCRAPBOOK COLLAGE AESTHETIC  ── consistent across all screens
    Palette (matching reference image 3):
-   - WARM OATMEAL PAPER (#F5EDD8 / #EDE0C4): Light cream scrapbook paper base
-   - SANGRIA DEEP RED  (#8B0D09 / #A31208): Torn paper button & title accents
-   - CORNFLOWER BLUE   (#95BBEA): Washi-tape badge, airplane doodle
+   - WARM OATMEAL PAPER (var(--paper-solid) / var(--cream-deep)): Light cream scrapbook paper base
+   - SANGRIA DEEP RED  (var(--sangria-deep) / var(--sangria-deep)): Torn paper button & title accents
+   - CORNFLOWER BLUE   (var(--blue-deep)): Washi-tape badge, airplane doodle
    ========================================================================== */
 
 /* ── Shared paper token ─────────────────────────────────────────────────── */
 :root {
-  --vp-paper:        #f5edd8;   /* main page background  */
-  --vp-paper-mid:   #ede0c4;   /* mid-tone crease       */
-  --vp-paper-dark:  #d9c9a8;   /* shadow crease         */
-  --vp-paper-light: #fdf8ef;   /* highlight crease      */
-  --vp-card:        #fffdf7;   /* memo card background  */
-  --vp-red:         #8b0d09;   /* sangria red           */
-  --vp-red-mid:     #a31208;   /* lighter red stroke    */
-  --vp-blue:        #95bbea;   /* cornflower            */
-  --vp-text:        #2b1810;   /* warm dark text        */
-  --vp-subtext:     #634b39;   /* warm muted text       */
-  --vp-border:      #e8d5b5;   /* warm paper border     */
+  --vp-paper:        var(--paper-solid);   /* main page background  */
+  --vp-paper-mid:   var(--cream-deep);   /* mid-tone crease       */
+  --vp-paper-dark:  var(--warning);   /* shadow crease         */
+  --vp-paper-light: var(--paper-solid);   /* highlight crease      */
+  --vp-card:        var(--paper-solid);   /* memo card background  */
+  --vp-red:         var(--sangria-deep);   /* sangria red           */
+  --vp-red-mid:     var(--sangria-deep);   /* lighter red stroke    */
+  --vp-blue:        var(--blue-deep);   /* cornflower            */
+  --vp-text:        var(--ink);   /* warm dark text        */
+  --vp-subtext:     var(--ink-soft);   /* warm muted text       */
+  --vp-border:      var(--cream-deep);   /* warm paper border     */
 }
 
 /* ── Oatmeal paper background with wrinkle-like shading (BOTH screens) ──── */
