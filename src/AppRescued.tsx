@@ -304,6 +304,8 @@ export default function AppRescued() {
   const [stored] = useState(() => loadPersisted());
   const [onboardingComplete, setOnboardingComplete] = useState(Boolean(stored.onboardingComplete));
   const [onboardingName, setOnboardingName] = useState(stored.onboardingName ?? '');
+  const [onboardingCountryCode, setOnboardingCountryCode] = useState(stored.onboardingCountryCode ?? '+60');
+  const [onboardingBirthday, setOnboardingBirthday] = useState(stored.onboardingBirthday ?? '');
   const [onboardingStage, setOnboardingStage] = useState<'account' | 'tingo' | 'packing'>('account');
   const [ritualRecords, setRitualRecords] = useState(() => loadRitualState());
   const storedPace = stored.completedPaceEvidence;
@@ -643,10 +645,10 @@ export default function AppRescued() {
       privacy, continuousLocation,
       recommendations: recommendations.map(({ name, saved, added }) => ({ name, saved, added })),
       tripIntent,
-      worthIt, profileLearned, learningProposal: learningProposal?.status === 'confirmed' ? undefined : learningProposal ?? undefined, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, basePackingPreferences, tripCreated, tripPhase,
+      worthIt, profileLearned, learningProposal: learningProposal?.status === 'confirmed' ? undefined : learningProposal ?? undefined, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, onboardingCountryCode, onboardingBirthday, basePackingPreferences, tripCreated, tripPhase,
       members, memberPreferenceProfiles, backupCandidates, appliedRepair: appliedRepair ?? undefined, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, revivedWishIds: ghostWishes.filter(wish => wish.status === 'revived').map(wish => wish.id), destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, flightBooking, flightBookingDraft, accommodationBooking, accommodationBookingDraft,
     });
-  }, [mode, destination, readyConfirmed, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals, delay, mood, arrivalChecked, privacy, continuousLocation, recommendations, tripIntent, worthIt, profileLearned, learningProposal, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, basePackingPreferences, tripCreated, tripPhase, members, memberPreferenceProfiles, backupCandidates, appliedRepair, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, ghostWishes, destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, flightBooking, flightBookingDraft, accommodationBooking, accommodationBookingDraft]);
+  }, [mode, destination, readyConfirmed, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals, delay, mood, arrivalChecked, privacy, continuousLocation, recommendations, tripIntent, worthIt, profileLearned, learningProposal, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, onboardingCountryCode, onboardingBirthday, basePackingPreferences, tripCreated, tripPhase, members, memberPreferenceProfiles, backupCandidates, appliedRepair, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, ghostWishes, destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, flightBooking, flightBookingDraft, accommodationBooking, accommodationBookingDraft]);
 
   function setProfileField(field: keyof TravelProfile, value: string) {
     setProfile(current => ({ ...current, [field]: value }));
@@ -1948,7 +1950,9 @@ export default function AppRescued() {
         ? renderDrawer()
         : <OnboardingFlow
           initialStep={onboardingStage === 'packing' ? 'packing' : 'entry'}
-          onAccountReady={({ name }) => { if (name) setOnboardingName(name); }}
+          initialAccount={{ name: onboardingName, countryCode: onboardingCountryCode, birthday: onboardingBirthday }}
+          onAccountChange={({ name, countryCode, birthday }) => { setOnboardingName(name); setOnboardingCountryCode(countryCode); setOnboardingBirthday(birthday); }}
+          onAccountReady={({ name, countryCode, birthday }) => { setOnboardingName(name); setOnboardingCountryCode(countryCode); setOnboardingBirthday(birthday); }}
           onTermsAccepted={beginTingo}
           onComplete={completeOnboarding}
         />}

@@ -106,6 +106,8 @@ export type PersistedState = {
   tingoDimensions?: TingoDimensions;
   onboardingComplete?: boolean;
   onboardingName?: string;
+  onboardingCountryCode?: string;
+  onboardingBirthday?: string;
   basePackingPreferences?: string[];
   tripCreated?: boolean;
   tripPhase?: 'planning' | 'traveling' | 'completed';

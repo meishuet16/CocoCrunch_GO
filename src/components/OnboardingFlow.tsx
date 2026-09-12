@@ -1,10 +1,18 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export type OnboardingStep = 'entry' | 'login' | 'signup' | 'terms' | 'packing';
 
+export type OnboardingAccount = {
+  name: string;
+  countryCode: string;
+  birthday: string;
+};
+
 export type OnboardingFlowProps = {
   initialStep?: OnboardingStep;
-  onAccountReady: (account: { name: string }) => void;
+  initialAccount?: Partial<OnboardingAccount>;
+  onAccountChange?: (account: OnboardingAccount) => void;
+  onAccountReady: (account: OnboardingAccount) => void;
   onTermsAccepted: () => void;
   onComplete: (preferences: string[]) => void;
 };
@@ -27,18 +35,39 @@ function isMockOtpValid(value: string): boolean {
   return /^\d{4,6}$/.test(value);
 }
 
-export function OnboardingFlow({ initialStep = 'entry', onAccountReady, onTermsAccepted, onComplete }: OnboardingFlowProps) {
+export function OnboardingFlow({ initialStep = 'entry', initialAccount, onAccountChange, onAccountReady, onTermsAccepted, onComplete }: OnboardingFlowProps) {
   const [step, setStep] = useState<OnboardingStep>(initialStep);
-  const [name, setName] = useState('');
+  const [name, setName] = useState(initialAccount?.name ?? '');
+  const [countryCode, setCountryCode] = useState(initialAccount?.countryCode ?? countryCodes[0].value);
+  const [birthday, setBirthday] = useState(initialAccount?.birthday ?? '');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [preferences, setPreferences] = useState<string[]>(['portable-charger', 'rain-layer']);
 
   const displayStep = step === 'packing' ? 4 : step === 'terms' ? 3 : step === 'entry' ? 1 : 2;
   const otpValid = isMockOtpValid(otp);
+  useEffect(() => {
+    if (resendCooldown === 0) return;
+    const timer = window.setInterval(() => setResendCooldown(current => Math.max(0, current - 1)), 1000);
+    return () => window.clearInterval(timer);
+  }, [resendCooldown]);
+
+  const account = (changes: Partial<OnboardingAccount> = {}): OnboardingAccount => ({ name, countryCode, birthday, ...changes });
+  const updateAccount = (changes: Partial<OnboardingAccount>) => {
+    if (changes.name !== undefined) setName(changes.name);
+    if (changes.countryCode !== undefined) setCountryCode(changes.countryCode);
+    if (changes.birthday !== undefined) setBirthday(changes.birthday);
+    onAccountChange?.(account(changes));
+  };
+  const sendMockOtp = () => {
+    setOtpSent(true);
+    setResendCooldown(30);
+  };
   const advanceToTerms = () => {
-    onAccountReady({ name: step === 'signup' ? name.trim() : '' });
+    onAccountReady(account({ name: step === 'signup' ? name.trim() : '' }));
     setStep('terms');
   };
   const togglePreference = (id: string) => {
@@ -71,21 +100,21 @@ export function OnboardingFlow({ initialStep = 'entry', onAccountReady, onTermsA
           <label className="setup-field"><span>Phone number</span><input value={phone} inputMode="tel" onChange={event => setPhone(event.target.value)} placeholder="012 345 6789" /></label>
           <label className="setup-field"><span>OTP</span><input value={otp} inputMode="numeric" maxLength={6} onChange={event => setOtp(event.target.value)} placeholder="4–6 digits" /></label>
           <div className="onboarding-actions"><button className="secondary" onClick={() => setStep('entry')}>Back</button><button className="primary" disabled={!phone.trim() || !otpValid} onClick={advanceToTerms}>Continue</button></div>
-          <button className="onboarding-skip" onClick={() => { onAccountReady({ name: '' }); setStep('terms'); }}>Skip login for this prototype</button>
+          <button className="onboarding-skip" onClick={() => { onAccountReady(account({ name: '' })); setStep('terms'); }}>Skip login for this prototype</button>
         </>}
 
         {step === 'signup' && <>
           <span className="drawer-kicker">SIGN UP · PROTOTYPE</span>
           <h1>Set up your travel profile.</h1>
           <p className="adapter-note">Prototype verification only — no real SMS is sent. Enter any 4–6 digit OTP after sending it.</p>
-          <label className="setup-field"><span>Name</span><input value={name} onChange={event => setName(event.target.value)} placeholder="Your name" /></label>
-          <label className="setup-field"><span>Country code<select aria-label="Country code">{countryCodes.map(country => <option value={country.value} key={country.value}>{country.label}</option>)}</select></span></label>
+          <label className="setup-field"><span>Name</span><input value={name} onChange={event => updateAccount({ name: event.target.value })} placeholder="Your name" /></label>
+          <label className="setup-field"><span>Country code<select aria-label="Country code" value={countryCode} onChange={event => updateAccount({ countryCode: event.target.value })}>{countryCodes.map(country => <option value={country.value} key={country.value}>{country.label}</option>)}</select></span></label>
           <label className="setup-field"><span>Phone number</span><input value={phone} inputMode="tel" onChange={event => setPhone(event.target.value)} placeholder="012 345 6789" /></label>
-          <button className="secondary" type="button">Send mock OTP</button>
+          <div className="onboarding-actions"><button className="secondary" type="button" onClick={sendMockOtp}>{otpSent ? 'Mock OTP sent' : 'Send mock OTP'}</button><button className="secondary" type="button" disabled={!otpSent || resendCooldown > 0} onClick={sendMockOtp}>{resendCooldown > 0 ? `Resend verification code (${resendCooldown}s)` : 'Resend verification code'}</button></div>
           <label className="setup-field"><span>OTP</span><input value={otp} inputMode="numeric" maxLength={6} onChange={event => setOtp(event.target.value)} placeholder="4–6 digits" /></label>
-          <label className="setup-field"><span>Birthday</span><input type="date" aria-label="Birthday" /></label>
+          <label className="setup-field"><span>Birthday</span><input type="date" aria-label="Birthday" value={birthday} onChange={event => updateAccount({ birthday: event.target.value })} /></label>
           <div className="onboarding-actions"><button className="secondary" onClick={() => setStep('entry')}>Back</button><button className="primary" disabled={!name.trim() || !phone.trim() || !otpValid} onClick={advanceToTerms}>Continue</button></div>
-          <button className="onboarding-skip" onClick={() => { onAccountReady({ name: '' }); setStep('terms'); }}>Skip sign up for this prototype</button>
+          <button className="onboarding-skip" onClick={() => { onAccountReady(account({ name: '' })); setStep('terms'); }}>Skip sign up for this prototype</button>
         </>}
 
         {step === 'terms' && <>

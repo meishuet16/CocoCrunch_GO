@@ -18,6 +18,14 @@ describe('OnboardingFlow', () => {
     expect(render('login')).toContain('no real SMS is sent');
     expect(render('signup')).toContain('Country code');
     expect(render('signup')).toContain('Birthday');
+    expect(render('signup')).toContain('Resend verification code');
+    expect(render('signup')).toContain('disabled=""');
+  });
+
+  it('restores persisted signup country code and birthday values', () => {
+    const html = renderToStaticMarkup(<OnboardingFlow initialStep="signup" initialAccount={{ countryCode: '+65', birthday: '1995-06-12' }} onAccountReady={vi.fn()} onTermsAccepted={vi.fn()} onComplete={vi.fn()} />);
+    expect(html).toContain('value="+65"');
+    expect(html).toContain('value="1995-06-12"');
   });
 
   it('requires explicit consent before terms can continue', () => {
