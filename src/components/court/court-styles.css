@@ -5679,34 +5679,34 @@ body:has(.court-modal-overlay) {
 /* Seamless Vintage Navbar — No white strips, no dividing borders, single unified paper background */
 .court-vintage-chamber .court-navbar,
 .court-vintage-chamber .court-vote-navbar {
-  background: transparent !important;
-  border-bottom: none !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  padding: 12px 18px 6px !important;
+  background: transparent;
+  border-bottom: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  padding: 12px 18px 6px;
 }
 
 /* Non-overlapping voting submit wrapper in vintage chamber */
 .court-vintage-chamber .court-vote-submit-wrap {
-  position: relative !important;
-  left: auto !important;
-  right: auto !important;
-  bottom: auto !important;
-  width: 100% !important;
-  margin-top: auto !important;
-  padding: 6px 0 2px !important;
+  position: relative;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  width: 100%;
+  margin-top: auto;
+  padding: 6px 0 2px;
   z-index: 20;
 }
 
 .court-vintage-chamber .court-vote-home-wrap {
-  position: relative !important;
-  left: auto !important;
-  right: auto !important;
-  bottom: auto !important;
-  width: 100% !important;
-  margin-top: 6px !important;
-  padding-bottom: 2px !important;
+  position: relative;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  width: 100%;
+  margin-top: 6px;
+  padding-bottom: 2px;
   z-index: 19;
 }
 
@@ -5720,8 +5720,8 @@ body:has(.court-modal-overlay) {
 .court-showdown-result-card {
   position: relative;
   overflow: hidden;
-  background: #ffffff;
-  border: 1px solid #e8edf5;
+  background: var(--paper-solid);
+  border: 1px solid var(--paper-solid);
   border-radius: 20px;
   padding: 14px;
   display: flex;
@@ -5747,7 +5747,7 @@ body:has(.court-modal-overlay) {
 }
 
 .court-showdown-result-kicker {
-  color: #64748b;
+  color: var(--blue-deep);
   background: transparent;
   border: 0;
   border-radius: 0;
@@ -5763,13 +5763,13 @@ body:has(.court-modal-overlay) {
 }
 
 .court-showdown-result-card.is-not-now .court-showdown-result-kicker {
-  color: #64748b;
+  color: var(--blue-deep);
   background: transparent;
   border-color: transparent;
 }
 
 .court-showdown-result-card.is-go .court-showdown-result-kicker {
-  color: #64748b;
+  color: var(--blue-deep);
   background: transparent;
   border-color: transparent;
 }
@@ -5777,7 +5777,7 @@ body:has(.court-modal-overlay) {
 .court-showdown-result-header b {
   grid-column: 1 / -1;
   grid-row: 2;
-  color: #0f172a;
+  color: var(--ink);
   font-family: "Inter Display", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 17px;
   font-weight: 600;
@@ -5786,18 +5786,18 @@ body:has(.court-modal-overlay) {
 }
 
 .court-result-team-go {
-  color: #059669;
+  color: var(--success);
 }
 
 .court-result-team-not-now {
-  color: #ef4444;
+  color: var(--sangria);
 }
 
 .court-showdown-result-header p {
   grid-column: 1 / -1;
   grid-row: 3;
   margin: 0;
-  color: #64748b;
+  color: var(--blue-deep);
   font-size: 11.5px;
   font-weight: 500;
   line-height: 1.35;
@@ -5810,13 +5810,13 @@ body:has(.court-modal-overlay) {
 }
 
 .court-showdown-outcome-line.is-go {
-  color: #047857;
-  background: #ecfdf5;
+  color: var(--success);
+  background: var(--paper-solid);
 }
 
 .court-showdown-outcome-line.is-not-now {
-  color: #dc2626;
-  background: #fff1f1;
+  color: var(--sangria);
+  background: var(--paper-solid);
 }
 
 .court-showdown-versus-board {
@@ -5829,7 +5829,7 @@ body:has(.court-modal-overlay) {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 12px;
-  color: #667085;
+  color: var(--muted);
   font-size: 10.5px;
   font-weight: 600;
   line-height: 1;
@@ -5854,21 +5854,21 @@ body:has(.court-modal-overlay) {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  color: #ffffff;
+  color: var(--paper-solid);
   box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
 }
 
 .court-versus-capsule.is-green {
   align-items: flex-start;
   border-radius: 22px 12px 12px 22px;
-  background: linear-gradient(135deg, #18c78a, #54d5ad);
+  background: linear-gradient(135deg, var(--success), var(--success));
 }
 
 .court-versus-capsule.is-red {
   align-items: flex-end;
   text-align: right;
   border-radius: 12px 22px 22px 12px;
-  background: linear-gradient(135deg, #ff7777, #f04438);
+  background: linear-gradient(135deg, var(--sangria), var(--sangria));
 }
 
 .court-versus-capsule.is-winner {
@@ -5876,7 +5876,7 @@ body:has(.court-modal-overlay) {
 }
 
 .court-versus-capsule b {
-  color: #ffffff;
+  color: var(--paper-solid);
   font-family: "Inter Display", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 28px;
   font-weight: 700;
@@ -5903,7 +5903,7 @@ body:has(.court-modal-overlay) {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(226, 232, 240, 0.9);
-  color: #cbd5e1;
+  color: var(--muted);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5923,8 +5923,8 @@ body:has(.court-modal-overlay) {
   gap: 6px;
   padding: 8px;
   border-radius: 19px;
-  background: #f8fafc;
-  border: 1px solid #e8edf5;
+  background: var(--paper-solid);
+  border: 1px solid var(--paper-solid);
 }
 
 .court-showdown-score-team {
@@ -5937,11 +5937,11 @@ body:has(.court-modal-overlay) {
 }
 
 .court-showdown-score-team.is-green {
-  background: #ecfdf5;
+  background: var(--paper-solid);
 }
 
 .court-showdown-score-team.is-red {
-  background: #fff6f6;
+  background: var(--paper-solid);
 }
 
 .court-showdown-score-team.is-winner {
@@ -5959,7 +5959,7 @@ body:has(.court-modal-overlay) {
 }
 
 .court-showdown-score-team span {
-  color: #667085;
+  color: var(--muted);
   font-size: 10px;
   font-weight: 500;
   overflow: hidden;
@@ -5969,7 +5969,7 @@ body:has(.court-modal-overlay) {
 }
 
 .court-showdown-score-team b {
-  color: #0f172a;
+  color: var(--ink);
   font-family: "Inter Display", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 31px;
   font-weight: 700;
@@ -5978,15 +5978,15 @@ body:has(.court-modal-overlay) {
 }
 
 .court-showdown-score-team.is-green b {
-  color: #059669;
+  color: var(--success);
 }
 
 .court-showdown-score-team.is-red b {
-  color: #f04438;
+  color: var(--sangria);
 }
 
 .court-showdown-score-team small {
-  color: #64748b;
+  color: var(--blue-deep);
   font-size: 10.5px;
   font-weight: 500;
 }
@@ -5995,9 +5995,9 @@ body:has(.court-modal-overlay) {
   width: 30px;
   height: 30px;
   border-radius: 999px;
-  background: #ffffff;
-  border: 1px solid #e8edf5;
-  color: #94a3b8;
+  background: var(--paper-solid);
+  border: 1px solid var(--paper-solid);
+  color: var(--muted);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -6012,7 +6012,7 @@ body:has(.court-modal-overlay) {
   border-radius: 999px;
   overflow: hidden;
   display: flex;
-  background: #f1f5f9;
+  background: var(--paper-solid);
 }
 
 .court-showdown-score-green,
@@ -6022,17 +6022,17 @@ body:has(.court-modal-overlay) {
 }
 
 .court-showdown-score-green {
-  background: #12b981;
+  background: var(--success);
 }
 
 .court-showdown-score-red {
-  background: #ff6b6b;
+  background: var(--sangria);
 }
 
 .court-showdown-payment-note {
   border-radius: 16px;
-  background: #ffffff;
-  border: 1px solid #e8edf5;
+  background: var(--paper-solid);
+  border: 1px solid var(--paper-solid);
   padding: 9px 11px;
   display: flex;
   align-items: center;
@@ -6041,13 +6041,13 @@ body:has(.court-modal-overlay) {
 }
 
 .court-showdown-payment-note span {
-  color: #64748b;
+  color: var(--blue-deep);
   font-size: 10.5px;
   font-weight: 500;
 }
 
 .court-showdown-payment-note b {
-  color: #0f172a;
+  color: var(--ink);
   font-size: 12px;
   font-weight: 600;
   text-align: right;
