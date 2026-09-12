@@ -23,6 +23,14 @@ export type SpatialPhotoSummary = {
   note?: string;
 };
 
+export type SpatialLiveRoute = {
+  currentLocation: string;
+  target: string;
+  eta: string;
+  timelineLabel: string;
+  weatherLabel: string;
+};
+
 type TripSpatialViewProps = {
   mode: SpatialMode;
   destination: string;
@@ -35,6 +43,7 @@ type TripSpatialViewProps = {
   privacy?: SpatialPrivacy;
   disruptionLabel?: string;
   photoSummary?: SpatialPhotoSummary;
+  liveRoute?: SpatialLiveRoute;
   overlay?: ReactNode;
 };
 
@@ -77,6 +86,7 @@ export function TripSpatialView({
   privacy,
   disruptionLabel,
   photoSummary,
+  liveRoute,
   overlay,
 }: TripSpatialViewProps) {
   const visibleStops = plan.items.filter(item => item.kind !== 'buffer').slice(0, stopPositions.length);
@@ -120,6 +130,10 @@ export function TripSpatialView({
               </g>
             );
           })}
+          {mode === 'traveling' && liveRoute && <g className="spatial-live-marker" aria-label={`Current prototype location: ${liveRoute.currentLocation}`}>
+            <circle cx="72" cy="112" r="8" />
+            <circle cx="72" cy="112" r="3" />
+          </g>}
         </svg>
         {overlay && <div className="spatial-overlay">{overlay}</div>}
       </div>
@@ -172,6 +186,10 @@ export function TripSpatialView({
 
       {mode === 'traveling' && (
         <>
+          {liveRoute && <section className="spatial-live-route" aria-label="Live routing prototype">
+            <div><span>LIVE ROUTING · PROTOTYPE</span><b>{liveRoute.currentLocation} → {liveRoute.target}</b><small>{liveRoute.eta} · {liveRoute.timelineLabel}</small></div>
+            <small>{liveRoute.weatherLabel}</small>
+          </section>}
           {canPreviewWalk && <CocoPathPreview
             from={{ x: stopPositions[previewFromIndex].x / 340 * 100, y: stopPositions[previewFromIndex].y / 180 * 100, label: visibleStops[previewFromIndex].name }}
             to={{ x: stopPositions[previewToIndex].x / 340 * 100, y: stopPositions[previewToIndex].y / 180 * 100, label: visibleStops[previewToIndex].name }}
@@ -206,8 +224,8 @@ export function TripSpatialView({
             <small className="spatial-detail spatial-detail--saved">Saved {travelingContextParts.join(' · ')} context</small>
           )}
           <div className="adapter-note">
-            <b>Travel context only</b>
-            <small>Current and next stops come from saved trip state and manual check-ins only.</small>
+            <b>{liveRoute ? 'Prototype routing boundary' : 'Travel context only'}</b>
+            <small>{liveRoute ? 'Current and next stops come from saved trip state and manual check-ins only. The route is a local schematic; weather is refreshed by Open-Meteo above, with no device location, traffic, or turn-by-turn navigation connected.' : 'Current and next stops come from saved trip state and manual check-ins only.'}</small>
           </div>
         </>
       )}

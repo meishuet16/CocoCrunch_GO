@@ -121,6 +121,13 @@ describe('TripSpatialView', () => {
         reunionLabel="Shibuya crossing · 19:30 · ±15 min"
         privacy="status"
         disruptionLabel="Floating block needs repair review."
+        liveRoute={{
+          currentLocation: 'Last manual check-in',
+          target: 'Scenic cafe block',
+          eta: 'ETA needs a check-in',
+          timelineLabel: 'Mark arrival to advance the local route',
+          weatherLabel: 'Weather refreshes in the panel above · Open-Meteo',
+        }}
       />,
     );
 
@@ -133,6 +140,10 @@ describe('TripSpatialView', () => {
     expect(html).toContain('Sharing: status only');
     expect(html).toContain('Current and next stops come from saved trip state and manual check-ins only.');
     expect(html).toContain('Saved current · next · reunion context');
+    expect(html).toContain('LIVE ROUTING · PROTOTYPE');
+    expect(html).toContain('Last manual check-in → Scenic cafe block');
+    expect(html).toContain('Weather refreshes in the panel above · Open-Meteo');
+    expect(html).toContain('no device location, traffic, or turn-by-turn navigation connected');
   });
 
   it('describes only supplied traveling context in the saved-context cue', async () => {

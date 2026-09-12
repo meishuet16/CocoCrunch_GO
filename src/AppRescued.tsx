@@ -1348,6 +1348,13 @@ export default function AppRescued() {
         reunionLabel={mode === 'group' ? `${reunion.place} · ${reunion.time} · ±${reunion.tolerance} min` : undefined}
         privacy={privacy}
         disruptionLabel={delay ? 'Floating block needs repair review.' : undefined}
+        liveRoute={{
+          currentLocation: arrivalChecked ? (anchorItem?.name ?? 'Checked-in stop') : 'Last manual check-in',
+          target: floatingItem?.name ?? anchorItem?.name ?? 'Next saved stop',
+          eta: arrivalChecked ? 'ETA 12 min' : 'ETA needs a check-in',
+          timelineLabel: arrivalChecked ? 'Timeline is progressing' : 'Mark arrival to advance the local route',
+          weatherLabel: 'Weather refreshes in the panel above · Open-Meteo',
+        }}
         overlay={<Coco tiny mood={delay ? 'panic' : 'happy'} context="travel" />}
       />
     </>;
