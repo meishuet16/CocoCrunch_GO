@@ -22,6 +22,7 @@ function stubPersistedTrip(readyConfirmed: boolean) {
   vi.stubGlobal('localStorage', {
     getItem: (key: string) => key === 'cococrunch:v1' ? JSON.stringify({
       version: 1,
+      onboardingComplete: true,
       mode: 'solo',
       readyConfirmed,
       tingoAnswers: completeTingoAnswers,
@@ -47,7 +48,7 @@ describe('AppRescued journey status integration', () => {
     vi.unstubAllGlobals();
   });
 
-  it('surfaces the shared journey status on Home for the active trip', () => {
+  it('requires onboarding before rendering the existing app for a first-time visitor', () => {
     vi.stubGlobal('localStorage', {
       getItem: () => null,
       setItem: () => undefined,
@@ -56,14 +57,10 @@ describe('AppRescued journey status integration', () => {
 
     const html = renderToStaticMarkup(<AppRescued />);
 
-    expect(html).toContain('HOME · ACTIVE TRIP');
-    expect(html).toContain('Your trip can be shaped now; Tingo is not complete.');
-    expect(html).toContain('Review Tingo Card');
-    expect(html).toContain('Plan Health');
-    expect(html).toMatch(/Current Phase/i);
-    expect(html).toMatch(/Group Status/i);
-    expect(html).toContain('home-orientation');
-    expect(html).not.toContain('Discover places');
+    expect(html).toContain('WELCOME TO COCOCRUNCH');
+    expect(html).toContain('Login');
+    expect(html).toContain('Sign up');
+    expect(html).not.toContain('HOME · ACTIVE TRIP');
   });
 
   it('keeps confirm-ready pending until planning is explicitly confirmed', () => {
@@ -87,7 +84,7 @@ describe('AppRescued journey status integration', () => {
 
   it('uses canonical Home Coco in the accessible Home brand lockup', () => {
     vi.stubGlobal('localStorage', {
-      getItem: () => null,
+      getItem: (key: string) => key === 'cococrunch:v1' ? JSON.stringify({ version: 1, onboardingComplete: true }) : null,
       setItem: () => undefined,
       removeItem: () => undefined,
     });
@@ -104,6 +101,7 @@ describe('AppRescued journey status integration', () => {
     vi.stubGlobal('localStorage', {
       getItem: (key: string) => key === 'cococrunch:v1' ? JSON.stringify({
         version: 1,
+        onboardingComplete: true,
         mode: 'group',
         tab: 'explore',
         readyConfirmed: false,

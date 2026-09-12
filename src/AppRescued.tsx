@@ -69,6 +69,7 @@ import { SafetyToolkit } from './components/SafetyToolkit';
 import { CocoAssistantPrompt } from './components/CocoAssistantPrompt';
 import { CommunityPublishPanel } from './components/CommunityPublishPanel';
 import { PhotoJournalCapture } from './components/PhotoJournalCapture';
+import { OnboardingFlow } from './components/OnboardingFlow';
 import foodieHunter from './assets/coco/personas/foodie_hunter.png';
 import masterPlanner from './assets/coco/personas/master_planner.png';
 import transitNavigator from './assets/coco/personas/transit_navigator.png';
@@ -294,6 +295,9 @@ function tingoTypeCopy(dimensions: TingoDimensions): string {
 
 export default function AppRescued() {
   const [stored] = useState(() => loadPersisted());
+  const [onboardingComplete, setOnboardingComplete] = useState(Boolean(stored.onboardingComplete));
+  const [onboardingName, setOnboardingName] = useState(stored.onboardingName ?? '');
+  const [onboardingStage, setOnboardingStage] = useState<'account' | 'tingo' | 'packing'>('account');
   const [ritualRecords, setRitualRecords] = useState(() => loadRitualState());
   const storedPace = stored.completedPaceEvidence;
   const { mode: storedMode, tripBudget: storedTripBudget, profile: storedProfile, tripIntent: storedTripIntent } = derivePersistedTripState(stored);
@@ -614,10 +618,10 @@ export default function AppRescued() {
       privacy, continuousLocation,
       recommendations: recommendations.map(({ name, saved, added }) => ({ name, saved, added })),
       tripIntent,
-      worthIt, profileLearned, learningProposal: learningProposal?.status === 'confirmed' ? undefined : learningProposal ?? undefined, confirmedLearningHistory, tingoAnswers, tingoDimensions, basePackingPreferences, tripCreated, tripPhase,
+      worthIt, profileLearned, learningProposal: learningProposal?.status === 'confirmed' ? undefined : learningProposal ?? undefined, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, basePackingPreferences, tripCreated, tripPhase,
       members, memberPreferenceProfiles, backupCandidates, appliedRepair: appliedRepair ?? undefined, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, revivedWishIds: ghostWishes.filter(wish => wish.status === 'revived').map(wish => wish.id),
     });
-  }, [mode, destination, readyConfirmed, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals, delay, mood, arrivalChecked, privacy, continuousLocation, recommendations, tripIntent, worthIt, profileLearned, learningProposal, confirmedLearningHistory, tingoAnswers, tingoDimensions, basePackingPreferences, tripCreated, tripPhase, members, memberPreferenceProfiles, backupCandidates, appliedRepair, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, ghostWishes]);
+  }, [mode, destination, readyConfirmed, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals, delay, mood, arrivalChecked, privacy, continuousLocation, recommendations, tripIntent, worthIt, profileLearned, learningProposal, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, basePackingPreferences, tripCreated, tripPhase, members, memberPreferenceProfiles, backupCandidates, appliedRepair, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, ghostWishes]);
 
   function setProfileField(field: keyof TravelProfile, value: string) {
     setProfile(current => ({ ...current, [field]: value }));
@@ -920,6 +924,17 @@ export default function AppRescued() {
     const dimensions = scoreTingo(tingoAnswers);
     setRecommendations(current => makeRecommendations(destination, dimensions, current));
     setTingoRevealed(true);
+  }
+
+  function continueAfterTingo() {
+    finishTingo();
+    setDrawer(null);
+    if (!onboardingComplete) setOnboardingStage('packing');
+  }
+
+  function closeTingoAssessment() {
+    setDrawer(null);
+    if (!onboardingComplete) setOnboardingStage('account');
   }
 
   function retakeTingo() {
@@ -1554,7 +1569,7 @@ export default function AppRescued() {
       return (
         <div className="tingo-flow tingo-how">
           <div className="tingo-flow-top">
-            <button aria-label="Back" onClick={() => setDrawer(null)}>‹</button>
+            <button aria-label="Back" onClick={closeTingoAssessment}>‹</button>
             <div><i style={{ width: `${barWidth}%` }} /></div>
             <span>1/12</span>
           </div>
@@ -1635,7 +1650,7 @@ export default function AppRescued() {
 
     if (complete) {
       return <div className="tingo-flow tingo-result-screen">
-        <div className="tingo-result-head"><button aria-label="Back" onClick={() => setDrawer(null)}>‹</button><b>Your Tingo Card</b><button aria-label="Retake assessment" onClick={retakeTingo}>↻</button></div>
+        <div className="tingo-result-head"><button aria-label="Back" onClick={closeTingoAssessment}>‹</button><b>Your Tingo Card</b><button aria-label="Retake assessment" onClick={retakeTingo}>↻</button></div>
         <div className="tingo-result-hero">
           <div><span>THE<br />{identity.title}</span><strong>{identity.personaLabel}</strong></div>
           <img src={tingoPersonaImages[identity.personaKey]} alt={`${identity.personaLabel} logo`} />
@@ -1644,7 +1659,7 @@ export default function AppRescued() {
         <p className="tingo-result-quote">&quot;{identity.summary}&quot;</p>
         <div className="tingo-role-card"><span>BEST TRIP ROLE</span><b>{identity.role}</b><small>{identity.roleReason}</small></div>
         <div className="tingo-stat-list">{statRows.map(row => <div key={row.key}><span>{row.icon}</span><b>{row.label}</b><i><em style={{ width: `${scoreValue(row.key)}%`, background: row.color }} /></i><strong>{scoreValue(row.key)}</strong></div>)}</div>
-        <button className="tingo-flow-primary tingo-red-primary" onClick={() => { finishTingo(); setDrawer(null); }}>Plan My Trip <ChevronRight size={20} /></button>
+        <button className="tingo-flow-primary tingo-red-primary" onClick={continueAfterTingo}>{onboardingComplete ? 'Plan My Trip' : 'Continue setup'} <ChevronRight size={20} /></button>
       </div>;
     }
 
@@ -1664,7 +1679,7 @@ export default function AppRescued() {
 
   function renderDrawer() {
     if (!drawer) return null;
-    return <div className={`overlay ${drawer === 'tingo' ? 'tingo-overlay' : ''}`} onMouseDown={() => setDrawer(null)}><section className={`drawer ${drawer === 'tingo' ? 'tingo-flow-drawer' : ''}`} onMouseDown={e => e.stopPropagation()}>{drawer !== 'tingo' && <button className="close" aria-label="Close drawer" onClick={() => setDrawer(null)}><X size={20} /></button>}
+    return <div className={`overlay ${drawer === 'tingo' ? 'tingo-overlay' : ''}`} onMouseDown={() => { if (drawer !== 'tingo' || onboardingComplete) setDrawer(null); }}><section className={`drawer ${drawer === 'tingo' ? 'tingo-flow-drawer' : ''}`} onMouseDown={e => e.stopPropagation()}>{drawer !== 'tingo' && <button className="close" aria-label="Close drawer" onClick={() => setDrawer(null)}><X size={20} /></button>}
       {drawer === 'discover' && <><span className="drawer-kicker">DISCOVER · COCO PICKS</span><h3>Where are we going?</h3><p className="drawer-copy">Search Tokyo, Kyoto or Osaka for destination-aware prototype data. Unknown destinations are explicitly marked as fallback examples. Ranking uses your current Tingo dimensions.</p><div className="discover-search"><input className="big-input" value={exploreDestination} onChange={e => { setExploreDestination(e.target.value); setDestinationSearched(false); }} placeholder="Tokyo, Kyoto, Osaka…" /><button className="primary" onClick={searchDestination}>Search</button></div>{destinationSearched && <div className="discover-results"><span className="drawer-kicker">FOR YOUR {exploreDestination.toUpperCase()} TRIP · {tingoBehavior.recommendationBias.toUpperCase()} BIAS</span>{recommendations.map(place => <article className="community-row discover-row" key={place.id}><div><b>{place.name}</b><small>{place.match}% Tingo-adjusted match · {place.type}</small><small>{place.cost} · {place.duration}</small><small><strong>Why Coco picked this:</strong> {place.why}</small><small>{place.source === 'prototype-catalog' ? 'Local prototype catalog' : 'Fallback example · not live destination data'}</small><div className="inline-actions"><button onClick={() => toggleRecommendation(place.id, 'save')}>{place.saved ? '✓ Saved' : 'Save idea'}</button><button onClick={() => toggleRecommendation(place.id, 'add')}>{mode === 'group' ? (place.added ? '✓ Suggested to group' : 'Suggest to group') : (place.added ? '✓ In plan' : 'Add to plan')}</button></div>{mode === 'group' && <small>Suggestion only · the official Group itinerary changes only after group confirmation.</small>}</div></article>)}</div>}</>}
 {drawer === 'tingo' && renderTingoAssessment()}
       {drawer === 'tripSetup' && <><span className="drawer-kicker">NEW TRIP · BEFORE</span><h3>Give this journey a shape.</h3><label className="setup-field"><span>Destination</span><input className="big-input" value={destination} onChange={e => { setDestination(e.target.value); setDestinationSearched(false); }} /></label><div className="mode-toggle"><button className={mode === 'group' ? 'active' : ''} onClick={() => setMode('group')}>Group</button><button className={mode === 'solo' ? 'active' : ''} onClick={() => setMode('solo')}>Solo</button></div><div className="setup-fields"><label><span>Trip vibe / goal</span><input value={tripInputs.tripVibe} onChange={e => setTripInputField('tripVibe', e.target.value)} /></label><label><span>Must-Go anchor</span><input value={tripInputs.mustGo} onChange={e => setTripInputField('mustGo', e.target.value)} /></label><label><span>Deal breaker</span><input value={tripInputs.dealBreaker} onChange={e => setTripInputField('dealBreaker', e.target.value)} /></label><label><span>Preference</span><input value={tripInputs.preference} onChange={e => setTripInputField('preference', e.target.value)} /></label><label><span>Flexible</span><input value={tripInputs.flexible} onChange={e => setTripInputField('flexible', e.target.value)} /></label></div><div className="constraint-row"><button onClick={() => updateConstraint('must-go', tripInputs.mustGo)}>Save Must-Go</button><button onClick={() => updateConstraint('deal-breaker', tripInputs.dealBreaker)}>Save Deal Breaker</button><button onClick={() => updateConstraint('preference', tripInputs.preference)}>Save Preference</button><button onClick={() => updateConstraint('flexible', tripInputs.flexible)}>Save Flexible</button></div><div className="adapter-note"><b>Coco plan adapter</b><small>{tingoPlanGuidance.itineraryGuidance} {tingoPlanGuidance.budgetGuidance} Weather is provider-backed when available; map, traffic, and pricing remain local/prototype boundaries.</small></div><button className="primary" onClick={() => { setReadyConfirmed(current => transitionReadyConfirmation(current, 'confirm-trip-setup')); setTripCreated(true); setDrawer(null); openTrip('planning'); }}>Confirm inputs & open plan <ChevronRight size={15} /></button></>}
@@ -1763,6 +1778,36 @@ export default function AppRescued() {
               : tab === 'me'
                 ? 'empty'
                 : 'home';
+
+  if (!onboardingComplete) {
+    const beginTingo = () => {
+      setTingoStep(-1);
+      setTingoRevealed(false);
+      setOnboardingStage('tingo');
+      setDrawer('tingo');
+    };
+    const completeOnboarding = (preferences: string[]) => {
+      const packingLabels: Record<string, string> = {
+        'light-packer': 'comfortable walking shoes',
+        'extra-outfits': 'extra outfit options',
+        'portable-charger': 'portable charger',
+        'rain-layer': 'light rain layer',
+      };
+      setBasePackingPreferences(preferences.map(preference => packingLabels[preference]).filter((preference): preference is string => Boolean(preference)));
+      setOnboardingComplete(true);
+    };
+
+    return <div className="app-shell onboarding-shell">
+      {onboardingStage === 'tingo'
+        ? renderDrawer()
+        : <OnboardingFlow
+          initialStep={onboardingStage === 'packing' ? 'packing' : 'entry'}
+          onAccountReady={({ name }) => { if (name) setOnboardingName(name); }}
+          onTermsAccepted={beginTingo}
+          onComplete={completeOnboarding}
+        />}
+    </div>;
+  }
 
   return (
     <div className={`app-shell tab-${tab}`}>

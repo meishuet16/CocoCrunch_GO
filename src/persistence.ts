@@ -82,6 +82,8 @@ export type PersistedState = {
   confirmedLearningHistory?: ConfirmedLearningRecord[];
   tingoAnswers?: TingoAnswer[];
   tingoDimensions?: TingoDimensions;
+  onboardingComplete?: boolean;
+  onboardingName?: string;
   basePackingPreferences?: string[];
   tripCreated?: boolean;
   tripPhase?: 'planning' | 'traveling' | 'completed';
