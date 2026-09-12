@@ -134,6 +134,7 @@ export interface ExploreScreenProps {
   // Community trips
   communityTrips: CommunityTripItem[];
   onToggleSaveCommunityTrip: (id: number) => void;
+  onCopyCommunityTrip?: (trip: CommunityTripItem) => void;
 
   // Ritual / Saved Ideas
   savedIdeas?: SavedIdeaItem[];
@@ -202,6 +203,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
   onAddPlace,
   communityTrips,
   onToggleSaveCommunityTrip,
+  onCopyCommunityTrip,
   savedIdeas = [],
   onOpenTripPlanning,
   onSearchPlaces,
@@ -859,6 +861,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                 trip={trip}
                 onToggleSave={onToggleSaveCommunityTrip}
                 onViewPlan={setSelectedPlanModal}
+                onCopyTrip={onCopyCommunityTrip}
               />
             ))}
             {filteredCommunityTrips.length === 0 && (

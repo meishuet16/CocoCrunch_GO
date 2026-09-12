@@ -26,12 +26,14 @@ interface CommunityTripCardProps {
   trip: CommunityTripItem;
   onToggleSave: (id: number) => void;
   onViewPlan: (trip: CommunityTripItem) => void;
+  onCopyTrip?: (trip: CommunityTripItem) => void;
 }
 
 export const CommunityTripCard: React.FC<CommunityTripCardProps> = ({
   trip,
   onToggleSave,
   onViewPlan,
+  onCopyTrip,
 }) => {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(trip.initialLikes ?? 24 + trip.id * 7);
@@ -202,6 +204,14 @@ export const CommunityTripCard: React.FC<CommunityTripCardProps> = ({
           <span>View Full Plan</span>
           <ChevronRight size={14} />
         </button>
+        {onCopyTrip && <button
+          type="button"
+          className="view-plan-cta"
+          onClick={() => onCopyTrip(trip)}
+        >
+          <span>Use as a starting point</span>
+          <ChevronRight size={14} />
+        </button>}
       </footer>
     </article>
   );

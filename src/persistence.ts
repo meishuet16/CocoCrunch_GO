@@ -87,6 +87,10 @@ export type PersistedState = {
   basePackingPreferences?: string[];
   tripCreated?: boolean;
   tripPhase?: 'planning' | 'traveling' | 'completed';
+  destinationLockedByLeader?: boolean;
+  groupMemberBudgets?: Record<string, number>;
+  groupMemberVibes?: Record<string, string>;
+  groupMemberDestinations?: Record<string, string>;
   members?: TripMember[];
   memberPreferenceProfiles?: Record<string, MemberPreferenceProfile>;
   backupCandidates?: BackupCandidate[];
