@@ -3505,7 +3505,7 @@ main {
 
 .lifecycle-tabs {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 4px;
   padding: 4px;
   border: 1px solid rgba(147, 5, 0, .1);
@@ -3513,7 +3513,7 @@ main {
   background: rgba(255, 255, 255, .35);
 }
 
-.lifecycle-tabs button {
+.lifecycle-tabs > div {
   min-height: 53px;
   border: 0;
   border-radius: 14px;
@@ -3525,16 +3525,16 @@ main {
   gap: 3px;
 }
 
-.lifecycle-tabs button b {
+.lifecycle-tabs > div b {
   font-family: Georgia, serif;
   font-size: 12px;
 }
 
-.lifecycle-tabs button small {
+.lifecycle-tabs > div small {
   font-size: 8px;
 }
 
-.lifecycle-tabs button.active {
+.lifecycle-tabs > div.active {
   background: var(--sangria);
   color: var(--paper-solid);
   box-shadow: 0 5px 13px rgba(147, 5, 0, .16);

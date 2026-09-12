@@ -38,7 +38,7 @@ import { derivePersistedTripState, loadPersisted, resetTripScopedSharing, savePe
 import { RecommendationEvidenceText } from './components/RecommendationEvidenceText';
 import { EverydayGachaMachine } from './components/EverydayGachaMachine';
 import { LuckyDrawReveal } from './components/LuckyDrawReveal';
-import { TripLifecycleTabs, TripWorkspaceContext, TripWorkspaceHeader, type TripPhase } from './components/TripWorkspace';
+import { TripLifecycleTabs, TripWorkspaceContext, TripWorkspaceHeader, type TripLifecycleStatus, type TripPhase } from './components/TripWorkspace';
 import {
   deriveTingoBehavior, deriveTingoIdentity, describeTingo, defaultTingoDimensions, scoreTingo, tingoCompletion,
   tingoGuidance, tingoQuestions, type TingoAnswer, type TingoDimensions, type TingoPersonaKey,
@@ -106,6 +106,15 @@ type TripSetupStep = 1 | 2 | 3 | 4 | 5;
 type TripSetupLocationMethod = 'manual' | 'recommendation' | 'link';
 type TripReference = { destination: string; tripVibe: string; budget: number; title: string };
 type GroupSetupStep = 1 | 2 | 3 | 4 | 5 | 6;
+
+export function deriveTripLifecycleStatus({ tripCreated, readyConfirmed, dates, phase, now = new Date() }: { tripCreated: boolean; readyConfirmed: boolean; dates: TripIntent['dates']; phase: TripPhase; now?: Date }): TripLifecycleStatus {
+  if (phase === 'completed') return 'completed';
+  if (!tripCreated || !readyConfirmed || !dates?.start) return 'planning';
+  const departure = new Date(`${dates.start}T00:00:00`);
+  if (Number.isNaN(departure.getTime())) return 'planning';
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return departure <= today ? 'ongoing' : 'active';
+}
 
 const tingoPersonaImages: Record<TingoPersonaKey, string> = {
   'foodie-hunter': foodieHunter,
@@ -589,10 +598,12 @@ export default function AppRescued() {
   const completedPaceEvidence: CompletedPaceEvidence = { delayed: delay, mood, arrivalChecked };
   const actualPaceCopy = paceEvidenceSummary(completedPaceEvidence);
   const tingoComplete = tingoCompletion(tingoAnswers) === 100;
+  const tripLifecycleStatus = deriveTripLifecycleStatus({ tripCreated, readyConfirmed, dates: tripIntent.dates, phase: tripPhase });
+  const workspacePhase: TripPhase = tripLifecycleStatus === 'ongoing' ? 'traveling' : tripLifecycleStatus === 'completed' ? 'completed' : 'planning';
   const outcomeReviewed = actualPaceCopy !== 'No completed pace signal yet' || Object.keys(itemReviews).length > 0;
   const expressiveAvailable = memoryEligible(outcomeReviewed, worthIt, profileLearned, learningProposal?.status);
   const journeyState = useMemo(() => deriveJourneyState({
-    phase: tripPhase,
+    phase: workspacePhase,
     tripCreated,
     tingoComplete,
     mode,
@@ -606,7 +617,7 @@ export default function AppRescued() {
     disruption: delay && !replanApplied ? 'failed-floating-item' : null,
     repairAvailable: Boolean(repairPreview?.applicable),
     repairRequiresGroupConfirmation: Boolean(repairPreview?.requiresGroupConfirmation),
-    currentStopNeedsCheckIn: tripPhase === 'traveling' && !arrivalChecked,
+    currentStopNeedsCheckIn: workspacePhase === 'traveling' && !arrivalChecked,
     outcomeReviewed,
     worthItRecorded: Boolean(worthIt),
     learningProposalPending: Boolean(worthIt && !profileLearned && learningProposal?.status !== 'dismissed'),
@@ -630,7 +641,7 @@ export default function AppRescued() {
     repairPreview?.requiresGroupConfirmation,
     tripCreated,
     tripIntent,
-    tripPhase,
+    workspacePhase,
     tingoComplete,
     visibleTripPlan.items.length,
     worthIt,
@@ -862,8 +873,7 @@ export default function AppRescued() {
     emitExperience({ type: 'open-packing', items: generated });
   }
 
-  function openTrip(phase: TripPhase = 'planning') {
-    setTripPhase(phase);
+  function openTrip() {
     setTripWorkspaceOpen(true);
     setTab('trips');
   }
@@ -877,39 +887,39 @@ export default function AppRescued() {
     const actionId = journeyState.nextAction?.id;
 
     if (actionId === 'setup-trip' || actionId === 'review-intent') {
-      openTrip('planning');
+      openTrip();
       setDrawer('tripSetup');
       return;
     }
 
     if (actionId === 'open-court') {
-      openTrip('planning');
+      openTrip();
       setDrawer(null);
       openCourt();
       return;
     }
 
     if (actionId === 'review-health' || actionId === 'confirm-ready') {
-      openTrip('planning');
+      openTrip();
       setDrawer('feasibility');
       return;
     }
 
     if (actionId === 'preview-repair' || actionId === 'approve-repair') {
-      openTrip('traveling');
+      openTrip();
       setDrawer(null);
       setReplanPreview(Boolean(repairPreview?.applicable));
       return;
     }
 
     if (actionId === 'check-in' || actionId === 'continue-traveling') {
-      openTrip('traveling');
+      openTrip();
       setDrawer(null);
       return;
     }
 
     if (actionId === 'review-outcome' || actionId === 'open-memories' || actionId === 'review-learning') {
-      openTrip('completed');
+      openTrip();
       setDrawer(null);
       return;
     }
@@ -922,13 +932,13 @@ export default function AppRescued() {
     }
 
     if (actionId === 'continue-planning') {
-      openTrip('planning');
+      openTrip();
       setDrawer(null);
       return;
     }
 
     setDrawer(null);
-    if (target === 'trip') openTrip(tripPhase);
+    if (target === 'trip') openTrip();
     else {
       setTripWorkspaceOpen(false);
       setTab(target);
@@ -1054,6 +1064,14 @@ export default function AppRescued() {
   }
 
   function renderHome() {
+    if (tripLifecycleStatus === 'planning') return <div className="home-orientation">
+      <SectionTitle kicker="HOME · NO ACTIVE TRIP" title="Your trip is still taking shape." copy="Planning trips stay in Trips until their setup is confirmed." />
+      <button className="primary" onClick={openTrip}>Open planning trip <ChevronRight size={16} /></button>
+    </div>;
+    if (tripLifecycleStatus === 'completed') return <div className="home-orientation">
+      <SectionTitle kicker="HOME · TRIP COMPLETE" title="This journey now lives in Memories." copy="Review what happened and carry the useful parts forward." />
+      <button className="primary" onClick={() => setTab('memories')}>Open Memories <ChevronRight size={16} /></button>
+    </div>;
     const groupStatus = mode === 'group'
       ? planHealth.metrics.unresolvedConflicts > 0
         ? `${planHealth.metrics.unresolvedConflicts} conflict${planHealth.metrics.unresolvedConflicts === 1 ? '' : 's'} to resolve`
@@ -1062,10 +1080,10 @@ export default function AppRescued() {
 
     return <div className="home-orientation">
       <SectionTitle kicker="HOME · ACTIVE TRIP" title={`${destination} stays in view.`} copy="Follow the next meaningful action first, then inspect the rest of the trip as needed." />
-      <HomeTripGlance destination={destination} dates={tripIntent.dates} phase={tripPhase} />
+      <HomeTripGlance destination={destination} dates={tripIntent.dates} phase={workspacePhase} />
       <TripJourneyStatus state={journeyState} destination={destination} onAction={handleJourneyAction} />
-      <JourneyProgress destination={destination} currentPhase={tripPhase} nextActionLabel={journeyState.nextAction?.label} />
-      <section className="status-strip status-strip--home"><div><span>Current Phase</span><b>{tripPhase === 'planning' ? 'Planning' : tripPhase === 'traveling' ? 'Traveling' : 'Completed'}</b></div><div><span>Plan Health</span><b>{planHealth.overall}/100</b></div><div><span>Budget Remaining</span><b>RM {remaining}</b></div><div><span>Group Status</span><b>{groupStatus}</b></div></section>
+      <JourneyProgress destination={destination} currentPhase={workspacePhase} nextActionLabel={journeyState.nextAction?.label} />
+      <section className="status-strip status-strip--home"><div><span>Trip status</span><b>{tripLifecycleStatus === 'active' ? 'Active · departure ahead' : 'Ongoing · travelling now'}</b></div><div><span>Plan Health</span><b>{planHealth.overall}/100</b></div><div><span>Budget Remaining</span><b>RM {remaining}</b></div><div><span>Group Status</span><b>{groupStatus}</b></div></section>
     </div>;
   }
 
@@ -1186,11 +1204,13 @@ export default function AppRescued() {
   }
 
   function renderTrips() {
+    const tripIsActive = tripLifecycleStatus === 'active' || tripLifecycleStatus === 'ongoing';
+    const statusLabel = tripLifecycleStatus === 'planning' ? 'PLANNING' : tripLifecycleStatus === 'active' ? 'ACTIVE' : tripLifecycleStatus === 'ongoing' ? 'ONGOING' : 'COMPLETED';
     return <>
       <SectionTitle kicker="TRIPS · YOUR NOTEBOOK" title="Keep the trip in view." copy="Planning, traveling, and remembering all belong to the same journey." />
       <button className="new-trip-link" onClick={startNewTrip}>+ Start a new trip</button>
-      <section className="trip-card active-trip paper-sheet"><div className="trip-card-art"><span>COCOCRUNCH</span><b>{destination}</b><small>12–21 Oct 2026 · {travellerCount} travellers</small><i>✦</i></div><div className="trip-card-body"><div className="trip-card-heading"><div><span>IN MOTION</span><h3>{destination} · slow food + small discoveries</h3></div><b>{planHealth.overall}</b></div><div className="trip-phase-preview"><span className={tripPhase === 'planning' ? 'active' : ''}>Planning</span><span className={tripPhase === 'traveling' ? 'active' : ''}>Traveling</span><span className={tripPhase === 'completed' ? 'active' : ''}>Completed</span></div><p>Today: {tripInputs.mustGo} · one open pocket</p><button className="primary" onClick={() => openTrip(tripPhase)}>Continue trip <ChevronRight size={16} /></button></div></section>
-      <section className="trip-list"><div className="section-rule"><span>OTHER TRIPS</span><button onClick={() => setTab('explore')}>Find inspiration <ChevronRight size={14} /></button></div><article className="trip-list-row"><div className="trip-thumb sea-thumb" /><div><b>Jeju · salt air and citrus</b><small>Completed · 5 days · shared privately</small></div><button onClick={() => openTrip('completed')} aria-label="Open Jeju trip"><ChevronRight size={17} /></button></article><article className="trip-list-row"><div className="trip-thumb blue-thumb" /><div><b>Kyoto · temple mornings</b><small>Draft · solo · 3 anchor ideas</small></div><button onClick={() => openTrip('planning')} aria-label="Open Kyoto trip"><ChevronRight size={17} /></button></article></section>
+      <section className={`trip-card ${tripIsActive ? 'active-trip' : 'planning-trip'} paper-sheet`}><div className="trip-card-art"><span>COCOCRUNCH</span><b>{destination}</b><small>{tripIntent.dates ? `${tripIntent.dates.start}–${tripIntent.dates.end}` : 'Dates to be confirmed'} · {travellerCount} travellers</small><i>✦</i></div><div className="trip-card-body"><div className="trip-card-heading"><div><span>{statusLabel}</span><h3>{destination} · slow food + small discoveries</h3></div><b>{planHealth.overall}</b></div><div className="trip-phase-preview"><span className={tripLifecycleStatus === 'planning' ? 'active' : ''}>Planning</span><span className={tripLifecycleStatus === 'active' ? 'active' : ''}>Active</span><span className={tripLifecycleStatus === 'ongoing' ? 'active' : ''}>Ongoing</span></div><p>{tripLifecycleStatus === 'planning' ? 'Finish setup and confirm to make this trip active.' : `Today: ${tripInputs.mustGo} · one open pocket`}</p><button className="primary" onClick={openTrip}>{tripLifecycleStatus === 'planning' ? 'Continue planning' : 'Open trip'} <ChevronRight size={16} /></button></div></section>
+      <section className="trip-list"><div className="section-rule"><span>OTHER TRIPS</span><button onClick={() => setTab('explore')}>Find inspiration <ChevronRight size={14} /></button></div><article className="trip-list-row"><div className="trip-thumb sea-thumb" /><div><b>Jeju · salt air and citrus</b><small>Completed · 5 days · shared privately</small></div><button onClick={openTrip} aria-label="Open Jeju trip"><ChevronRight size={17} /></button></article><article className="trip-list-row"><div className="trip-thumb blue-thumb" /><div><b>Kyoto · temple mornings</b><small>Draft · solo · 3 anchor ideas</small></div><button onClick={openTrip} aria-label="Open Kyoto trip"><ChevronRight size={17} /></button></article></section>
       <section className="trip-footer-note"><Coco tiny mood="happy" context="travel" /><div><b>Every trip gets a little wiser.</b><small>Reviews and category-level actual spend feed back into your private Tingo Card.</small></div></section>
     </>;
   }
@@ -1208,7 +1228,7 @@ export default function AppRescued() {
       onToggleSaveCommunityTrip={(id) => setCommunityTrips(items => items.map(item => item.id === id ? { ...item, saved: !item.saved } : item))}
       onCopyCommunityTrip={copyExploreTrip}
       savedIdeas={ritualRecords.savedIdeas}
-      onOpenTripPlanning={() => openTrip('planning')}
+      onOpenTripPlanning={openTrip}
       onSearchPlaces={(dest) => {
         setExploreDestination(dest);
         setRecommendations(makeRecommendations(dest, tingoDimensions, recommendations));
@@ -1220,8 +1240,8 @@ export default function AppRescued() {
   function renderGlobalMemories() {
     return <div className="memories-screen">
       <SectionTitle kicker="MEMORIES · YOUR ARCHIVE" title="The trips that stayed with you." copy="Private by default. Start with the review, then keep the decisions, detours, and tiny wins close." />
-      <MemoryArchiveGuide onOpenTrip={() => openTrip('completed')} />
-      <section className="memory-archive-feature paper-sheet"><div className="archive-photo"><span>OCT 2026</span><b>{destination}</b></div><div><span>LAST TRIP · {worthIt ? (worthIt === 'yes' ? 'Worth it' : worthIt === 'mixed' ? 'Mixed' : 'Not really') : 'Not reviewed'}</span><h3>{outcomeReviewed ? 'Your recorded outcome is ready to revisit.' : 'The retrospective starts with what actually happened.'}</h3><p>{photoImport ? `${importPhotoMetadata().imported} local metadata entries` : 'No photo metadata recorded'} · {decisionHistory.length} decisions · RM {spent} actual</p><button className="primary" onClick={() => openTrip('completed')}>Open Memory Trunk <ChevronRight size={16} /></button></div></section>
+      <MemoryArchiveGuide onOpenTrip={openTrip} />
+      <section className="memory-archive-feature paper-sheet"><div className="archive-photo"><span>OCT 2026</span><b>{destination}</b></div><div><span>LAST TRIP · {worthIt ? (worthIt === 'yes' ? 'Worth it' : worthIt === 'mixed' ? 'Mixed' : 'Not really') : 'Not reviewed'}</span><h3>{outcomeReviewed ? 'Your recorded outcome is ready to revisit.' : 'The retrospective starts with what actually happened.'}</h3><p>{photoImport ? `${importPhotoMetadata().imported} local metadata entries` : 'No photo metadata recorded'} · {decisionHistory.length} decisions · RM {spent} actual</p><button className="primary" onClick={openTrip}>Open trip workspace <ChevronRight size={16} /></button></div></section>
       <div className="explore-section-heading"><span>KEEPSAKE SHELF</span><span className="quiet-note">Only you can see these</span></div><section className="keepsake-grid"><article><span>PHOTO MAP</span><b>{photoImport ? `${importPhotoMetadata().grouped} areas` : 'Not indexed'}</b><small>{photoImport ? 'Local metadata only' : 'Available after explicit review'}</small></article><article><span>FUTURE POSTCARD</span><b>{postcardSealed ? '1 sealed' : 'Not sealed'}</b><small>{postcardSealed ? 'Waiting for your next trip' : 'Write after the review loop'}</small></article><article><span>GHOST WISHES</span><b>{ghostWishes.length} remembered</b><small>Some plans can come back</small></article></section>
       <section className="community-entry"><div><span>COMMUNITY</span><b>{published ? 'Published with consent' : 'Private by default'}</b><small>Nothing becomes public without an explicit action.</small></div><button onClick={() => setDrawer('community')}>Manage</button></section>
     </div>;
@@ -1230,11 +1250,11 @@ export default function AppRescued() {
   function renderTripWorkspace() {
     return <>
       <TripWorkspaceHeader destination={destination} mode={mode} travellerCount={travellerCount} planHealth={planHealth.overall} onBack={openTripsIndex} />
-      <TripLifecycleTabs phase={tripPhase} onChange={setTripPhase} />
-      <TripWorkspaceContext phase={tripPhase} onExit={openTripsIndex} />
+      <TripLifecycleTabs status={tripLifecycleStatus} />
+      <TripWorkspaceContext phase={workspacePhase} onExit={openTripsIndex} />
       <TripJourneyStatus state={journeyState} destination={destination} onAction={handleJourneyAction} />
-      <JourneyProgress destination={destination} currentPhase={tripPhase} nextActionLabel={journeyState.nextAction?.label} />
-      {tripPhase === 'planning' ? renderPlan() : tripPhase === 'traveling' ? renderDuring() : renderMemories()}
+      <JourneyProgress destination={destination} currentPhase={workspacePhase} nextActionLabel={journeyState.nextAction?.label} />
+      {workspacePhase === 'planning' ? renderPlan() : workspacePhase === 'traveling' ? renderDuring() : renderMemories()}
     </>;
   }
 
@@ -1562,7 +1582,7 @@ export default function AppRescued() {
 
           <p className="me-trip-blurb">Volcanic beauty, coastal trails and incredible local cuisine awaits.</p>
 
-          <button className="me-open-trip-btn" onClick={() => openTrip(tripPhase)}>
+          <button className="me-open-trip-btn" onClick={openTrip}>
             <span>Open active trip</span>
             <span className="arrow">→</span>
           </button>
@@ -1576,7 +1596,7 @@ export default function AppRescued() {
 
         <div className="me-phase-tracker-bar">
           <div className="me-tracker-steps-grid" aria-label="Trip progress">
-            <button className="me-phase-step-btn" onClick={() => openTrip('planning')}>
+            <button className="me-phase-step-btn" onClick={openTrip}>
               <div className="me-step-icon-box">
                 <FileText size={20} />
                 <div className="me-step-check-dot"><Check size={8} /></div>
@@ -1590,13 +1610,13 @@ export default function AppRescued() {
               </div>
               <span>Pack</span>
             </button>
-            <button className="me-phase-step-btn is-active" onClick={() => openTrip('traveling')}>
+            <button className="me-phase-step-btn is-active" onClick={openTrip}>
               <div className="me-step-icon-box me-step-active-circle">
                 <Plane size={20} />
               </div>
               <span>Go</span>
             </button>
-            <button className="me-phase-step-btn" onClick={() => openTrip('completed')}>
+            <button className="me-phase-step-btn" onClick={() => setTab('memories')}>
               <div className="me-step-icon-box">
                 <Image size={20} />
               </div>
@@ -1661,7 +1681,7 @@ export default function AppRescued() {
         </div>
       </section>
 
-      {learningProposal?.status === 'proposed' && <section className="learning-handoff paper-sheet"><div><span>TRIP LEARNING · REVIEW BEFORE APPLY</span><h3>{destination} has a proposal for your long-term Tingo.</h3><p>These changes came from this trip’s actual outcome and will not apply until you confirm them.</p>{learningProposal.changes.map(change => <small key={change.questionId}>{change.questionId}: {change.beforeOptionId ?? 'none'} → {change.afterOptionId} · {change.reason}</small>)}</div><div className="learning-handoff-actions"><button className="secondary" onClick={() => openTrip('completed')}>Review in Completed</button><button className="primary" onClick={confirmLearning}>Confirm this learning</button><button className="secondary" onClick={dismissLearning}>Dismiss</button></div></section>}
+      {learningProposal?.status === 'proposed' && <section className="learning-handoff paper-sheet"><div><span>TRIP LEARNING · REVIEW BEFORE APPLY</span><h3>{destination} has a proposal for your long-term Tingo.</h3><p>These changes came from this trip’s actual outcome and will not apply until you confirm them.</p>{learningProposal.changes.map(change => <small key={change.questionId}>{change.questionId}: {change.beforeOptionId ?? 'none'} → {change.afterOptionId} · {change.reason}</small>)}</div><div className="learning-handoff-actions"><button className="secondary" onClick={() => setTab('memories')}>Review in Memories</button><button className="primary" onClick={confirmLearning}>Confirm this learning</button><button className="secondary" onClick={dismissLearning}>Dismiss</button></div></section>}
       {confirmedLearningHistory.length > 0 && <section className="learning-history paper-sheet"><span>CONFIRMED TINGO LEARNING</span><h3>What you chose to carry forward</h3>{confirmedLearningHistory.slice(0, 3).map(record => <div key={record.id}><b>{record.sourceTripReview === 'yes' ? 'Worth it' : record.sourceTripReview === 'mixed' ? 'Mixed' : 'Not really'} · {new Date(record.confirmedAt).toLocaleDateString()}</b>{record.changes.map(change => <small key={change.questionId}>{change.questionId}: {change.beforeOptionId ?? 'none'} → {change.afterOptionId}</small>)}</div>)}</section>}
     </div>;
   }
@@ -1814,7 +1834,7 @@ export default function AppRescued() {
         {groupSetupStep === 4 && <><span className="drawer-kicker">STEP 4 · MEMBER BUDGETS</span><h3>Every joined member sets their own comfort number.</h3><div className="group-member-fields">{members.filter(member => member.inviteStatus === 'joined').map(member => <label key={member.id}><span><b>{member.name}</b><small>{groupMemberBudgets[member.id] ? 'Filled' : 'Pending'}</small></span><input type="number" min="0" value={groupMemberBudgets[member.id] ?? ''} onChange={event => setGroupMemberBudgets(current => ({ ...current, [member.id]: sanitizeAmount(Number(event.target.value)) }))} placeholder="RM" /></label>)}</div></>}
         {groupSetupStep === 5 && <><span className="drawer-kicker">STEP 5 · MEMBER VIBES</span><h3>Every joined member adds their own trip rhythm.</h3><div className="group-member-fields">{members.filter(member => member.inviteStatus === 'joined').map(member => <label key={member.id}><span><b>{member.name}</b><small>{groupMemberVibes[member.id] ? 'Filled' : 'Pending'}</small></span><input value={groupMemberVibes[member.id] ?? ''} onChange={event => setGroupMemberVibes(current => ({ ...current, [member.id]: event.target.value }))} placeholder="e.g. slow food and cafés" /></label>)}</div></>}
         {groupSetupStep === 6 && <><span className="drawer-kicker">STEP 6 · SHARED DESTINATION</span><h3>{destinationLockedByLeader ? 'The leader has set the shared frame.' : 'Let the group take destination candidates to Court.'}</h3>{destinationLockedByLeader ? <div className="success-note"><div><b>{destination}</b><small>{tripDates?.start} → {tripDates?.end} · set by the group leader</small></div></div> : <><div className="group-member-fields">{members.filter(member => member.inviteStatus === 'joined').map(member => <label key={member.id}><span><b>{member.name}</b><small>{groupMemberDestinations[member.id] ? 'Candidate added' : 'Pending'}</small></span><input value={groupMemberDestinations[member.id] ?? ''} onChange={event => setGroupMemberDestinations(current => ({ ...current, [member.id]: event.target.value }))} placeholder="Destination candidate" /></label>)}</div><div className="trip-date-grid"><label className="setup-field"><span>Departure</span><input type="date" value={tripDates?.start ?? ''} onChange={event => setTripDates(current => ({ start: event.target.value, end: current?.end ?? event.target.value }))} /></label><label className="setup-field"><span>Return</span><input type="date" value={tripDates?.end ?? ''} onChange={event => setTripDates(current => ({ start: current?.start ?? event.target.value, end: event.target.value }))} /></label></div><button className="secondary" disabled={new Set(Object.values(groupMemberDestinations).filter(Boolean)).size < 2} onClick={openDestinationCourt}>Send candidates to Group Court</button>{courtConfirmed && <div className="success-note"><div><b>Court selected: {courtDecision}</b><small>Destination is now ready for the group trip.</small></div></div>}</>}</>}
-        <div className="trip-setup-actions">{groupSetupStep > 1 && <button className="secondary" onClick={() => setGroupSetupStep(step => Math.max(1, step - 1) as GroupSetupStep)}>Back</button>}{groupSetupStep < 6 ? <button className="primary" disabled={(groupSetupStep === 1 && !onboardingName.trim()) || (groupSetupStep === 2 && !members.some(member => member.inviteStatus === 'joined')) || (groupSetupStep === 4 && members.filter(member => member.inviteStatus === 'joined').some(member => !groupMemberBudgets[member.id])) || (groupSetupStep === 5 && members.filter(member => member.inviteStatus === 'joined').some(member => !groupMemberVibes[member.id]))} onClick={() => { if (groupSetupStep === 3) setDestinationLockedByLeader(Boolean(destination.trim() && tripDates?.start && tripDates?.end)); setGroupSetupStep(step => (step + 1) as GroupSetupStep); }}>Continue <ChevronRight size={15} /></button> : <button className="primary" disabled={!tripDates?.start || !tripDates?.end || (!destinationLockedByLeader && !courtConfirmed)} onClick={() => { setGroupBudgetTotal(Object.values(groupMemberBudgets).reduce((total, value) => total + value, 0)); setReadyConfirmed(current => transitionReadyConfirmation(current, 'confirm-trip-setup')); setTripCreated(true); setDrawer(null); openTrip('planning'); }}>Create group trip &amp; open plan <ChevronRight size={15} /></button>}</div>
+        <div className="trip-setup-actions">{groupSetupStep > 1 && <button className="secondary" onClick={() => setGroupSetupStep(step => Math.max(1, step - 1) as GroupSetupStep)}>Back</button>}{groupSetupStep < 6 ? <button className="primary" disabled={(groupSetupStep === 1 && !onboardingName.trim()) || (groupSetupStep === 2 && !members.some(member => member.inviteStatus === 'joined')) || (groupSetupStep === 4 && members.filter(member => member.inviteStatus === 'joined').some(member => !groupMemberBudgets[member.id])) || (groupSetupStep === 5 && members.filter(member => member.inviteStatus === 'joined').some(member => !groupMemberVibes[member.id]))} onClick={() => { if (groupSetupStep === 3) setDestinationLockedByLeader(Boolean(destination.trim() && tripDates?.start && tripDates?.end)); setGroupSetupStep(step => (step + 1) as GroupSetupStep); }}>Continue <ChevronRight size={15} /></button> : <button className="primary" disabled={!tripDates?.start || !tripDates?.end || (!destinationLockedByLeader && !courtConfirmed)} onClick={() => { setGroupBudgetTotal(Object.values(groupMemberBudgets).reduce((total, value) => total + value, 0)); setReadyConfirmed(true); setTripCreated(true); setDrawer(null); openTrip(); }}>Create group trip &amp; open plan <ChevronRight size={15} /></button>}</div>
       </section>}
       {drawer === 'tripSetup' && !tripSetupModeChoice && mode === 'solo' && <section className="trip-setup-wizard"><div className="trip-setup-progress"><span>NEW SOLO TRIP</span><b>Step {tripSetupStep} of 5</b><div><i style={{ width: `${tripSetupStep * 20}%` }} /></div></div>
         {tripSetupReference && <div className="adapter-note"><b>Starting from {tripSetupReference.title}</b><small>Its vibe and estimated budget are prefilled. You can change both.</small></div>}
@@ -1826,7 +1846,7 @@ export default function AppRescued() {
         {tripSetupStep === 3 && <><span className="drawer-kicker">STEP 3 · BUDGET</span><h3>What feels comfortable for this trip?</h3><label className="budget-total-input"><span>Solo total (RM)</span><input type="number" min="0" value={soloBudgetTotal} onChange={event => setSoloBudgetTotal(sanitizeAmount(Number(event.target.value)))} /></label><div className="adapter-note"><b>Budget stays editable.</b><small>This is your starting total; category planning happens in the Plan workspace.</small></div></>}
         {tripSetupStep === 4 && <><span className="drawer-kicker">STEP 4 · TRIP VIBE</span><h3>How much room should the days have?</h3><label className="trip-vibe-slider"><span>Relaxed</span><input type="range" min="0" max="100" value={tripInputs.tripVibe.includes('Packed') ? 80 : tripInputs.tripVibe.includes('Balanced') ? 50 : 20} onChange={event => { const value = Number(event.target.value); setTripInputField('tripVibe', value < 34 ? 'Relaxed and spacious' : value > 66 ? 'Packed with highlights' : 'Balanced days with breathing room'); }} /><span>Packed</span></label><div className="constraint-row">{['Slow food + cafés', 'Culture + museums', 'Nature + movement', 'Night markets + city lights'].map(vibe => <button key={vibe} className={tripInputs.tripVibe === vibe ? 'active' : ''} onClick={() => setTripInputField('tripVibe', vibe)}>{vibe}</button>)}</div><div className="adapter-note"><small>Current vibe: {tripInputs.tripVibe || 'Choose a starting rhythm'}</small></div></>}
         {tripSetupStep === 5 && <><span className="drawer-kicker">STEP 5 · DATES</span><h3>When are you going?</h3><div className="trip-date-grid"><label className="setup-field"><span>Departure</span><input type="date" value={tripDates?.start ?? ''} onChange={event => setTripDates(current => ({ start: event.target.value, end: current?.end ?? event.target.value }))} /></label><label className="setup-field"><span>Return</span><input type="date" min={tripDates?.start} value={tripDates?.end ?? ''} onChange={event => setTripDates(current => ({ start: current?.start ?? event.target.value, end: event.target.value }))} /></label></div><small className="adapter-note">Choose dates from the calendar fields. You can revise them later.</small></>}
-        <div className="trip-setup-actions">{tripSetupStep > 1 && <button className="secondary" onClick={() => setTripSetupStep(step => Math.max(1, step - 1) as TripSetupStep)}>Back</button>}{tripSetupStep < 5 ? <button className="primary" disabled={(tripSetupStep === 1 && !onboardingName.trim()) || (tripSetupStep === 2 && !destination.trim())} onClick={() => setTripSetupStep(step => (step + 1) as TripSetupStep)}>Continue <ChevronRight size={15} /></button> : <button className="primary" disabled={!tripDates?.start || !tripDates?.end} onClick={() => { setReadyConfirmed(current => transitionReadyConfirmation(current, 'confirm-trip-setup')); setTripCreated(true); setDrawer(null); openTrip('planning'); }}>Create trip &amp; open plan <ChevronRight size={15} /></button>}</div>
+        <div className="trip-setup-actions">{tripSetupStep > 1 && <button className="secondary" onClick={() => setTripSetupStep(step => Math.max(1, step - 1) as TripSetupStep)}>Back</button>}{tripSetupStep < 5 ? <button className="primary" disabled={(tripSetupStep === 1 && !onboardingName.trim()) || (tripSetupStep === 2 && !destination.trim())} onClick={() => setTripSetupStep(step => (step + 1) as TripSetupStep)}>Continue <ChevronRight size={15} /></button> : <button className="primary" disabled={!tripDates?.start || !tripDates?.end} onClick={() => { setReadyConfirmed(true); setTripCreated(true); setDrawer(null); openTrip(); }}>Create trip &amp; open plan <ChevronRight size={15} /></button>}</div>
       </section>}
       {drawer === 'group' && <><span className="drawer-kicker">GROUP DNA</span><h3>{groupDNA.conflicts.length ? `${groupDNA.conflicts.length} conflict${groupDNA.conflicts.length === 1 ? '' : 's'} stay visible until the group decides.` : 'Shared signals are explicit, not averaged from Mei.'}</h3><div className="dna-grid"><div><span>Trip Vibe</span><b>{tripInputs.tripVibe}</b></div><div><span>Shared priority</span><b>{groupDNA.sharedPriorities[0]?.label ?? 'None yet'}</b></div><div><span>Budget range</span><b>{groupDNA.budgetRange.max ? `RM${groupDNA.budgetRange.min}–${groupDNA.budgetRange.max}` : 'No ranges yet'}</b></div><div><span>Budget sensitivity</span><b>{groupDNA.budgetSensitivity}</b></div></div><div className="member-list">{members.map(member => <div key={member.id}><div><b>{member.name}</b><small>{member.inviteStatus === 'pending' ? 'Invite pending' : member.role} · {member.pace} pace · {memberPreferenceProfiles[member.id]?.tingoAssessed ? 'Tingo assessed' : 'Tingo not assessed'}</small></div><button onClick={() => setMembers(current => current.map(item => item.id === member.id ? { ...item, role: item.role === 'Trip lead' ? 'Food scout' : item.role === 'Food scout' ? 'Memory keeper' : 'Trip lead' } : item))}>Rotate role</button></div>)}</div><div className="adapter-note"><b>Coco responsibility preview</b>{responsibilitySuggestions.map(item => <small key={item.memberId}><strong>{item.source === 'member-tingo' ? 'Tingo-assessed' : 'Fallback'} · </strong>{item.memberName}: {item.suggestedRole} — {item.reason}</small>)}<button className="secondary" onClick={() => setMembers(current => applyResponsibilitySuggestions(current, responsibilitySuggestions))}>Confirm & apply suggested roles</button></div><button className="secondary" onClick={inviteMember}>+ Invite a traveller</button><div className="conflict-mini"><span>GROUP DNA SIGNALS</span>{groupDNA.conflicts.length ? groupDNA.conflicts.map(conflict => <div key={`${conflict.kind}-${conflict.label}`}><b>{conflict.label}</b><small>{conflict.reason}</small></div>) : <b>No strong conflict detected from explicit member inputs.</b>}<small>{groupDNA.evidence.join(' ')}</small><small>{tingoPlanGuidance.courtGuidance} AI can explain options, but cannot silently choose for the group.</small></div><label className="setup-field"><span>Mark another uncertainty</span><input className="big-input" value={draftConflict} onChange={e => setDraftConflict(e.target.value)} placeholder="e.g. Shinjuku hotel vs Asakusa hotel" /></label><button className="secondary" onClick={markConflict}>{conflictMarked ? 'Send another conflict to Court' : 'Mark conflict & open Court'}</button><div className="planner-turn"><span>Editing turn</span><b>{plannerTurn}</b><button onClick={() => setPlannerTurn(plannerTurn === 'Mei' ? 'JH' : plannerTurn === 'JH' ? 'Zi Shan' : plannerTurn === 'Zi Shan' ? 'Alex' : 'Mei')}>Pass turn</button></div><button className="secondary" onClick={() => setDrawer('reminders')}>Reminders & human commitments</button></>}
       {drawer === 'backup' && <><span className="drawer-kicker">BACKUP PLAN POOL</span><h3>Only viable, Deal-Breaker-safe alternatives are repair candidates.</h3>{backupPool.map(item => <div className={`backup-row ${item.viable && item.dealBreakerSafe ? '' : 'off'}`} key={item.id}><b>{item.name}</b><small>{item.support} supporters · {item.costDelta >= 0 ? '+' : ''}RM{item.costDelta} · {item.timeDeltaMinutes >= 0 ? '+' : ''}{item.timeDeltaMinutes} min · {item.viable && item.dealBreakerSafe ? 'viable' : 'blocked'}</small><small>{item.source} · {item.lossReason}</small></div>)}{backupPool.length === 0 && <div className="adapter-note">No Backup candidate has been retained yet. A confirmed Court loser appears here only when it is viable and Deal-Breaker-safe.</div>}{ghostWishes.filter(wish => wish.status === 'revived').map(wish => <div className="backup-row" key={`ghost-${wish.id}`}><b>👻 {wish.name}</b><small>Revived from Ghost Wish · preserved with original reason</small></div>)}</>}
@@ -1917,9 +1937,9 @@ export default function AppRescued() {
             ? 'map'
             : tab === 'trips'
               ? tripWorkspaceOpen
-                ? tripPhase === 'traveling'
+              ? workspacePhase === 'traveling'
                   ? 'traveling'
-                  : tripPhase === 'completed'
+                  : workspacePhase === 'completed'
                     ? 'memory'
                     : 'planning'
                 : 'planning'
@@ -1980,7 +2000,7 @@ export default function AppRescued() {
       {renderCourt()}
       {renderDrawer()}
 
-      <GlobalCocoCompanion context={globalCocoContext} onAsk={() => { setTripWorkspaceOpen(true); setTripPhase('traveling'); setTab('trips'); setDrawer('assistant'); }} onPray={() => emitExperience({ type: 'open-prayer', source: 'user-reported', uncertainty: 'Personal prayer only; no weather, itinerary, or provider claim.' })} onNext={() => handleJourneyAction(journeyState.nextAction?.target ?? 'trip')} onEveryday={() => { setTripWorkspaceOpen(true); setTripPhase('traveling'); setTab('trips'); setDrawer('gacha'); }} onLucky={() => { setTripWorkspaceOpen(true); setTripPhase('traveling'); setTab('trips'); setDrawer('lucky'); }} />
+      <GlobalCocoCompanion context={globalCocoContext} onAsk={() => { setTripWorkspaceOpen(true); setTab('trips'); setDrawer('assistant'); }} onPray={() => emitExperience({ type: 'open-prayer', source: 'user-reported', uncertainty: 'Personal prayer only; no weather, itinerary, or provider claim.' })} onNext={() => handleJourneyAction(journeyState.nextAction?.target ?? 'trip')} onEveryday={() => { setTripWorkspaceOpen(true); setTab('trips'); setDrawer('gacha'); }} onLucky={() => { setTripWorkspaceOpen(true); setTab('trips'); setDrawer('lucky'); }} />
     </div>
   );
 }

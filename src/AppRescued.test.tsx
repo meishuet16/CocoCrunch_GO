@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import AppRescued from './AppRescued';
+import AppRescued, { deriveTripLifecycleStatus } from './AppRescued';
 import { cocoAsset } from './components/coco/assets';
 
 const completeTingoAnswers = [
@@ -28,7 +28,7 @@ function stubPersistedTrip(readyConfirmed: boolean) {
       tingoAnswers: completeTingoAnswers,
       tripIntent: {
         destination: 'Tokyo',
-        dates: null,
+        dates: { start: '2099-10-12', end: '2099-10-21' },
         mode: 'solo',
         tripVibe: 'Slow food and side streets',
         mustGo: 'Tsukiji food walk',
@@ -63,13 +63,14 @@ describe('AppRescued journey status integration', () => {
     expect(html).not.toContain('HOME · ACTIVE TRIP');
   });
 
-  it('keeps confirm-ready pending until planning is explicitly confirmed', () => {
+  it('keeps an unconfirmed planning trip out of Home', () => {
     stubPersistedTrip(false);
 
     const html = renderToStaticMarkup(<AppRescued />);
 
-    expect(html).toContain('The plan is reviewable and waiting for a Ready-to-Go confirmation.');
-    expect(html).toContain('Confirm Ready to Go');
+    expect(html).toContain('HOME · NO ACTIVE TRIP');
+    expect(html).toContain('Planning trips stay in Trips until their setup is confirmed.');
+    expect(html).not.toContain('HOME · ACTIVE TRIP');
   });
 
   it('does not require confirm-ready after a stored planning confirmation', () => {
@@ -77,9 +78,15 @@ describe('AppRescued journey status integration', () => {
 
     const html = renderToStaticMarkup(<AppRescued />);
 
-    expect(html).toContain('The trip is ready to continue.');
-    expect(html).toContain('Continue planning');
-    expect(html).not.toContain('Confirm Ready to Go');
+    expect(html).toContain('HOME · ACTIVE TRIP');
+    expect(html).toContain('Active · departure ahead');
+  });
+
+  it('derives active and ongoing status from confirmation and departure date', () => {
+    const base = { tripCreated: true, readyConfirmed: true, phase: 'planning' as const };
+    expect(deriveTripLifecycleStatus({ ...base, dates: { start: '2099-10-12', end: '2099-10-21' }, now: new Date('2099-10-11T12:00:00') })).toBe('active');
+    expect(deriveTripLifecycleStatus({ ...base, dates: { start: '2099-10-12', end: '2099-10-21' }, now: new Date('2099-10-12T00:00:00') })).toBe('ongoing');
+    expect(deriveTripLifecycleStatus({ ...base, readyConfirmed: false, dates: { start: '2099-10-12', end: '2099-10-21' } })).toBe('planning');
   });
 
   it('uses canonical Home Coco in the accessible Home brand lockup', () => {

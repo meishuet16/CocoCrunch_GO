@@ -1,6 +1,7 @@
 import { ChevronRight } from 'lucide-react';
 
 export type TripPhase = 'planning' | 'traveling' | 'completed';
+export type TripLifecycleStatus = 'planning' | 'active' | 'ongoing' | 'completed';
 
 type HeaderProps = {
   destination: string;
@@ -23,21 +24,21 @@ export function TripWorkspaceHeader({ destination, mode, travellerCount, planHea
 }
 
 type LifecycleProps = {
-  phase: TripPhase;
-  onChange: (phase: TripPhase) => void;
+  status: TripLifecycleStatus;
 };
 
-const phaseLabels: { id: TripPhase; label: string; note: string }[] = [
+const phaseLabels: { id: TripLifecycleStatus; label: string; note: string }[] = [
   { id: 'planning', label: 'Planning', note: 'Make it yours' },
-  { id: 'traveling', label: 'Traveling', note: 'Stay in the moment' },
+  { id: 'active', label: 'Active', note: 'Ready for departure' },
+  { id: 'ongoing', label: 'Ongoing', note: 'Stay in the moment' },
   { id: 'completed', label: 'Completed', note: 'Keep what mattered' },
 ];
 
-export function TripLifecycleTabs({ phase, onChange }: LifecycleProps) {
-  return <div className="lifecycle-tabs" role="tablist" aria-label="Trip lifecycle">
-    {phaseLabels.map(item => <button key={item.id} role="tab" aria-selected={phase === item.id} className={phase === item.id ? 'active' : ''} onClick={() => onChange(item.id)}>
+export function TripLifecycleTabs({ status }: LifecycleProps) {
+  return <div className="lifecycle-tabs" role="list" aria-label="Trip lifecycle status">
+    {phaseLabels.map(item => <div key={item.id} role="listitem" aria-current={status === item.id ? 'step' : undefined} className={status === item.id ? 'active' : ''}>
       <b>{item.label}</b><small>{item.note}</small>
-    </button>)}
+    </div>)}
   </div>;
 }
 

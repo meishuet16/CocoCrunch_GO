@@ -45,7 +45,7 @@ button {
   min-width: 44px;
 }
 .bottom-nav button,
-.lifecycle-tabs button,
+.lifecycle-tabs > div,
 .primary,
 .secondary,
 .hero-link,
@@ -1276,7 +1276,7 @@ select:focus-visible {
   .app-shell { padding-inline: 15px; }
   .status-strip { gap: 4px; }
   .status-strip div { padding-inline: 6px; }
-  .lifecycle-tabs button { min-width: 0; padding-inline: 6px; }
+  .lifecycle-tabs > div { min-width: 0; padding-inline: 6px; }
   .lifecycle-tabs small { white-space: normal; }
   .page-title h2 { font-size: 26px; }
   .trip-conditions-head { display: grid; gap: 8px; }
