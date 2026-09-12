@@ -6,23 +6,23 @@
    ========================================================================== */
 
 :root {
-  --duo-blue: #1877f2;
-  --duo-blue-dark: #0f62d1;
-  --duo-blue-light: #e8f3ff;
-  --duo-green: #12b76a;
-  --duo-green-dark: #027a48;
-  --duo-green-light: #edfdf5;
-  --duo-red: #f04438;
-  --duo-red-dark: #b42318;
-  --duo-red-light: #fef3f2;
-  --duo-yellow: #fec84b;
-  --duo-wood: #8d5b4c;
-  --duo-wood-dark: #5c382e;
-  --duo-wood-light: #d69f7e;
-  --duo-card-bg: #ffffff;
-  --duo-border: #e2e8f0;
-  --duo-text-dark: #0f172a;
-  --duo-text-muted: #64748b;
+  --duo-blue: var(--blue-deep);
+  --duo-blue-dark: var(--blue-deep);
+  --duo-blue-light: var(--paper-solid);
+  --duo-green: var(--success);
+  --duo-green-dark: var(--success);
+  --duo-green-light: var(--paper-solid);
+  --duo-red: var(--sangria);
+  --duo-red-dark: var(--sangria);
+  --duo-red-light: var(--paper-solid);
+  --duo-yellow: var(--warning);
+  --duo-wood: var(--sangria);
+  --duo-wood-dark: var(--sangria-deep);
+  --duo-wood-light: var(--warning);
+  --duo-card-bg: var(--paper-solid);
+  --duo-border: var(--paper-solid);
+  --duo-text-dark: var(--ink);
+  --duo-text-muted: var(--blue-deep);
 }
 
 /* Base Modal Overlay */
@@ -137,18 +137,18 @@ body:has(.court-modal-overlay) {
   max-width: 100%;
   height: 844px;
   max-height: 844px;
-  background: #f8fafc;
+  background: var(--paper-solid);
   border-radius: 44px;
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.2),
-    0 0 0 3px #1e293b,
-    0 0 0 4.5px #0f172a,
+    0 0 0 3px var(--ink),
+    0 0 0 4.5px var(--ink),
     0 25px 70px -10px rgba(0, 0, 0, 0.55);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   position: relative;
-  border: 2px solid #334155;
+  border: 2px solid var(--ink);
   box-sizing: border-box;
   flex-shrink: 0;
 }
@@ -177,7 +177,7 @@ body:has(.court-modal-overlay) {
 .court-ios-home-indicator {
   width: 130px;
   height: 5px;
-  background: #0f172a;
+  background: var(--ink);
   border-radius: 100px;
   opacity: 0.28;
 }
@@ -186,7 +186,7 @@ body:has(.court-modal-overlay) {
 @media (max-width: 440px) {
   .court-modal-overlay {
     padding: 0 !important;
-    background: #ffffff !important;
+    background: var(--paper-solid) !important;
     backdrop-filter: none !important;
     overflow: hidden !important;
   }
@@ -230,7 +230,7 @@ body:has(.court-modal-overlay) {
   align-items: center;
   justify-content: space-between;
   padding: 14px 18px 10px;
-  background: #ffffff;
+  background: var(--paper-solid);
   border-bottom: 1px solid rgba(226, 232, 240, 0.6);
   position: relative;
   z-index: 10;
@@ -246,12 +246,12 @@ body:has(.court-modal-overlay) {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #0f172a;
+  color: var(--ink);
   transition: background 0.15s ease, transform 0.15s ease;
 }
 
 .court-nav-back-btn:hover {
-  background: #f1f5f9;
+  background: var(--paper-solid);
 }
 
 .court-nav-back-btn:active {
@@ -263,8 +263,8 @@ body:has(.court-modal-overlay) {
   height: 34px;
   border-radius: 999px;
   border: 1px solid rgba(24, 119, 242, 0.22);
-  background: #1877f2;
-  color: #ffffff;
+  background: var(--blue-deep);
+  color: var(--paper-solid);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -280,7 +280,7 @@ body:has(.court-modal-overlay) {
 }
 
 .court-top-idea-btn:hover {
-  background: #0f62d1;
+  background: var(--blue-deep);
   box-shadow: 0 8px 18px rgba(24, 119, 242, 0.26);
   transform: translateY(-1px);
 }
@@ -297,7 +297,7 @@ body:has(.court-modal-overlay) {
 .court-nav-title-group h1 {
   font-size: 20px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--ink);
   margin: 0;
   line-height: 1.15;
   letter-spacing: -0.02em;
@@ -305,7 +305,7 @@ body:has(.court-modal-overlay) {
 
 .court-nav-title-group span {
   font-size: 12px;
-  color: #64748b;
+  color: var(--blue-deep);
   margin-top: 1px;
 }
 
@@ -314,8 +314,8 @@ body:has(.court-modal-overlay) {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #f0f7ff;
-  border: 1px solid #d0e5ff;
+  background: var(--paper-solid);
+  border: 1px solid var(--blue-soft);
   border-radius: 999px;
   padding: 4px 10px 4px 6px;
   cursor: pointer;
@@ -323,7 +323,7 @@ body:has(.court-modal-overlay) {
 }
 
 .court-now-discussing-pill:hover {
-  background: #e0effe;
+  background: var(--paper-solid);
   transform: translateY(-1px);
 }
 
@@ -331,7 +331,7 @@ body:has(.court-modal-overlay) {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: #ffffff;
+  background: var(--paper-solid);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -347,14 +347,14 @@ body:has(.court-modal-overlay) {
 
 .court-discuss-text small {
   font-size: 9px;
-  color: #64748b;
+  color: var(--blue-deep);
   line-height: 1;
 }
 
 .court-discuss-text b {
   font-size: 13px;
   font-weight: 800;
-  color: #1877f2;
+  color: var(--blue-deep);
   line-height: 1.15;
 }
 
@@ -364,7 +364,7 @@ body:has(.court-modal-overlay) {
   align-items: center;
   justify-content: space-between;
   padding: 10px 20px 4px;
-  background: #ffffff;
+  background: var(--paper-solid);
 }
 
 .court-progress-segments {
@@ -378,12 +378,12 @@ body:has(.court-modal-overlay) {
   height: 6px;
   flex: 1;
   border-radius: 999px;
-  background: #e2e8f0;
+  background: var(--paper-solid);
   transition: background 0.3s ease;
 }
 
 .court-progress-seg.filled {
-  background: #1877f2;
+  background: var(--blue-deep);
 }
 
 .court-progress-label {
@@ -395,12 +395,12 @@ body:has(.court-modal-overlay) {
 .court-progress-label b {
   font-size: 13px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--ink);
 }
 
 .court-progress-label span {
   font-size: 10px;
-  color: #64748b;
+  color: var(--blue-deep);
 }
 
 /* Scrollable Content Container */
@@ -417,7 +417,7 @@ body:has(.court-modal-overlay) {
    ========================================================================== */
 
 .court-hero-banner {
-  background: linear-gradient(180deg, #dcf0ff 0%, #edf7ff 60%, #f8fafc 100%);
+  background: linear-gradient(180deg, var(--paper-solid) 0%, var(--paper-solid) 60%, var(--paper-solid) 100%);
   padding: 18px 20px 0;
   position: relative;
   overflow: hidden;
@@ -432,7 +432,7 @@ body:has(.court-modal-overlay) {
 .court-hero-copy h2 {
   font-size: 26px;
   font-weight: 900;
-  color: #0f172a;
+  color: var(--ink);
   margin: 0;
   line-height: 1.15;
   letter-spacing: -0.03em;
@@ -440,7 +440,7 @@ body:has(.court-modal-overlay) {
 
 .court-hero-copy p {
   font-size: 13px;
-  color: #475569;
+  color: var(--ink);
   margin: 6px 0 0;
   line-height: 1.4;
 }
@@ -550,7 +550,7 @@ body:has(.court-modal-overlay) {
 }
 
 .court-upload-card {
-  background: #ffffff;
+  background: var(--paper-solid);
   border-radius: 20px;
   padding: 14px;
   box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(226, 232, 240, 0.8);
@@ -558,20 +558,20 @@ body:has(.court-modal-overlay) {
 
 .court-upload-input {
   width: 100%;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--paper-solid);
   border-radius: 12px;
   padding: 12px 14px;
   font-size: 14px;
-  color: #0f172a;
-  background: #f8fafc;
+  color: var(--ink);
+  background: var(--paper-solid);
   outline: none;
   box-sizing: border-box;
   transition: border-color 0.2s, background-color 0.2s;
 }
 
 .court-upload-input:focus {
-  border-color: #1877f2;
-  background: #ffffff;
+  border-color: var(--blue-deep);
+  background: var(--paper-solid);
 }
 
 .court-upload-actions-row {
@@ -596,29 +596,29 @@ body:has(.court-modal-overlay) {
   gap: 4px;
   padding: 6px 10px;
   border-radius: 999px;
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
+  border: 1px solid var(--paper-solid);
+  background: var(--paper-solid);
   font-size: 12px;
   font-weight: 600;
-  color: #334155;
+  color: var(--ink);
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
 }
 
 .court-chip-btn:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
+  background: var(--paper-solid);
+  border-color: var(--muted);
 }
 
 .court-chip-btn:active {
   transform: scale(0.95);
 }
 
-.court-chip-btn.photo svg { color: #12b76a; }
-.court-chip-btn.place svg { color: #f04438; }
-.court-chip-btn.note svg { color: #f59e0b; }
-.court-chip-btn.link svg { color: #8b5cf6; }
+.court-chip-btn.photo svg { color: var(--success); }
+.court-chip-btn.place svg { color: var(--sangria); }
+.court-chip-btn.note svg { color: var(--warning); }
+.court-chip-btn.link svg { color: var(--blue-deep); }
 
 /* ==========================================================================
    Scrapbook Polaroid Styles (Matching media_1789054848249.jpg)
@@ -634,7 +634,7 @@ body:has(.court-modal-overlay) {
 
 .court-polaroid-item {
   position: absolute;
-  background: #ffffff;
+  background: var(--paper-solid);
   border-radius: 4px;
   box-shadow: 0 8px 22px rgba(15, 23, 42, 0.14), 0 2px 6px rgba(0,0,0,0.06);
   padding: 5px 5px 14px 5px;
@@ -664,11 +664,11 @@ body:has(.court-modal-overlay) {
 }
 
 .court-polaroid-pin.red {
-  background: radial-gradient(circle at 35% 35%, #f87171, #dc2626 60%, #991b1b);
+  background: radial-gradient(circle at 35% 35%, var(--sangria), var(--sangria) 60%, var(--sangria-deep));
 }
 
 .court-polaroid-pin.blue {
-  background: radial-gradient(circle at 35% 35%, #60a5fa, #2563eb 60%, #1e40af);
+  background: radial-gradient(circle at 35% 35%, var(--blue-deep), var(--blue-deep) 60%, var(--blue-deep));
 }
 
 /* Primary Upload Button */
@@ -679,8 +679,8 @@ body:has(.court-modal-overlay) {
   padding: 8px 16px;
   border-radius: 999px;
   border: none;
-  background: #0d6efd;
-  color: #ffffff;
+  background: var(--blue-deep);
+  color: var(--paper-solid);
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -690,12 +690,12 @@ body:has(.court-modal-overlay) {
 }
 
 .court-upload-submit-btn:hover {
-  background: #2563eb;
+  background: var(--blue-deep);
 }
 
 .court-upload-submit-btn:active {
   transform: translateY(3px);
-  box-shadow: 0 1px 0 #0f62d1;
+  box-shadow: 0 1px 0 var(--blue-deep);
 }
 
 /* ==========================================================================
@@ -716,7 +716,7 @@ body:has(.court-modal-overlay) {
 .court-ideas-section-header h3 {
   font-size: 17px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--ink);
   margin: 0;
 }
 
@@ -726,7 +726,7 @@ body:has(.court-modal-overlay) {
   gap: 4px;
   font-size: 13px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--blue-deep);
   cursor: pointer;
   border: none;
   background: transparent;
@@ -740,10 +740,10 @@ body:has(.court-modal-overlay) {
 
 /* Individual Idea Card */
 .court-idea-card {
-  background: #ffffff;
+  background: var(--paper-solid);
   border-radius: 20px;
   padding: 14px;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04), 0 0 0 1px #f1f5f9;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04), 0 0 0 1px var(--paper-solid);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -784,24 +784,24 @@ body:has(.court-modal-overlay) {
 .court-idea-author-row b {
   font-size: 14px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--ink);
 }
 
 .court-idea-author-row span {
   font-size: 11px;
-  color: #94a3b8;
+  color: var(--muted);
 }
 
 .court-idea-title {
   font-size: 16px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--ink);
   margin: 0 0 4px;
 }
 
 .court-idea-desc {
   font-size: 13px;
-  color: #475569;
+  color: var(--ink);
   line-height: 1.4;
   margin: 0 0 8px;
 }
@@ -813,8 +813,8 @@ body:has(.court-modal-overlay) {
 }
 
 .court-idea-tag {
-  background: #eff6ff;
-  color: #1877f2;
+  background: var(--paper-solid);
+  color: var(--blue-deep);
   border-radius: 6px;
   padding: 2px 8px;
   font-size: 11px;
@@ -855,7 +855,7 @@ body:has(.court-modal-overlay) {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
+  color: var(--paper-solid);
 }
 
 /* Idea Bottom Interaction Row */
@@ -864,7 +864,7 @@ body:has(.court-modal-overlay) {
   align-items: center;
   justify-content: space-between;
   padding-top: 8px;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--paper-solid);
 }
 
 .court-idea-stats-group {
@@ -891,23 +891,23 @@ body:has(.court-modal-overlay) {
 }
 
 .court-stat-pill.thumbs {
-  background: #edfdf5;
-  color: #12b76a;
+  background: var(--paper-solid);
+  color: var(--success);
 }
 
 .court-stat-pill.thumbs.active {
-  background: #12b76a;
-  color: #ffffff;
+  background: var(--success);
+  color: var(--paper-solid);
 }
 
 .court-stat-pill.comments {
-  background: #f1f5f9;
-  color: #64748b;
+  background: var(--paper-solid);
+  color: var(--blue-deep);
 }
 
 .court-stat-pill.flag {
-  background: #fef3f2;
-  color: #f04438;
+  background: var(--paper-solid);
+  color: var(--sangria);
 }
 
 .court-view-discussion-link {
@@ -916,7 +916,7 @@ body:has(.court-modal-overlay) {
   gap: 3px;
   font-size: 12px;
   font-weight: 700;
-  color: #64748b;
+  color: var(--blue-deep);
   cursor: pointer;
   border: none;
   background: transparent;
@@ -924,7 +924,7 @@ body:has(.court-modal-overlay) {
 }
 
 .court-view-discussion-link:hover {
-  color: #1877f2;
+  color: var(--blue-deep);
 }
 
 /* Bottom Sticky Action Bar */
@@ -949,8 +949,8 @@ body:has(.court-modal-overlay) {
   flex-shrink: 0;
   border-radius: 16px;
   border: none;
-  background: #1877f2;
-  color: #ffffff;
+  background: var(--blue-deep);
+  color: var(--paper-solid);
   font-size: 15.5px;
   font-weight: 800;
   display: flex;
@@ -958,17 +958,17 @@ body:has(.court-modal-overlay) {
   justify-content: center;
   gap: 8px;
   cursor: pointer;
-  box-shadow: 0 4px 0 #0f62d1, 0 8px 18px -4px rgba(24, 119, 242, 0.35);
+  box-shadow: 0 4px 0 var(--blue-deep), 0 8px 18px -4px rgba(24, 119, 242, 0.35);
   transition: all 0.15s ease;
 }
 
 .court-sticky-cta-btn:hover {
-  background: #2563eb;
+  background: var(--blue-deep);
 }
 
 .court-sticky-cta-btn:active {
   transform: translateY(3px);
-  box-shadow: 0 1px 0 #0f62d1;
+  box-shadow: 0 1px 0 var(--blue-deep);
 }
 
 /* ==========================================================================
@@ -981,7 +981,7 @@ body:has(.court-modal-overlay) {
   height: 100%;
   width: 100%;
   position: relative;
-  background: #ffffff;
+  background: var(--paper-solid);
   overflow: hidden; /* Guaranteed zero scrolling and zero scrollbars */
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
@@ -1010,13 +1010,13 @@ body:has(.court-modal-overlay) {
 .court-lobby-header h2 {
   font-size: 28px;
   font-weight: 900;
-  color: #0f172a;
+  color: var(--ink);
   margin: 0 0 6px;
 }
 
 .court-lobby-header p {
   font-size: 14px;
-  color: #64748b;
+  color: var(--blue-deep);
   margin: 0;
 }
 
@@ -1028,8 +1028,8 @@ body:has(.court-modal-overlay) {
 
 .court-lobby-members-card {
   width: 100%;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--paper-solid);
+  border: 1px solid var(--paper-solid);
   border-radius: 24px;
   padding: 14px 14px 12px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.05);
@@ -1039,7 +1039,7 @@ body:has(.court-modal-overlay) {
 .court-lobby-members-title {
   font-size: 13px;
   font-weight: 700;
-  color: #64748b;
+  color: var(--blue-deep);
   margin-bottom: 12px;
   text-align: left;
 }
@@ -1056,7 +1056,7 @@ body:has(.court-modal-overlay) {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  border: 2px solid #ffffff;
+  border: 2px solid var(--paper-solid);
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   flex-shrink: 0;
 }
@@ -1065,27 +1065,27 @@ body:has(.court-modal-overlay) {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  border: 2px dashed #cbd5e1;
-  background: #f8fafc;
+  border: 2px dashed var(--muted);
+  background: var(--paper-solid);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #64748b;
+  color: var(--blue-deep);
   cursor: pointer;
   flex-shrink: 0;
   transition: all 0.15s ease;
 }
 
 .court-lobby-add-btn:hover {
-  border-color: #1877f2;
-  color: #1877f2;
+  border-color: var(--blue-deep);
+  color: var(--blue-deep);
 }
 
 .court-dark-pill-btn {
   width: 100%;
   height: 52px;
-  background: #0f172a;
-  color: #ffffff;
+  background: var(--ink);
+  color: var(--paper-solid);
   border-radius: 999px;
   border: none;
   font-size: 16px;
@@ -1095,17 +1095,17 @@ body:has(.court-modal-overlay) {
   justify-content: center;
   gap: 8px;
   cursor: pointer;
-  box-shadow: 0 4px 0 #020617;
+  box-shadow: 0 4px 0 var(--ink);
   transition: all 0.15s ease;
 }
 
 .court-dark-pill-btn:hover {
-  background: #1e293b;
+  background: var(--ink);
 }
 
 .court-dark-pill-btn:active {
   transform: translateY(3px);
-  box-shadow: 0 1px 0 #020617;
+  box-shadow: 0 1px 0 var(--ink);
 }
 
 /* Screen 2: Case Proposal */
@@ -1124,12 +1124,12 @@ body:has(.court-modal-overlay) {
 .court-proposal-title {
   font-size: 26px;
   font-weight: 900;
-  color: #0f172a;
+  color: var(--ink);
   margin: 12px 0 16px;
 }
 
 .court-proposal-title b {
-  color: #1877f2;
+  color: var(--blue-deep);
 }
 
 .court-proposal-stack {
@@ -1172,7 +1172,7 @@ body:has(.court-modal-overlay) {
   left: 18px;
   right: 18px;
   z-index: 1;
-  background: linear-gradient(145deg, #f8fbff, #edf6ff);
+  background: linear-gradient(145deg, var(--paper-solid), var(--paper-solid));
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.95),
     0 5px 14px rgba(37, 62, 91, 0.06);
@@ -1183,7 +1183,7 @@ body:has(.court-modal-overlay) {
   left: 8px;
   right: 8px;
   z-index: 2;
-  background: linear-gradient(145deg, #ffffff, #f2f8ff);
+  background: linear-gradient(145deg, var(--paper-solid), var(--paper-solid));
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.96),
     0 8px 18px rgba(37, 62, 91, 0.1);
@@ -1206,7 +1206,7 @@ body:has(.court-modal-overlay) {
   height: 24px;
   border-radius: 9px;
   overflow: hidden;
-  background: #dbeafe;
+  background: var(--paper-solid);
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.1);
 }
 
@@ -1218,9 +1218,9 @@ body:has(.court-modal-overlay) {
 }
 
 .court-stack-case-chip {
-  color: #1877f2;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
+  color: var(--blue-deep);
+  background: var(--paper-solid);
+  border: 1px solid var(--blue-soft);
   border-radius: 999px;
   padding: 3px 7px;
   font-size: 9.5px;
@@ -1266,9 +1266,9 @@ body:has(.court-modal-overlay) {
 
 .court-proposal-card {
   width: 100%;
-  background: #ffffff;
+  background: var(--paper-solid);
   border-radius: 24px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--paper-solid);
   overflow: hidden;
   box-shadow: 0 8px 24px rgba(0,0,0,0.06);
   margin-top: 14px;
@@ -1294,7 +1294,7 @@ body:has(.court-modal-overlay) {
 .court-proposal-destination {
   font-size: 18px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--ink);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1305,7 +1305,7 @@ body:has(.court-modal-overlay) {
 .court-vote-chamber {
   background:
     radial-gradient(circle at 50% 18%, rgba(219, 234, 254, 0.95), transparent 36%),
-    linear-gradient(180deg, #eff6ff 0%, #ffffff 38%, #ffffff 100%);
+    linear-gradient(180deg, var(--paper-solid) 0%, var(--paper-solid) 38%, var(--paper-solid) 100%);
 }
 
 .court-vote-navbar {
@@ -1343,7 +1343,7 @@ body:has(.court-modal-overlay) {
 .court-voting-header h2 {
   font-size: 32px;
   font-weight: 700;
-  color: #8b1520;
+  color: var(--sangria-deep);
   margin: 0 0 3px;
   letter-spacing: -0.01em;
   line-height: 1.05;
@@ -1353,7 +1353,7 @@ body:has(.court-modal-overlay) {
 
 .court-voting-header p {
   font-size: 15px;
-  color: #7a5840;
+  color: var(--ink-soft);
   margin: 0;
   font-weight: 600;
   font-family: 'Caveat', cursive;
@@ -1367,7 +1367,7 @@ body:has(.court-modal-overlay) {
   border-radius: 26px;
   position: relative;
   overflow: hidden;
-  background: #dbeafe;
+  background: var(--paper-solid);
   border: 1px solid rgba(203, 213, 225, 0.9);
   box-shadow:
     0 18px 36px -22px rgba(15, 23, 42, 0.38),
@@ -1474,7 +1474,7 @@ body:has(.court-modal-overlay) {
   border-radius: 999px;
   background: rgba(239, 246, 255, 0.86);
   border: 1px solid rgba(191, 219, 254, 0.82);
-  color: #2563eb;
+  color: var(--blue-deep);
   font-size: 10px;
   font-weight: 800;
   white-space: nowrap;
@@ -1482,7 +1482,7 @@ body:has(.court-modal-overlay) {
 
 .court-vote-case-copy h3 {
   margin: 0;
-  color: #0f172a;
+  color: var(--ink);
   font-size: 15px;
   font-weight: 900;
   line-height: 1.12;
@@ -1494,7 +1494,7 @@ body:has(.court-modal-overlay) {
 
 .court-vote-case-copy p {
   margin: 2px 0 5px;
-  color: #475569;
+  color: var(--ink);
   font-size: 12px;
   font-weight: 700;
   line-height: 1.1;
@@ -1514,7 +1514,7 @@ body:has(.court-modal-overlay) {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.76);
   border: 1px solid rgba(203, 213, 225, 0.68);
-  color: #1d4ed8;
+  color: var(--blue-deep);
   font-size: 10px;
   font-weight: 800;
   white-space: nowrap;
@@ -1561,7 +1561,7 @@ body:has(.court-modal-overlay) {
   place-items: center;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.92);
-  color: #f97316;
+  color: var(--warning);
   font-size: 14px;
   font-weight: 900;
   opacity: 0;
@@ -1577,13 +1577,13 @@ body:has(.court-modal-overlay) {
 
 .court-june-expression.is-no {
   opacity: 1;
-  color: #ef4444;
+  color: var(--sangria);
   animation: court-june-expression-pop 0.52s cubic-bezier(0.2, 0.85, 0.2, 1) both;
 }
 
 .court-june-expression.is-either {
   opacity: 1;
-  color: #2563eb;
+  color: var(--blue-deep);
   animation: court-june-expression-pop 0.65s cubic-bezier(0.2, 0.85, 0.2, 1) both;
 }
 
@@ -1594,7 +1594,7 @@ body:has(.court-modal-overlay) {
   background: rgba(255, 255, 255, 0.86);
   border: 1px solid rgba(226, 232, 240, 0.86);
   box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
-  color: #475569;
+  color: var(--ink);
   font-size: 10.5px;
   padding: 2px 8px;
 }
@@ -1638,7 +1638,7 @@ body:has(.court-modal-overlay) {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
+  color: var(--paper-solid);
   transition: all 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
   flex-shrink: 0;
   user-select: none;
@@ -1647,13 +1647,13 @@ body:has(.court-modal-overlay) {
 
 /* Unselected state: raised 3D physical button in Green & Red */
 .court-vote-circle.go {
-  background: linear-gradient(180deg, #10b981 0%, #059669 100%);
-  box-shadow: 0 5px 0 #047857, 0 8px 16px -4px rgba(5, 150, 105, 0.35);
+  background: linear-gradient(180deg, var(--success) 0%, var(--success) 100%);
+  box-shadow: 0 5px 0 var(--success), 0 8px 16px -4px rgba(5, 150, 105, 0.35);
 }
 
 .court-vote-circle.not-now {
-  background: linear-gradient(180deg, #f87171 0%, #ef4444 100%);
-  box-shadow: 0 5px 0 #b91c1c, 0 8px 16px -4px rgba(239, 68, 68, 0.35);
+  background: linear-gradient(180deg, var(--sangria) 0%, var(--sangria) 100%);
+  box-shadow: 0 5px 0 var(--sangria), 0 8px 16px -4px rgba(239, 68, 68, 0.35);
 }
 
 .court-vote-btn-choice:hover:not(.selected):not(.dimmed) {
@@ -1671,17 +1671,17 @@ body:has(.court-modal-overlay) {
 }
 
 .court-vote-btn-choice.selected .court-vote-circle {
-  outline: none !important;
+  outline: none;
 }
 
 .court-vote-btn-choice.selected .court-vote-circle.go {
-  background: linear-gradient(180deg, #059669 0%, #047857 100%);
-  box-shadow: 0 1px 0 #047857, inset 0 3px 6px rgba(0, 0, 0, 0.38) !important;
+  background: linear-gradient(180deg, var(--success) 0%, var(--success) 100%);
+  box-shadow: 0 1px 0 var(--success), inset 0 3px 6px rgba(0, 0, 0, 0.38);
 }
 
 .court-vote-btn-choice.selected .court-vote-circle.not-now {
-  background: linear-gradient(180deg, #dc2626 0%, #b91c1c 100%);
-  box-shadow: 0 1px 0 #b91c1c, inset 0 3px 6px rgba(0, 0, 0, 0.38) !important;
+  background: linear-gradient(180deg, var(--sangria) 0%, var(--sangria) 100%);
+  box-shadow: 0 1px 0 var(--sangria), inset 0 3px 6px rgba(0, 0, 0, 0.38);
 }
 
 .court-vote-btn-choice span {
@@ -1693,19 +1693,19 @@ body:has(.court-modal-overlay) {
 }
 
 .court-vote-btn-choice .court-vote-circle.go + span {
-  color: #059669;
+  color: var(--success);
 }
 
 .court-vote-btn-choice .court-vote-circle.not-now + span {
-  color: #dc2626;
+  color: var(--sangria);
 }
 
 .court-vote-btn-choice.selected .court-vote-circle.go + span {
-  color: #047857;
+  color: var(--success);
 }
 
 .court-vote-btn-choice.selected .court-vote-circle.not-now + span {
-  color: #991b1b;
+  color: var(--sangria-deep);
 }
 
 /* 3D Physical Denim Blue Pill Submit Button */
@@ -1714,8 +1714,8 @@ body:has(.court-modal-overlay) {
   height: 50px;
   border-radius: 99px;
   border: none;
-  background: linear-gradient(180deg, #4a7ba8 0%, #366088 100%);
-  color: #ffffff;
+  background: linear-gradient(180deg, var(--blue-deep) 0%, var(--blue-ink) 100%);
+  color: var(--paper-solid);
   font-family: 'Caveat', cursive;
   font-size: 22px;
   font-weight: 700;
@@ -1724,7 +1724,7 @@ body:has(.court-modal-overlay) {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 5px 0 #244360, 0 8px 18px rgba(74, 123, 168, 0.35);
+  box-shadow: 0 5px 0 var(--blue-ink), 0 8px 18px rgba(74, 123, 168, 0.35);
   transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.15s ease;
   user-select: none;
   outline: none;
@@ -1732,17 +1732,17 @@ body:has(.court-modal-overlay) {
 
 .court-vote-submit-btn-3d:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 6px 0 #244360, 0 10px 22px rgba(74, 123, 168, 0.42);
+  box-shadow: 0 6px 0 var(--blue-ink), 0 10px 22px rgba(74, 123, 168, 0.42);
 }
 
 .court-vote-submit-btn-3d:active:not(:disabled) {
   transform: translateY(4px);
-  box-shadow: 0 1px 0 #244360, inset 0 2px 4px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 1px 0 var(--blue-ink), inset 0 2px 4px rgba(0, 0, 0, 0.35);
 }
 
 .court-vote-submit-btn-3d:disabled {
-  background: linear-gradient(180deg, #b8c8d8 0%, #9cb3c9 100%);
-  box-shadow: 0 3px 0 #7b94ad;
+  background: linear-gradient(180deg, var(--muted) 0%, var(--blue-deep) 100%);
+  box-shadow: 0 3px 0 var(--blue-deep);
   color: rgba(255, 255, 255, 0.85);
   cursor: not-allowed;
   opacity: 0.65;
@@ -1753,7 +1753,7 @@ body:has(.court-modal-overlay) {
   background: transparent;
   border: none;
   padding: 4px 10px;
-  color: #94a3b8;
+  color: var(--muted);
   font-size: 12.5px;
   font-weight: 600;
   text-decoration: underline;
@@ -1766,24 +1766,24 @@ body:has(.court-modal-overlay) {
 }
 
 .court-vote-either-text-btn:hover {
-  color: #64748b;
+  color: var(--blue-deep);
 }
 
 .court-vote-either-text-btn.selected {
-  color: #2563eb;
+  color: var(--blue-deep);
   font-weight: 750;
-  text-decoration-color: #2563eb;
+  text-decoration-color: var(--blue-deep);
   background: rgba(239, 246, 255, 0.85);
 }
 
 .court-reason-input {
   width: 100%;
-  border: 1.5px solid #cbd5e1;
+  border: 1.5px solid var(--muted);
   border-radius: 15px;
   padding: 12px 15px;
   font-size: 13.5px;
   font-weight: 650;
-  color: #0f172a;
+  color: var(--ink);
   background: rgba(255, 255, 255, 0.96);
   outline: none;
   margin-bottom: 0;
@@ -1794,8 +1794,8 @@ body:has(.court-modal-overlay) {
 }
 
 .court-reason-input:focus {
-  border-color: #1877f2;
-  background: #ffffff;
+  border-color: var(--blue-deep);
+  background: var(--paper-solid);
   box-shadow:
     0 0 0 4px rgba(24, 119, 242, 0.12),
     0 10px 22px -16px rgba(24, 119, 242, 0.55);
@@ -5302,7 +5302,7 @@ body:has(.court-modal-overlay) {
   width: 100%;
   position: relative;
   margin-top: 5px;
-  filter: 
+  filter:
     drop-shadow(0 6px 14px rgba(139, 13, 9, 0.32))
     drop-shadow(0 2px 4px rgba(50, 15, 8, 0.22));
   transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s ease;
@@ -5311,14 +5311,14 @@ body:has(.court-modal-overlay) {
 
 .court-torn-paper-btn-wrap:hover {
   transform: translateY(-2px) rotate(-0.4deg);
-  filter: 
+  filter:
     drop-shadow(0 9px 20px rgba(139, 13, 9, 0.42))
     drop-shadow(0 3px 7px rgba(50, 15, 8, 0.26));
 }
 
 .court-torn-paper-btn-wrap:active {
   transform: translateY(1.5px) scale(0.985);
-  filter: 
+  filter:
     drop-shadow(0 3px 8px rgba(139, 13, 9, 0.24));
 }
 
