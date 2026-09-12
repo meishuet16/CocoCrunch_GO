@@ -115,6 +115,7 @@ export type PersistedState = {
   groupMemberBudgets?: Record<string, number>;
   groupMemberVibes?: Record<string, string>;
   groupMemberDestinations?: Record<string, string>;
+  itineraryOrder?: string[];
   flightBooking?: FlightBookingState;
   flightBookingDraft?: string;
   accommodationBooking?: AccommodationBookingState;

@@ -116,6 +116,7 @@ describe('TripPlanOverview', () => {
         tripIntent={tripIntent}
         onOpenWhy={() => undefined}
         onOpenHealth={() => undefined}
+        onReorder={() => undefined}
       />,
     );
 
@@ -127,5 +128,6 @@ describe('TripPlanOverview', () => {
     expect(html).toContain('Why this?');
     expect(html).toContain('constraint: Tsukiji food walk');
     expect(html).toContain('candidate: Fits a slower food day');
+    expect(html).toContain('drag to reschedule');
   });
 });

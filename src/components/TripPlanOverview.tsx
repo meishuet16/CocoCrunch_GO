@@ -9,15 +9,40 @@ type TripPlanOverviewProps = {
   tripIntent: TripIntent;
   onOpenWhy: (itemId: string) => void;
   onOpenHealth: () => void;
+  onReorder?: (itemIds: string[]) => void;
 };
 
-export function TripPlanOverview({ plan, planHealth, tripIntent, onOpenWhy, onOpenHealth }: TripPlanOverviewProps) {
+function SortableItineraryRow({ item, label, flexible, onOpenWhy }: { item: TripPlan['items'][number]; label: string; flexible: string; onOpenWhy: (itemId: string) => void }) {
+  const sortable = useSortable({ id: item.id, disabled: item.protected });
+  const style = { transform: CSS.Transform.toString(sortable.transform), transition: sortable.transition };
+  return <button ref={sortable.setNodeRef} style={style} className={`itinerary-row ${item.kind}`} key={item.id} onClick={() => onOpenWhy(item.id)} {...sortable.attributes} {...sortable.listeners} aria-label={item.protected ? `${item.name}, protected Must-Go item` : `Drag ${item.name} to reschedule`}>
+    <time>{item.timeLabel}</time>
+    <span className="itinerary-row-content">
+      <small className="itinerary-row-label">{label}{item.protected ? ' · fixed' : ' · drag to reschedule'}</small>
+      <b>{item.name}</b>
+      <small>{item.kind === 'anchor' ? 'Must-Go · protected · cannot be AI-replaced' : `${item.kind} · ${flexible || 'flexible time'}`}</small>
+      <small><strong>Why this?</strong> <RecommendationEvidenceText evidence={item.evidence} /></small>
+    </span>
+    <em>{label}</em>
+  </button>;
+}
+
+export function TripPlanOverview({ plan, planHealth, tripIntent, onOpenWhy, onOpenHealth, onReorder = () => undefined }: TripPlanOverviewProps) {
   const itemLabels = {
     anchor: 'Must-Go anchor',
     floating: 'Floating time',
     buffer: 'Buffer / breathing room',
     open: 'Open time',
   } as const;
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
+  const handleDragEnd = ({ active, over }: DragEndEvent) => {
+    if (!over || active.id === over.id) return;
+    const oldIndex = plan.items.findIndex(item => item.id === active.id);
+    const newIndex = plan.items.findIndex(item => item.id === over.id);
+    if (oldIndex < 0 || newIndex < 0 || plan.items[oldIndex].protected) return;
+    onReorder(arrayMove(plan.items.map(item => item.id), oldIndex, newIndex));
+  };
 
   return (
     <section className="trip-plan-overview">
@@ -30,20 +55,12 @@ export function TripPlanOverview({ plan, planHealth, tripIntent, onOpenWhy, onOp
           <div><span>GENERATED PLAN</span><h3>{plan.destination} · reviewable timeline</h3></div>
           <div className="score-stamp">{planHealth.overall}</div>
         </div>
-        <div className="itinerary-timeline" aria-label="Trip timeline">
-          {plan.items.map(item => (
-            <button className={`itinerary-row ${item.kind}`} key={item.id} onClick={() => onOpenWhy(item.id)}>
-              <time>{item.timeLabel}</time>
-              <span className="itinerary-row-content">
-                <small className="itinerary-row-label">{itemLabels[item.kind]}</small>
-                <b>{item.name}</b>
-                <small>{item.kind === 'anchor' ? 'Must-Go · protected · cannot be AI-replaced' : `${item.kind} · ${tripIntent.flexible || 'flexible time'}`}</small>
-                <small><strong>Why this?</strong> <RecommendationEvidenceText evidence={item.evidence} /></small>
-              </span>
-              <em>{itemLabels[item.kind]}</em>
-            </button>
-          ))}
-        </div>
+        <p className="adapter-note">Drag flexible itinerary items to reschedule. Plan Health and feasibility use the reordered timeline.</p>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={plan.items.map(item => item.id)} strategy={verticalListSortingStrategy}>
+            <div className="itinerary-timeline" aria-label="Trip timeline">{plan.items.map(item => <SortableItineraryRow key={item.id} item={item} label={itemLabels[item.kind]} flexible={tripIntent.flexible} onOpenWhy={onOpenWhy} />)}</div>
+          </SortableContext>
+        </DndContext>
       </section>
       <section className="plan-health plan-health--overview">
         <button className="section-rule" onClick={onOpenHealth}>
@@ -62,3 +79,6 @@ export function TripPlanOverview({ plan, planHealth, tripIntent, onOpenWhy, onOp
     </section>
   );
 }
+import { DndContext, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';

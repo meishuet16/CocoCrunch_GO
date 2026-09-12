@@ -47,6 +47,7 @@ import { tripIntentIsReviewable, type TripIntent } from './domain/trip-intent';
 import { checkFeasibility, comparisonOptions, importPhotoMetadata } from './domain/adapters';
 import { deriveGroupDNA, scopeGroupDNAForMode, type MemberPreferenceProfile } from './domain/group-dna';
 import { candidateFromDiscovery, generateTripPlan } from './domain/itinerary';
+import type { TripPlan } from './domain/itinerary';
 import { deriveJourneyState, transitionReadyConfirmation } from './domain/journey-state';
 import { calculatePlanHealth } from './domain/plan-health';
 import { applyRepairToPlan, buildMinimumLossRepair, promoteCourtLosers, type BackupCandidate, type RepairResult } from './domain/backup-repair';
@@ -106,6 +107,19 @@ type TripSetupStep = 1 | 2 | 3 | 4 | 5;
 type TripSetupLocationMethod = 'manual' | 'recommendation' | 'link';
 type TripReference = { destination: string; tripVibe: string; budget: number; title: string };
 type GroupSetupStep = 1 | 2 | 3 | 4 | 5 | 6;
+
+function reorderedPlan(plan: TripPlan, order: string[]): TripPlan {
+  const byId = new globalThis.Map(plan.items.map(item => [item.id, item]));
+  const items = [...order.map(id => byId.get(id)).filter((item): item is TripPlan['items'][number] => Boolean(item)), ...plan.items.filter(item => !order.includes(item.id))];
+  let cursor = items[0]?.startMinutes ?? 0;
+  const scheduled = items.map((item, index) => {
+    const duration = item.endMinutes - item.startMinutes;
+    const startMinutes = index === 0 ? cursor : cursor + item.transferMinutes;
+    cursor = startMinutes + duration;
+    return { ...item, startMinutes, endMinutes: cursor, timeLabel: formatPlanTime(startMinutes) };
+  });
+  return { ...plan, items: scheduled, totalEstimatedCost: scheduled.reduce((total, item) => total + item.estimatedCost, 0), walkingKm: Number(scheduled.reduce((total, item) => total + item.walkingKm, 0).toFixed(1)), transferMinutes: scheduled.reduce((total, item) => total + item.transferMinutes, 0) };
+}
 
 export function deriveTripLifecycleStatus({ tripCreated, readyConfirmed, dates, phase, now = new Date() }: { tripCreated: boolean; readyConfirmed: boolean; dates: TripIntent['dates']; phase: TripPhase; now?: Date }): TripLifecycleStatus {
   if (phase === 'completed') return 'completed';
@@ -441,6 +455,7 @@ export default function AppRescued() {
   const [tingoStep, setTingoStep] = useState(-1);
   const [tingoRevealed, setTingoRevealed] = useState(() => tingoCompletion(stored.tingoAnswers ?? []) === 100);
   const [basePackingPreferences, setBasePackingPreferences] = useState<string[]>(stored.basePackingPreferences ?? ['comfortable walking shoes', 'portable charger', 'light rain layer']);
+  const [itineraryOrder, setItineraryOrder] = useState<string[]>(stored.itineraryOrder ?? []);
   const [tripCreated, setTripCreated] = useState(stored.tripCreated ?? true);
   const [tripSetupStep, setTripSetupStep] = useState<TripSetupStep>(1);
   const [tripSetupLocationMethod, setTripSetupLocationMethod] = useState<TripSetupLocationMethod>('manual');
@@ -574,9 +589,10 @@ export default function AppRescued() {
   const suggestedFloatingLabel = formatPlanTime(suggestedFloatingStart);
   const failedPlanItem = baseTripPlan.items.find(item => item.kind === 'floating');
   const backupPool = backupCandidates;
+  const orderedTripPlan = useMemo(() => reorderedPlan(baseTripPlan, itineraryOrder), [baseTripPlan, itineraryOrder]);
   const repairSourcePlan = useMemo(() => delay && !replanApplied && failedPlanItem
-    ? { ...baseTripPlan, unresolvedRisks: [...baseTripPlan.unresolvedRisks, `${failedPlanItem.name} failed due to weather.`] }
-    : baseTripPlan, [baseTripPlan, delay, failedPlanItem, replanApplied]);
+    ? { ...orderedTripPlan, unresolvedRisks: [...orderedTripPlan.unresolvedRisks, `${failedPlanItem.name} failed due to weather.`] }
+    : orderedTripPlan, [orderedTripPlan, delay, failedPlanItem, replanApplied]);
   const repairPreview = useMemo(() => failedPlanItem ? buildMinimumLossRepair({ plan: repairSourcePlan, failedItemId: failedPlanItem.id, backups: backupPool, budgetRemaining: remaining, mode }) : null, [backupPool, failedPlanItem, mode, remaining, repairSourcePlan]);
   const visibleTripPlan = useMemo(() => appliedRepair ? applyRepairToPlan(repairSourcePlan, appliedRepair, true).plan : repairSourcePlan, [appliedRepair, repairSourcePlan]);
   const optionLabel = (id: string | null) => courtOptions.find(option => option.id === id)?.label ?? id ?? '';
@@ -657,9 +673,9 @@ export default function AppRescued() {
       recommendations: recommendations.map(({ name, saved, added }) => ({ name, saved, added })),
       tripIntent,
       worthIt, profileLearned, learningProposal: learningProposal?.status === 'confirmed' ? undefined : learningProposal ?? undefined, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, onboardingCountryCode, onboardingBirthday, basePackingPreferences, tripCreated, tripPhase,
-      members, memberPreferenceProfiles, backupCandidates, appliedRepair: appliedRepair ?? undefined, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, revivedWishIds: ghostWishes.filter(wish => wish.status === 'revived').map(wish => wish.id), destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, flightBooking, flightBookingDraft, accommodationBooking, accommodationBookingDraft,
+      members, memberPreferenceProfiles, backupCandidates, appliedRepair: appliedRepair ?? undefined, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, revivedWishIds: ghostWishes.filter(wish => wish.status === 'revived').map(wish => wish.id), destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, itineraryOrder, flightBooking, flightBookingDraft, accommodationBooking, accommodationBookingDraft,
     });
-  }, [mode, destination, readyConfirmed, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals, delay, mood, arrivalChecked, privacy, continuousLocation, recommendations, tripIntent, worthIt, profileLearned, learningProposal, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, onboardingCountryCode, onboardingBirthday, basePackingPreferences, tripCreated, tripPhase, members, memberPreferenceProfiles, backupCandidates, appliedRepair, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, ghostWishes, destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, flightBooking, flightBookingDraft, accommodationBooking, accommodationBookingDraft]);
+  }, [mode, destination, readyConfirmed, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals, delay, mood, arrivalChecked, privacy, continuousLocation, recommendations, tripIntent, worthIt, profileLearned, learningProposal, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, onboardingCountryCode, onboardingBirthday, basePackingPreferences, tripCreated, tripPhase, members, memberPreferenceProfiles, backupCandidates, appliedRepair, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, ghostWishes, destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, itineraryOrder, flightBooking, flightBookingDraft, accommodationBooking, accommodationBookingDraft]);
 
   function setProfileField(field: keyof TravelProfile, value: string) {
     setProfile(current => ({ ...current, [field]: value }));
@@ -1174,6 +1190,7 @@ export default function AppRescued() {
     setGroupBudgetTotal(reference.budget);
     setTripCreated(false);
     setTripPhase('planning');
+    setItineraryOrder([]);
     setTripSetupModeChoice(true);
     setTab('trips');
     setTripWorkspaceOpen(true);
@@ -1285,7 +1302,7 @@ export default function AppRescued() {
       {mode === 'group' && <section className="conflict-ticket"><span>{courtConfirmed ? 'COURT DECISION RECORDED' : 'UNRESOLVED CONFLICT'}</span><b>{activeConflict}</b><small>{first?.label ?? 'Option A'} {firstCount} · {second?.label ?? 'Option B'} {secondCount} · {tally.tied ? 'tie · Gacha is eligible' : `${optionLabel(tally.majority)} has majority`}</small><button className="ritual-trigger" onClick={() => openCourt()}>{courtConfirmed ? 'Review Group Court' : 'Open Group Court'} <Gavel size={18} /></button></section>}
       <div className="planning-plan">
         <div className="planning-itinerary-primary">
-          <TripPlanOverview plan={visibleTripPlan} planHealth={planHealth} tripIntent={tripIntent} onOpenWhy={setPlanWhyItemId} onOpenHealth={() => setDrawer('feasibility')} />
+          <TripPlanOverview plan={visibleTripPlan} planHealth={planHealth} tripIntent={tripIntent} onOpenWhy={setPlanWhyItemId} onOpenHealth={() => setDrawer('feasibility')} onReorder={setItineraryOrder} />
           {selectedWhyItem && <section className="why-note"><Sparkles size={19} /><div><b>Why this? · {selectedWhyItem.name}</b><p><RecommendationEvidenceText evidence={selectedWhyItem.evidence} /></p></div><button className="secondary" onClick={() => setPlanWhyItemId(null)}>Close</button></section>}
         </div>
         <div className="spatial-secondary-panel">
