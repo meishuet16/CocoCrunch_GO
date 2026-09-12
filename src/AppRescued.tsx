@@ -7,6 +7,7 @@ import {
 import { emitExperience } from './experience';
 import { isPastPlannedCheckIn } from './during-deviation';
 import { shouldPromptToEndTrip } from './trip-end';
+import { buildPublicCommunityTrip } from './community-sharing';
 import { playSound } from './sound';
 import { GlobalNav, type GlobalTab } from './components/GlobalNav';
 import { PostmarkStamp } from './components/PostmarkStamp';
@@ -1276,6 +1277,7 @@ export default function AppRescued() {
   }
 
   function renderExplore() {
+    const ownPublicTrip = buildPublicCommunityTrip({ published, id: 999, title: `${destination} · my CocoCrunch trip`, author: onboardingName || 'You', destination, artifacts: photoMemoryArtifacts });
     return <ExploreScreen
       activeTripDestination={destination}
       mode={mode}
@@ -1284,7 +1286,7 @@ export default function AppRescued() {
       placeRecommendations={recommendations}
       onSavePlace={(id) => toggleRecommendation(id, 'save')}
       onAddPlace={(id) => toggleRecommendation(id, 'add')}
-      communityTrips={communityTrips}
+      communityTrips={ownPublicTrip ? [...communityTrips, ownPublicTrip] : communityTrips}
       onToggleSaveCommunityTrip={(id) => setCommunityTrips(items => items.map(item => item.id === id ? { ...item, saved: !item.saved } : item))}
       onCopyCommunityTrip={copyExploreTrip}
       savedIdeas={ritualRecords.savedIdeas}
