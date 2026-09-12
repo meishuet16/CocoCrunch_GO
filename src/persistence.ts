@@ -55,6 +55,11 @@ export type PhotoMemoryArtifact = {
   locationLabel: string;
   audience: 'personal' | 'group';
   isPublic?: boolean;
+  capturedAt?: string;
+  latitude?: number;
+  longitude?: number;
+  archiveDay?: number;
+  archivePlace?: string;
 };
 
 export type EmergencyContact = { id: string; name: string; contact: string; permission: 'location' | 'message' | 'both' };
