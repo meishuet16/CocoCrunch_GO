@@ -68,7 +68,6 @@ import { TravelCourtModal } from './components/court/TravelCourtModal';
 import { type CourtStep } from './components/court/TravelCourtCaseFlow';
 import { WeatherGlance } from './components/WeatherGlance';
 import { GlobalCocoCompanion } from './components/GlobalCocoCompanion';
-import { HomeTripGlance } from './components/HomeTripGlance';
 import { CompletedKeepLauncher, type CompletedPanel } from './components/CompletedKeepLauncher';
 import { SafetyToolkit } from './components/SafetyToolkit';
 import { EmergencyContactsManager } from './components/EmergencyContactsManager';
@@ -1140,12 +1139,26 @@ export default function AppRescued() {
         : `${travellerCount} travellers aligned`
       : 'Solo trip';
 
-    return <div className="home-orientation">
-      <SectionTitle kicker="HOME · ACTIVE TRIP" title={`${destination} stays in view.`} copy="Follow the next meaningful action first, then inspect the rest of the trip as needed." />
-      <HomeTripGlance destination={destination} dates={tripIntent.dates} phase={workspacePhase} />
-      <TripJourneyStatus state={journeyState} destination={destination} onAction={handleJourneyAction} />
-      <JourneyProgress destination={destination} currentPhase={workspacePhase} nextActionLabel={journeyState.nextAction?.label} />
-      <section className="status-strip status-strip--home"><div><span>Trip status</span><b>{tripLifecycleStatus === 'active' ? 'Active · departure ahead' : 'Ongoing · travelling now'}</b></div><div><span>Plan Health</span><b>{planHealth.overall}/100</b></div><div><span>Budget Remaining</span><b>RM {remaining}</b></div><div><span>Group Status</span><b>{groupStatus}</b></div></section>
+    return <div className="home-orientation home-dashboard">
+      <button className="home-active-hero" onClick={openTrip} aria-label={`Open ${destination} trip details`}>
+        <div className="home-trip-hero-art" aria-hidden="true"><Map size={34} strokeWidth={1.5} /></div>
+        <div className="home-active-hero-copy"><span>Active trip</span><h2>{destination}</h2><small>{tripIntent.dates ? `${tripIntent.dates.start} – ${tripIntent.dates.end}` : 'Dates to be confirmed'}</small></div>
+        <ChevronRight className="home-active-hero-arrow" size={22} aria-hidden="true" />
+      </button>
+      <section className="home-current-trips" aria-label="Current trip">
+        <div className="home-section-heading"><h2>Current trip</h2><button onClick={openTrip}>View details <ChevronRight size={15} /></button></div>
+        <button className="home-current-trip-card" onClick={openTrip}>
+          <div><span>{workspacePhase === 'traveling' ? 'Travelling now' : 'Departure ahead'}</span><b>{destination}</b><small>Plan health {planHealth.overall}/100 · {groupStatus}</small></div><ChevronRight size={18} aria-hidden="true" />
+        </button>
+        <TripJourneyStatus state={journeyState} destination={destination} onAction={handleJourneyAction} />
+      </section>
+      <section className="home-shortcuts" aria-label="Trip shortcuts">
+        <button onClick={openTrip}><Calendar size={20} /><span>Plan</span></button>
+        <button onClick={openTrip}><Map size={20} /><span>Map</span></button>
+        <button onClick={() => setTab('explore')}><BookOpen size={20} /><span>Saved places</span></button>
+        <button onClick={openPacking}><Box size={20} /><span>Packing list</span></button>
+      </section>
+      <section className="home-tip-card paper-sheet" aria-label="Trip tip"><WeatherGlance destination={destination} compact /></section>
     </div>;
   }
 
@@ -2069,11 +2082,11 @@ export default function AppRescued() {
 
   return (
     <div className={`app-shell tab-${tab}`}>
-      <header className="topbar">
-        <button className="brand-lockup" onClick={() => { setTripWorkspaceOpen(false); setTab('home'); }} aria-label="Go to Home">
+      <header className={`topbar ${tab === 'home' ? 'topbar-home' : ''}`}>
+        {tab === 'home' ? <><div className="home-greeting"><span>Good to see you</span><b>{onboardingName || 'Traveller'}</b></div><button className="bell" aria-label="Notifications"><Bell size={19} /><i /></button></> : <button className="brand-lockup" onClick={() => { setTripWorkspaceOpen(false); setTab('home'); }} aria-label="Go to Home">
           <img className="brand-companion" src={cocoAsset('scene-home')} alt="Coco, your travel companion" />
           <span className="wordmark"><b>COCOCRUNCH</b><small>travel, with room to breathe</small></span>
-        </button>
+        </button>}
         {tab === 'me' && (
           <div className="topbar-actions">
             <button className="bell" aria-label="Notifications"><Bell size={19} /><i /></button>

@@ -78,8 +78,9 @@ describe('AppRescued journey status integration', () => {
 
     const html = renderToStaticMarkup(<AppRescued />);
 
-    expect(html).toContain('HOME · ACTIVE TRIP');
-    expect(html).toContain('Active · departure ahead');
+    expect(html).toContain('Active trip');
+    expect(html).toContain('Current trip');
+    expect(html).toContain('Departure ahead');
   });
 
   it('derives active and ongoing status from confirmation and departure date', () => {
@@ -89,7 +90,7 @@ describe('AppRescued journey status integration', () => {
     expect(deriveTripLifecycleStatus({ ...base, readyConfirmed: false, dates: { start: '2099-10-12', end: '2099-10-21' } })).toBe('planning');
   });
 
-  it('uses canonical Home Coco in the accessible Home brand lockup', () => {
+  it('uses the Home greeting and canonical Coco companion on Home', () => {
     vi.stubGlobal('localStorage', {
       getItem: (key: string) => key === 'cococrunch:v1' ? JSON.stringify({ version: 1, onboardingComplete: true }) : null,
       setItem: () => undefined,
@@ -98,10 +99,11 @@ describe('AppRescued journey status integration', () => {
 
     const html = renderToStaticMarkup(<AppRescued />);
 
-    expect(html).toContain('aria-label="Go to Home"');
-    expect(html).toContain(`class="brand-companion"`);
+    expect(html).toContain('Good to see you');
+    expect(html).toContain('aria-label="Notifications"');
+    expect(html).toContain('aria-label="Open Coco menu"');
     expect(html).toContain(`src="${cocoAsset('scene-home')}"`);
-    expect(html).toContain('alt="Coco, your travel companion"');
+    expect(html).toContain('data-context="home"');
   });
 
   it('renders Community Trip Explore screen when on explore tab without changing active trip', () => {
