@@ -1089,6 +1089,32 @@
   background: var(--sangria);
 }
 
+.me-logout-section {
+  padding: 4px 0 24px;
+  text-align: center;
+}
+
+.me-logout-button {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--muted);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  gap: 8px;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 18px;
+}
+
+.me-logout-button:hover,
+.me-logout-button:focus-visible {
+  border-color: var(--sangria);
+  color: var(--sangria);
+}
+
 /* Responsive adjustments for narrow screens */
 @media (max-width: 380px) {
   .tab-me .me-tingo-card.redesign-card {

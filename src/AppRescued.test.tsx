@@ -57,7 +57,8 @@ describe('AppRescued journey status integration', () => {
 
     const html = renderToStaticMarkup(<AppRescued />);
 
-    expect(html).toContain('WELCOME');
+    expect(html).toContain('Welcome');
+    expect(html).toContain('CocoCrunch');
     expect(html).toContain('Login');
     expect(html).toContain('Sign up');
     expect(html).not.toContain('HOME · ACTIVE TRIP');
@@ -104,6 +105,19 @@ describe('AppRescued journey status integration', () => {
     expect(html).toContain('aria-label="Open Coco menu"');
     expect(html).toContain(`src="${cocoAsset('scene-home')}"`);
     expect(html).toContain('data-context="home"');
+  });
+
+  it('renders Logout at the end of the Me screen', () => {
+    vi.stubGlobal('localStorage', {
+      getItem: (key: string) => key === 'cococrunch:v1' ? JSON.stringify({ version: 1, onboardingComplete: true, tab: 'me' }) : null,
+      setItem: () => undefined,
+      removeItem: () => undefined,
+    });
+
+    const html = renderToStaticMarkup(<AppRescued />);
+
+    expect(html).toContain('aria-label="Account actions"');
+    expect(html).toContain('Log out');
   });
 
   it('renders Community Trip Explore screen when on explore tab without changing active trip', () => {

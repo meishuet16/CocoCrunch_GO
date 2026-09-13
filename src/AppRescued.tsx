@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Bell, BookOpen, Box, Calendar, Check, ChevronRight, CircleDollarSign, CloudRain,
-  FileText, Gavel, Heart, Image, Link2, Map, MapPin, PackageCheck, Plane,
+  FileText, Gavel, Heart, Image, Link2, LogOut, Map, MapPin, PackageCheck, Plane,
   ReceiptText, RotateCcw, Send, Sparkles, Users, X
 } from 'lucide-react';
 import { emitExperience } from './experience';
@@ -37,7 +37,7 @@ import {
 } from './domain/preferences';
 import { buildLearningProposal, confirmLearningProposal, type LearningProposal } from './domain/learning';
 import { normalizeBudgetActuals, paceEvidenceSummary, rateDecision, updateBudgetActual } from './domain/retrospective';
-import { derivePersistedTripState, loadPersisted, resetTripScopedSharing, savePersisted, type CompletedPaceEvidence, type ConfirmedLearningRecord, type CourtOptionState, type DecisionRecord, type FlightBookingState, type AccommodationBookingState, type GroupSplitPlan, type PhotoMemoryArtifact, type EmergencyContact } from './persistence';
+import { clearPersisted, derivePersistedTripState, loadPersisted, resetTripScopedSharing, savePersisted, type CompletedPaceEvidence, type ConfirmedLearningRecord, type CourtOptionState, type DecisionRecord, type FlightBookingState, type AccommodationBookingState, type GroupSplitPlan, type PhotoMemoryArtifact, type EmergencyContact } from './persistence';
 import { RecommendationEvidenceText } from './components/RecommendationEvidenceText';
 import { EverydayGachaMachine } from './components/EverydayGachaMachine';
 import { LuckyDrawReveal } from './components/LuckyDrawReveal';
@@ -1024,6 +1024,11 @@ export default function AppRescued() {
     setTingoRevealed(true);
   }
 
+  function logOut() {
+    clearPersisted();
+    window.location.reload();
+  }
+
   function confirmAccommodationBooking(booking: AccommodationBookingState) {
     setAccommodationBooking(booking);
     setReminders(current => current.map(reminder => reminder.id === 'hotel-cancel' ? accommodationCancellationReminder(booking.cancellationDeadline) : reminder));
@@ -1780,6 +1785,9 @@ export default function AppRescued() {
       <EmergencyContactsManager contacts={emergencyContacts} frequency={emergencyCheckInFrequency} onChange={contacts => { setEmergencyContacts(contacts); if (selectedEmergencyContactId && !contacts.some(contact => contact.id === selectedEmergencyContactId)) setSelectedEmergencyContactId(''); }} onFrequencyChange={setEmergencyCheckInFrequency} />
       {learningProposal?.status === 'proposed' && <section className="learning-handoff paper-sheet"><div><span>TRIP LEARNING · REVIEW BEFORE APPLY</span><h3>{destination} has a proposal for your long-term Tingo.</h3><p>These changes came from this trip’s actual outcome and will not apply until you confirm them.</p>{learningProposal.changes.map(change => <small key={change.questionId}>{change.questionId}: {change.beforeOptionId ?? 'none'} → {change.afterOptionId} · {change.reason}</small>)}</div><div className="learning-handoff-actions"><button className="secondary" onClick={() => setTab('memories')}>Review in Memories</button><button className="primary" onClick={confirmLearning}>Confirm this learning</button><button className="secondary" onClick={dismissLearning}>Dismiss</button></div></section>}
       {confirmedLearningHistory.length > 0 && <section className="learning-history paper-sheet"><span>CONFIRMED TINGO LEARNING</span><h3>What you chose to carry forward</h3>{confirmedLearningHistory.slice(0, 3).map(record => <div key={record.id}><b>{record.sourceTripReview === 'yes' ? 'Worth it' : record.sourceTripReview === 'mixed' ? 'Mixed' : 'Not really'} · {new Date(record.confirmedAt).toLocaleDateString()}</b>{record.changes.map(change => <small key={change.questionId}>{change.questionId}: {change.beforeOptionId ?? 'none'} → {change.afterOptionId}</small>)}</div>)}</section>}
+      <section className="me-logout-section" aria-label="Account actions">
+        <button className="me-logout-button" onClick={logOut}><LogOut size={17} /> Log out</button>
+      </section>
     </div>;
   }
 
@@ -1790,15 +1798,15 @@ export default function AppRescued() {
     const currentQuestion = tingoQuestions[Math.max(0, Math.min(tingoStep, tingoQuestions.length - 1))];
     const barWidth = tingoStep < 0 ? 12 : complete ? 100 : Math.round(((tingoStep + 1) / tingoQuestions.length) * 100);
     const statRows: { key: keyof TingoDimensions; label: string; icon: string; color: string }[] = [
-      { key: 'pace', label: 'Pace', icon: '🏝️', color: '#f26c7a' },
-      { key: 'experience', label: 'Experience', icon: '🌎', color: '#156ed0' },
-      { key: 'budget', label: 'Budget', icon: '💳', color: '#f6a83e' },
-      { key: 'comfort', label: 'Comfort', icon: '🏨', color: '#18aee4' },
-      { key: 'food', label: 'Food', icon: '🍴', color: '#0b65c8' },
-      { key: 'adventure', label: 'Adventure', icon: '⛰️', color: '#ff8191' },
-      { key: 'planning', label: 'Planning', icon: '🗂️', color: '#ffa83e' },
-      { key: 'flexibility', label: 'Flexibility', icon: '🔁', color: '#218d7a' },
-      { key: 'social', label: 'Social', icon: '👥', color: '#17aa78' },
+      { key: 'pace', label: 'Pace', icon: '🏝️', color: 'var(--sangria)' },
+      { key: 'experience', label: 'Experience', icon: '🌎', color: 'var(--blue)' },
+      { key: 'budget', label: 'Budget', icon: '💳', color: 'var(--warning)' },
+      { key: 'comfort', label: 'Comfort', icon: '🏨', color: 'var(--blue)' },
+      { key: 'food', label: 'Food', icon: '🍴', color: 'var(--sangria-deep)' },
+      { key: 'adventure', label: 'Adventure', icon: '⛰️', color: 'var(--sangria-soft)' },
+      { key: 'planning', label: 'Planning', icon: '🗂️', color: 'var(--warning)' },
+      { key: 'flexibility', label: 'Flexibility', icon: '🔁', color: 'var(--success)' },
+      { key: 'social', label: 'Social', icon: '👥', color: 'var(--success)' },
     ];
     const scoreValue = (key: keyof TingoDimensions) => Math.max(8, Math.min(98, Math.round(58 + tingoDimensions[key] * 7)));
 
@@ -1812,58 +1820,38 @@ export default function AppRescued() {
           </div>
 
           <div className="tingo-how-header">
-            <h2>How it works?</h2>
-            <p>4 quick rules to uncover your true travel persona ✨</p>
+            <h2>Find your travel rhythm ✦</h2>
+            <p>12 quick choices. One Tingo Card that feels like you ✨</p>
           </div>
 
           <div className="tingo-how-list">
             <article className="how-card how-card-1">
               <span className="how-step-num num-maroon">01</span>
               <div className="how-card-body">
-                <div className="how-card-title-row">
-                  <b>Two options, every question</b>
-                  <span className="how-feature-tag tag-maroon">Pick 1</span>
-                </div>
-                <small>Pick what feels like you. No right or wrong answers.</small>
+                <b>Pick what feels right</b>
+                <small>Choose between two travel moments.</small>
               </div>
             </article>
 
             <article className="how-card how-card-2">
               <span className="how-step-num num-travel">02</span>
               <div className="how-card-body">
-                <div className="how-card-title-row">
-                  <b>Real travel scenarios</b>
-                  <span className="how-feature-tag tag-travel">Real Life</span>
-                </div>
-                <small>Based on actual trip dilemmas and genuine moments.</small>
+                <b>Follow your instinct</b>
+                <small>There are no perfect answers.</small>
               </div>
             </article>
 
             <article className="how-card how-card-3">
               <span className="how-step-num num-heart">03</span>
               <div className="how-card-body">
-                <div className="how-card-title-row">
-                  <b>No right or wrong</b>
-                  <span className="how-feature-tag tag-heart">100% You</span>
-                </div>
-                <small>Just your spontaneous personal vibes and gut instincts.</small>
-              </div>
-            </article>
-
-            <article className="how-card how-card-4">
-              <span className="how-step-num num-sparkles">04</span>
-              <div className="how-card-body">
-                <div className="how-card-title-row">
-                  <b>A better trip for you</b>
-                  <span className="how-feature-tag tag-sparkles">AI Magic</span>
-                </div>
-                <small>The more you choose, the smarter we personalize your plan.</small>
+                <b>See your Tingo Card</b>
+                <small>Discover your pace and plan style.</small>
               </div>
             </article>
           </div>
 
           <button className="tingo-flow-primary tingo-how-maroon-btn" onClick={() => setTingoStep(0)}>
-            <span>Got it, let&apos;s go!</span>
+            <span>Start Tingo</span>
             <ChevronRight size={18} />
           </button>
         </div>
