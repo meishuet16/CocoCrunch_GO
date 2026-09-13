@@ -1465,3 +1465,15 @@
 .tab-me .me-logout-button {
   font: 700 12px/1 Inter, system-ui, sans-serif !important;
 }
+
+/* The account popover extends below the curved Me header, so the header must
+   not clip it or sit below the page content. */
+.tab-me .topbar {
+  overflow: visible !important;
+  position: relative;
+  z-index: 20;
+}
+
+.tab-me .profile-menu > div {
+  z-index: 21;
+}
