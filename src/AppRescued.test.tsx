@@ -167,4 +167,65 @@ describe('AppRescued journey status integration', () => {
     // Active trip preserved
     expect(html).toContain('Browsing <b>Tokyo</b>');
   });
+
+  it('renders During Live Routing screen with emergency contact above map, realistic map, and next stop card', () => {
+    vi.stubGlobal('localStorage', {
+      getItem: (key: string) => key === 'cococrunch:v1' ? JSON.stringify({
+        version: 1,
+        onboardingComplete: true,
+        mode: 'group',
+        tab: 'trips',
+        tripWorkspaceOpen: true,
+        tripCreated: true,
+        readyConfirmed: true,
+        tripPhase: 'ongoing',
+        ongoingView: 'routing',
+        tingoAnswers: completeTingoAnswers,
+        tripIntent: {
+          destination: 'Tokyo',
+          dates: { start: '2020-01-01', end: '2099-01-01' },
+          mode: 'group',
+          tripVibe: 'Slow food and side streets',
+          mustGo: 'Tsukiji food walk',
+          dealBreaker: 'No red-eye return',
+          preference: 'One cafe break each day',
+          flexible: 'Leave one evening open',
+          budget: 2400,
+        },
+      }) : null,
+      setItem: () => undefined,
+      removeItem: () => undefined,
+    });
+
+    const html = renderToStaticMarkup(<AppRescued />);
+
+    // Emergency contact is rendered above the map
+    expect(html).toContain('routing-top-emergency');
+    expect(html).toContain('🚨 Emergency Help:');
+    expect(html).toContain('Check-in');
+
+    // Realistic Route Map
+    expect(html).toContain('realistic-map-container');
+    expect(html).toContain('LIVE ROUTE (YOU)');
+
+    // Live Next Stop card with meta
+    expect(html).toContain('LIVE NEXT STOP');
+    expect(html).toContain('Hours');
+    expect(html).toContain('ETA');
+    expect(html).toContain('Transit Mode');
+    expect(html).toContain('Estimated Cost');
+
+    // Deviation simulation
+    expect(html).toContain('Simulate Delay');
+
+    // Daily wrap-up
+    expect(html).toContain('DAILY WRAP-UP');
+    expect(html).toContain('How did today feel?');
+    expect(html).toContain('⚡ Great &amp; Energized');
+    expect(html).toContain('🥱 A bit tired');
+
+    // Floating Action Dock
+    expect(html).toContain('floating-dock-trigger');
+    expect(html).toContain('Quick Tools');
+  });
 });

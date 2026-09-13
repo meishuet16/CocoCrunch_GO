@@ -44,7 +44,8 @@ export type GroupSplitPlan = {
   destination: string;
   meetingPoint: string;
   meetingTime: string;
-  suggestionSource: 'prototype-midpoint' | 'manual';
+  suggestionSource: 'ai-midpoint' | 'prototype-midpoint' | 'manual';
+  aiReasoning?: string;
 };
 
 export type PhotoMemoryArtifact = {

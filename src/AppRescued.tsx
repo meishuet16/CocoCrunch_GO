@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  ArrowLeft, Bell, BookOpen, Box, Calendar, Check, ChevronRight, CircleDollarSign, CloudRain,
-  FileText, Gavel, Heart, Image, Link2, LogOut, Map, MapPin, PackageCheck, Plane,
+  ArrowLeft, Bell, BookOpen, Box, Calendar, Camera, Check, ChevronRight, CircleDollarSign, Clock, CloudRain,
+  DollarSign, FileText, Footprints, Gavel, Heart, Image, Info, Link2, LogOut, Map, MapPin, Navigation, PackageCheck, Plane,
   RotateCcw, Send, Sparkles, Users, X
 } from 'lucide-react';
 import { emitExperience } from './experience';
@@ -71,6 +71,7 @@ import { GlobalCocoCompanion } from './components/GlobalCocoCompanion';
 import { CompletedKeepLauncher, type CompletedPanel } from './components/CompletedKeepLauncher';
 import { SafetyToolkit } from './components/SafetyToolkit';
 import { EmergencyContactsManager } from './components/EmergencyContactsManager';
+import { RealisticRouteMap } from './components/RealisticRouteMap';
 import { PhotoArchiveTimeline } from './components/PhotoArchiveTimeline';
 import { CocoAssistantPrompt } from './components/CocoAssistantPrompt';
 import { CommunityPublishPanel } from './components/CommunityPublishPanel';
@@ -81,6 +82,7 @@ import { AccommodationDrawer } from './components/AccommodationDrawer';
 import { GroupChannel, type GroupChannelMessage } from './components/GroupChannel';
 import { GroupSplit } from './components/GroupSplit';
 import { BudgetDrawer } from './components/BudgetDrawer';
+import { MemoryScreen } from './components/MemoryScreen';
 import { DemoModePanel } from './components/DemoModePanel';
 import foodieHunter from './assets/coco/personas/foodie_hunter.png';
 import masterPlanner from './assets/coco/personas/master_planner.png';
@@ -105,7 +107,7 @@ type TripMode = 'group' | 'solo';
 type Mood = 'great' | 'okay' | 'tired' | null;
 type Privacy = 'status' | 'area' | 'exact';
 type CourtView = 'upload' | 'discussion' | 'voting';
-type Drawer = 'group' | 'backup' | 'budget' | 'family' | 'location' | 'community' | 'import' | 'discover' | 'tingo' | 'tripSetup' | 'compare' | 'feasibility' | 'reminders' | 'commitments' | 'safety' | 'assistant' | 'gacha' | 'lucky' | 'memoryCard' | 'all-personas' | 'flight' | 'accommodation' | 'tripEnd' | 'demo' | null;
+type Drawer = 'group' | 'groupSplit' | 'backup' | 'budget' | 'family' | 'location' | 'community' | 'import' | 'discover' | 'tingo' | 'tripSetup' | 'compare' | 'feasibility' | 'reminders' | 'commitments' | 'safety' | 'assistant' | 'gacha' | 'lucky' | 'memoryCard' | 'all-personas' | 'flight' | 'accommodation' | 'tripEnd' | 'demo' | null;
 type CommunityTrip = { id: number; title: string; author: string; match: number; saved: boolean };
 type PlaceRecommendation = DiscoveryPlace & { id: number; saved: boolean; added: boolean };
 type GhostWish = { id: number; name: string; reason: string; status: 'resting' | 'revived' | 'released' };
@@ -380,7 +382,7 @@ export default function AppRescued() {
   const storedTripDates = storedTripIntent.dates ?? null;
   const storedTingoDimensions = stored.tingoDimensions ?? defaultTingoDimensions;
   const [tab, setTab] = useState<Tab>(() => (stored as { tab?: Tab }).tab ?? 'home');
-  const [tripWorkspaceOpen, setTripWorkspaceOpen] = useState(false);
+  const [tripWorkspaceOpen, setTripWorkspaceOpen] = useState(() => Boolean((stored as { tripWorkspaceOpen?: boolean }).tripWorkspaceOpen));
   const [tripPhase, setTripPhase] = useState<TripPhase>(stored.tripPhase ?? 'planning');
   const [completedPanel, setCompletedPanel] = useState<CompletedPanel>(null);
   const [readyConfirmed, setReadyConfirmed] = useState(Boolean(stored.readyConfirmed));
@@ -510,7 +512,7 @@ export default function AppRescued() {
   const [tripList, setTripList] = useState<TripListEntry[]>(stored.tripList ?? []);
   const [currentTripListId, setCurrentTripListId] = useState<string | null>(null);
   const [planningContentOpen, setPlanningContentOpen] = useState(false);
-  const [ongoingView, setOngoingView] = useState<'menu' | 'routing'>('menu');
+  const [ongoingView, setOngoingView] = useState<'menu' | 'routing'>(() => (stored as { ongoingView?: 'menu' | 'routing' }).ongoingView ?? 'menu');
   const [flightPageOpen, setFlightPageOpen] = useState(false);
   const [flightView, setFlightView] = useState<'not-booked' | 'booked'>('not-booked');
   const [bookingPage, setBookingPage] = useState<BookingPage | null>(null);
@@ -613,6 +615,18 @@ export default function AppRescued() {
   const tingoIdentity = useMemo(() => deriveTingoIdentity(tingoDimensions), [tingoDimensions]);
   const tingoBehavior = useMemo(() => deriveTingoBehavior(tingoDimensions), [tingoDimensions]);
   const tingoPlanGuidance = useMemo(() => tingoGuidance(tingoDimensions), [tingoDimensions]);
+  const activePersonaKey = personaOverride ?? tingoIdentity.personaKey;
+  const activePersonaDetail = tingoPersonaDetails[activePersonaKey] ?? tingoPersonaDetails['hidden-gem-seeker'];
+  const activePersonaImage = tingoPersonaImages[activePersonaKey] ?? tingoPersonaImages['hidden-gem-seeker'];
+
+  const [showNextStopDetails, setShowNextStopDetails] = useState(false);
+  const [mascotDeviationModalOpen, setMascotDeviationModalOpen] = useState(false);
+  const [actionDockOpen, setActionDockOpen] = useState(false);
+  const [activeMapServiceCategory, setActiveMapServiceCategory] = useState<'all' | 'hospital' | 'luggage' | 'repair' | 'pharmacy' | 'none'>('none');
+  const [dailyMood, setDailyMood] = useState<'great' | 'okay' | 'tired' | null>(null);
+  const [tomorrowAdjusted, setTomorrowAdjusted] = useState(false);
+  const [walkingReductionApplied, setWalkingReductionApplied] = useState(false);
+  const [ghostReviveNotice, setGhostReviveNotice] = useState<string | null>(null);
   const responsibilitySuggestions = useMemo(() => suggestResponsibilities(members, tingoBehavior, { priya: tingoBehavior }), [members, tingoBehavior]);
   const memberPreferenceProfiles = useMemo<Record<string, MemberPreferenceProfile>>(() => Object.fromEntries(members.map(member => [member.id, member.preferenceProfile ?? { tingoAssessed: false, preferences: [] }])), [members]);
   const groupMemberInputs = useMemo(() => members.filter(member => member.inviteStatus === 'joined').map(member => ({
@@ -1216,7 +1230,7 @@ export default function AppRescued() {
 
     return <div className="home-orientation home-dashboard">
       <button className="home-active-hero cc-card" onClick={openTrip} aria-label={`Open ${destination} trip details`}>
-        <div className="home-trip-hero-art" aria-hidden="true"><Map size={34} strokeWidth={1.5} /></div>
+        <div className="home-trip-hero-art" aria-hidden="true"><CocoCompanion context="traveling" size={80} /></div>
         <div className="home-active-hero-copy"><span>Active trip</span><h2>{destination}</h2><small>{tripIntent.dates ? `${tripIntent.dates.start} – ${tripIntent.dates.end}` : 'Dates to be confirmed'}</small></div>
         <ChevronRight className="home-active-hero-arrow" size={22} aria-hidden="true" />
       </button>
@@ -1228,7 +1242,6 @@ export default function AppRescued() {
       </section>
       <section className="home-shortcuts" aria-label="Trip shortcuts">
         <button className="cc-card" onClick={openTrip}><Calendar size={20} /><span>Plan</span></button>
-        <button className="cc-card" onClick={openTrip}><Map size={20} /><span>Map</span></button>
         <button className="cc-card" onClick={() => setTab('explore')}><BookOpen size={20} /><span>Saved places</span></button>
         <button className="cc-card" onClick={openPacking}><Box size={20} /><span>Packing list</span></button>
       </section>
@@ -1411,13 +1424,26 @@ export default function AppRescued() {
   }
 
   function renderGlobalMemories() {
-    return <div className="memories-screen">
-      <SectionTitle kicker="MEMORIES · YOUR ARCHIVE" title="The trips that stayed with you." copy="Private by default. Start with the review, then keep the decisions, detours, and tiny wins close." />
-      <MemoryArchiveGuide onOpenTrip={openTrip} />
-      <section className="memory-archive-feature paper-sheet"><div className="archive-photo"><span>OCT 2026</span><b>{destination}</b></div><div><span>LAST TRIP · {worthIt ? (worthIt === 'yes' ? 'Worth it' : worthIt === 'mixed' ? 'Mixed' : 'Not really') : 'Not reviewed'}</span><h3>{outcomeReviewed ? 'Your recorded outcome is ready to revisit.' : 'The retrospective starts with what actually happened.'}</h3><p>{photoImport ? `${importPhotoMetadata().imported} local metadata entries` : 'No photo metadata recorded'} · {decisionHistory.length} decisions · RM {spent} actual</p><button className="primary" onClick={openTrip}>Open trip workspace <ChevronRight size={16} /></button></div></section>
-      <div className="explore-section-heading"><span>KEEPSAKE SHELF</span><span className="quiet-note">Only you can see these</span></div><section className="keepsake-grid"><article><span>PHOTO MAP</span><b>{photoImport ? `${importPhotoMetadata().grouped} areas` : 'Not indexed'}</b><small>{photoImport ? 'Local metadata only' : 'Available after explicit review'}</small></article><article><span>FUTURE POSTCARD</span><b>{postcardSealed ? '1 sealed' : 'Not sealed'}</b><small>{postcardSealed ? 'Waiting for your next trip' : 'Write after the review loop'}</small></article><article><span>GHOST WISHES</span><b>{ghostWishes.length} remembered</b><small>Some plans can come back</small></article></section>
-      <section className="community-entry"><div><span>COMMUNITY</span><b>{published ? 'Published with consent' : 'Private by default'}</b><small>Nothing becomes public without an explicit action.</small></div><button onClick={() => setDrawer('community')}>Manage</button></section>
-    </div>;
+    return <MemoryScreen
+      destination={destination}
+      mode={mode}
+      tripIntent={tripIntent}
+      plan={visibleTripPlan}
+      photoArtifacts={photoMemoryArtifacts}
+      onPhotoArtifactsChange={setPhotoMemoryArtifacts}
+      itemReviews={itemReviews}
+      onItemReviewChange={(id: string, rating: 'worth' | 'mixed' | 'skip') => setItemReviews(current => ({ ...current, [id]: rating }))}
+      decisionHistory={decisionHistory}
+      onRateDecision={rateDecisionRecord}
+      categoryVariance={categoryVariance}
+      spent={spent}
+      totalBudget={mode === 'group' ? groupBudgetTotal : soloBudgetTotal}
+      worthIt={worthIt}
+      onRecordWorthIt={recordWorthIt}
+      members={members}
+      tripList={tripList}
+      onManageCommunity={() => setDrawer('community')}
+    />;
   }
 
   function openBookingPage(page: BookingPage) {
@@ -1531,7 +1557,469 @@ export default function AppRescued() {
     const anchorItem = visibleTripPlan.items.find(item => item.kind === 'anchor');
     const floatingItem = visibleTripPlan.items.find(item => item.kind === 'floating');
     const focusedOngoingView = Boolean(true);
-    if (focusedOngoingView && ongoingView === 'routing') return <section className="routing-page" aria-label="Routing"><button className="planning-back" aria-label="Back to ongoing menu" onClick={() => setOngoingView('menu')}><ArrowLeft size={20} /></button><TripSpatialView mode="traveling" destination={destination} source="local-schematic" showWalkPreview={false} plan={visibleTripPlan} currentItem={anchorItem ? { name: anchorItem.name, timeLabel: anchorItem.timeLabel } : undefined} nextItem={floatingItem ? { name: floatingItem.name, timeLabel: floatingItem.timeLabel } : undefined} liveRoute={{ currentLocation: browserLocation ? 'Your location' : 'Current stop', target: floatingItem?.name ?? anchorItem?.name ?? 'Next stop', eta: '12 min', timelineLabel: 'Next stop', weatherLabel: 'Weather below', coordinates: browserLocation ?? undefined, locationStatus: browserLocation ? 'live' : 'unavailable' }} overlay={<Coco tiny mood="happy" context="travel" />} /><section className="routing-next cc-card"><span>Next stop</span><b>{floatingItem?.name ?? anchorItem?.name ?? 'Choose your next stop'}</b><small>{floatingItem ? `${floatingItem.timeLabel} · about ${floatingItem.transferMinutes || 12} min away` : 'Your next route will appear here.'}</small></section><WeatherGlance destination={destination} compact /><div className="routing-tools">{mode === 'group' && <button className="secondary" onClick={() => openGovernedAction('split-on')}><Users size={16} />Group split</button>}<button className="secondary" onClick={() => setDrawer('safety')}><Heart size={16} />Nearby medical</button>{mode === 'group' && <button className="secondary" onClick={() => openCourt()}><Gavel size={16} />Group call</button>}<button className="secondary" onClick={() => setDrawer('budget')}><CircleDollarSign size={16} />Pay money</button></div></section>;
+    if (focusedOngoingView && ongoingView === 'routing') {
+      const mapPhotoPins = photoMemoryArtifacts.map((artifact, index) => ({
+        id: artifact.id,
+        title: artifact.title,
+        audience: (artifact.audience === 'group' ? 'group' : 'personal') as 'personal' | 'group',
+        capturedAt: artifact.capturedAt,
+        x: 180 + ((index * 60) % 180),
+        y: 190 + ((index * 45) % 150),
+      }));
+
+      return (
+        <section className="routing-page" aria-label="Routing">
+          <button className="planning-back" aria-label="Back to ongoing menu" onClick={() => setOngoingView('menu')}>
+            <ArrowLeft size={20} />
+            <span>Back to Menu</span>
+          </button>
+
+          {/* 4.1 / Emergency Contact Placement: strictly above the map */}
+          <div className="routing-top-emergency" role="region" aria-label="Emergency quick access">
+            <div className="routing-emergency-pill" onClick={() => setDrawer('safety')}>
+              <Heart size={16} className="emergency-heart-icon" />
+              <span className="emergency-contact-text">
+                <strong>🚨 Emergency Help:</strong> {emergencyContacts.find(c => c.id === selectedEmergencyContactId)?.name ?? (emergencyContacts[0] ? emergencyContacts[0].name : '110 / 119 · Tap for Nearby Help')}
+              </span>
+            </div>
+            <button className="routing-reassure-btn" onClick={() => setDrawer('family')} title="Send safety check-in to family">
+              <Send size={14} /> Check-in
+            </button>
+          </div>
+
+          {/* Group Split active banner */}
+          {split && (
+            <div className="routing-split-banner">
+              <Users size={16} />
+              <span>Group split · Meeting point: <strong>{groupSplitPlan.meetingPoint || reunion.place}</strong> ({groupSplitPlan.meetingTime || reunion.time})</span>
+              <button onClick={() => setDrawer('groupSplit')}>Manage Split</button>
+            </div>
+          )}
+
+          {/* Ghost Wish revive banner */}
+          {ghostReviveNotice && (
+            <div className="ghost-revive-banner">
+              <Sparkles size={16} />
+              <span>{ghostReviveNotice}</span>
+            </div>
+          )}
+
+          {/* Realistic Route Map with GPS puck + Photo Pins + Service Points */}
+          <RealisticRouteMap
+            destination={destination}
+            plan={visibleTripPlan}
+            currentItem={anchorItem ? { name: anchorItem.name, timeLabel: anchorItem.timeLabel } : undefined}
+            nextItem={floatingItem ? { name: floatingItem.name, timeLabel: floatingItem.timeLabel, transferMinutes: floatingItem.transferMinutes || 12 } : undefined}
+            afterNextItem={visibleTripPlan.items.filter(i => i.kind !== 'buffer')[2] ? { name: visibleTripPlan.items.filter(i => i.kind !== 'buffer')[2].name, timeLabel: visibleTripPlan.items.filter(i => i.kind !== 'buffer')[2].timeLabel } : undefined}
+            browserLocation={browserLocation}
+            browserLocationError={browserLocationError}
+            delay={delay}
+            isGroupMode={mode === 'group'}
+            splitActive={split}
+            meetingPoint={groupSplitPlan.meetingPoint || reunion.place}
+            meetingTime={groupSplitPlan.meetingTime || reunion.time}
+            photoPins={mapPhotoPins}
+            onAddPhotoPin={entry => {
+              setPhotoMemoryArtifacts(current => [
+                ...current,
+                {
+                  id: `photo-${Date.now()}-${current.length}`,
+                  title: entry.title,
+                  body: `Live moment at ${floatingItem?.name ?? destination}. Captured during ongoing journey.`,
+                  source: `Live ${entry.audience === 'group' ? 'shared group' : 'personal private'} pin`,
+                  locationLabel: floatingItem?.name ?? destination,
+                  audience: entry.audience,
+                  capturedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                },
+              ]);
+            }}
+            activeServiceCategory={activeMapServiceCategory}
+            onSelectServiceCategory={setActiveMapServiceCategory}
+          />
+
+          {/* 4.1 Next Stop Card */}
+          <section className="routing-next cc-card">
+            <div className="next-stop-top">
+              <div className="next-stop-kicker">
+                <span className="live-pulse" />
+                <span>LIVE NEXT STOP</span>
+              </div>
+              <button
+                type="button"
+                className="view-details-btn"
+                onClick={() => setShowNextStopDetails(true)}
+                aria-label="View details"
+              >
+                <span>Details</span>
+                <ChevronRight size={13} className="details-chevron" />
+              </button>
+            </div>
+            <b className="next-stop-name">{floatingItem?.name ?? anchorItem?.name ?? 'Choose your next stop'}</b>
+            <p className="next-stop-desc">
+              {floatingItem?.evidence?.[0]?.value ?? 'Daikanyama hillside curated stop · relaxed atmosphere and design boutiques.'}
+            </p>
+            <div className="next-stop-meta-grid">
+              <div className="meta-item">
+                <Clock size={14} />
+                <div>
+                  <small>Hours</small>
+                  <span>09:00 - 18:00</span>
+                </div>
+              </div>
+              <div className="meta-item">
+                <Navigation size={14} />
+                <div>
+                  <small>ETA</small>
+                  <span>{floatingItem ? `${floatingItem.transferMinutes || 12} min` : '12 min'}</span>
+                </div>
+              </div>
+              <div className="meta-item">
+                <Footprints size={14} />
+                <div>
+                  <small>Transit Mode</small>
+                  <span>{walkingReductionApplied ? '🚇 5m Metro + 3m Walk' : '🚶 15 min Walk'}</span>
+                </div>
+              </div>
+              <div className="meta-item">
+                <DollarSign size={14} />
+                <div>
+                  <small>Estimated Cost</small>
+                  <span>{floatingItem?.estimatedCost ? `RM ${floatingItem.estimatedCost}` : 'Free / Budget'}</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Spot Details Modal */}
+          {showNextStopDetails && (
+            <div className="modal-backdrop" onClick={() => setShowNextStopDetails(false)}>
+              <div className="spot-details-modal" onClick={e => e.stopPropagation()}>
+                <div className="spot-modal-header">
+                  <span className="drawer-kicker">SPOT DETAILS</span>
+                  <button
+                    type="button"
+                    className="close-btn"
+                    onClick={() => setShowNextStopDetails(false)}
+                    aria-label="Close details"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+                <h3 className="spot-modal-title">{floatingItem?.name ?? anchorItem?.name ?? 'Daikanyama Arts District'}</h3>
+                <div className="spot-modal-meta">
+                  <div><b>📍 Address:</b> Sarugakucho 16-15, Shibuya-ku, Tokyo</div>
+                  <div><b>⏰ Hours:</b> 09:00 - 18:00 (Open Daily)</div>
+                  <div><b>🏷️ Tags:</b> Stroll · Coffee · Gallery · Low Crowd</div>
+                  <div><b>💡 Tingo Fit:</b> 95% · Matches your pace &amp; style</div>
+                </div>
+                <p className="spot-modal-body">
+                  Daikanyama features wide pedestrian walkways and curated design boutiques, ideal for a relaxed afternoon stroll away from Shibuya crowds.
+                </p>
+                <button className="primary" onClick={() => setShowNextStopDetails(false)}>Back to Route</button>
+              </div>
+            </div>
+          )}
+
+          {/* Real-time weather */}
+          <WeatherGlance destination={destination} compact />
+
+          {/* Deviation Detection / Simulation Bar */}
+          <div className="routing-deviation-bar">
+            <div className="deviation-status">
+              <span className={delay ? 'status-dot alert' : 'status-dot green'} />
+              <span>{delay ? '⚠️ Deviation Detected (Transit Delay)' : '✓ Route is on track'}</span>
+            </div>
+            <div className="deviation-actions">
+              <button
+                className="simulate-deviation-btn"
+                title="Simulate Delay"
+                aria-label="Simulate Delay"
+                onClick={() => {
+                  setDelay(true);
+                  setMascotDeviationModalOpen(true);
+                }}
+              >
+                <Sparkles size={14} /> Reroute
+              </button>
+              {delay && (
+                <button className="re-open-mascot-btn" onClick={() => setMascotDeviationModalOpen(true)}>
+                  Review Mascot Suggestion
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Mascot Active Deviation Modal (Section 4.1 & 4.2) */}
+          {mascotDeviationModalOpen && (
+            <div className="modal-backdrop" onClick={() => setMascotDeviationModalOpen(false)}>
+              <div className="mascot-deviation-modal" onClick={e => e.stopPropagation()}>
+                <div className="mascot-modal-header">
+                  <div className="mascot-avatar-badge">
+                    <img src={activePersonaImage} alt={activePersonaDetail.label} />
+                    <div>
+                      <b>Coco ({activePersonaDetail.label})</b>
+                      <small>Live Route Companion & Guidance</small>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="close-btn"
+                    onClick={() => setMascotDeviationModalOpen(false)}
+                    aria-label="Close deviation modal"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+
+                <div className="mascot-modal-bubble">
+                  <p>
+                    {delay
+                      ? '"Flight and transit delay of ~45 minutes detected! We recomputed your afternoon route adjustments."'
+                      : '"Energy levels tend to dip around this hour and rain is expected. Would you like to ease your pace?"'}
+                  </p>
+                  <div className="mascot-reason-tag">
+                    💡 Trigger: {delay ? 'Transit delay over 30 min' : 'Low energy curve + Rain shelter consideration'}
+                  </div>
+                </div>
+
+                <div className="deviation-proposal-preview">
+                  <div className="preview-header">
+                    <span className="proposal-fit-badge">⭐ 94% Fit Score</span>
+                    <span className="proposal-slot">Recommended: 15:30 - 17:00</span>
+                  </div>
+                  <div className="preview-details-grid">
+                    <div>
+                      <small>Alternative Option</small>
+                      <b>{backupPool[0]?.name ?? 'Daikanyama T-Site Indoor Break'}</b>
+                    </div>
+                    <div>
+                      <small>Subsequent Changes</small>
+                      <span>Dinner delayed 35 min; core Anchor spots preserved</span>
+                    </div>
+                    <div>
+                      <small>Transfer Time</small>
+                      <span>🚶 8 min Walk / 🚇 1 stop Metro (4 min)</span>
+                    </div>
+                    <div>
+                      <small>Budget Impact</small>
+                      <span>RM 0 (Within backup budget)</span>
+                    </div>
+                    <div>
+                      <small>Operating Hours</small>
+                      <span>Open until 22:00 (Plenty of time)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mascot-modal-actions">
+                  {mode === 'group' ? (
+                    <>
+                      <button
+                        className="primary"
+                        onClick={() => {
+                          setDelay(false);
+                          setMascotDeviationModalOpen(false);
+                          setReplanApplied(true);
+                        }}
+                      >
+                        Use Backup Plan
+                      </button>
+                      <button
+                        className="secondary"
+                        onClick={() => {
+                          setMascotDeviationModalOpen(false);
+                          openCourt();
+                          setGhostReviveNotice('👻 Majority passed! Ghost wish "Riverside night market" revived to pool');
+                        }}
+                      >
+                        <Gavel size={14} /> Call Group Vote
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        className="primary"
+                        onClick={() => {
+                          setDelay(false);
+                          setMascotDeviationModalOpen(false);
+                          setReplanApplied(true);
+                        }}
+                      >
+                        Confirm &amp; Apply
+                      </button>
+                      <button
+                        className="secondary"
+                        onClick={() => {
+                          setMascotDeviationModalOpen(false);
+                        }}
+                      >
+                        Keep Original Plan
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 4.5 Daily Wrap-up */}
+          <section className="daily-wrapup-card cc-card">
+            <div className="wrapup-header">
+              <span className="drawer-kicker">DAILY WRAP-UP · TODAY&apos;S SUMMARY</span>
+              <h3>How did today feel?</h3>
+            </div>
+            <div className="wrapup-mood-row">
+              {([
+                { id: 'great', label: '⚡ Great & Energized' },
+                { id: 'okay', label: '🙂 Balanced & Good' },
+                { id: 'tired', label: '🥱 A bit tired' },
+              ] as const).map(option => (
+                <button
+                  key={option.id}
+                  className={`mood-btn ${dailyMood === option.id ? 'active' : ''}`}
+                  onClick={() => setDailyMood(option.id)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+
+            {dailyMood === 'tired' && (
+              <div className="tired-adjustment-box">
+                <p>
+                  🥱 <strong>Tired signal detected:</strong> Suggest starting tomorrow 45 min later (09:45) to ease afternoon pace.
+                </p>
+                <button
+                  className={`adjust-tomorrow-btn ${tomorrowAdjusted ? 'done' : ''}`}
+                  onClick={() => setTomorrowAdjusted(true)}
+                >
+                  {tomorrowAdjusted ? '✓ Tomorrow departure delayed 45 min' : 'Confirm Tomorrow Adjustments (+45m rest)'}
+                </button>
+              </div>
+            )}
+
+            <div className="wrapup-summary-grid">
+              <div className="wrapup-summary-item">
+                <small>Places Visited Today</small>
+                <b>{completedTodayItemIds.length || 2} places visited</b>
+              </div>
+              <div className="wrapup-summary-item">
+                <small>Walking Distance Today</small>
+                <b>{walkingReductionApplied ? (planHealth.metrics.walkingKm * 0.7).toFixed(1) : planHealth.metrics.walkingKm.toFixed(1)} km</b>
+              </div>
+              <div className="wrapup-summary-item">
+                <small>Spent Today</small>
+                <b>RM {spent} / RM {budgetTotal}</b>
+              </div>
+            </div>
+          </section>
+
+          {/* Routing Tools */}
+          <div className="routing-tools">
+            {mode === 'group' && (
+              <button
+                type="button"
+                className={`secondary ${split ? 'active-split-btn' : ''}`}
+                onClick={() => setDrawer('groupSplit')}
+              >
+                <Users size={16} /> {split ? 'Group split (Active)' : 'Group split'}
+              </button>
+            )}
+            <button type="button" className="secondary" onClick={() => setDrawer('safety')}>
+              <Heart size={16} /> Nearby medical
+            </button>
+            {mode === 'group' && (
+              <button type="button" className="secondary" onClick={() => openCourt()}>
+                <Gavel size={16} /> Group court
+              </button>
+            )}
+            <button type="button" className="secondary" onClick={() => setDrawer('budget')}>
+              <CircleDollarSign size={16} /> Pay money
+            </button>
+          </div>
+
+          {/* 4.4 Floating Action Dock */}
+          <div className="floating-action-dock-container">
+            {actionDockOpen && (
+              <div className="action-dock-menu">
+                <button
+                  className="dock-item"
+                  onClick={() => {
+                    setActionDockOpen(false);
+                    setDrawer('assistant');
+                  }}
+                >
+                  <Sparkles size={16} />
+                  <span>Ask Mascot</span>
+                </button>
+                {mode === 'group' && (
+                  <button
+                    className="dock-item"
+                    onClick={() => {
+                      setActionDockOpen(false);
+                      setDrawer('groupSplit');
+                    }}
+                  >
+                    <Users size={16} />
+                    <span>Group Split</span>
+                  </button>
+                )}
+                <button
+                  className="dock-item"
+                  onClick={() => {
+                    const next: ('none' | 'all' | 'hospital' | 'luggage' | 'repair' | 'pharmacy')[] = ['none', 'all', 'hospital', 'luggage', 'repair', 'pharmacy'];
+                    const currIdx = next.indexOf(activeMapServiceCategory);
+                    const nextCat = next[(currIdx + 1) % next.length];
+                    setActiveMapServiceCategory(nextCat);
+                  }}
+                >
+                  <MapPin size={16} />
+                  <span>Nearby Services ({activeMapServiceCategory === 'none' ? 'Off' : activeMapServiceCategory})</span>
+                </button>
+                <button
+                  className="dock-item"
+                  onClick={() => {
+                    setActionDockOpen(false);
+                    setDrawer('lucky');
+                  }}
+                >
+                  <Sparkles size={16} />
+                  <span>Lucky Draw (Fun)</span>
+                </button>
+                <div className="dock-walking-monitor">
+                  <div className="walking-monitor-head">
+                    <Footprints size={14} />
+                    <span>Walking load: {walkingReductionApplied ? (planHealth.metrics.walkingKm * 0.7).toFixed(1) : planHealth.metrics.walkingKm.toFixed(1)} km</span>
+                  </div>
+                  {planHealth.metrics.walkingKm > 6 && !walkingReductionApplied && (
+                    <div className="walking-overload-alert">
+                      <small>⚠️ High walking steps today</small>
+                      <button
+                        className="switch-transit-btn"
+                        onClick={() => setWalkingReductionApplied(true)}
+                      >
+                        Switch to Metro (-30% fatigue)
+                      </button>
+                    </div>
+                  )}
+                  {walkingReductionApplied && (
+                    <small className="walking-reduced-badge">✓ Switched to Metro-first route</small>
+                  )}
+                </div>
+              </div>
+            )}
+            <button
+              className={`floating-dock-trigger ${actionDockOpen ? 'active' : ''}`}
+              aria-label="Toggle action dock"
+              onClick={() => setActionDockOpen(prev => !prev)}
+            >
+              <Sparkles size={22} />
+              <span className="dock-label">Quick Tools</span>
+            </button>
+          </div>
+        </section>
+      );
+    }
     if (focusedOngoingView) return <section className="ongoing-dashboard ongoing-launcher" aria-label="Ongoing trip"><button className="ongoing-launcher-card cc-card" onClick={() => setOngoingView('routing')}><CocoCompanion context="map" pose="action-gps" size={88} /><b>Routing</b></button><button className="ongoing-launcher-card cc-card" onClick={() => setDrawer('budget')}><CocoCompanion context="map" pose="action-snack" size={88} /><b>Budgeting</b></button></section>;
     return <>
       <SectionTitle kicker="DURING · LIVE TRIP" title={delay ? 'Reality changed.' : 'The trip is moving.'} copy="Coco watches the plan, not your every step." />
@@ -1542,8 +2030,18 @@ export default function AppRescued() {
       {replanApplied && <section className="success-note"><Check size={21} /><div><b>Plan repaired.</b><small>{appliedRepair?.preview.join(' · ')} · undo available</small></div><button onClick={undoRepair}>Undo</button></section>}
       <section className="arrival-check"><div><span>PROGRESS CHECK</span><b>{arrivalChecked ? `Arrived at ${anchorItem?.name ?? 'the anchor'}.` : `Has the group reached ${anchorItem?.name ?? 'the morning anchor'}?`}</b><small>Manual check-in is always available; location permission is not required.</small></div><button onClick={() => setArrivalChecked(!arrivalChecked)}>{arrivalChecked ? 'Undo check-in' : 'Mark arrived'}</button></section>
       <section className="energy-check"><span>HOW’S THE GROUP?</span><div>{(['great', 'okay', 'tired'] as const).map(value => <button key={value} className={mood === value ? 'active' : ''} onClick={() => setMood(value)}>{value === 'great' ? '⚡ Great' : value === 'okay' ? '🙂 Okay' : '🥱 Tired'}</button>)}</div>{mood === 'tired' && <small>Coco suggests dropping one floating item and adding 45 min rest. Anchors stay untouched.</small>}</section>
-      {mode === 'group' && <section className="heartbeat"><span>GROUP HEARTBEAT</span><b>{delay ? 'Needs a decision' : split ? 'Can reunite on time' : arrivalChecked ? 'Together at the anchor' : 'Status check pending'}</b><small>Only shared status is shown. Exact group coordinates stay hidden by default.</small></section>}
-      {mode === 'group' && <GroupSplit members={members} value={groupSplitPlan} active={split} onChange={setGroupSplitPlan} onRequest={() => openGovernedAction('split-on')} onRequestReunion={() => openGovernedAction('split-off')} />}
+      {mode === 'group' && (
+        <GroupSplit
+          members={members}
+          value={groupSplitPlan}
+          active={split}
+          currentAnchorName={visibleTripPlan.items.find(item => item.kind === 'anchor')?.name ?? destination}
+          cityDestination={destination}
+          onChange={setGroupSplitPlan}
+          onRequest={() => setSplit(true)}
+          onRequestReunion={() => setSplit(false)}
+        />
+      )}
       <details className="during-tools secondary-launcher"><summary>More tools · sharing, reunion, safety & play</summary><div className="contextual-section-heading"><span>WHEN YOU NEED A HAND</span><small>These tools stay secondary to Today, conditions, and repair.</small></div><div className="during-tool-group"><span className="tool-group-label">SHARE & SAFETY</span><MiniTool icon={Send} label="Family Window" note={reported ? 'Latest reassurance sent' : 'Reassurance, not surveillance'} onClick={() => setDrawer('family')} /><MiniTool icon={MapPin} label="Location privacy" note="Permission and provider boundary" onClick={() => setDrawer('location')} /><MiniTool icon={Users} label="Reunion agreement" note={`${reunion.place} · ${reunion.time} · ±${reunion.tolerance} min`} onClick={() => setDrawer('commitments')} /><MiniTool icon={Heart} label="Safety + local help" note="Prototype contact and nearby useful info" onClick={() => setDrawer('safety')} /><MiniTool icon={Image} label="Photo pin + memory" note="Local metadata prototype; no upload" onClick={() => setDrawer('import')} /></div><div className="during-tool-group"><span className="tool-group-label">EXPLAIN & PLAY</span><MiniTool icon={Sparkles} label="Ask Coco" note={assistantApplied ? 'Suggestion applied · undo available' : 'Read-only until you confirm'} onClick={() => setDrawer('assistant')} /><MiniTool icon={Sparkles} label="Everyday Gacha" note="Real choice · never governance" onClick={() => setDrawer('gacha')} /><MiniTool icon={Sparkles} label="Lucky Draw" note="Entertainment only · isolated from decisions" onClick={() => setDrawer('lucky')} /></div></details>
       <TripSpatialView
         mode="traveling"
@@ -1576,30 +2074,27 @@ export default function AppRescued() {
   }
 
   function renderMemories() {
-    const keepsakes = [
-      ...decisionHistory.map(record => ({ id: record.id, title: record.topic, body: record.decision, source: `Recorded ${record.kind} decision · ${record.createdAt}` })),
-      ...photoMemoryArtifacts,
-      ...(ritualRecords.authoredMemoryNote ? [{ id: 'authored-note', title: 'My memory note', body: ritualRecords.authoredMemoryNote, source: 'Explicitly saved personal note' }] : []),
-    ];
-    const photoMetadata = photoImport ? importPhotoMetadata() : null;
-    return <div className="completed-screen">
-      <SectionTitle kicker="COMPLETED" title={`${destination}, kept close.`} copy={tripIntent.dates ? `${tripIntent.dates.start}–${tripIntent.dates.end}` : 'Trip dates were not recorded.'} />
-      <section className="completed-nutshell paper-sheet"><h3>{outcomeReviewed ? actualPaceCopy : 'No actual outcome has been recorded yet.'}</h3><div><small>{spent > 0 ? `RM ${spent} recorded spend` : 'No spend recorded'}</small><small>{decisionHistory.length ? `${decisionHistory.length} recorded decision${decisionHistory.length === 1 ? '' : 's'}` : 'No recorded decisions'}</small><small>{keepsakes.length ? `${keepsakes.length} kept memor${keepsakes.length === 1 ? 'y' : 'ies'}` : 'No memories kept yet'}</small></div></section>
-      <section className="completed-learning-loop">
-        <TripRetrospective actualSummary={{ pace: actualPaceCopy, spent, decisions: decisionHistory.length, outcomeRecorded: outcomeReviewed }} worthIt={worthIt} proposal={learningProposal} learningConfirmed={profileLearned} showMemoryAction={false} onRecordReflection={recordWorthIt} onBuildProposal={() => { if (worthIt) buildCurrentLearningProposal(worthIt); }} onConfirmLearning={confirmLearning} onDismissLearning={dismissLearning} onOpenMemory={() => { if (expressiveAvailable) setTrunkRequest(value => value + 1); }} />
-      </section>
-      <CompletedKeepLauncher active={completedPanel} onOpen={panel => setCompletedPanel(current => current === panel ? null : panel)} />
-      {completedPanel && <section className="completed-progressive" aria-label={`${completedPanel} details`}>
-        <button className="completed-progressive-close" onClick={() => setCompletedPanel(null)}>Close details</button>
-        {completedPanel === 'trunk' && <><MemoryTrunk artifacts={keepsakes} available={expressiveAvailable} openRequested={trunkRequest} />{expressiveAvailable && <><section className="memory-note-card"><div><span>MEMORY NOTE</span><b>Keep your own words.</b></div><textarea value={memoryNote} onChange={e => setMemoryNote(e.target.value)} aria-label="Memory note" /><button onClick={() => { const ok = commitRitualState({ authoredMemoryNote: memoryNote }); setMemorySaveError(!ok); if (ok) setRitualRecords(loadRitualState()); }}>Save note to trunk</button>{memorySaveError && <p role="alert">Could not save this note. Please retry.</p>}<small>Private, explicitly authored memory. No generated travel story.</small></section><button className="memory-card-trigger" onClick={() => setDrawer('memoryCard')}><span>MEMORY STICKER CARD</span><b>Make one moment collectible <ChevronRight size={15} /></b></button></>}</>}
-        {completedPanel === 'photo' && <><PhotoJournalCapture destination={destination} onIndex={() => { setPhotoIndexed(true); setPhotoImport(true); }} /><PhotoArchiveTimeline artifacts={photoMemoryArtifacts} plan={visibleTripPlan} onPrivacyChange={(id, isPublic) => setPhotoMemoryArtifacts(items => items.map(item => item.id === id ? { ...item, isPublic } : item))} /><section className="memory-actions"><button onClick={() => { setPhotoIndexed(true); setPhotoImport(true); }}><Map size={20} /><span><b>Photo Map</b><small>{photoIndexed ? `${importPhotoMetadata().imported} photos indexed · ${importPhotoMetadata().grouped} areas` : 'Index local photo metadata'}</small></span></button></section>{photoImport && <section className="adapter-note"><b>Metadata adapter complete.</b><small>{photoMetadata?.note}</small></section>}<TripSpatialView mode="completed" destination={destination} source={photoMetadata ? 'photo-metadata' : 'local-schematic'} plan={visibleTripPlan} photoSummary={photoMetadata ? { imported: photoMetadata.imported, grouped: photoMetadata.grouped, note: photoMetadata.note } : undefined} /></>}
-        {completedPanel === 'ghost' && expressiveAvailable && <section className="ghost-wish"><span>GHOST WISH CEMETERY</span><h3>Retained prototype Ghost Wishes.</h3>{ghostWishes.map(wish => <div className={`ghost-wish-row ${wish.status}`} key={wish.id}><div><b>{wish.name}</b><small>{wish.reason}</small><em>{wish.status === 'resting' ? 'Still remembered' : wish.status === 'revived' ? 'Revived for review · viability not assessed' : 'Released, history kept'}</em></div>{wish.status !== 'released' && <div>{wish.status === 'resting' && <button onClick={() => { const next = ghostWishes.filter(item => item.status === 'revived').map(item => item.id); if (commitRitualState({ revivedWishIds: [...new Set([...next, wish.id])] })) { setRitualRecords(loadRitualState()); setGhostWishes(items => items.map(item => item.id === wish.id ? { ...item, status: 'revived' } : item)); } }}>Revive</button>}<button onClick={() => emitExperience({ type: 'release-wish', name: wish.name, reason: wish.reason, commit: () => { const current = loadRitualState(); if (!commitRitualState({ releasedWishIds: [...new Set([...(current.releasedWishIds ?? []), wish.id])], revivedWishIds: (current.revivedWishIds ?? []).filter(id => id !== wish.id) })) return false; setRitualRecords(loadRitualState()); setGhostWishes(items => items.map(item => item.id === wish.id ? { ...item, status: 'released' } : item)); return true; } })}>超度行程</button></div>}</div>)}</section>}
-        {completedPanel === 'ghost' && !expressiveAvailable && <p>Complete the reflection and learning handoff before opening Ghost Wishes.</p>}
-        {completedPanel === 'postcard' && expressiveAvailable && <section className="future-postcard"><span>FUTURE POSTCARD</span><h3>To your next-trip self.</h3>{postcardSealed ? <div className="sealed-postcard"><b>✉ Sealed for the next trip</b><button onClick={() => setPostcardSealed(false)}>Reopen</button></div> : <><textarea value={futurePostcard} onChange={e => setFuturePostcard(e.target.value)} /><button className="primary" onClick={() => setPostcardSealed(true)}>Seal postcard</button></>}</section>}
-        {completedPanel === 'postcard' && !expressiveAvailable && <p>Complete the reflection and learning handoff before opening the Future Postcard.</p>}
-        {completedPanel === 'recap' && <><CompletedLearningGuide /><section className="review-items"><div className="section-rule"><span>HOW EACH STOP FELT</span><span className="quiet-note">Feeds future recommendations</span></div>{[['anchor', tripInputs.mustGo], ['cafe', 'Scenic café block']].map(([id, label]) => <div className="review-item" key={id}><div><b>{label}</b><small>Recorded stop review</small></div><div className="rating-row">{(['worth', 'mixed', 'skip'] as const).map(value => <button key={value} className={itemReviews[id] === value ? 'active' : ''} onClick={() => setItemReviews(current => ({ ...current, [id]: value }))}>{value === 'worth' ? 'Worth it' : value === 'mixed' ? 'Mixed' : 'Skip next time'}</button>)}</div></div>)}</section><section className="review-ledger paper-sheet"><div><span>Budget vs actual</span><b>RM {spent} spent</b><small>RM {remaining} remaining</small></div><div><span>Decisions</span><b>{decisionHistory.length} recorded</b><small>{decisionHistory[0] ? `${decisionHistory[0].topic} · ${decisionHistory[0].decision}` : 'No Court history yet'}</small></div></section>{decisionHistory.length > 0 && <section className="review-items"><div className="section-rule"><span>DECISION HISTORY · SATISFACTION</span></div>{decisionHistory.map(record => <div className="review-item" key={record.id}><div><b>{record.topic}</b><small>{record.decision}</small></div><div className="rating-row">{(['worth', 'mixed', 'skip'] as const).map(value => <button key={value} className={record.satisfaction === value ? 'active' : ''} onClick={() => rateDecisionRecord(record.id, value)}>{value}</button>)}</div></div>)}</section>}<section className="compare-ledger"><span>CATEGORY BUDGET · PLANNED VS ACTUAL</span>{categoryVariance.map(item => <div key={item.category}><b>{item.category}</b><i className={item.status === 'over' ? 'actual' : ''} /><small>RM {item.planned} planned · RM {item.actual} actual · {item.status}</small></div>)}{budgetLearningNotes.length > 0 && <p>{budgetLearningNotes.join(' ')}</p>}</section><section className="compare-ledger"><span>PACE · PLANNED VS ACTUAL</span><div><b>Planned</b><i /><small>{tingoBehavior.itineraryDensity} · {tingoBehavior.dailyStops} stops/day · {tingoBehavior.bufferMinutes} min buffers</small></div><div><b>Actual</b><i className="actual" /><small>{actualPaceCopy}</small></div></section><section className="community-entry"><div><span>COMMUNITY</span><b>{published ? 'Published with consent' : 'Private by default'}</b><small>Nothing becomes public without an explicit action.</small></div><button onClick={() => setDrawer('community')}>Open</button></section><button className="secondary" onClick={() => setJournalGenerated(true)}><BookOpen size={18} />{journalGenerated ? 'Regenerate travel journal draft' : 'Generate travel journal draft'}</button>{journalGenerated && <section className="postcard-note"><span>{destination.toUpperCase()}</span><p>Draft from recorded timeline and trip data. Edit before saving.</p><small>Prototype draft · not an inferred factual travel story</small></section>}</>}
-      </section>}
-    </div>;
+    return <MemoryScreen
+      destination={destination}
+      mode={mode}
+      tripIntent={tripIntent}
+      plan={visibleTripPlan}
+      photoArtifacts={photoMemoryArtifacts}
+      onPhotoArtifactsChange={setPhotoMemoryArtifacts}
+      itemReviews={itemReviews}
+      onItemReviewChange={(id, rating) => setItemReviews(current => ({ ...current, [id]: rating }))}
+      decisionHistory={decisionHistory}
+      onRateDecision={rateDecisionRecord}
+      categoryVariance={categoryVariance}
+      spent={spent}
+      totalBudget={mode === 'group' ? groupBudgetTotal : soloBudgetTotal}
+      worthIt={worthIt}
+      onRecordWorthIt={recordWorthIt}
+      members={members}
+      tripList={tripList}
+      initialTripId={currentTripListId || destination || 'past-trip-1'}
+      onManageCommunity={() => setDrawer('community')}
+    />;
   }
 
   function SuitcaseGraphic() {
@@ -2072,6 +2567,25 @@ export default function AppRescued() {
       {drawer === 'community' && <CommunityPublishPanel published={published} onChange={setPublished} artifacts={photoMemoryArtifacts} onArtifactPrivacyChange={(id, isPublic) => setPhotoMemoryArtifacts(items => items.map(item => item.id === id ? { ...item, isPublic } : item))} />}
       {drawer === 'import' && <PhotoJournalCapture destination={destination} groupMode={mode === 'group'} tripStart={tripIntent.dates?.start} places={visibleTripPlan.items.filter(item => item.kind !== 'buffer').map(item => item.name)} onIndex={() => { setPhotoIndexed(true); setPhotoImport(true); }} onSaveMoment={(entry, audience) => { const place = entry.archivePlace ?? (entry.locationSource === 'exif' ? 'GPS pin · choose nearby saved place' : `${destination} photo pin`); setPhotoMemoryArtifacts(current => [...current, { id: `photo-${Date.now()}-${current.length}`, title: entry.name, body: `${entry.note || 'A selected trip moment.'}\n\n${entry.timeSource === 'exif' ? 'EXIF' : 'Fallback'} time: ${entry.takenAt} · ${place}.`, source: `Explicitly saved ${audience === 'group' ? 'shared album' : 'personal'} photo memory · ${entry.timeSource === 'exif' ? 'local EXIF' : 'prototype fallback'} metadata`, locationLabel: place, audience, capturedAt: entry.takenAt, latitude: entry.latitude, longitude: entry.longitude, archiveDay: entry.archiveDay, archivePlace: entry.archivePlace }]); setDrawer(null); }} />}
       {drawer === 'memoryCard' && <section className="memory-card-drawer"><h3>Memory Sticker Card</h3><p>Make one moment collectible.</p><button className="primary" onClick={() => setDrawer(null)}>Collect sticker</button></section>}
+      {drawer === 'groupSplit' && (
+        <GroupSplit
+          members={members}
+          value={groupSplitPlan}
+          active={split}
+          currentAnchorName={visibleTripPlan.items.find(item => item.kind === 'anchor')?.name ?? destination}
+          cityDestination={destination}
+          onChange={setGroupSplitPlan}
+          onRequest={() => {
+            setSplit(true);
+            setDrawer(null);
+          }}
+          onRequestReunion={() => {
+            setSplit(false);
+            setDrawer(null);
+          }}
+          onClose={() => setDrawer(null)}
+        />
+      )}
       {drawer === 'all-personas' && (
         <section className="me-all-personas-drawer">
           <span className="drawer-kicker">16 TRAVEL PERSONAS</span>
