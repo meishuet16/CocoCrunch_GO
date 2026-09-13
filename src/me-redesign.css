@@ -1489,6 +1489,7 @@
   letter-spacing: normal !important;
 }
 
+.tab-me .me-tingo-card.redesign-card .me-chip-row small,
 .tab-me .me-tingo-card.is-complete .me-chip-row small {
   min-height: 28px !important;
   padding: 4px 9px !important;
