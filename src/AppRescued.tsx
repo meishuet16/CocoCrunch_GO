@@ -166,7 +166,7 @@ const tingoPersonaDetails: Record<TingoPersonaKey, PersonaDetail> = {
   'hidden-gem-seeker': {
     label: 'Hidden Gem Seeker',
     tagline: 'Handles unique spots',
-    tags: ['FOOD', 'CULTURE', 'EXPLORATION', 'LOCAL LIVING'],
+    tags: ['Food', 'Culture', 'Exploration', 'Local Living'],
     summary: 'You love meaningful local experiences, unhurried moments and good food along the way.',
   },
   'foodie-hunter': {
