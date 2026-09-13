@@ -1204,3 +1204,45 @@
 .tab-me .emergency-contact-list > div { display: grid; gap: 5px; padding: 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--paper); }
 .tab-me .emergency-contact-list small { color: var(--muted); font-size: 11px; }
 .tab-me .emergency-contacts .primary { min-height: 44px; border-radius: var(--radius-sm); }
+
+/* Keep the Me profile concise, with the same Coco controls available as elsewhere. */
+.tab-me .me-tingo-kicker,
+.tab-me .me-card-copy > p,
+.tab-me .me-persona-badge,
+.tab-me .me-persona-subtag {
+  display: none !important;
+}
+
+.tab-me .me-card-copy h2 {
+  font-size: 23px !important;
+  line-height: 1.15 !important;
+}
+
+.tab-me .me-tingo-actions-col {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 5px !important;
+}
+
+.tab-me .me-all-types-link,
+.tab-me .me-retake-link,
+.tab-me .me-view-profile-btn {
+  min-height: 30px !important;
+  padding: 6px 9px !important;
+  border: 1px solid var(--line) !important;
+  background: var(--paper) !important;
+  color: var(--muted) !important;
+  font-size: 10px !important;
+}
+
+.tab-me .me-card-collage {
+  gap: 7px !important;
+}
+
+.tab-me .global-coco,
+.tab-me .global-coco-companion {
+  display: block !important;
+}
+
+.tab-me .emergency-contacts > .setup-field:last-child { order: 2; }
+.tab-me .emergency-contacts > .primary { order: 3; }

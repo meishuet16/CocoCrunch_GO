@@ -1558,20 +1558,7 @@ export default function AppRescued() {
             </div>
 
             <div className="me-card-copy">
-              <span className="me-tingo-kicker">MY TINGO CARD</span>
-
-              <h2>
-                You&apos;re a<br />
-                {typeLabel === 'Hidden Gem Seeker' ? (
-                  <>Hidden Gem<br />Seeker</>
-                ) : typeLabel.split(' ').length === 2 ? (
-                  <>{typeLabel.split(' ')[0]}<br />{typeLabel.split(' ')[1]}</>
-                ) : typeLabel.split(' ').length > 2 ? (
-                  <>{typeLabel.split(' ').slice(0, 2).join(' ')}<br />{typeLabel.split(' ').slice(2).join(' ')}</>
-                ) : (
-                  typeLabel
-                )}
-              </h2>
+              <h2>You are a {typeLabel}</h2>
 
               <p>{typeCopy}</p>
 
@@ -1584,7 +1571,7 @@ export default function AppRescued() {
               <div className="me-tingo-actions-col">
                 <button className="me-all-types-link" onClick={() => setDrawer('all-personas')}>
                   <Users size={15} />
-                  <span>See all 16 travel types</span>
+                  <span>CO · 16 Travel Types</span>
                   <span className="arrow">→</span>
                 </button>
                 <button className="me-retake-link" onClick={retakeTingo}>
@@ -2066,7 +2053,7 @@ export default function AppRescued() {
       <header className="topbar">
         <button className="brand-lockup" onClick={() => { setTripWorkspaceOpen(false); setTab('home'); }} aria-label="Go to Home">
           <img className="brand-companion" src={cocoAsset('scene-home')} alt="Coco, your travel companion" />
-          <span className="wordmark"><b>COCOCRUNCH</b><small>Plan together, design transparently, recover gracefully.</small></span>
+          <span className="wordmark"><b>COCOCRUNCH</b></span>
         </button>
         {tab !== 'me' && <button className="bell" aria-label="Notifications"><Bell size={19} /><i /></button>}
         {tab === 'me' && (
