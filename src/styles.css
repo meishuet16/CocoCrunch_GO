@@ -8386,7 +8386,7 @@ main {
 }
 
 .brand-lockup .wordmark b {
-  color: var(--ink);
+  color: var(--sangria);
   font-family: var(--font-editorial);
   font-size: 20px;
   font-weight: 900;
@@ -8415,7 +8415,8 @@ main {
 
 .home-empty {
   min-height: calc(100dvh - 210px);
-  align-content: center;
+  align-content: start;
+  padding-top: clamp(20px, 5dvh, 44px);
 }
 
 .home-empty-state {
