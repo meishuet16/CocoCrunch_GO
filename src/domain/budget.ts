@@ -35,3 +35,29 @@ export function budgetLearning(actuals: BudgetActuals, plan: BudgetPlan): string
     ? `${item.category} ran RM ${Math.abs(item.variance)} over plan; surface a larger ${item.category} buffer next trip.`
     : `${item.category} finished RM ${Math.abs(item.variance)} under plan; Coco can avoid over-reserving this category next trip.`);
 }
+
+export type ExpenseTransaction = {
+  id: string;
+  category: BudgetCategory;
+  amount: number;
+  description: string;
+  payer: string;
+  timestamp: string;
+};
+
+export const defaultGroupTransactions: ExpenseTransaction[] = [
+  { id: 'tx-1', category: 'stay', amount: 358, description: 'Boutique Hotel deposit', payer: 'Alex', timestamp: 'Yesterday 15:30' },
+  { id: 'tx-2', category: 'food', amount: 320, description: 'Shinjuku Izakaya dinner', payer: 'Me', timestamp: 'Yesterday 20:15' },
+  { id: 'tx-3', category: 'food', amount: 228, description: 'Tsukiji market brunch', payer: 'Me', timestamp: 'Today 09:40' },
+  { id: 'tx-4', category: 'transport', amount: 302, description: 'JR Regional Rail passes', payer: 'Priya', timestamp: 'Today 11:00' },
+  { id: 'tx-5', category: 'activities', amount: 80, description: 'Digital art museum tickets', payer: 'Me', timestamp: 'Today 14:20' },
+];
+
+export const defaultSoloTransactions: ExpenseTransaction[] = [
+  { id: 'stx-1', category: 'stay', amount: 174, description: 'Capsule hotel stay', payer: 'Me', timestamp: 'Yesterday 14:00' },
+  { id: 'stx-2', category: 'food', amount: 154, description: 'Ramen & bakery breakfast', payer: 'Me', timestamp: 'Today 12:30' },
+  { id: 'stx-3', category: 'food', amount: 90, description: 'Café & matcha sweets', payer: 'Me', timestamp: 'Today 16:15' },
+  { id: 'stx-4', category: 'transport', amount: 146, description: 'Metro travel card reload', payer: 'Me', timestamp: 'Today 10:15' },
+  { id: 'stx-5', category: 'activities', amount: 40, description: 'Art museum admission', payer: 'Me', timestamp: 'Today 15:00' },
+];
+

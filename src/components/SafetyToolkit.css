@@ -1,0 +1,439 @@
+/* Enhanced Safety Toolkit Styles */
+
+.safety-toolkit {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--ink, #2b211f);
+  padding-bottom: 20px;
+}
+
+.safety-header-area {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.safety-header-area h3 {
+  margin: 0;
+  font-family: var(--font-editorial, Georgia, serif);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--ink, #2b211f);
+  letter-spacing: -0.02em;
+}
+
+.safety-header-area p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted, #64748b);
+  line-height: 1.4;
+}
+
+/* SOS Emergency Hotline Banner */
+.sos-hotline-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, rgba(225, 29, 72, 0.08), rgba(147, 5, 0, 0.05));
+  border: 1px solid rgba(225, 29, 72, 0.22);
+  border-radius: var(--radius, 14px);
+}
+
+.sos-strip-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sos-strip-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #e11d48;
+}
+
+.sos-destination-badge {
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(225, 29, 72, 0.12);
+  color: #be123c;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.sos-numbers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+}
+
+.sos-number-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: #ffffff;
+  border: 1px solid rgba(225, 29, 72, 0.16);
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.18s ease;
+}
+
+.sos-number-card:hover {
+  border-color: #e11d48;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(225, 29, 72, 0.15);
+}
+
+.sos-number-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.sos-number-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted, #64748b);
+}
+
+.sos-number-digits {
+  font-size: 15px;
+  font-weight: 800;
+  color: #e11d48;
+  font-family: monospace;
+  letter-spacing: 0.02em;
+}
+
+.sos-call-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(225, 29, 72, 0.1);
+  color: #e11d48;
+  display: grid;
+  place-items: center;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.sos-number-card:hover .sos-call-btn {
+  background: #e11d48;
+  color: #ffffff;
+}
+
+/* Safety List Sections (Check-in, Nearby Help, Emergency Contacts) */
+.safety-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border: 0;
+}
+
+.safety-card-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--line, rgba(0, 0, 0, 0.08));
+  border-radius: var(--radius, 14px);
+  background: var(--paper-solid, #ffffff);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.safety-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.safety-card-title {
+  font-size: 13.5px;
+  font-weight: 750;
+  color: var(--ink, #2b211f);
+}
+
+.safety-card-desc {
+  font-size: 11.5px;
+  color: var(--muted, #64748b);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Category Filter Buttons in Nearby Help */
+.safety-service-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.safety-service-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 42px;
+  padding: 6px 10px;
+  border: 1px solid var(--line, rgba(0, 0, 0, 0.1));
+  border-radius: 10px;
+  background: var(--cream-soft, #fbf9f4);
+  color: var(--ink, #2b211f);
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.safety-service-btn:hover {
+  background: #ffffff;
+  border-color: var(--sangria, #930500);
+  color: var(--sangria, #930500);
+  transform: translateY(-1px);
+}
+
+.safety-service-btn.active {
+  border-color: var(--sangria, #930500);
+  background: rgba(147, 5, 0, 0.08);
+  color: var(--sangria, #930500);
+  box-shadow: inset 0 0 0 1px var(--sangria, #930500);
+}
+
+/* Search Bar inside Nearby Help */
+.safety-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--line, rgba(0, 0, 0, 0.1));
+  border-radius: 10px;
+  background: #ffffff;
+  transition: border-color 0.18s ease;
+}
+
+.safety-search-box:focus-within {
+  border-color: var(--sangria, #930500);
+  box-shadow: 0 0 0 2px rgba(147, 5, 0, 0.1);
+}
+
+.safety-search-box input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 12px;
+  width: 100%;
+  color: var(--ink, #2b211f);
+}
+
+.safety-search-box input::placeholder {
+  color: #94a3b8;
+}
+
+/* Facilities Results List */
+.safety-results {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.safety-result-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--line, rgba(0, 0, 0, 0.08));
+  border-radius: 12px;
+  background: var(--paper-solid, #ffffff);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.18s ease, transform 0.18s ease;
+}
+
+.safety-result-card:hover {
+  border-color: rgba(147, 5, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+.safety-result-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.safety-result-name-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.safety-result-name {
+  font-size: 13.5px;
+  font-weight: 750;
+  color: var(--ink, #2b211f);
+  margin: 0;
+}
+
+.safety-result-address {
+  font-size: 11px;
+  color: var(--muted, #64748b);
+}
+
+.safety-result-distance {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #2563eb;
+  background: rgba(37, 99, 235, 0.08);
+  padding: 3px 7px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.safety-result-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.safety-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.safety-badge.highlight {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  font-weight: 700;
+}
+
+.safety-result-note {
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: #334155;
+  background: var(--cream-soft, #fbf9f4);
+  padding: 8px 10px;
+  border-radius: 8px;
+  margin: 0;
+  border-left: 3px solid var(--sangria, #930500);
+}
+
+/* Action Buttons inside Result Card */
+.safety-result-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.safety-action-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex: 1;
+}
+
+.safety-action-link.primary-action {
+  background: var(--sangria, #930500);
+  color: #ffffff;
+}
+
+.safety-action-link.primary-action:hover {
+  background: #7a0400;
+}
+
+.safety-action-link.secondary-action {
+  background: #ffffff;
+  color: var(--ink, #2b211f);
+  border: 1px solid var(--line, rgba(0, 0, 0, 0.12));
+}
+
+.safety-action-link.secondary-action:hover {
+  border-color: var(--sangria, #930500);
+  color: var(--sangria, #930500);
+}
+
+/* English Flashcards / Show-to-Local Section */
+.emergency-phrases-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px dashed rgba(147, 5, 0, 0.25);
+  border-radius: var(--radius, 14px);
+  background: rgba(254, 242, 242, 0.6);
+}
+
+.emergency-phrase-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.emergency-phrase-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.emergency-phrase-title {
+  font-size: 11px;
+  font-weight: 750;
+  color: #e11d48;
+}
+
+.emergency-phrase-quote {
+  font-size: 12px;
+  color: var(--ink, #2b211f);
+  font-weight: 500;
+}
+
+.emergency-phrase-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 9px;
+  border-radius: 6px;
+  border: 1px solid var(--line, rgba(0, 0, 0, 0.1));
+  background: #ffffff;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.emergency-phrase-copy-btn:hover {
+  background: #f8fafc;
+  color: #0f172a;
+}

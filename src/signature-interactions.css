@@ -96,7 +96,7 @@
 .incense-scene > i:nth-of-type(1){transform:translateX(-12px)}.incense-scene > i:nth-of-type(2){transform:none}.incense-scene > i:nth-of-type(3){transform:translateX(12px)}
 .incense-scene.prayer-2 span { animation:tinyShake 340ms ease-out 1; }
 .incense-scene.prayer-3::after { content:'☀'; position:absolute; right:22px; top:18px; font-size:28px; color:var(--sangria); transform:rotate(8deg); }
-.incense-scene.prayer-4::before { content:'申诉已送达'; position:absolute; left:18px; top:16px; font-size:9px; font-weight:950; color:var(--sangria); border:1px solid rgba(147,5,0,.25); padding:5px 8px; border-radius:999px; background:var(--cream); }
+.incense-scene.prayer-4::before { content:'PRAYER SENT'; position:absolute; left:18px; top:16px; font-size:9px; font-weight:950; color:var(--sangria); border:1px solid rgba(147,5,0,.25); padding:5px 8px; border-radius:999px; background:var(--cream); }
 @keyframes tinyShake { 0%,100%{transform:none} 25%{transform:rotate(-5deg)} 75%{transform:rotate(5deg)} }
 .prayer-progress { display:flex; justify-content:center; gap:6px; }
 .prayer-progress i { width:22px; height:5px; border-radius:999px; background:rgba(147,5,0,.12); }

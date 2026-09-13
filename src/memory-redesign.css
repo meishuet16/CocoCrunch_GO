@@ -1,0 +1,1028 @@
+/* ==========================================================================
+   COCOCRUNCH GO - MEMORY TAB REDESIGN
+   STRICT COLOR SCHEME: TEXT COLORS ONLY BLACK, RED, AND GRAY
+   ========================================================================== */
+
+.tab-memories {
+  background: var(--cream, #fff8e7) !important;
+  padding: 12px 14px calc(80px + env(safe-area-inset-bottom)) !important;
+}
+
+.memories-screen {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  padding: 0 0 20px !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+  color: var(--ink, #2b211f) !important;
+}
+
+/* Trips list card label (Image 2 style with completed label) */
+.memory-card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.memory-trip-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(147, 5, 0, 0.08);
+  color: var(--sangria, #930500);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+
+/* Back button matching trips planning-back */
+.memory-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: var(--sangria, #930500);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 0 8px;
+  align-self: flex-start;
+}
+
+.memory-back-btn:hover {
+  text-decoration: underline;
+}
+
+/* 1. Trip Hero Summary Card */
+.memory-hero-card {
+  position: relative;
+  background: var(--paper-solid, #ffffff);
+  border-radius: 16px;
+  padding: 16px 18px;
+  border: 1px solid rgba(147, 5, 0, 0.12);
+  box-shadow: 0 4px 16px rgba(43, 33, 31, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.memory-hero-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.memory-trip-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(147, 5, 0, 0.08);
+  color: var(--sangria, #930500);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.memory-mode-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(117, 104, 98, 0.1);
+  color: var(--muted, #756862);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.memory-hero-title-area {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.memory-hero-title-area h2 {
+  margin: 0;
+  font-family: var(--font-editorial, Georgia, serif);
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--ink, #2b211f);
+  letter-spacing: -0.02em;
+}
+
+.memory-hero-dates {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted, #756862);
+}
+
+.memory-hero-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(147, 5, 0, 0.08);
+}
+
+.memory-metric-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.memory-metric-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--muted, #756862);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.memory-metric-value {
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--ink, #2b211f);
+}
+
+/* 2. Navigation Tabs */
+.memory-nav-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  margin: -2px 0 2px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.memory-nav-tab-btn {
+  flex: 0 0 auto;
+  padding: 8px 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(117, 104, 98, 0.2);
+  background: var(--paper-solid, #ffffff);
+  color: var(--muted, #756862);
+  font-size: 11px;
+  font-weight: 700;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.memory-nav-tab-btn.is-active {
+  background: var(--sangria, #930500);
+  color: #ffffff;
+  border-color: var(--sangria, #930500);
+  box-shadow: 0 3px 10px rgba(147, 5, 0, 0.2);
+}
+
+/* 3. Section Container */
+.memory-section-card {
+  background: var(--paper-solid, #ffffff);
+  border-radius: 16px;
+  padding: 16px 18px;
+  border: 1px solid rgba(147, 5, 0, 0.1);
+  box-shadow: 0 4px 16px rgba(43, 33, 31, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.memory-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.memory-section-kicker-box {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.memory-section-kicker {
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  color: var(--sangria, #930500);
+  text-transform: uppercase;
+}
+
+.memory-section-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 850;
+  color: var(--ink, #2b211f);
+  letter-spacing: -0.01em;
+}
+
+.memory-view-toggle {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(117, 104, 98, 0.08);
+  border: 1px solid rgba(117, 104, 98, 0.15);
+  gap: 2px;
+}
+
+.memory-view-toggle button {
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted, #756862);
+  transition: all 0.15s ease;
+}
+
+.memory-view-toggle button.is-active {
+  background: #ffffff;
+  color: var(--ink, #2b211f);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* 4. Photo Map Presentation */
+.memory-photo-map-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.memory-photo-map-canvas {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  border-radius: 14px;
+  background: #fbf7ee;
+  border: 1px solid rgba(147, 5, 0, 0.1);
+  overflow: hidden;
+}
+
+.memory-map-bg-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.memory-map-pin-badge {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #ffffff;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1.5px solid var(--sangria, #930500);
+  box-shadow: 0 3px 8px rgba(147, 5, 0, 0.16);
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--ink, #2b211f);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.memory-map-pin-badge:hover,
+.memory-map-pin-badge.is-selected {
+  transform: translate(-50%, -108%) scale(1.05);
+  background: var(--sangria, #930500);
+  color: #ffffff;
+}
+
+.memory-map-pin-badge svg {
+  color: var(--sangria, #930500);
+}
+
+.memory-map-pin-badge.is-selected svg {
+  color: #ffffff;
+}
+
+.memory-map-summary-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(117, 104, 98, 0.06);
+  font-size: 11px;
+  color: var(--muted, #756862);
+}
+
+.memory-map-summary-strip b {
+  color: var(--ink, #2b211f);
+}
+
+/* 5. Timeline Presentation */
+.memory-timeline-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  padding-left: 6px;
+}
+
+.memory-day-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.memory-day-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.memory-day-pill {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--sangria, #930500);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.memory-day-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink, #2b211f);
+}
+
+.memory-day-date {
+  font-size: 11px;
+  color: var(--muted, #756862);
+}
+
+.memory-day-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-left: 12px;
+  border-left: 2px dashed rgba(147, 5, 0, 0.16);
+  margin-left: 14px;
+}
+
+/* 6. Memory Small Cards (回忆小卡片) */
+.memory-card-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #fffdfa;
+  border-radius: 14px;
+  border: 1px solid rgba(147, 5, 0, 0.08);
+  padding: 10px;
+  box-shadow: 0 3px 10px rgba(43, 33, 31, 0.03);
+}
+
+.memory-card-top-row {
+  display: flex;
+  gap: 10px;
+}
+
+.memory-card-photo-box {
+  position: relative;
+  flex: 0 0 84px;
+  height: 84px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f5efe6;
+}
+
+.memory-card-photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.memory-card-day-tag {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: rgba(43, 33, 31, 0.7);
+  color: #ffffff;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.memory-card-info-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.memory-card-place-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink, #2b211f);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.memory-card-time-loc {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--muted, #756862);
+}
+
+.memory-card-note-box {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 6px 8px;
+  border: 1px dashed rgba(147, 5, 0, 0.14);
+  font-size: 11px;
+  color: var(--ink, #2b211f);
+  line-height: 1.4;
+}
+
+.memory-card-note-edit-area {
+  width: 100%;
+  border: 1px solid rgba(147, 5, 0, 0.2);
+  border-radius: 6px;
+  padding: 6px;
+  font-size: 11px;
+  font-family: inherit;
+  color: var(--ink, #2b211f);
+  resize: vertical;
+  min-height: 48px;
+  background: #ffffff;
+}
+
+.memory-card-bottom-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(147, 5, 0, 0.06);
+}
+
+.memory-privacy-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(147, 5, 0, 0.15);
+  background: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.memory-privacy-toggle-btn.is-public {
+  background: rgba(147, 5, 0, 0.08);
+  color: var(--sangria, #930500);
+  border-color: rgba(147, 5, 0, 0.25);
+}
+
+.memory-privacy-toggle-btn.is-private {
+  background: rgba(117, 104, 98, 0.08);
+  color: var(--muted, #756862);
+  border-color: rgba(117, 104, 98, 0.2);
+}
+
+.memory-card-edit-btn {
+  border: none;
+  background: transparent;
+  color: var(--sangria, #930500);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+
+/* 7. "Worth It" Review Section (值不值复盘) */
+.memory-worthit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.memory-worthit-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fdfbf7;
+  border: 1px solid rgba(147, 5, 0, 0.08);
+}
+
+.memory-worthit-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.memory-worthit-name {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ink, #2b211f);
+}
+
+.memory-worthit-desc {
+  font-size: 10px;
+  color: var(--muted, #756862);
+}
+
+.memory-worthit-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.memory-worthit-btn {
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(117, 104, 98, 0.2);
+  background: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted, #756862);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.memory-worthit-btn.is-active-worth {
+  background: rgba(147, 5, 0, 0.08);
+  color: var(--sangria, #930500);
+  border-color: var(--sangria, #930500);
+  font-weight: 850;
+}
+
+.memory-worthit-btn.is-active-mixed {
+  background: #f5f5f4;
+  color: var(--ink, #2b211f);
+  border-color: var(--ink, #2b211f);
+  font-weight: 850;
+}
+
+.memory-worthit-btn.is-active-skip {
+  background: #f5f5f4;
+  color: var(--muted, #756862);
+  border-color: var(--muted, #756862);
+  font-weight: 850;
+}
+
+.memory-ai-hint-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(147, 5, 0, 0.04);
+  border-left: 3px solid var(--sangria, #930500);
+  font-size: 10px;
+  color: var(--muted, #756862);
+}
+
+.memory-ai-hint-badge svg {
+  color: var(--sangria, #930500);
+}
+
+/* 8. Said vs Done Comparison Section (说的和做的对比) */
+.memory-said-done-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.memory-said-done-simple-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fdfbf7;
+  border: 1px solid rgba(147, 5, 0, 0.08);
+}
+
+.memory-said-done-simple-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.memory-said-done-simple-left .memory-said-done-topic {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ink, #2b211f);
+}
+
+.memory-said-done-simple-left .memory-col-text {
+  font-size: 10px;
+  color: var(--muted, #756862);
+  line-height: 1.35;
+}
+
+
+.memory-said-done-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #fdfbf7;
+  border: 1px solid rgba(147, 5, 0, 0.08);
+}
+
+.memory-said-done-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.memory-said-done-topic {
+  font-size: 12px;
+  font-weight: 850;
+  color: var(--ink, #2b211f);
+}
+
+.memory-said-done-gap-badge {
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.gap-matched {
+  background: rgba(43, 33, 31, 0.08);
+  color: var(--ink, #2b211f);
+}
+
+.gap-shifted {
+  background: rgba(147, 5, 0, 0.08);
+  color: var(--sangria, #930500);
+}
+
+.memory-said-done-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.memory-said-col,
+.memory-done-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 10px;
+}
+
+.memory-said-col {
+  background: #ffffff;
+  border: 1px solid rgba(117, 104, 98, 0.15);
+}
+
+.memory-done-col {
+  background: rgba(147, 5, 0, 0.03);
+  border: 1px solid rgba(147, 5, 0, 0.12);
+}
+
+.memory-col-label {
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--muted, #756862);
+  text-transform: uppercase;
+}
+
+.memory-col-text {
+  font-size: 11px;
+  color: var(--ink, #2b211f);
+  line-height: 1.35;
+}
+
+.memory-said-done-insight {
+  font-size: 10px;
+  color: var(--muted, #756862);
+  line-height: 1.4;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(43, 33, 31, 0.03);
+}
+
+.memory-said-done-insight strong {
+  color: var(--ink, #2b211f);
+}
+
+/* 9. Budget vs Actual Spend Review Section (预算 vs 实际花费复盘) */
+.memory-budget-total-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(147, 5, 0, 0.05);
+  border: 1px solid rgba(147, 5, 0, 0.1);
+}
+
+.memory-budget-total-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted, #756862);
+}
+
+.memory-budget-total-num {
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--ink, #2b211f);
+}
+
+.memory-budget-categories-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.memory-budget-cat-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fdfbf7;
+  border: 1px solid rgba(147, 5, 0, 0.08);
+}
+
+.memory-budget-cat-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ink, #2b211f);
+}
+
+.memory-budget-cat-nums {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--ink, #2b211f);
+}
+
+.memory-budget-diff-tag {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.diff-over {
+  background: rgba(147, 5, 0, 0.1);
+  color: var(--sangria, #930500);
+}
+
+.diff-under {
+  background: rgba(43, 33, 31, 0.08);
+  color: var(--ink, #2b211f);
+}
+
+.diff-on-track {
+  background: #f5f5f4;
+  color: var(--muted, #756862);
+}
+
+.memory-budget-bar-track {
+  height: 6px;
+  border-radius: 999px;
+  background: #e7e5e4;
+  overflow: hidden;
+  position: relative;
+}
+
+.memory-budget-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--ink, #2b211f);
+  transition: width 0.3s ease;
+}
+
+.memory-budget-bar-fill.is-over {
+  background: var(--sangria, #930500);
+}
+
+.memory-cat-satisfaction-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 4px;
+  border-top: 1px dashed rgba(147, 5, 0, 0.08);
+}
+
+.memory-cat-satisfaction-label {
+  font-size: 9px;
+  color: var(--muted, #756862);
+  font-weight: 700;
+}
+
+.memory-cat-satisfaction-toggles {
+  display: flex;
+  gap: 4px;
+}
+
+.memory-cat-satisfaction-toggles button {
+  padding: 3px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(117, 104, 98, 0.2);
+  background: #ffffff;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--muted, #756862);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.memory-cat-satisfaction-toggles button.is-selected {
+  background: var(--sangria, #930500);
+  color: #ffffff;
+  border-color: var(--sangria, #930500);
+}
+
+/* 10. Decision History Review Section (Group 专属) */
+.memory-decision-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.memory-decision-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #fdfbf7;
+  border: 1px solid rgba(147, 5, 0, 0.08);
+}
+
+.memory-decision-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.memory-decision-topic {
+  font-size: 13px;
+  font-weight: 850;
+  color: var(--ink, #2b211f);
+}
+
+.memory-decision-gacha-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(147, 5, 0, 0.08);
+  color: var(--sangria, #930500);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.memory-decision-detail-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+}
+
+.memory-decision-row {
+  display: flex;
+  gap: 6px;
+  line-height: 1.35;
+}
+
+.memory-decision-row strong {
+  flex: 0 0 65px;
+  color: var(--muted, #756862);
+  font-size: 10px;
+}
+
+.memory-decision-row span {
+  color: var(--ink, #2b211f);
+  flex: 1;
+}
+
+/* 11. AI Preference Evolution Card (自适应行为学习) */
+.memory-ai-evolution-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
+  border: 1.5px solid rgba(147, 5, 0, 0.16);
+  box-shadow: 0 4px 16px rgba(43, 33, 31, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.memory-ai-evolution-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.memory-ai-evolution-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 850;
+  color: var(--ink, #2b211f);
+}
+
+.memory-ai-evolution-title svg {
+  color: var(--sangria, #930500);
+}
+
+.memory-ai-status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(147, 5, 0, 0.08);
+  color: var(--sangria, #930500);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.memory-ai-desc {
+  font-size: 11px;
+  color: var(--muted, #756862);
+  line-height: 1.45;
+}
+
+.memory-ai-tags-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.memory-ai-learning-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #fdfbf7;
+  border: 1px solid rgba(147, 5, 0, 0.08);
+  font-size: 10px;
+  color: var(--ink, #2b211f);
+  font-weight: 600;
+}
+
+.memory-ai-learning-item svg {
+  color: var(--sangria, #930500);
+  flex: 0 0 14px;
+}
+
+.memory-ai-learning-item strong {
+  color: var(--ink, #2b211f);
+}
+
+/* Responsive Narrow Layouts */
+@media (max-width: 390px) {
+  .memory-said-done-columns {
+    grid-template-columns: 1fr;
+  }
+  .memory-hero-metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
