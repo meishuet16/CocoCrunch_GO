@@ -183,10 +183,8 @@ describe('ExploreScreen (Community Trip Explore)', () => {
     );
 
     expect(html).toContain('DESTINATIONS COVERED');
-    expect(html).toContain('3 regions mapped · 12 community itineraries');
-    expect(html).toContain('Tokyo');
-    expect(html).toContain('Kyoto');
-    expect(html).toContain('Osaka');
+    expect(html).not.toContain('3 regions mapped · 12 community itineraries');
+    expect(html).not.toContain('Rotate the real-color Earth');
     expect(html).toContain('100%');
     expect(html).toContain('Explicit Sharing');
     // Verifies rotatable earth canvas and YouTube-style fullscreen icon button
@@ -302,7 +300,7 @@ describe('ExploreScreen (Community Trip Explore)', () => {
     expect(html).toContain('View Full Plan');
   });
 
-  it('renders ExplorePlaceCard with fit %, metrics, explainability, and governance subnote in group mode', () => {
+  it('renders ExplorePlaceCard with fit %, metrics, and explainability in group mode', () => {
     const place = mockPlaces[0];
     const html = renderToStaticMarkup(
       <ExplorePlaceCard
@@ -327,7 +325,7 @@ describe('ExploreScreen (Community Trip Explore)', () => {
     expect(html).toContain('Food-first anchor with an easy morning slot.');
     expect(html).toContain('Suggest to group');
     expect(html).toContain('Local prototype catalog');
-    expect(html).toContain('Suggestion creates a candidate; official group itinerary updates only upon consensus.');
+    expect(html).not.toContain('Suggestion creates a candidate; official group itinerary updates only upon consensus.');
   });
 
   it('truthfully exposes fallback source when destination is unknown', () => {

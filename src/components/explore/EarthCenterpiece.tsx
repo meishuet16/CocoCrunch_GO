@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Compass, MapPin, Maximize2 } from 'lucide-react';
+import { Compass, Maximize2 } from 'lucide-react';
 import { RotatableEarth, type EarthMarker } from './RotatableEarth';
 import { EarthFullscreenModal } from './EarthFullscreenModal';
 
@@ -70,33 +70,6 @@ export const EarthCenterpiece: React.FC<EarthCenterpieceProps> = ({
             <Compass size={13} className="earth-kicker-icon" />
             <span>DESTINATIONS COVERED</span>
           </div>
-          <h3 className="earth-heading">
-            {destinationsCovered.length} regions mapped · {totalItineraries} community itineraries
-          </h3>
-          <p className="earth-subcopy">
-            Rotate the real-color Earth to explore travel footprints, or open full screen to review past trip outcomes.
-          </p>
-
-          <div className="earth-destination-pills" role="tablist" aria-label="Destinations covered">
-            {destinationsCovered.map(dest => {
-              const isActive = activeDestination.toLowerCase() === dest.toLowerCase();
-              return (
-                <button
-                  key={dest}
-                  type="button"
-                  role="tab"
-                  aria-selected={isActive}
-                  className={`earth-dest-pill ${isActive ? 'active' : ''}`}
-                  onClick={() => onSelectDestination?.(dest)}
-                >
-                  <MapPin size={11} />
-                  <span>{dest}</span>
-                  {isActive && <span className="earth-pill-active-dot" />}
-                </button>
-              );
-            })}
-          </div>
-
           <div className="earth-stats-bar">
             <div className="earth-stat-item">
               <b>{destinationsCovered.length}</b>

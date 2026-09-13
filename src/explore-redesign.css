@@ -1707,6 +1707,31 @@
   color: var(--cream-soft);
 }
 
+/* Community cards use the same quiet paper controls as the rest of Explore. */
+.trip-summary-preview {
+  background: var(--paper) !important;
+  border-color: var(--line) !important;
+  border-radius: var(--radius) !important;
+}
+
+.trip-card-footer {
+  gap: 6px;
+}
+
+.like-button,
+.save-action-pill,
+.view-plan-cta {
+  min-height: 36px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  color: var(--sangria);
+  box-shadow: none;
+}
+
+.view-plan-cta {
+  padding: 7px 10px;
+}
 /* ==========================================================================
    4. DISCOVERY LENS (Tingo Integration)
    ========================================================================== */

@@ -7,7 +7,6 @@ import {
 import { EarthCenterpiece } from './EarthCenterpiece';
 import { CommunityTripCard, type CommunityTripItem } from './CommunityTripCard';
 import { ExplorePlaceCard, type PlaceCandidate } from './ExplorePlaceCard';
-import { ExplorePlanningGuide } from '../JourneyPhaseGuide';
 import type { TingoDimensions, TingoBehavior } from '../../domain/tingo';
 import { getCommunityTripCover, getStopThumbnail, getPlacePhoto } from './explorePhotos';
 
@@ -523,17 +522,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
 
   return (
     <div className="explore-screen modern-explore" role="region" aria-label="Community Trip Explore">
-      {/* 1. Header Section */}
-      <header className="explore-page-header">
-        <div className="explore-header-lockup">
-          <h2 className="explore-title">Explore</h2>
-        </div>
-      </header>
-
-      {/* Governance Planning Guide */}
-      <ExplorePlanningGuide onOpenTrip={onOpenTripPlanning} />
-
-      {/* 2. Top Section (Search & Discovery) */}
+      {/* Top Section (Search & Discovery) */}
       <section className="explore-search-discovery-section" aria-label="Search and Discovery">
         {/* Search Row: Search Input + Country Filter Button on the same level */}
         <div className="explore-search-row">

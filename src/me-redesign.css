@@ -1502,5 +1502,16 @@
 
 .tab-me .me-tingo-card.redesign-card .me-chip-row,
 .tab-me .me-tingo-card.is-complete .me-chip-row {
-  justify-content: center !important;
+  justify-content: flex-start !important;
+  flex-wrap: nowrap !important;
+  gap: 4px !important;
+  margin-left: 0 !important;
+}
+
+.tab-me .me-tingo-card.redesign-card .me-chip-row small,
+.tab-me .me-tingo-card.is-complete .me-chip-row small {
+  min-height: 22px !important;
+  padding: 3px 6px !important;
+  font-size: 9px !important;
+  white-space: nowrap !important;
 }
