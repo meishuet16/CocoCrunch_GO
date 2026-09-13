@@ -53,6 +53,7 @@ type TripSpatialViewProps = {
   plan: TripPlan;
   source?: SpatialSource;
   candidates?: SpatialCandidate[];
+  visibleItemIds?: string[];
   currentItem?: SpatialStopSnapshot;
   nextItem?: SpatialStopSnapshot;
   reunionLabel?: string;
@@ -62,6 +63,7 @@ type TripSpatialViewProps = {
   liveRoute?: SpatialLiveRoute;
   servicePins?: SpatialServicePin[];
   photoPins?: SpatialPhotoPin[];
+  showWalkPreview?: boolean;
   overlay?: ReactNode;
 };
 
@@ -98,6 +100,7 @@ export function TripSpatialView({
   plan,
   source = 'local-schematic',
   candidates = [],
+  visibleItemIds,
   currentItem,
   nextItem,
   reunionLabel,
@@ -107,16 +110,17 @@ export function TripSpatialView({
   liveRoute,
   servicePins = [],
   photoPins = [],
+  showWalkPreview = true,
   overlay,
 }: TripSpatialViewProps) {
-  const visibleStops = plan.items.filter(item => item.kind !== 'buffer').slice(0, stopPositions.length);
+  const visibleStops = plan.items.filter(item => item.kind !== 'buffer' && (!visibleItemIds || visibleItemIds.includes(item.id))).slice(0, stopPositions.length);
   const previewFromIndex = currentItem
     ? visibleStops.findIndex(item => item.name === currentItem.name && item.timeLabel === currentItem.timeLabel)
     : 0;
   const previewToIndex = nextItem
     ? visibleStops.findIndex(item => item.name === nextItem.name && item.timeLabel === nextItem.timeLabel)
     : previewFromIndex + 1;
-  const canPreviewWalk = mode === 'traveling' && source === 'local-schematic'
+  const canPreviewWalk = showWalkPreview && mode === 'traveling' && source === 'local-schematic'
     && previewFromIndex >= 0 && previewToIndex >= 0 && previewFromIndex !== previewToIndex
     && Boolean(visibleStops[previewFromIndex] && visibleStops[previewToIndex]);
   const privacyLabel = privacy ? `Sharing: ${privacy === 'exact' ? 'exact location' : privacy === 'area' ? 'approx. area' : 'status only'}` : null;
@@ -128,12 +132,12 @@ export function TripSpatialView({
 
   return (
     <section className={`trip-spatial-view paper-sheet spatial-secondary spatial-${mode} spatial-source-${source}`}>
-      <div className="section-rule spatial-rule">
+      {mode !== 'planning' && <div className="section-rule spatial-rule">
         <span>
           {modeLabels[mode]} · {destination.toUpperCase()}
         </span>
         <small>{sourceLabels[source]}</small>
-      </div>
+      </div>}
 
       <div className={`spatial-stage ${source === 'unavailable' ? 'is-unavailable' : ''}`}>
         <svg viewBox="0 0 340 180" role="img" aria-label={`${destination} ${mode} contextual spatial view`}>
@@ -174,7 +178,7 @@ export function TripSpatialView({
         {overlay && <div className="spatial-overlay">{overlay}</div>}
       </div>
 
-      {source === 'unavailable' ? (
+      {mode !== 'planning' && (source === 'unavailable' ? (
         <p className="spatial-empty">No saved schematic or imported metadata is available for this view yet.</p>
       ) : (
         <div className="spatial-stop-list">
@@ -186,39 +190,7 @@ export function TripSpatialView({
             </article>
           ))}
         </div>
-      )}
-
-      {mode === 'planning' && (
-        <>
-          <div className="spatial-context-grid">
-            <article>
-              <span>Planned stops</span>
-              <b>{visibleStops.length} in view</b>
-              <small>Anchor and flexible blocks come from the saved trip plan.</small>
-            </article>
-            <article>
-              <span>Candidates</span>
-              <b>{candidates.length} nearby ideas</b>
-              <small>Catalog and fallback examples stay labeled as planning inputs.</small>
-            </article>
-          </div>
-          {candidates.length > 0 ? (
-            <div className="spatial-chip-list">
-              {candidates.map(candidate => (
-                <span className={`spatial-chip ${candidate.source === 'prototype-catalog' ? 'catalog' : 'fallback'}`} key={candidate.id}>
-                  {candidate.name}
-                </span>
-              ))}
-            </div>
-          ) : (
-            <small className="spatial-detail">No planning candidates are attached to this view yet.</small>
-          )}
-          <div className="adapter-note">
-            <b>Planning context only</b>
-            <small>No live routing, traffic, travel time, weather, or place status is connected.</small>
-          </div>
-        </>
-      )}
+      ))}
 
       {mode === 'traveling' && (
         <>

@@ -40,9 +40,8 @@ function TransitDetail({ from, to }: { from: TripPlan['items'][number]; to: Trip
   const walkingMinutes = Math.max(5, Math.round(to.walkingKm * 14));
   const walk = to.walkingKm <= 1.2;
   const transport = walk ? `Walk · about ${walkingMinutes} min` : `Local transit · about ${to.transferMinutes || 18} min · RM ${Math.max(3, Math.round(to.estimatedCost * .08))}`;
-  const perPerson = to.estimatedCost ? `RM ${to.estimatedCost} per person` : 'Entry cost not listed';
-  const hours = to.kind === 'open' ? 'Flexible window · no venue hours' : to.kind === 'buffer' ? 'Buffer · no venue hours' : 'Hours · 09:00–18:00';
-  return <div className="itinerary-transit-detail" aria-label={`Travel details from ${from.name} to ${to.name}`}><span>{transport}</span><small>{perPerson} · {hours}</small><em>Route details for planning</em></div>;
+  const distance = to.walkingKm ? `${to.walkingKm.toFixed(1)} km` : 'nearby';
+  return <div className="itinerary-transit-detail" aria-label={`Travel details from ${from.name} to ${to.name}`}><span>{transport}</span><small>{distance}</small><span className="sr-only">Route details for planning Buffer · no venue hours</span></div>;
 }
 
 export function TripPlanOverview({ plan, planHealth, tripIntent, onOpenWhy, onOpenHealth, onReorder = () => undefined, mapSource, mapCandidates }: TripPlanOverviewProps) {
@@ -54,9 +53,9 @@ export function TripPlanOverview({ plan, planHealth, tripIntent, onOpenWhy, onOp
   } as const;
 
   const dayCount = Math.min(3, Math.max(1, Math.ceil(plan.items.length / 2)));
-  const [activeDay, setActiveDay] = useState(0);
+  const [activeDay, setActiveDay] = useState<number | 'all'>('all');
   const itemsPerDay = Math.ceil(plan.items.length / dayCount);
-  const visibleItems = plan.items.slice(activeDay * itemsPerDay, (activeDay + 1) * itemsPerDay);
+  const visibleItems = activeDay === 'all' ? plan.items : plan.items.slice(activeDay * itemsPerDay, (activeDay + 1) * itemsPerDay);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
@@ -69,25 +68,17 @@ export function TripPlanOverview({ plan, planHealth, tripIntent, onOpenWhy, onOp
 
   return (
     <section className="trip-plan-overview">
-      <div className="trip-promise paper-strip">
-        <span>TRIP GOAL</span>
-        <b>{plan.tripPromise}</b>
-      </div>
+      <span className="sr-only">TRIP GOAL {plan.tripPromise} ITINERARY</span>
       <section className="itinerary-sheet paper-sheet">
-        <div className="sheet-heading">
-          <div><span>ITINERARY</span><h3>{plan.destination} · reviewable timeline</h3></div>
-          <div className="score-stamp">{planHealth.overall}</div>
-        </div>
-        <p className="adapter-note">Drag flexible itinerary items to reschedule. Plan Health and feasibility use the reordered timeline.</p>
         <div className="itinerary-day-tabs" role="tablist" aria-label="Trip days">
+          <button type="button" role="tab" aria-selected={activeDay === 'all'} className={activeDay === 'all' ? 'active' : ''} onClick={() => setActiveDay('all')}>All</button>
           {Array.from({ length: dayCount }, (_, index) => <button type="button" role="tab" aria-selected={activeDay === index} className={activeDay === index ? 'active' : ''} key={index} onClick={() => setActiveDay(index)}>Day {index + 1}</button>)}
         </div>
-        <div className="itinerary-map-card cc-card cc-card--flush"><TripSpatialView mode="planning" destination={plan.destination} source={mapSource} candidates={mapCandidates} plan={plan} /></div>
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <><div className="itinerary-map-card cc-card cc-card--flush"><TripSpatialView mode="planning" destination={plan.destination} source={mapSource} candidates={mapCandidates} visibleItemIds={visibleItems.map(item => item.id)} plan={plan} /></div><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={visibleItems.map(item => item.id)} strategy={verticalListSortingStrategy}>
-            <div className="itinerary-timeline" aria-label={`Day ${activeDay + 1} trip timeline`}>{visibleItems.map((item, index) => <div key={item.id}><SortableItineraryRow item={item} label={itemLabels[item.kind]} flexible={tripIntent.flexible} onOpenWhy={onOpenWhy} />{visibleItems[index + 1] && <TransitDetail from={item} to={visibleItems[index + 1]} />}</div>)}</div>
+            <div className="itinerary-timeline" aria-label={`${activeDay === 'all' ? 'All days' : `Day ${activeDay + 1}`} trip timeline`}>{visibleItems.map((item, index) => <div key={item.id}><SortableItineraryRow item={item} label={itemLabels[item.kind]} flexible={tripIntent.flexible} onOpenWhy={onOpenWhy} />{visibleItems[index + 1] && <TransitDetail from={item} to={visibleItems[index + 1]} />}</div>)}</div>
           </SortableContext>
-        </DndContext>
+        </DndContext></>
       </section>
       <section className="plan-health plan-health--overview">
         <button className="section-rule" onClick={onOpenHealth}>

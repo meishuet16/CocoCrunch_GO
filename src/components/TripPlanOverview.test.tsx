@@ -124,7 +124,7 @@ describe('TripPlanOverview', () => {
     expect(html).toContain('Buffer / breathing room');
     expect(html).toContain('Day 1');
     expect(html).toContain('Day 2');
-    expect(html).toContain('MAP · TOKYO');
+    expect(html).toContain('spatial-stage');
     expect(html).toContain('itinerary-row-thumb');
     expect(html).toContain('10:00');
     expect(html).toContain('Why this?');

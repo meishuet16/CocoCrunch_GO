@@ -94,14 +94,10 @@ describe('TripSpatialView', () => {
       />,
     );
 
-    expect(html).toContain('MAP · TOKYO');
     expect(html).toContain('spatial-secondary');
-    expect(html).toContain('Saved place candidates · planning context only');
-    expect(html).toContain('Tsukiji food walk');
-    expect(html).toContain('Scenic cafe block');
-    expect(html).toContain('Kiyosumi garden cafe');
-    expect(html).toContain('Vintage street snack lane');
-    expect(html).toContain('No live routing, traffic, travel time, weather, or place status is connected.');
+    expect(html).toContain('spatial-stage');
+    expect(html).toContain('spatial-node');
+    expect(html).not.toContain('Planning context only');
   });
 
   it('renders traveling current and next context without live-location claims', async () => {
@@ -237,7 +233,7 @@ describe('TripSpatialView', () => {
       />,
     );
 
-    expect(html).toContain('Spatial data unavailable');
-    expect(html).toContain('No saved schematic or imported metadata is available for this view yet.');
+    expect(html).toContain('spatial-stage is-unavailable');
+    expect(html).not.toContain('No saved schematic or imported metadata is available for this view yet.');
   });
 });

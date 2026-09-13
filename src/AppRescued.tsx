@@ -116,6 +116,29 @@ type TripSetupLocationMethod = 'manual' | 'recommendation' | 'link';
 type TripReference = { destination: string; tripVibe: string; budget: number; title: string };
 type GroupSetupStep = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 type TripListEntry = { id: string; name: string; destination: string; mode: TripMode; status: 'planning' | 'active' | 'ongoing' | 'completed'; createdAt: string };
+type BookingPage = 'flight' | 'accommodation';
+type BookingOffer = { id: string; provider: string; logo: string; price: string; originalPrice: string; route: string; timing: string; detail: string; perks: string[] };
+type PlanPlaceLabel = 'Must-Go' | 'Deal Breaker' | 'Preference' | 'Flexible';
+type DraftPlanPlace = { id: number; name: string; label: PlanPlaceLabel };
+
+function PlanSketchMap({ places, route = false }: { places: DraftPlanPlace[]; route?: boolean }) {
+  const points = places.map((place, index) => ({
+    ...place,
+    x: [19, 61, 39, 77, 24, 66][index % 6],
+    y: [69, 27, 48, 71, 25, 52][index % 6],
+  }));
+  const routePoints = points.map(point => `${point.x},${point.y}`).join(' ');
+  return <div className="plan-sketch-map" aria-label={route ? 'Generated route map' : 'Pinned places map'}>
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <path className="plan-map-water" d="M-8 18 C18 5 33 22 47 11 S74 3 110 14 L110 34 C81 23 70 42 48 29 S15 37 -8 31Z" />
+      <path className="plan-map-street plan-map-street--one" d="M-5 74 C19 58 35 66 51 49 S76 42 105 20" />
+      <path className="plan-map-street plan-map-street--two" d="M12 -4 C31 20 26 39 47 57 S74 82 95 105" />
+      <path className="plan-map-street plan-map-street--three" d="M-4 42 C21 38 41 34 55 47 S81 64 108 60" />
+      {route && points.length > 1 && <polyline className="plan-map-route-line" points={routePoints} />}
+    </svg>
+    {points.map((point, index) => <span className="plan-sketch-pin" style={{ left: `${point.x}%`, top: `${point.y}%` }} key={point.id}><i>{index + 1}</i><b>{point.name}</b></span>)}
+  </div>;
+}
 
 function reorderedPlan(plan: TripPlan, order: string[]): TripPlan {
   const byId = new globalThis.Map(plan.items.map(item => [item.id, item]));
@@ -132,6 +155,7 @@ function reorderedPlan(plan: TripPlan, order: string[]): TripPlan {
 
 export function deriveTripLifecycleStatus({ tripCreated, readyConfirmed, dates, phase, now = new Date() }: { tripCreated: boolean; readyConfirmed: boolean; dates: TripIntent['dates']; phase: TripPhase; now?: Date }): TripLifecycleStatus {
   if (phase === 'completed') return 'completed';
+  if (phase === 'traveling') return 'ongoing';
   if (!tripCreated || !readyConfirmed || !dates?.start) return 'planning';
   const departure = new Date(`${dates.start}T00:00:00`);
   if (Number.isNaN(departure.getTime())) return 'planning';
@@ -486,8 +510,23 @@ export default function AppRescued() {
   const [tripList, setTripList] = useState<TripListEntry[]>(stored.tripList ?? []);
   const [currentTripListId, setCurrentTripListId] = useState<string | null>(null);
   const [planningContentOpen, setPlanningContentOpen] = useState(false);
+  const [ongoingView, setOngoingView] = useState<'menu' | 'routing'>('menu');
   const [flightPageOpen, setFlightPageOpen] = useState(false);
   const [flightView, setFlightView] = useState<'not-booked' | 'booked'>('not-booked');
+  const [bookingPage, setBookingPage] = useState<BookingPage | null>(null);
+  const [bookingView, setBookingView] = useState<'not-booked' | 'booked'>('not-booked');
+  const [expandedBookingOffer, setExpandedBookingOffer] = useState<string | null>(null);
+  const [paymentOffer, setPaymentOffer] = useState<BookingOffer | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'wallet'>('card');
+  const [paymentComplete, setPaymentComplete] = useState(false);
+  const [bookingSearch, setBookingSearch] = useState('');
+  const [bookingSort, setBookingSort] = useState<'recommended' | 'lowest'>('recommended');
+  const [planPlaceQuery, setPlanPlaceQuery] = useState('');
+  const [planAiSuggestionsVisible, setPlanAiSuggestionsVisible] = useState(false);
+  const [planDraftPlaces, setPlanDraftPlaces] = useState<DraftPlanPlace[]>([]);
+  const [planGenerated, setPlanGenerated] = useState(false);
+  const [planSuggestionDetailsId, setPlanSuggestionDetailsId] = useState<number | null>(null);
+  const [groupWorkspaceView, setGroupWorkspaceView] = useState<'tasks' | 'chat' | 'change'>('tasks');
   const [tripSetupStep, setTripSetupStep] = useState<TripSetupStep>(1);
   const [tripSetupLocationMethod, setTripSetupLocationMethod] = useState<TripSetupLocationMethod>('manual');
   const [tripSetupPrompt, setTripSetupPrompt] = useState('');
@@ -602,7 +641,7 @@ export default function AppRescued() {
   const categoryVariance = budgetVariance(budgetPlan, budgetActuals);
   const budgetLearningNotes = budgetLearning(budgetActuals, budgetPlan);
   const travellerCount = mode === 'group' ? members.filter(member => member.inviteStatus === 'joined').length : 1;
-  const destinationCandidates = useMemo(() => recommendations.map((place, index) => candidateFromDiscovery(place, index)), [recommendations]);
+  const destinationCandidates = useMemo(() => recommendations.filter(place => place.added).map((place, index) => candidateFromDiscovery(place, index)), [recommendations]);
   const resolvedConflictLabels = useMemo(() => courtConfirmed ? [activeConflict] : [], [courtConfirmed, activeConflict]);
   const baseTripPlan = useMemo(() => generateTripPlan({
     destination: tripIntent.destination,
@@ -955,6 +994,7 @@ export default function AppRescued() {
   }
 
   function openTrip() {
+    if (tripLifecycleStatus === 'active') setTripPhase('traveling');
     setTripWorkspaceOpen(true);
     setTab('trips');
   }
@@ -1185,7 +1225,6 @@ export default function AppRescued() {
         <button className="home-current-trip-card cc-card" onClick={openTrip}>
           <div><span>{workspacePhase === 'traveling' ? 'Travelling now' : 'Departure ahead'}</span><b>{destination}</b><small>Plan health {planHealth.overall}/100 · {groupStatus}</small></div><ChevronRight size={18} aria-hidden="true" />
         </button>
-        <TripJourneyStatus state={journeyState} destination={destination} onAction={handleJourneyAction} />
       </section>
       <section className="home-shortcuts" aria-label="Trip shortcuts">
         <button className="cc-card" onClick={openTrip}><Calendar size={20} /><span>Plan</span></button>
@@ -1249,6 +1288,10 @@ export default function AppRescued() {
     setGroupMemberDestinations({});
     setGroupUsernameSearch('');
     setMembers([]);
+    setPlanPlaceQuery('');
+    setPlanAiSuggestionsVisible(false);
+    setPlanDraftPlaces([]);
+    setPlanGenerated(false);
     setDrawer('tripSetup');
   }
 
@@ -1377,20 +1420,76 @@ export default function AppRescued() {
     </div>;
   }
 
+  function openBookingPage(page: BookingPage) {
+    setBookingPage(page);
+    setBookingView('not-booked');
+    setExpandedBookingOffer(null);
+    setPaymentOffer(null);
+    setPaymentComplete(false);
+    setBookingSearch('');
+    setBookingSort('recommended');
+  }
+
+  function renderBookingPage() {
+    if (!bookingPage) return null;
+    const isFlight = bookingPage === 'flight';
+    const title = isFlight ? 'Flight & Transport' : 'Accommodation';
+    const offers: BookingOffer[] = isFlight ? [
+      { id: 'airasia', provider: 'AirAsia', logo: 'airasia', price: 'RM 688', originalPrice: 'RM 738', route: 'KUL → Tokyo', timing: '09:15 → 16:40 · 7h 25m', detail: '1 stop in Bangkok · cabin bag included', perks: ['7 kg cabin bag', 'Seat selection', 'COCO10 voucher'] },
+      { id: 'sia', provider: 'Singapore Airlines', logo: 'SIA', price: 'RM 742', originalPrice: 'RM 782', route: 'KUL → Tokyo', timing: '08:40 → 15:35 · 6h 55m', detail: '1 stop in Singapore · meals included', perks: ['25 kg checked bag', 'Meal included', '1h 45m connection'] },
+      { id: 'mh', provider: 'Malaysia Airlines', logo: 'MH', price: 'RM 805', originalPrice: 'RM 850', route: 'KUL → Tokyo', timing: '10:20 → 16:50 · 6h 30m', detail: 'Direct flight · flexible change option', perks: ['Direct route', '20 kg checked bag', 'Changeable fare'] },
+    ] : [
+      { id: 'mimaru', provider: 'MIMARU Tokyo Ueno', logo: 'M', price: 'RM 1,280', originalPrice: 'RM 1,360', route: 'Ueno · Tokyo', timing: '12 Oct → 17 Oct · 5 nights', detail: 'Apartment stay · 8 min walk to Ueno Station', perks: ['Free cancellation', 'Private kitchen', '4.7 guest rating'] },
+      { id: 'sequence', provider: 'sequence SUIDOBASHI', logo: 'S', price: 'RM 1,095', originalPrice: 'RM 1,155', route: 'Suidobashi · Tokyo', timing: '12 Oct → 17 Oct · 5 nights', detail: 'Modern hotel · breakfast included', perks: ['Breakfast', '24h front desk', '4.5 guest rating'] },
+      { id: 'kanda', provider: 'Kanda Pocket Hotel', logo: 'K', price: 'RM 860', originalPrice: 'RM 910', route: 'Kanda · Tokyo', timing: '12 Oct → 17 Oct · 5 nights', detail: 'Compact central stay · pay at property', perks: ['Near JR station', 'Free Wi-Fi', 'Pay at property'] },
+    ];
+    const visibleOffers = offers
+      .filter(offer => `${offer.provider} ${offer.route}`.toLowerCase().includes(bookingSearch.trim().toLowerCase()))
+      .sort((a, b) => bookingSort === 'lowest' ? Number(a.price.replace(/[^0-9]/g, '')) - Number(b.price.replace(/[^0-9]/g, '')) : 0);
+    const booked = isFlight ? flightBooking : accommodationBooking;
+    const savePayment = () => {
+      if (!paymentOffer) return;
+      if (isFlight) setFlightBooking({ flightNumber: paymentOffer.id === 'mh' ? 'MH 088' : paymentOffer.id === 'sia' ? 'SQ 012' : 'AK 518', departureTime: paymentOffer.timing.split(' · ')[0], arrivalTime: paymentOffer.timing.split(' → ')[1]?.split(' · ')[0] ?? '16:40', checkInTime: '07:15', provider: paymentOffer.provider, sharedWithGroup: false, source: 'quote-prototype' });
+      else setAccommodationBooking({ propertyName: paymentOffer.provider, checkInTime: '12 Oct · 15:00', checkOutTime: '17 Oct · 11:00', cancellationDeadline: '09 Oct · 23:59', notes: paymentOffer.perks.join(' · '), provider: paymentOffer.provider, sharedWithGroup: false, source: 'quote-prototype' });
+      setPaymentComplete(true);
+    };
+    if (paymentOffer) return <section className="booking-page payment-page" aria-label="Payment"><button className="planning-back" aria-label={`Back to ${title}`} onClick={() => setPaymentOffer(null)}><ArrowLeft size={20} /></button><div className="planning-trip-title"><span>SECURE PAYMENT</span><h2>Review &amp; pay</h2><CocoCompanion context="planning" pose="action-journal" size={58} /></div>{paymentComplete ? <section className="payment-success cc-card"><Check size={28} /><h3>Booking confirmed</h3><p>{paymentOffer.provider} is now saved to this trip.</p><button className="primary" onClick={() => { setPaymentOffer(null); setBookingView('booked'); }}>View booking</button></section> : <><section className="payment-summary cc-card"><div className={`provider-logo ${paymentOffer.id}`}>{paymentOffer.logo}</div><div><b>{paymentOffer.provider}</b><small>{paymentOffer.route}</small><small>{paymentOffer.timing}</small></div><div className="payment-price"><del>{paymentOffer.originalPrice}</del><strong>{paymentOffer.price}</strong><small>CocoCrunch price</small></div></section><section className="payment-methods"><span>PAYMENT METHOD</span><button className={paymentMethod === 'card' ? 'active' : ''} onClick={() => setPaymentMethod('card')}><b>Card</b><small>Visa · Mastercard</small></button><button className={paymentMethod === 'wallet' ? 'active' : ''} onClick={() => setPaymentMethod('wallet')}><b>eWallet</b><small>Touch 'n Go eWallet</small></button></section>{paymentMethod === 'card' && <section className="payment-fields"><label className="setup-field"><span>Name on card</span><input placeholder="Cardholder name" /></label><label className="setup-field"><span>Card number</span><input inputMode="numeric" placeholder="1234  5678  9012  3456" /></label><div><label className="setup-field"><span>Expiry</span><input placeholder="MM / YY" /></label><label className="setup-field"><span>CVV</span><input inputMode="numeric" placeholder="•••" /></label></div></section>}<button className="primary payment-submit" onClick={savePayment}>Pay {paymentOffer.price}</button><small className="payment-note">Your booking details will be saved to this trip.</small></>}</section>;
+    return <section className="booking-page" aria-label={title}><button className="planning-back" aria-label="Back to planning" onClick={() => setBookingPage(null)}><ArrowLeft size={20} /></button><div className="planning-trip-title"><span>PLANNING PHASE</span><h2>{title}</h2><CocoCompanion context="planning" pose={isFlight ? 'action-transit' : 'action-bags'} size={70} /></div><div className="flight-page-tabs"><button className={bookingView === 'not-booked' ? 'active' : ''} onClick={() => setBookingView('not-booked')}>Not booked yet</button><button className={bookingView === 'booked' ? 'active' : ''} onClick={() => setBookingView('booked')}>Booked</button></div>{bookingView === 'booked' ? <section className="booking-upload cc-card">{booked ? <><div className="booking-confirmed"><Check size={20} /><div><b>{isFlight ? (booked as FlightBookingState).flightNumber : (booked as AccommodationBookingState).propertyName}</b><small>{isFlight ? (booked as FlightBookingState).departureTime : (booked as AccommodationBookingState).checkInTime}</small></div></div><button className="secondary" onClick={() => setBookingView('not-booked')}>Add another option</button></> : <><CocoCompanion context="planning" pose="action-journal" size={76} /><h3>Add an existing booking</h3><label className="setup-field"><span>Gmail, PDF, or confirmation file</span><input type="file" accept=".pdf,.eml,.msg,text/plain" /></label><button className="primary" onClick={() => isFlight ? setFlightBooking({ flightNumber: 'MH 772', departureTime: '12 Oct · 09:15', arrivalTime: '12 Oct · 16:40', checkInTime: '12 Oct · 07:15', provider: 'Uploaded confirmation', sharedWithGroup: false, source: 'email-prototype' }) : setAccommodationBooking({ propertyName: 'Uploaded stay', checkInTime: '12 Oct · 15:00', checkOutTime: '17 Oct · 11:00', cancellationDeadline: '09 Oct · 23:59', notes: 'Confirmation uploaded', provider: 'Uploaded confirmation', sharedWithGroup: false, source: 'email-prototype' })}>Save booking</button></>}</section> : <><section className="booking-search"><input value={bookingSearch} onChange={event => setBookingSearch(event.target.value)} placeholder={isFlight ? 'Search airline or route' : 'Search hotel or area'} /><select aria-label="Sort booking options" value={bookingSort} onChange={event => setBookingSort(event.target.value as 'recommended' | 'lowest')}><option value="recommended">Recommended</option><option value="lowest">Lowest price</option></select></section><section className="booking-offers">{visibleOffers.map(offer => <article className={`booking-offer cc-card ${expandedBookingOffer === offer.id ? 'expanded' : ''}`} key={offer.id}><div className="booking-offer-main"><span className={`provider-logo ${offer.id}`}>{offer.logo}</span><div><b>{offer.provider}</b><small>{offer.route}</small><small>{offer.timing}</small></div><div className="booking-price"><del>{offer.originalPrice}</del><strong>{offer.price}</strong></div></div><p>{offer.detail}</p>{expandedBookingOffer === offer.id && <ul>{offer.perks.map(perk => <li key={perk}><Check size={14} /> {perk}</li>)}</ul>}<div className="booking-offer-actions"><button className="secondary" onClick={() => setExpandedBookingOffer(current => current === offer.id ? null : offer.id)}>{expandedBookingOffer === offer.id ? 'Hide details' : 'Show details'}</button><button className="primary" onClick={() => setPaymentOffer(offer)}>Select</button></div></article>)}{visibleOffers.length === 0 && <p className="booking-no-results">No match found. Try another company or area.</p>}</section><button className="secondary booking-load-more">Load more</button></>}</section>;
+  }
+
   function renderTripWorkspace() {
+    if (bookingPage) return renderBookingPage();
     if (flightPageOpen) return <section className="flight-page"><button className="planning-back" aria-label="Back to planning" onClick={() => setFlightPageOpen(false)}><ArrowLeft size={20} /></button><div className="planning-trip-title"><span>PLANNING PHASE</span><h2>{destination}</h2><CocoCompanion context="planning" pose="action-transit" size={70} /></div><div className="flight-page-tabs"><button className={flightView === 'not-booked' ? 'active' : ''} onClick={() => setFlightView('not-booked')}>Not booked yet</button><button className={flightView === 'booked' ? 'active' : ''} onClick={() => setFlightView('booked')}>Booked</button></div>{flightView === 'not-booked' ? <section className="flight-offers"><article><b>AirAsia</b><span>RM 688</span><small>09:15 → 16:40 · 7h 25m</small><button className="primary">Continue to payment</button></article><article><b>Singapore Airlines</b><span>RM 742</span><small>08:40 → 15:35 · 6h 55m</small><button className="primary">Continue to payment</button></article><article><b>Malaysia Airlines</b><span>RM 805</span><small>10:20 → 16:50 · 6h 30m</small><button className="primary">Continue to payment</button></article></section> : <section className="flight-upload"><CocoCompanion context="planning" pose="action-journal" size={76} /><h3>Add your booking</h3><label className="setup-field"><span>Gmail, PDF, or confirmation file</span><input type="file" accept=".pdf,.eml,.msg,text/plain" /></label><button className="primary">Upload booking</button></section>}</section>;
-    if (workspacePhase === 'planning' && !planningContentOpen) return <section className="planning-launcher" aria-label="Trip planning"><button className="planning-back" aria-label="Back to Trips" onClick={openTripsIndex}><ArrowLeft size={20} /></button><div className="planning-trip-title"><span>PLANNING PHASE</span><h2>{groupName || destination}</h2><CocoCompanion context="planning" pose="scene-planning" size={70} /></div><div className="planning-launcher-grid"><button onClick={() => setFlightPageOpen(true)}><CocoCompanion context="planning" pose="action-transit" size={62} /><b>Flight &amp; Transport</b></button><button onClick={() => setPlanningContentOpen(true)}><CocoCompanion context="planning" pose="action-map" size={62} /><b>Plan</b></button><button onClick={() => setDrawer('accommodation')}><CocoCompanion context="planning" pose="action-bags" size={62} /><b>Accommodation</b></button><button onClick={openPacking}><CocoCompanion context="planning" pose="action-luggage" size={62} /><b>Luggage</b></button></div></section>;
+    if (workspacePhase === 'planning' && !planningContentOpen) return <section className="planning-launcher" aria-label="Trip planning"><button className="planning-back" aria-label="Back to Trips" onClick={openTripsIndex}><ArrowLeft size={20} /></button><div className="planning-trip-title"><span>PLANNING PHASE</span><h2>{groupName || destination}</h2><CocoCompanion context="planning" pose="scene-planning" size={70} /></div>{mode === 'group' && <><div className="group-workspace-tabs"><button className={groupWorkspaceView === 'tasks' ? 'active' : ''} onClick={() => setGroupWorkspaceView('tasks')}>Tasks</button><button className={groupWorkspaceView === 'chat' ? 'active' : ''} onClick={() => setGroupWorkspaceView('chat')}>Chat {groupCourtUnreadCount ? `· ${groupCourtUnreadCount}` : ''}</button><button className={groupWorkspaceView === 'change' ? 'active' : ''} onClick={() => setGroupWorkspaceView('change')}>Change task</button></div>{groupWorkspaceView === 'chat' ? <GroupChannel messages={groupChannelMessages} unreadCount={groupCourtUnreadCount} onMarkRead={() => setGroupCourtUnreadCount(0)} onSend={text => setGroupChannelMessages(messages => [...messages, { id: `message-${Date.now()}`, author: onboardingName || 'You', text, createdAt: 'Now' }])} /> : <section className="group-task-assignment cc-card"><b>{groupWorkspaceView === 'change' ? 'Assign team tasks' : 'Team tasks'}</b>{['Plan', 'Flight & Transport', 'Accommodation', 'Luggage'].map((task, index) => <button key={task} disabled={groupWorkspaceView !== 'change'} onClick={() => setGroupWorkspaceView('tasks')}><span>{task}</span><small>{responsibilitySuggestions[index]?.memberName ?? (onboardingName || 'Leader')}</small></button>)}</section>}</>}<div className="planning-launcher-grid"><button onClick={() => openBookingPage('flight')}><CocoCompanion context="planning" pose="action-transit" size={62} /><b>Flight &amp; Transport</b></button><button onClick={() => setPlanningContentOpen(true)}><CocoCompanion context="planning" pose="action-map" size={62} /><b>Plan</b></button><button onClick={() => openBookingPage('accommodation')}><CocoCompanion context="planning" pose="action-bags" size={62} /><b>Accommodation</b></button><button onClick={openPacking}><CocoCompanion context="planning" pose="action-luggage" size={62} /><b>Luggage</b></button></div></section>;
     return <>
-      <TripWorkspaceHeader destination={destination} mode={mode} travellerCount={travellerCount} planHealth={planHealth.overall} onBack={() => workspacePhase === 'planning' ? setPlanningContentOpen(false) : openTripsIndex()} />
-      <TripLifecycleTabs status={tripLifecycleStatus} />
-      <TripWorkspaceContext phase={workspacePhase} onExit={() => workspacePhase === 'planning' ? setPlanningContentOpen(false) : openTripsIndex()} />
-      <TripJourneyStatus state={journeyState} destination={destination} onAction={handleJourneyAction} />
-      <JourneyProgress destination={destination} currentPhase={workspacePhase} nextActionLabel={journeyState.nextAction?.label} />
+      {workspacePhase === 'completed' && <TripWorkspaceHeader destination={destination} mode={mode} travellerCount={travellerCount} planHealth={planHealth.overall} onBack={() => openTripsIndex()} />}
+      {workspacePhase === 'completed' && <TripLifecycleTabs status={tripLifecycleStatus} />}
+      {workspacePhase === 'completed' && <TripWorkspaceContext phase={workspacePhase} onExit={() => openTripsIndex()} />}
+      {workspacePhase === 'completed' && <TripJourneyStatus state={journeyState} destination={destination} onAction={handleJourneyAction} />}
+      {workspacePhase === 'completed' && <JourneyProgress destination={destination} currentPhase={workspacePhase} nextActionLabel={journeyState.nextAction?.label} />}
       {workspacePhase === 'planning' ? renderPlan() : workspacePhase === 'traveling' ? renderDuring() : renderMemories()}
     </>;
   }
 
+  function addPlanPlace(name: string, label: PlanPlaceLabel = 'Must-Go') {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    const matched = recommendations.find(place => place.name.toLowerCase() === trimmed.toLowerCase());
+    const id = matched?.id ?? Date.now();
+    if (!matched) setRecommendations(current => [...current, { id, name: trimmed, type: 'Saved place', match: 80, cost: 'RM 30 est.', duration: '1.5h', why: 'Added to this trip by you.', source: 'fallback', estimatedCost: 30, durationMinutes: 90, transferMinutes: 15, walkingKm: 1, indoor: false, tags: ['saved'], saved: true, added: true }]);
+    else setRecommendations(current => current.map(place => place.id === id ? { ...place, added: true } : place));
+    setPlanDraftPlaces(current => current.some(place => place.id === id) ? current : [...current, { id, name: trimmed, label }]);
+    setPlanPlaceQuery('');
+  }
+
+  function setPlanPlaceLabel(id: number, label: PlanPlaceLabel) {
+    setPlanDraftPlaces(current => current.map(place => place.id === id ? { ...place, label } : place));
+  }
+
   function renderPlan() {
+    const selectedPlanPlaces = planDraftPlaces.length ? planDraftPlaces : recommendations.filter(place => place.added).map(place => ({ id: place.id, name: place.name, label: 'Must-Go' as PlanPlaceLabel }));
+    if (!planGenerated) return <section className="plan-builder" aria-label="Build your plan"><section className="plan-search-card cc-card"><label className="setup-field"><span>Search a place</span><div className="plan-search-row"><input value={planPlaceQuery} onChange={event => setPlanPlaceQuery(event.target.value)} placeholder="Search a location or place" /><button className="primary" onClick={() => addPlanPlace(planPlaceQuery)}>Add</button></div></label><button className="secondary plan-ai-button" onClick={() => setPlanAiSuggestionsVisible(current => !current)}><Sparkles size={16} />AI suggestions</button>{planAiSuggestionsVisible && <div className="plan-suggestion-list">{recommendations.slice(0, 3).map(place => <article key={place.id}><div className="plan-suggestion-photo" /><div><b>{place.name}</b>{planSuggestionDetailsId === place.id && <section className="plan-place-details"><button className="plan-details-close" onClick={() => setPlanSuggestionDetailsId(null)}>×</button><b>{place.name}</b><small>{place.type} · {place.cost}</small><small>Open 09:00–18:00 · Rating {(place.match / 20 + .2).toFixed(1)}</small><p>{place.why}</p></section>}<div className="plan-suggestion-actions"><button onClick={() => setPlanSuggestionDetailsId(place.id)}>Details</button><button onClick={() => addPlanPlace(place.name)}>Pin to map</button></div></div></article>)}</div>}</section>{selectedPlanPlaces.length > 0 && <><section className="plan-draft-map cc-card"><span>MAP PREVIEW</span><PlanSketchMap places={selectedPlanPlaces} /></section><section className="plan-label-board">{(['Must-Go','Deal Breaker','Preference','Flexible'] as const).map(label => <section key={label} onDragOver={event => event.preventDefault()} onDrop={event => setPlanPlaceLabel(Number(event.dataTransfer.getData('text/plain')), label)}><b>{label}</b>{selectedPlanPlaces.filter(place => place.label === label).map(place => <button draggable key={place.id} onDragStart={event => event.dataTransfer.setData('text/plain', String(place.id))} onClick={() => { const labels: PlanPlaceLabel[] = ['Must-Go', 'Deal Breaker', 'Preference', 'Flexible']; setPlanPlaceLabel(place.id, labels[(labels.indexOf(place.label) + 1) % labels.length]); }} title="Tap to move to the next label">{place.name}</button>)}</section>)}</section><button className="primary plan-generate" onClick={() => setPlanGenerated(true)}>Generate itinerary <ChevronRight size={16} /></button></>}</section>;
+    if (planGenerated) return <section className="plan-builder plan-generated" aria-label="Generated itinerary"><WeatherGlance destination={destination} compact /><section className="generated-trip-goal"><span>TRIP GOAL</span><b>{tripInputs.tripVibe || 'Your trip preferences'}</b></section><TripPlanOverview plan={visibleTripPlan} planHealth={planHealth} tripIntent={tripIntent} onOpenWhy={setPlanWhyItemId} onOpenHealth={() => setDrawer('feasibility')} onReorder={setItineraryOrder} mapSource="local-schematic" mapCandidates={selectedPlanPlaces.map(place => ({ id: `selected-${place.id}`, name: place.name, source: 'fallback' as const }))} />{planWhyItemId && <section className="why-note"><Sparkles size={19} /><div><b>Why this stop?</b><p><RecommendationEvidenceText evidence={visibleTripPlan.items.find(item => item.id === planWhyItemId)?.evidence ?? []} /></p></div><button className="secondary" onClick={() => setPlanWhyItemId(null)}>Close</button></section>}<button className="primary plan-confirm-only" onClick={() => setDrawer('feasibility')}>Confirm plan <ChevronRight size={15} /></button><div className="plan-generated-actions"><button className="secondary" onClick={() => setPlanGenerated(false)}>Add locations</button>{mode === 'group' && <button className="secondary" onClick={() => openCourt()}>Group Court</button>}</div></section>;
     const first = courtOptions[0];
     const second = courtOptions[1];
     const firstCount = first ? tally.counts[first.id] ?? 0 : 0;
@@ -1431,6 +1530,9 @@ export default function AppRescued() {
   function renderDuring() {
     const anchorItem = visibleTripPlan.items.find(item => item.kind === 'anchor');
     const floatingItem = visibleTripPlan.items.find(item => item.kind === 'floating');
+    const focusedOngoingView = Boolean(true);
+    if (focusedOngoingView && ongoingView === 'routing') return <section className="routing-page" aria-label="Routing"><button className="planning-back" aria-label="Back to ongoing menu" onClick={() => setOngoingView('menu')}><ArrowLeft size={20} /></button><TripSpatialView mode="traveling" destination={destination} source="local-schematic" showWalkPreview={false} plan={visibleTripPlan} currentItem={anchorItem ? { name: anchorItem.name, timeLabel: anchorItem.timeLabel } : undefined} nextItem={floatingItem ? { name: floatingItem.name, timeLabel: floatingItem.timeLabel } : undefined} liveRoute={{ currentLocation: browserLocation ? 'Your location' : 'Current stop', target: floatingItem?.name ?? anchorItem?.name ?? 'Next stop', eta: '12 min', timelineLabel: 'Next stop', weatherLabel: 'Weather below', coordinates: browserLocation ?? undefined, locationStatus: browserLocation ? 'live' : 'unavailable' }} overlay={<Coco tiny mood="happy" context="travel" />} /><section className="routing-next cc-card"><span>Next stop</span><b>{floatingItem?.name ?? anchorItem?.name ?? 'Choose your next stop'}</b><small>{floatingItem ? `${floatingItem.timeLabel} · about ${floatingItem.transferMinutes || 12} min away` : 'Your next route will appear here.'}</small></section><WeatherGlance destination={destination} compact /><div className="routing-tools">{mode === 'group' && <button className="secondary" onClick={() => openGovernedAction('split-on')}><Users size={16} />Group split</button>}<button className="secondary" onClick={() => setDrawer('safety')}><Heart size={16} />Nearby medical</button>{mode === 'group' && <button className="secondary" onClick={() => openCourt()}><Gavel size={16} />Group call</button>}<button className="secondary" onClick={() => setDrawer('budget')}><CircleDollarSign size={16} />Pay money</button></div></section>;
+    if (focusedOngoingView) return <section className="ongoing-dashboard ongoing-launcher" aria-label="Ongoing trip"><button className="ongoing-launcher-card cc-card" onClick={() => setOngoingView('routing')}><CocoCompanion context="map" pose="action-gps" size={88} /><b>Routing</b></button><button className="ongoing-launcher-card cc-card" onClick={() => setDrawer('budget')}><CocoCompanion context="map" pose="action-snack" size={88} /><b>Budgeting</b></button></section>;
     return <>
       <SectionTitle kicker="DURING · LIVE TRIP" title={delay ? 'Reality changed.' : 'The trip is moving.'} copy="Coco watches the plan, not your every step." />
       <WeatherGlance destination={destination} compact />
@@ -1958,7 +2060,7 @@ export default function AppRescued() {
       {drawer === 'backup' && <><span className="drawer-kicker">BACKUP PLAN POOL</span><h3>Only viable, Deal-Breaker-safe alternatives are repair candidates.</h3>{backupPool.map(item => <div className={`backup-row ${item.viable && item.dealBreakerSafe ? '' : 'off'}`} key={item.id}><b>{item.name}</b><small>{item.support} supporters · {item.costDelta >= 0 ? '+' : ''}RM{item.costDelta} · {item.timeDeltaMinutes >= 0 ? '+' : ''}{item.timeDeltaMinutes} min · {item.viable && item.dealBreakerSafe ? 'viable' : 'blocked'}</small><small>{item.source} · {item.lossReason}</small></div>)}{backupPool.length === 0 && <div className="adapter-note">No Backup candidate has been retained yet. A confirmed Court loser appears here only when it is viable and Deal-Breaker-safe.</div>}{ghostWishes.filter(wish => wish.status === 'revived').map(wish => <div className="backup-row" key={`ghost-${wish.id}`}><b>👻 {wish.name}</b><small>Revived from Ghost Wish · preserved with original reason</small></div>)}</>}
       {drawer === 'budget' && <BudgetDrawer mode={mode} total={budgetTotal} planned={planned} spent={spent} remaining={remaining} plan={budgetPlan} actuals={budgetActuals} days={Math.max(1, Math.ceil(visibleTripPlan.items.length / 2))} onTotalChange={value => mode === 'group' ? setGroupBudgetTotal(sanitizeAmount(value)) : setSoloBudgetTotal(sanitizeAmount(value))} onPlanChange={changeBudgetCategory} onActualChange={changeBudgetActual} onPrintReceipt={printReceipt} receiptPrinted={receiptPrinted} />}
       {drawer === 'compare' && <><span className="drawer-kicker">COMPARE · HONEST PROTOTYPE</span><h3>Shortlist the option that fits the trip, not just the price.</h3><p className="drawer-copy">These are deterministic demo prices. No live supplier, inventory, or external checkout is connected.</p>{comparisonOptions.map(option => <article className="compare-option" key={option.id}><div><span>{option.category.toUpperCase()} · {option.fit}% fit</span><b>{option.label}</b><small>{option.why}</small></div><strong>RM {option.price}<em>{option.deal}</em></strong><small className={option.price <= remaining ? 'within-budget' : 'over-budget'}>{option.price <= remaining ? 'Within current remaining budget' : 'Over current remaining budget'}</small><button className="secondary" onClick={() => setDrawer(null)}>Preview in plan</button></article>)}</>}
-{drawer === 'feasibility' && <><span className="drawer-kicker">PLAN HEALTH · FEASIBILITY</span><h3>Check the joins before the trip does.</h3><div className="health-check-list">{checkFeasibility().map(issue => <div className={issue.severity === 'block' ? 'block' : ''} key={issue.id}><span>{issue.resolved ? '✓' : '!'}</span><div><b>{issue.label}</b><small>{issue.detail}</small></div></div>)}</div><div className="adapter-note"><b>One watch item remains.</b><small>The local adapter can flag opening hours and buffer risks; it cannot verify live operating data.</small></div><button className="primary" onClick={() => { setReadyConfirmed(current => transitionReadyConfirmation(current, 'confirm-ready')); updateCurrentTripStatus('active'); setDrawer(null); }}>Keep this reviewed plan</button></>}
+{drawer === 'feasibility' && <><h3>Plan health</h3><div className="health-check-list">{checkFeasibility().filter(issue => !issue.resolved).map(issue => <div className={issue.severity === 'block' ? 'block' : ''} key={issue.id}><span>!</span><div><b>{issue.label}</b><small>{issue.detail}</small></div></div>)}</div><button className="primary" onClick={() => { setReadyConfirmed(current => transitionReadyConfirmation(current, 'confirm-ready')); updateCurrentTripStatus('active'); setDrawer(null); }}>Confirm plan</button></>}
       {drawer === 'reminders' && <><span className="drawer-kicker">REMINDERS · PEOPLE COUNT TOO</span><h3>Important dates and human plans belong on the timeline.</h3><div className="reminder-list">{reminders.map(reminder => <button key={reminder.id} className={reminder.done ? 'done' : ''} onClick={() => setReminders(current => current.map(item => item.id === reminder.id ? { ...item, done: !item.done } : item))}><span>{reminder.done ? '✓' : '○'}</span><div><b>{reminder.label}</b><small>{reminder.date} · {reminder.kind}</small></div></button>)}</div><button className="secondary" onClick={() => setDrawer('commitments')}>Open human commitments & reunion</button></>}
       {drawer === 'commitments' && <><span className="drawer-kicker">HUMAN COMMITMENTS · REUNION</span><h3>Make the invisible parts of a day schedulable.</h3><div className="commitment-list">{commitments.map(item => <div key={item.id}><div><b>{item.label}</b><small>{item.time} · {item.owner} · {item.fixed ? 'fixed' : 'flexible'}</small></div><span>{item.fixed ? 'ANCHOR' : 'FLOATING'}</span></div>)}</div><div className="reunion-form"><span>REUNION AGREEMENT</span><label>Time<input value={reunion.time} onChange={e => setReunion(current => ({ ...current, time: e.target.value }))} /></label><label>Place<input value={reunion.place} onChange={e => setReunion(current => ({ ...current, place: e.target.value }))} /></label><label>Tolerance<input type="number" min="0" max="60" value={reunion.tolerance} onChange={e => setReunion(current => ({ ...current, tolerance: sanitizeAmount(Number(e.target.value)) }))} /></label></div><button className="primary" onClick={() => setDrawer(null)}>Save agreement</button></>}
       {drawer === 'safety' && <SafetyToolkit destination={destination} />}
