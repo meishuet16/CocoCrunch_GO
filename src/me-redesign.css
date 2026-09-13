@@ -1312,7 +1312,42 @@
 .tab-me .me-chip-row small {
   border: 1px solid var(--line) !important;
   border-radius: 999px !important;
-  background: transparent !important;
+  min-width: 0 !important;
+  padding: 4px 8px !important;
+  background: rgba(43, 33, 31, .06) !important;
   color: var(--muted) !important;
   font-family: Inter, system-ui, sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+/* Keep the Tingo card to the app's red and neutral palette. */
+.tab-me .me-card-copy h2,
+.tab-me .emergency-contacts h3 {
+  color: var(--ink) !important;
+  font-family: var(--font-editorial) !important;
+  font-size: 23px !important;
+  font-weight: 700 !important;
+}
+
+.tab-me .me-all-types-link,
+.tab-me .me-retake-link,
+.tab-me .me-view-profile-btn {
+  border-color: var(--line) !important;
+  background: rgba(43, 33, 31, .04) !important;
+  color: var(--muted) !important;
+}
+
+.tab-me .me-all-types-link svg,
+.tab-me .me-retake-link svg,
+.tab-me .me-view-profile-btn .arrow,
+.tab-me .me-all-types-link .arrow {
+  color: var(--sangria) !important;
+}
+
+.tab-me .me-floating-mini-card {
+  border-color: var(--line) !important;
+  background: rgba(43, 33, 31, .03) !important;
 }
