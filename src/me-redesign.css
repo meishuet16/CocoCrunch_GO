@@ -1351,3 +1351,99 @@
   border-color: var(--line) !important;
   background: rgba(43, 33, 31, .03) !important;
 }
+
+/* Remove the old blue postcard layer from the complete Tingo flow. */
+.tab-me .me-card-copy h2 {
+  max-width: none !important;
+  margin: 0 !important;
+  color: var(--ink) !important;
+  font: 700 23px/1.15 var(--font-editorial) !important;
+  letter-spacing: normal !important;
+}
+
+.tab-me .me-chip-row {
+  gap: 6px !important;
+  margin: 10px 0 !important;
+}
+
+.tab-me .me-chip-row small {
+  display: inline-flex !important;
+  min-height: 28px !important;
+  align-items: center !important;
+  padding: 4px 9px !important;
+  border: 1px solid var(--line) !important;
+  background: rgba(43, 33, 31, .07) !important;
+  color: var(--muted) !important;
+  font: 700 12px/1 Inter, system-ui, sans-serif !important;
+  letter-spacing: 0 !important;
+}
+
+.tab-me .me-view-profile-btn {
+  border: 0 !important;
+  background: var(--sangria) !important;
+  color: var(--paper-solid) !important;
+}
+
+.tab-me .me-view-profile-btn .arrow { color: var(--paper-solid) !important; }
+
+.me-all-personas-drawer {
+  background: var(--paper-solid) !important;
+  color: var(--ink) !important;
+  font-family: Inter, system-ui, sans-serif !important;
+}
+
+.me-all-personas-drawer .drawer-kicker {
+  color: var(--sangria) !important;
+  font: 800 10px Inter, system-ui, sans-serif !important;
+  letter-spacing: .08em !important;
+}
+
+.me-all-personas-drawer h3 {
+  margin: 0 !important;
+  color: var(--ink) !important;
+  font: 700 23px/1.15 var(--font-editorial) !important;
+}
+
+.me-all-personas-drawer .drawer-copy {
+  margin: 6px 0 12px !important;
+  color: var(--muted) !important;
+  font: 12px/1.45 Inter, system-ui, sans-serif !important;
+}
+
+.me-personas-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  margin-top: 0 !important;
+}
+
+.me-persona-grid-card,
+.me-persona-grid-card.is-current {
+  border: 1px solid var(--line) !important;
+  border-radius: var(--radius-sm) !important;
+  background: var(--paper) !important;
+  box-shadow: none !important;
+}
+
+.me-persona-grid-card.is-current { border-color: var(--sangria) !important; }
+.me-persona-grid-card .me-current-badge { background: var(--sangria) !important; color: var(--paper-solid) !important; }
+
+.me-persona-grid-card {
+  min-height: 126px !important;
+  padding: 10px !important;
+}
+
+.me-grid-img-wrap {
+  height: 76px !important;
+  margin-bottom: 6px !important;
+}
+
+.me-grid-copy b {
+  color: var(--ink) !important;
+  font: 700 12px/1.2 Inter, system-ui, sans-serif !important;
+}
+
+.me-grid-tagline,
+.me-grid-copy p,
+.me-grid-chips {
+  display: none !important;
+}
