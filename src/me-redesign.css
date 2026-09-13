@@ -1159,3 +1159,48 @@
 .tab-me .me-tingo-kicker, .tab-me .me-trip-tag-pill, .tab-me .me-summary-pct, .tab-me .me-persona-badge { color: var(--sangria) !important; }
 .tab-me .me-all-types-link, .tab-me .me-retake-link, .tab-me .me-open-trip-btn, .tab-me .me-view-profile-btn, .tab-me .me-round-nav-btn { border: 0 !important; border-radius: var(--radius-sm) !important; background: var(--sangria) !important; color: var(--paper-solid) !important; box-shadow: none !important; }
 .tab-me .me-chip-row small, .tab-me .me-summary-pill { border: 1px solid var(--line) !important; background: var(--paper) !important; color: var(--muted) !important; }
+
+/* Me intentionally contains only identity, safety contacts, and account exit. */
+.tab-me .me-trip-card,
+.tab-me .me-summary-card,
+.tab-me .me-history-card,
+.tab-me .learning-handoff,
+.tab-me .learning-history,
+.tab-me .me-screen > .paper-sheet:not(.me-tingo-card):not(.emergency-contacts) {
+  display: none !important;
+}
+
+.tab-me .me-tingo-card.redesign-card {
+  grid-template-columns: minmax(0, 1fr) 128px !important;
+  gap: 16px !important;
+  padding: 20px !important;
+}
+
+.tab-me .me-card-copy { gap: 9px !important; }
+.tab-me .me-tingo-kicker { color: var(--sangria) !important; font: 800 10px Inter, system-ui, sans-serif !important; letter-spacing: .08em !important; }
+.tab-me .me-card-copy h2 { margin: 0 !important; font-size: 25px !important; line-height: 1.05 !important; }
+.tab-me .me-card-copy p { margin: 0 !important; font-size: 12px !important; line-height: 1.45 !important; }
+.tab-me .me-floating-mini-card { border: 1px solid var(--line) !important; background: var(--paper) !important; box-shadow: none !important; transform: none !important; }
+.tab-me .me-persona-badge { font-family: Inter, system-ui, sans-serif !important; font-size: 11px !important; font-weight: 800 !important; }
+.tab-me .me-persona-subtag { color: var(--muted) !important; font-family: Inter, system-ui, sans-serif !important; }
+.tab-me .me-tingo-actions-col { gap: 8px !important; }
+.tab-me .me-all-types-link, .tab-me .me-retake-link, .tab-me .me-view-profile-btn { min-height: 42px !important; font-family: Inter, system-ui, sans-serif !important; font-size: 12px !important; }
+
+.tab-me .emergency-contacts {
+  display: grid !important;
+  gap: 12px !important;
+  padding: 20px !important;
+  border: 1px solid var(--line) !important;
+  border-radius: var(--radius) !important;
+  background: var(--paper-solid) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.tab-me .emergency-contacts h3 { margin: 0 !important; color: var(--ink) !important; font-family: var(--font-editorial) !important; font-size: 23px !important; }
+.tab-me .emergency-contacts .drawer-copy { margin: -5px 0 2px !important; color: var(--muted) !important; font-size: 12px !important; }
+.tab-me .emergency-contacts .setup-field { gap: 6px !important; color: var(--ink) !important; font-size: 12px !important; font-weight: 700 !important; }
+.tab-me .emergency-contacts input, .tab-me .emergency-contacts select { min-height: 44px !important; border: 1px solid var(--line) !important; border-radius: var(--radius-sm) !important; background: var(--paper) !important; color: var(--ink) !important; font: inherit !important; }
+.tab-me .emergency-contact-list { display: grid; gap: 8px; }
+.tab-me .emergency-contact-list > div { display: grid; gap: 5px; padding: 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--paper); }
+.tab-me .emergency-contact-list small { color: var(--muted); font-size: 11px; }
+.tab-me .emergency-contacts .primary { min-height: 44px; border-radius: var(--radius-sm); }
