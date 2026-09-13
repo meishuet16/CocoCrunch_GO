@@ -136,7 +136,7 @@ export type PersistedState = {
   onboardingBirthday?: string;
   basePackingPreferences?: string[];
   tripCreated?: boolean;
-  tripList?: Array<{ id: string; name: string; destination: string; mode: 'group' | 'solo'; status: 'planning' | 'ongoing' | 'completed'; createdAt: string }>;
+  tripList?: Array<{ id: string; name: string; destination: string; mode: 'group' | 'solo'; status: 'planning' | 'active' | 'ongoing' | 'completed'; createdAt: string }>;
   tripPhase?: 'planning' | 'traveling' | 'completed';
   groupName?: string;
   destinationLockedByLeader?: boolean;
