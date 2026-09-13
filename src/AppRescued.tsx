@@ -1024,6 +1024,12 @@ export default function AppRescued() {
     setTingoRevealed(true);
   }
 
+  useEffect(() => {
+    if (tingoStep !== tingoQuestions.length || tingoRevealed || tingoCompletion(tingoAnswers) !== 100) return;
+    const revealTimer = window.setTimeout(finishTingo, 650);
+    return () => window.clearTimeout(revealTimer);
+  }, [destination, tingoAnswers, tingoRevealed, tingoStep]);
+
   function logOut() {
     clearPersisted();
     window.location.reload();
@@ -1820,13 +1826,13 @@ export default function AppRescued() {
           </div>
 
           <div className="tingo-how-header">
-            <h2>Find your travel rhythm ✦</h2>
-            <p>12 quick choices. One Tingo Card that feels like you ✨</p>
+            <h2>Find your travel rhythm</h2>
+            <p>12 quick choices. One Tingo Card that feels like you.</p>
           </div>
 
           <div className="tingo-how-list">
             <article className="how-card how-card-1">
-              <span className="how-step-num num-maroon">01</span>
+              <span className="how-step-num num-maroon">Step 01</span>
               <div className="how-card-body">
                 <b>Pick what feels right</b>
                 <small>Choose between two travel moments.</small>
@@ -1834,7 +1840,7 @@ export default function AppRescued() {
             </article>
 
             <article className="how-card how-card-2">
-              <span className="how-step-num num-travel">02</span>
+              <span className="how-step-num num-travel">Step 02</span>
               <div className="how-card-body">
                 <b>Follow your instinct</b>
                 <small>There are no perfect answers.</small>
@@ -1842,7 +1848,7 @@ export default function AppRescued() {
             </article>
 
             <article className="how-card how-card-3">
-              <span className="how-step-num num-heart">03</span>
+              <span className="how-step-num num-heart">Step 03</span>
               <div className="how-card-body">
                 <b>See your Tingo Card</b>
                 <small>Discover your pace and plan style.</small>
@@ -1858,47 +1864,33 @@ export default function AppRescued() {
       );
     }
 
-    if (complete && !tingoRevealed) {
-      return <div className="tingo-flow tingo-creating">
-        <div className="tingo-flow-top"><button aria-label="Back" onClick={() => setTingoStep(tingoQuestions.length - 1)}>‹</button><div><i style={{ width: '100%' }} /></div><span>12/12</span></div>
-        <h2>Creating your<br />Tingo Card...</h2>
-        <p>Analyzing your preferences and crafting your travel vibe</p>
-        <div className="tingo-checks">
-          <span>✓ <b>Understanding your style</b></span>
-          <span>✓ <b>Matching travel experiences</b></span>
-          <span>◌ <b>Putting it all together</b></span>
-        </div>
-        <div className="tingo-creating-photo" aria-hidden="true"></div>
-        <button className="tingo-flow-primary" onClick={finishTingo}>Reveal my card <ChevronRight size={20} /></button>
-      </div>;
-    }
-
-    if (complete) {
+    if (complete && tingoRevealed) {
       return <div className="tingo-flow tingo-result-screen">
         <div className="tingo-result-head"><button aria-label="Back" onClick={closeTingoAssessment}>‹</button><b>Your Tingo Card</b><button aria-label="Retake assessment" onClick={retakeTingo}>↻</button></div>
         <div className="tingo-result-hero">
-          <div><span>THE<br />{identity.title}</span><strong>{identity.personaLabel}</strong></div>
+          <div><span>{identity.title}</span><small className="tingo-persona-description">{identity.personaLabel}</small></div>
           <img src={tingoPersonaImages[identity.personaKey]} alt={`${identity.personaLabel} logo`} />
-          <i>TRAVEL<br />YOUR<br />WAY</i>
         </div>
-        <p className="tingo-result-quote">&quot;{identity.summary}&quot;</p>
-        <div className="tingo-role-card"><span>BEST TRIP ROLE</span><b>{identity.role}</b><small>{identity.roleReason}</small></div>
-        <div className="tingo-stat-list">{statRows.map(row => <div key={row.key}><span>{row.icon}</span><b>{row.label}</b><i><em style={{ width: `${scoreValue(row.key)}%`, background: row.color }} /></i><strong>{scoreValue(row.key)}</strong></div>)}</div>
+        <div className="tingo-stat-list">{statRows.map(row => <div key={row.key}><b>{row.label}</b><i><em style={{ width: `${scoreValue(row.key)}%` }} /></i><strong>{scoreValue(row.key)}</strong></div>)}</div>
+        <p className="tingo-result-quote">{identity.summary}</p>
         <button className="tingo-flow-primary tingo-red-primary" onClick={continueAfterTingo}>{onboardingComplete ? 'Plan My Trip' : 'Continue setup'} <ChevronRight size={20} /></button>
       </div>;
     }
 
-    return <div className="tingo-flow tingo-question-screen">
-      <div className="tingo-flow-top"><button aria-label="Back" onClick={() => setTingoStep(step => Math.max(-1, step - 1))}>‹</button><div><i style={{ width: `${barWidth}%` }} /></div><span>{tingoStep + 1}/12</span></div>
+    const isFinalizing = complete && !tingoRevealed;
+    return <div className={`tingo-flow tingo-question-screen ${isFinalizing ? 'is-finalizing' : ''}`} aria-busy={isFinalizing}>
+      <div className="tingo-flow-top"><button aria-label="Back" onClick={() => setTingoStep(step => Math.max(-1, step - 1))}>‹</button><div><i style={{ width: `${barWidth}%` }} /></div><span>{Math.min(tingoStep + 1, tingoQuestions.length)}/12</span></div>
       <span className="tingo-question-kicker">{currentQuestion.category?.toUpperCase()}</span>
       <h2>{currentQuestion.prompt}</h2>
-      <div className="tingo-choice-grid">{currentQuestion.options.map(option => <button key={option.id} onClick={() => answerTingo(option.id)}>
+      <div className="tingo-choice-grid">{currentQuestion.options.map(option => <button key={option.id} disabled={isFinalizing} onClick={() => answerTingo(option.id)}>
         <img src={option.photoUrl} alt="" />
         <b>{option.label}</b>
         <span>{option.hint}</span>
         {(option.tags ?? []).map(tag => <small key={tag}>{tag}</small>)}
       </button>)}</div>
-      <button className="tingo-neither" onClick={() => answerTingo('neither')}>Neither feels like me</button>
+      {isFinalizing
+        ? <div className="tingo-finalizing" role="status"><span>Preparing your Tingo Card</span><i><em /></i></div>
+        : <button className="tingo-neither" onClick={() => answerTingo('neither')}>Neither feels like me</button>}
     </div>;
   }
 

@@ -7706,9 +7706,586 @@ main {
   box-shadow: none;
 }
 
+/* Global navigation stays a single outline icon system: only the current tab carries colour. */
+.bottom-nav button svg { fill: none; stroke-width: 1.8; }
+.tab-me .bottom-nav button:not(.active) { color: var(--muted); }
+.tab-me .bottom-nav button.active { color: var(--sangria); }
+
+.home-active-hero.cc-card,
+.home-current-trip-card.cc-card,
+.home-tip-card.cc-card { padding: 17px; }
+.home-shortcuts button.cc-card { padding: 17px 8px; }
+
 @media (max-width: 360px) {
-  .home-active-hero { grid-template-columns: 78px minmax(0, 1fr) auto; padding: 12px; }
+  .home-active-hero { grid-template-columns: 78px minmax(0, 1fr) auto; }
   .home-trip-hero-art { min-height: 92px; }
   .home-shortcuts { gap: 7px; }
   .home-shortcuts button { min-height: 78px; font-size: 9px; }
+}
+
+/* Tingo follows the onboarding paper, Sangria, and typography system. */
+.tingo-flow-drawer,
+.tingo-flow {
+  background: var(--paper-solid);
+  color: var(--ink);
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.tingo-flow {
+  gap: 18px;
+  padding: 24px;
+}
+
+.tingo-flow h2,
+.tingo-how-header h2,
+.tingo-question-screen h2,
+.tingo-result-hero span,
+.tingo-result-head b {
+  color: var(--sangria);
+  font-family: var(--font-editorial, Georgia, serif) !important;
+  font-weight: 700;
+  letter-spacing: -.03em;
+}
+
+.tingo-flow-top,
+.tingo-result-head {
+  min-height: 40px;
+  color: var(--muted);
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.tingo-flow-top button,
+.tingo-result-head button {
+  width: 40px;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper-solid);
+  color: var(--sangria);
+  box-shadow: none;
+}
+
+.tingo-flow-top div,
+.tingo-stat-list i {
+  background: var(--cream-deep);
+}
+
+.tingo-flow-top i,
+.tingo-stat-list em {
+  background: var(--sangria) !important;
+}
+
+.tingo-flow-top span,
+.tingo-question-kicker,
+.tingo-role-card span {
+  color: var(--muted);
+  font-family: Inter, system-ui, sans-serif !important;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+
+.tingo-how-header p,
+.tingo-creating p,
+.tingo-result-quote,
+.tingo-role-card small {
+  color: var(--muted);
+  font-family: Inter, system-ui, sans-serif !important;
+}
+
+.tingo-how-list .how-card,
+.tingo-choice-grid button,
+.tingo-role-card,
+.tingo-neither {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper-solid);
+  box-shadow: var(--shadow-sm);
+}
+
+.tingo-how-list .how-card,
+.tingo-choice-grid button {
+  color: var(--ink);
+}
+
+.tingo-how-list .how-card-body b,
+.tingo-choice-grid b,
+.tingo-role-card b {
+  color: var(--ink);
+  font-family: Inter, system-ui, sans-serif !important;
+  font-weight: 750;
+}
+
+.tingo-how-list .how-card-body small,
+.tingo-choice-grid span,
+.tingo-choice-grid small {
+  color: var(--muted);
+  font-family: Inter, system-ui, sans-serif !important;
+}
+
+.how-step-num.num-maroon,
+.how-step-num.num-travel,
+.how-step-num.num-heart,
+.how-step-num.num-sparkles {
+  border: 1px solid var(--line);
+  background: var(--cream-deep);
+  color: var(--sangria);
+  box-shadow: none;
+}
+
+.tingo-choice-grid button:hover,
+.tingo-choice-grid button:focus-visible,
+.tingo-how-list .how-card:hover {
+  border-color: var(--sangria);
+  background: var(--cream-soft);
+  box-shadow: var(--shadow-sm);
+  transform: none;
+}
+
+.tingo-flow-primary,
+.tingo-flow-primary.tingo-how-maroon-btn,
+.tingo-red-primary {
+  min-height: 46px;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--sangria) !important;
+  color: var(--paper-solid) !important;
+  box-shadow: var(--shadow);
+  font-family: Inter, system-ui, sans-serif !important;
+  font-weight: 750;
+}
+
+.tingo-neither {
+  min-height: 44px;
+  color: var(--sangria);
+  font-family: Inter, system-ui, sans-serif;
+  font-weight: 700;
+}
+
+.tingo-creating-photo {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--cream-deep);
+  box-shadow: var(--shadow-sm);
+}
+
+.tingo-checks span {
+  padding-left: 0;
+  color: var(--muted);
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.tingo-checks span::before {
+  display: none;
+}
+
+.tingo-checks b {
+  color: var(--ink);
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.tingo-result-hero {
+  grid-template-columns: minmax(0, 1fr) 112px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--cream-soft);
+  box-shadow: var(--shadow-sm);
+}
+
+.tingo-result-hero strong {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper-solid);
+  color: var(--sangria);
+  font-family: Inter, system-ui, sans-serif !important;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.tingo-result-hero img {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  transform: none;
+}
+
+.tingo-result-hero i {
+  display: none;
+}
+
+.tingo-result-quote {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.tingo-role-card {
+  gap: 5px;
+  padding: 14px;
+}
+
+.tingo-stat-list div {
+  grid-template-columns: 78px minmax(0, 1fr) 28px;
+  gap: 8px;
+}
+
+.tingo-stat-list b,
+.tingo-stat-list strong {
+  color: var(--ink);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 11px;
+}
+
+.tingo-stat-list strong {
+  color: var(--sangria);
+}
+
+/* Final hierarchy pass: titles lead in ink; supporting copy carries Sangria. */
+.tingo-flow h2,
+.tingo-how-header h2,
+.tingo-question-screen h2,
+.tingo-result-hero span,
+.tingo-result-head b {
+  color: var(--ink);
+}
+
+.tingo-flow-top span,
+.tingo-question-kicker,
+.tingo-role-card span,
+.tingo-how-header p,
+.tingo-creating p,
+.tingo-result-quote,
+.tingo-role-card small,
+.tingo-how-list .how-card-body small,
+.tingo-choice-grid span,
+.tingo-choice-grid small {
+  color: var(--sangria);
+}
+
+.tingo-flow-top {
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  column-gap: 12px;
+  align-items: center;
+}
+
+.tingo-flow-top button {
+  width: 32px;
+  min-height: 32px;
+  margin-left: -8px;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.tingo-flow-top div {
+  min-width: 0;
+}
+
+.how-step-num.num-maroon,
+.how-step-num.num-travel,
+.how-step-num.num-heart,
+.how-step-num.num-sparkles {
+  display: inline-flex;
+  width: auto;
+  min-width: 58px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(147, 5, 0, .1);
+  color: var(--sangria);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: .02em;
+}
+
+.tingo-creating {
+  justify-content: center;
+  gap: 14px;
+  padding: 22px 24px;
+}
+
+.tingo-creating h2 {
+  margin: 0;
+  font-size: clamp(25px, 7vw, 30px);
+  line-height: 1.1;
+}
+
+.tingo-creating p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.tingo-creating-photo {
+  width: 100%;
+  min-height: 72px;
+  background: var(--cream-deep);
+}
+
+.tingo-checks {
+  gap: 7px;
+}
+
+.tingo-checks span,
+.tingo-checks b {
+  font-size: 12px;
+}
+
+.tingo-result-screen {
+  gap: 10px;
+  padding: 16px;
+}
+
+.tingo-result-head {
+  grid-template-columns: 32px minmax(0, 1fr) 32px;
+  gap: 8px;
+  align-items: center;
+}
+
+.tingo-result-head button {
+  width: 32px;
+  min-height: 32px;
+  font-size: 18px;
+}
+
+.tingo-result-head b {
+  font-size: 18px;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.tingo-result-hero {
+  min-height: 104px;
+  grid-template-columns: minmax(0, 1fr) 90px;
+  padding: 12px;
+}
+
+.tingo-result-hero span {
+  font-size: 22px;
+  line-height: 1.04;
+}
+
+.tingo-result-hero strong {
+  margin-top: 6px;
+  padding: 4px 7px;
+  font-size: 10px;
+}
+
+.tingo-result-hero img {
+  width: 86px;
+}
+
+.tingo-result-quote {
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.tingo-role-card {
+  padding: 11px 12px;
+}
+
+.tingo-role-card b {
+  font-size: 15px;
+}
+
+.tingo-role-card small {
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.tingo-stat-list {
+  gap: 4px;
+}
+
+.tingo-stat-list div {
+  min-height: 16px;
+}
+
+.tingo-stat-list b,
+.tingo-stat-list strong {
+  font-size: 10px;
+}
+
+.tingo-stat-list i {
+  height: 5px;
+}
+
+.tingo-question-screen.is-finalizing .tingo-choice-grid {
+  opacity: .55;
+}
+
+.tingo-finalizing {
+  display: grid;
+  gap: 8px;
+  padding: 10px 0 0;
+  color: var(--sangria);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tingo-finalizing i {
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--cream-deep);
+}
+
+.tingo-finalizing em {
+  display: block;
+  width: 38%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--sangria);
+  animation: tingo-finalizing-progress .65s ease-out forwards;
+}
+
+@keyframes tingo-finalizing-progress {
+  to { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tingo-finalizing em { animation: none; width: 100%; }
+}
+
+/* The result is one relaxed identity card, not a dense assessment report. */
+.tingo-result-screen {
+  gap: 16px;
+  padding: 20px;
+}
+
+.tingo-result-hero {
+  min-height: 132px;
+  grid-template-columns: minmax(0, 1fr) 104px;
+  padding: 16px;
+}
+
+.tingo-result-hero span {
+  font-size: clamp(24px, 7vw, 30px);
+  line-height: 1.05;
+}
+
+.tingo-result-hero strong {
+  margin-top: 9px;
+  font-size: 11px;
+}
+
+.tingo-result-hero img {
+  width: 100px;
+}
+
+.tingo-result-quote {
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.tingo-role-card {
+  gap: 6px;
+  padding: 14px;
+}
+
+.tingo-role-card b {
+  font-size: 17px;
+}
+
+.tingo-role-card small {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* Result details use neutral text; Sangria is reserved for progress and action. */
+.tingo-result-screen {
+  gap: 14px;
+}
+
+.tingo-result-hero {
+  min-height: 122px;
+  padding: 15px;
+}
+
+.tingo-persona-description {
+  display: block;
+  margin-top: 8px;
+  color: var(--ink);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.tingo-stat-list {
+  display: grid;
+  gap: 7px;
+}
+
+.tingo-stat-list div {
+  grid-template-columns: 78px minmax(0, 1fr) 28px;
+  gap: 8px;
+  min-height: 18px;
+}
+
+.tingo-stat-list b,
+.tingo-stat-list strong {
+  color: var(--ink);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 11px;
+}
+
+.tingo-stat-list strong {
+  color: var(--muted);
+  text-align: right;
+}
+
+.tingo-stat-list i {
+  height: 6px;
+  background: var(--cream-deep);
+}
+
+.tingo-stat-list em {
+  background: var(--sangria) !important;
+}
+
+.tingo-result-quote {
+  margin: 0;
+  color: var(--muted);
+  font-family: Inter, system-ui, sans-serif !important;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Match the Welcome display face for Tingo's named categories. */
+.tingo-stat-list b,
+.tingo-question-kicker {
+  font-family: var(--font-editorial, Georgia, serif) !important;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.tingo-stat-list b {
+  font-size: 12px;
+}
+
+/* Let the result breathe across the drawer instead of clustering at its centre. */
+.tingo-result-screen {
+  min-height: 100%;
+  align-content: space-between;
+  gap: 22px;
+  padding-top: 24px;
+  padding-bottom: 20px;
+}
+
+.tingo-stat-list {
+  gap: 9px;
+}
+
+.tingo-result-quote {
+  padding-top: 4px;
+}
+
+.tingo-result-screen .tingo-flow-primary {
+  margin-top: 4px;
 }
