@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Bell, BookOpen, Box, Calendar, Check, ChevronRight, CircleDollarSign, CloudRain,
-  FileText, Gavel, Heart, Image, Link2, Map, MapPin, PackageCheck, Plane,
+  FileText, Gavel, Heart, Image, Link2, LogOut, Map, MapPin, PackageCheck, Plane,
   ReceiptText, RotateCcw, Send, Sparkles, Users, X
 } from 'lucide-react';
 import { emitExperience } from './experience';
@@ -37,7 +37,7 @@ import {
 } from './domain/preferences';
 import { buildLearningProposal, confirmLearningProposal, type LearningProposal } from './domain/learning';
 import { normalizeBudgetActuals, paceEvidenceSummary, rateDecision, updateBudgetActual } from './domain/retrospective';
-import { derivePersistedTripState, loadPersisted, resetTripScopedSharing, savePersisted, type CompletedPaceEvidence, type ConfirmedLearningRecord, type CourtOptionState, type DecisionRecord, type FlightBookingState, type AccommodationBookingState, type GroupSplitPlan, type PhotoMemoryArtifact, type EmergencyContact } from './persistence';
+import { clearPersisted, derivePersistedTripState, loadPersisted, resetTripScopedSharing, savePersisted, type CompletedPaceEvidence, type ConfirmedLearningRecord, type CourtOptionState, type DecisionRecord, type FlightBookingState, type AccommodationBookingState, type GroupSplitPlan, type PhotoMemoryArtifact, type EmergencyContact } from './persistence';
 import { RecommendationEvidenceText } from './components/RecommendationEvidenceText';
 import { EverydayGachaMachine } from './components/EverydayGachaMachine';
 import { LuckyDrawReveal } from './components/LuckyDrawReveal';
@@ -869,7 +869,7 @@ export default function AppRescued() {
 
   function printReceipt() {
     setReceiptPrinted(true);
-    emitExperience({ type: 'print-receipt', total: spent, participants: mode === 'group' ? members.filter(member => member.inviteStatus === 'joined').map(member => member.name) : ['Mei'] });
+    emitExperience({ type: 'print-receipt', total: spent, participants: mode === 'group' ? members.filter(member => member.inviteStatus === 'joined').map(member => member.name) : ['Priya'] });
   }
 
   function sendFamilyReassurance() {
@@ -1024,6 +1024,17 @@ export default function AppRescued() {
     setTingoRevealed(true);
   }
 
+  useEffect(() => {
+    if (tingoStep !== tingoQuestions.length || tingoRevealed || tingoCompletion(tingoAnswers) !== 100) return;
+    const revealTimer = window.setTimeout(finishTingo, 650);
+    return () => window.clearTimeout(revealTimer);
+  }, [destination, tingoAnswers, tingoRevealed, tingoStep]);
+
+  function logOut() {
+    clearPersisted();
+    window.location.reload();
+  }
+
   function confirmAccommodationBooking(booking: AccommodationBookingState) {
     setAccommodationBooking(booking);
     setReminders(current => current.map(reminder => reminder.id === 'hotel-cancel' ? accommodationCancellationReminder(booking.cancellationDeadline) : reminder));
@@ -1125,9 +1136,12 @@ export default function AppRescued() {
   }
 
   function renderHome() {
-    if (tripLifecycleStatus === 'planning') return <div className="home-orientation">
-      <SectionTitle kicker="HOME · NO ACTIVE TRIP" title="Your trip is still taking shape." copy="Planning trips stay in Trips until their setup is confirmed." />
-      <button className="primary" onClick={openTrip}>Open planning trip <ChevronRight size={16} /></button>
+    if (tripLifecycleStatus === 'planning') return <div className="home-orientation home-empty">
+      <section className="home-empty-state cc-card" aria-label="Trip inspiration">
+        <p className="home-empty-status">No active trip</p>
+        <CocoCompanion context="planning" size={98} />
+        <div><h2>Explore ideas</h2><p>Save a place for later.</p><button className="secondary" onClick={() => setTab('explore')}>Explore <ChevronRight size={16} /></button></div>
+      </section>
     </div>;
     if (tripLifecycleStatus === 'completed') return <div className="home-orientation">
       <SectionTitle kicker="HOME · TRIP COMPLETE" title="This journey now lives in Memories." copy="Review what happened and carry the useful parts forward." />
@@ -1780,6 +1794,9 @@ export default function AppRescued() {
       <EmergencyContactsManager contacts={emergencyContacts} frequency={emergencyCheckInFrequency} onChange={contacts => { setEmergencyContacts(contacts); if (selectedEmergencyContactId && !contacts.some(contact => contact.id === selectedEmergencyContactId)) setSelectedEmergencyContactId(''); }} onFrequencyChange={setEmergencyCheckInFrequency} />
       {learningProposal?.status === 'proposed' && <section className="learning-handoff paper-sheet"><div><span>TRIP LEARNING · REVIEW BEFORE APPLY</span><h3>{destination} has a proposal for your long-term Tingo.</h3><p>These changes came from this trip’s actual outcome and will not apply until you confirm them.</p>{learningProposal.changes.map(change => <small key={change.questionId}>{change.questionId}: {change.beforeOptionId ?? 'none'} → {change.afterOptionId} · {change.reason}</small>)}</div><div className="learning-handoff-actions"><button className="secondary" onClick={() => setTab('memories')}>Review in Memories</button><button className="primary" onClick={confirmLearning}>Confirm this learning</button><button className="secondary" onClick={dismissLearning}>Dismiss</button></div></section>}
       {confirmedLearningHistory.length > 0 && <section className="learning-history paper-sheet"><span>CONFIRMED TINGO LEARNING</span><h3>What you chose to carry forward</h3>{confirmedLearningHistory.slice(0, 3).map(record => <div key={record.id}><b>{record.sourceTripReview === 'yes' ? 'Worth it' : record.sourceTripReview === 'mixed' ? 'Mixed' : 'Not really'} · {new Date(record.confirmedAt).toLocaleDateString()}</b>{record.changes.map(change => <small key={change.questionId}>{change.questionId}: {change.beforeOptionId ?? 'none'} → {change.afterOptionId}</small>)}</div>)}</section>}
+      <section className="me-logout-section" aria-label="Account actions">
+        <button className="me-logout-button" onClick={logOut}><LogOut size={17} /> Log out</button>
+      </section>
     </div>;
   }
 
@@ -1790,15 +1807,15 @@ export default function AppRescued() {
     const currentQuestion = tingoQuestions[Math.max(0, Math.min(tingoStep, tingoQuestions.length - 1))];
     const barWidth = tingoStep < 0 ? 12 : complete ? 100 : Math.round(((tingoStep + 1) / tingoQuestions.length) * 100);
     const statRows: { key: keyof TingoDimensions; label: string; icon: string; color: string }[] = [
-      { key: 'pace', label: 'Pace', icon: '🏝️', color: '#f26c7a' },
-      { key: 'experience', label: 'Experience', icon: '🌎', color: '#156ed0' },
-      { key: 'budget', label: 'Budget', icon: '💳', color: '#f6a83e' },
-      { key: 'comfort', label: 'Comfort', icon: '🏨', color: '#18aee4' },
-      { key: 'food', label: 'Food', icon: '🍴', color: '#0b65c8' },
-      { key: 'adventure', label: 'Adventure', icon: '⛰️', color: '#ff8191' },
-      { key: 'planning', label: 'Planning', icon: '🗂️', color: '#ffa83e' },
-      { key: 'flexibility', label: 'Flexibility', icon: '🔁', color: '#218d7a' },
-      { key: 'social', label: 'Social', icon: '👥', color: '#17aa78' },
+      { key: 'pace', label: 'Pace', icon: '🏝️', color: 'var(--sangria)' },
+      { key: 'experience', label: 'Experience', icon: '🌎', color: 'var(--blue)' },
+      { key: 'budget', label: 'Budget', icon: '💳', color: 'var(--warning)' },
+      { key: 'comfort', label: 'Comfort', icon: '🏨', color: 'var(--blue)' },
+      { key: 'food', label: 'Food', icon: '🍴', color: 'var(--sangria-deep)' },
+      { key: 'adventure', label: 'Adventure', icon: '⛰️', color: 'var(--sangria-soft)' },
+      { key: 'planning', label: 'Planning', icon: '🗂️', color: 'var(--warning)' },
+      { key: 'flexibility', label: 'Flexibility', icon: '🔁', color: 'var(--success)' },
+      { key: 'social', label: 'Social', icon: '👥', color: 'var(--success)' },
     ];
     const scoreValue = (key: keyof TingoDimensions) => Math.max(8, Math.min(98, Math.round(58 + tingoDimensions[key] * 7)));
 
@@ -1812,105 +1829,71 @@ export default function AppRescued() {
           </div>
 
           <div className="tingo-how-header">
-            <h2>How it works?</h2>
-            <p>4 quick rules to uncover your true travel persona ✨</p>
+            <h2>Find your travel rhythm</h2>
+            <p>12 quick choices. One Tingo Card that feels like you.</p>
           </div>
 
           <div className="tingo-how-list">
             <article className="how-card how-card-1">
-              <span className="how-step-num num-maroon">01</span>
+              <span className="how-step-num num-maroon">Step 01</span>
               <div className="how-card-body">
-                <div className="how-card-title-row">
-                  <b>Two options, every question</b>
-                  <span className="how-feature-tag tag-maroon">Pick 1</span>
-                </div>
-                <small>Pick what feels like you. No right or wrong answers.</small>
+                <b>Pick what feels right</b>
+                <small>Choose between two travel moments.</small>
               </div>
             </article>
 
             <article className="how-card how-card-2">
-              <span className="how-step-num num-travel">02</span>
+              <span className="how-step-num num-travel">Step 02</span>
               <div className="how-card-body">
-                <div className="how-card-title-row">
-                  <b>Real travel scenarios</b>
-                  <span className="how-feature-tag tag-travel">Real Life</span>
-                </div>
-                <small>Based on actual trip dilemmas and genuine moments.</small>
+                <b>Follow your instinct</b>
+                <small>There are no perfect answers.</small>
               </div>
             </article>
 
             <article className="how-card how-card-3">
-              <span className="how-step-num num-heart">03</span>
+              <span className="how-step-num num-heart">Step 03</span>
               <div className="how-card-body">
-                <div className="how-card-title-row">
-                  <b>No right or wrong</b>
-                  <span className="how-feature-tag tag-heart">100% You</span>
-                </div>
-                <small>Just your spontaneous personal vibes and gut instincts.</small>
-              </div>
-            </article>
-
-            <article className="how-card how-card-4">
-              <span className="how-step-num num-sparkles">04</span>
-              <div className="how-card-body">
-                <div className="how-card-title-row">
-                  <b>A better trip for you</b>
-                  <span className="how-feature-tag tag-sparkles">AI Magic</span>
-                </div>
-                <small>The more you choose, the smarter we personalize your plan.</small>
+                <b>See your Tingo Card</b>
+                <small>Discover your pace and plan style.</small>
               </div>
             </article>
           </div>
 
           <button className="tingo-flow-primary tingo-how-maroon-btn" onClick={() => setTingoStep(0)}>
-            <span>Got it, let&apos;s go!</span>
+            <span>Start Tingo</span>
             <ChevronRight size={18} />
           </button>
         </div>
       );
     }
 
-    if (complete && !tingoRevealed) {
-      return <div className="tingo-flow tingo-creating">
-        <div className="tingo-flow-top"><button aria-label="Back" onClick={() => setTingoStep(tingoQuestions.length - 1)}>‹</button><div><i style={{ width: '100%' }} /></div><span>12/12</span></div>
-        <h2>Creating your<br />Tingo Card...</h2>
-        <p>Analyzing your preferences and crafting your travel vibe</p>
-        <div className="tingo-checks">
-          <span>✓ <b>Understanding your style</b></span>
-          <span>✓ <b>Matching travel experiences</b></span>
-          <span>◌ <b>Putting it all together</b></span>
-        </div>
-        <div className="tingo-creating-photo" aria-hidden="true"></div>
-        <button className="tingo-flow-primary" onClick={finishTingo}>Reveal my card <ChevronRight size={20} /></button>
-      </div>;
-    }
-
-    if (complete) {
+    if (complete && tingoRevealed) {
       return <div className="tingo-flow tingo-result-screen">
         <div className="tingo-result-head"><button aria-label="Back" onClick={closeTingoAssessment}>‹</button><b>Your Tingo Card</b><button aria-label="Retake assessment" onClick={retakeTingo}>↻</button></div>
         <div className="tingo-result-hero">
-          <div><span>THE<br />{identity.title}</span><strong>{identity.personaLabel}</strong></div>
+          <div><span>{identity.title}</span><small className="tingo-persona-description">{identity.personaLabel}</small></div>
           <img src={tingoPersonaImages[identity.personaKey]} alt={`${identity.personaLabel} logo`} />
-          <i>TRAVEL<br />YOUR<br />WAY</i>
         </div>
-        <p className="tingo-result-quote">&quot;{identity.summary}&quot;</p>
-        <div className="tingo-role-card"><span>BEST TRIP ROLE</span><b>{identity.role}</b><small>{identity.roleReason}</small></div>
-        <div className="tingo-stat-list">{statRows.map(row => <div key={row.key}><span>{row.icon}</span><b>{row.label}</b><i><em style={{ width: `${scoreValue(row.key)}%`, background: row.color }} /></i><strong>{scoreValue(row.key)}</strong></div>)}</div>
+        <div className="tingo-stat-list">{statRows.map(row => <div key={row.key}><b>{row.label}</b><i><em style={{ width: `${scoreValue(row.key)}%` }} /></i><strong>{scoreValue(row.key)}</strong></div>)}</div>
+        <p className="tingo-result-quote">{identity.summary}</p>
         <button className="tingo-flow-primary tingo-red-primary" onClick={continueAfterTingo}>{onboardingComplete ? 'Plan My Trip' : 'Continue setup'} <ChevronRight size={20} /></button>
       </div>;
     }
 
-    return <div className="tingo-flow tingo-question-screen">
-      <div className="tingo-flow-top"><button aria-label="Back" onClick={() => setTingoStep(step => Math.max(-1, step - 1))}>‹</button><div><i style={{ width: `${barWidth}%` }} /></div><span>{tingoStep + 1}/12</span></div>
+    const isFinalizing = complete && !tingoRevealed;
+    return <div className={`tingo-flow tingo-question-screen ${isFinalizing ? 'is-finalizing' : ''}`} aria-busy={isFinalizing}>
+      <div className="tingo-flow-top"><button aria-label="Back" onClick={() => setTingoStep(step => Math.max(-1, step - 1))}>‹</button><div><i style={{ width: `${barWidth}%` }} /></div><span>{Math.min(tingoStep + 1, tingoQuestions.length)}/12</span></div>
       <span className="tingo-question-kicker">{currentQuestion.category?.toUpperCase()}</span>
       <h2>{currentQuestion.prompt}</h2>
-      <div className="tingo-choice-grid">{currentQuestion.options.map(option => <button key={option.id} onClick={() => answerTingo(option.id)}>
+      <div className="tingo-choice-grid">{currentQuestion.options.map(option => <button key={option.id} disabled={isFinalizing} onClick={() => answerTingo(option.id)}>
         <img src={option.photoUrl} alt="" />
         <b>{option.label}</b>
         <span>{option.hint}</span>
         {(option.tags ?? []).map(tag => <small key={tag}>{tag}</small>)}
       </button>)}</div>
-      <button className="tingo-neither" onClick={() => answerTingo('neither')}>Neither feels like me</button>
+      {isFinalizing
+        ? <div className="tingo-finalizing" role="status"><span>Preparing your Tingo Card</span><i><em /></i></div>
+        : <button className="tingo-neither" onClick={() => answerTingo('neither')}>Neither feels like me</button>}
     </div>;
   }
 
@@ -2079,11 +2062,12 @@ export default function AppRescued() {
 
   return (
     <div className={`app-shell tab-${tab}`}>
-      <header className={`topbar ${tab === 'home' ? 'topbar-home' : ''}`}>
-        {tab === 'home' ? <><div className="home-greeting"><span>Good to see you</span><b>{onboardingName || 'Traveller'}</b></div><button className="bell" aria-label="Notifications"><Bell size={19} /><i /></button></> : <button className="brand-lockup" onClick={() => { setTripWorkspaceOpen(false); setTab('home'); }} aria-label="Go to Home">
+      <header className="topbar">
+        <button className="brand-lockup" onClick={() => { setTripWorkspaceOpen(false); setTab('home'); }} aria-label="Go to Home">
           <img className="brand-companion" src={cocoAsset('scene-home')} alt="Coco, your travel companion" />
-          <span className="wordmark"><b>COCOCRUNCH</b><small>travel, with room to breathe</small></span>
-        </button>}
+          <span className="wordmark"><b>COCOCRUNCH</b><small>Plan together, design transparently, recover gracefully.</small></span>
+        </button>
+        {tab !== 'me' && <button className="bell" aria-label="Notifications"><Bell size={19} /><i /></button>}
         {tab === 'me' && (
           <div className="topbar-actions">
             <button className="bell" aria-label="Notifications"><Bell size={19} /><i /></button>

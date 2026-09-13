@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import welcomeTravelKit from '../assets/onboarding/welcome-travel-kit.png';
 
-export type OnboardingStep = 'entry' | 'login' | 'signup' | 'terms' | 'packing';
+export type OnboardingStep = 'entry' | 'login' | 'signup' | 'packing';
 
 export type OnboardingAccount = {
   name: string;
@@ -31,29 +32,18 @@ const packingQuestions = [
   { id: 'rain-layer', label: 'I usually pack an umbrella or rain layer' },
 ];
 
-function isMockOtpValid(value: string): boolean {
-  return /^\d{4,6}$/.test(value);
-}
-
 export function OnboardingFlow({ initialStep = 'entry', initialAccount, onAccountChange, onAccountReady, onTermsAccepted, onComplete }: OnboardingFlowProps) {
   const [step, setStep] = useState<OnboardingStep>(initialStep);
   const [name, setName] = useState(initialAccount?.name ?? '');
   const [countryCode, setCountryCode] = useState(initialAccount?.countryCode ?? countryCodes[0].value);
   const [birthday, setBirthday] = useState(initialAccount?.birthday ?? '');
   const [phone, setPhone] = useState('');
-  const [otp, setOtp] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
-  const [resendCooldown, setResendCooldown] = useState(0);
+  const [password, setPassword] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsOpen, setTermsOpen] = useState(false);
   const [preferences, setPreferences] = useState<string[]>(['portable-charger', 'rain-layer']);
 
-  const displayStep = step === 'packing' ? 4 : step === 'terms' ? 3 : step === 'entry' ? 1 : 2;
-  const otpValid = isMockOtpValid(otp);
-  useEffect(() => {
-    if (resendCooldown === 0) return;
-    const timer = window.setInterval(() => setResendCooldown(current => Math.max(0, current - 1)), 1000);
-    return () => window.clearInterval(timer);
-  }, [resendCooldown]);
+  const passwordValid = password.length >= 8;
 
   const account = (changes: Partial<OnboardingAccount> = {}): OnboardingAccount => ({ name, countryCode, birthday, ...changes });
   const updateAccount = (changes: Partial<OnboardingAccount>) => {
@@ -62,13 +52,9 @@ export function OnboardingFlow({ initialStep = 'entry', initialAccount, onAccoun
     if (changes.birthday !== undefined) setBirthday(changes.birthday);
     onAccountChange?.(account(changes));
   };
-  const sendMockOtp = () => {
-    setOtpSent(true);
-    setResendCooldown(30);
-  };
-  const advanceToTerms = () => {
+  const advanceToTingo = () => {
     onAccountReady(account({ name: step === 'signup' ? name.trim() : '' }));
-    setStep('terms');
+    onTermsAccepted();
   };
   const togglePreference = (id: string) => {
     setPreferences(current => current.includes(id) ? current.filter(item => item !== id) : [...current, id]);
@@ -76,18 +62,15 @@ export function OnboardingFlow({ initialStep = 'entry', initialAccount, onAccoun
 
   return (
     <main className="onboarding-flow" aria-label="CocoCrunch onboarding">
-      <section className="onboarding-card">
-        <div className="onboarding-progress" aria-label={`Onboarding step ${displayStep} of 4`}>
-          <span>SETUP</span>
-          <b>{displayStep}/4</b>
-          <div><i style={{ width: `${displayStep * 25}%` }} /></div>
-        </div>
-
+      <section className={`onboarding-card onboarding-card--${step}`}>
         {step === 'entry' && <>
-          <span className="drawer-kicker">WELCOME</span>
-          <h1>Plan trips that still feel like yours.</h1>
-          <p>Start with the route that fits you. This is a local frontend prototype.</p>
-          <div className="onboarding-actions">
+          <div className="onboarding-welcome-copy">
+            <span>Welcome</span>
+            <h1>CocoCrunch</h1>
+          </div>
+          <img className="onboarding-welcome-art" src={welcomeTravelKit} alt="Coco and travel essentials" />
+          <p className="onboarding-welcome-tagline">Start with the route that fits you.</p>
+          <div className="onboarding-actions onboarding-actions--primary onboarding-entry-actions">
             <button className="primary" onClick={() => setStep('login')}>Login</button>
             <button className="secondary" onClick={() => setStep('signup')}>Sign up</button>
           </div>
@@ -96,46 +79,29 @@ export function OnboardingFlow({ initialStep = 'entry', initialAccount, onAccoun
         {step === 'login' && <>
           <span className="drawer-kicker">LOGIN</span>
           <h1>Welcome back.</h1>
-          <p className="adapter-note">Prototype verification only — no real SMS is sent. Enter any 4–6 digit OTP to continue.</p>
-          <label className="setup-field"><span>Phone number</span><input value={phone} inputMode="tel" onChange={event => setPhone(event.target.value)} placeholder="012 345 6789" /></label>
-          <label className="setup-field"><span>OTP</span><input value={otp} inputMode="numeric" maxLength={6} onChange={event => setOtp(event.target.value)} placeholder="4–6 digits" /></label>
-          <div className="onboarding-actions"><button className="secondary" onClick={() => setStep('entry')}>Back</button><button className="primary" disabled={!phone.trim() || !otpValid} onClick={advanceToTerms}>Continue</button></div>
-          <button className="onboarding-skip" onClick={() => { onAccountReady(account({ name: '' })); setStep('terms'); }}>Skip login for this prototype</button>
+          <label className="onboarding-field"><span>Phone number</span><input value={phone} inputMode="tel" autoComplete="tel" onChange={event => setPhone(event.target.value)} placeholder="012 345 6789" /></label>
+          <label className="onboarding-field"><span>Password</span><input value={password} type="password" autoComplete="current-password" onChange={event => setPassword(event.target.value)} placeholder="At least 8 characters" /></label>
+          <div className="onboarding-actions onboarding-actions--primary"><button className="secondary" onClick={() => setStep('entry')}>Back</button><button className="primary" disabled={!phone.trim() || !passwordValid} onClick={advanceToTingo}>Continue</button></div>
         </>}
 
         {step === 'signup' && <>
           <span className="drawer-kicker">SIGN UP</span>
           <h1>Set up your travel profile.</h1>
-          <p className="adapter-note">Prototype verification only — no real SMS is sent. Enter any 4–6 digit OTP after sending it.</p>
-          <label className="setup-field"><span>Name</span><input value={name} onChange={event => updateAccount({ name: event.target.value })} placeholder="Your name" /></label>
-          <label className="setup-field"><span>Country code<select aria-label="Country code" value={countryCode} onChange={event => updateAccount({ countryCode: event.target.value })}>{countryCodes.map(country => <option value={country.value} key={country.value}>{country.label}</option>)}</select></span></label>
-          <label className="setup-field"><span>Phone number</span><input value={phone} inputMode="tel" onChange={event => setPhone(event.target.value)} placeholder="012 345 6789" /></label>
-          <div className="onboarding-actions"><button className="secondary" type="button" onClick={sendMockOtp}>{otpSent ? 'Mock OTP sent' : 'Send mock OTP'}</button><button className="secondary" type="button" disabled={!otpSent || resendCooldown > 0} onClick={sendMockOtp}>{resendCooldown > 0 ? `Resend verification code (${resendCooldown}s)` : 'Resend verification code'}</button></div>
-          <label className="setup-field"><span>OTP</span><input value={otp} inputMode="numeric" maxLength={6} onChange={event => setOtp(event.target.value)} placeholder="4–6 digits" /></label>
-          <label className="setup-field"><span>Birthday</span><input type="date" aria-label="Birthday" value={birthday} onChange={event => updateAccount({ birthday: event.target.value })} /></label>
-          <div className="onboarding-actions"><button className="secondary" onClick={() => setStep('entry')}>Back</button><button className="primary" disabled={!name.trim() || !phone.trim() || !otpValid} onClick={advanceToTerms}>Continue</button></div>
-          <button className="onboarding-skip" onClick={() => { onAccountReady(account({ name: '' })); setStep('terms'); }}>Skip sign up for this prototype</button>
-        </>}
-
-        {step === 'terms' && <>
-          <span className="drawer-kicker">TERMS &amp; CONDITIONS</span>
-          <h1>Keep control of what CocoCrunch can use.</h1>
-          <ul className="onboarding-permissions">
-            <li><b>Real-time location</b><span>Used during a trip for route guidance and safety features. It stays off until you choose to share it.</span></li>
-            <li><b>Notifications</b><span>Used for the reminders and travel updates you choose.</span></li>
-            <li><b>Camera</b><span>Used only when you add photos to your private trip memories.</span></li>
-          </ul>
-          <label className="onboarding-consent"><input type="checkbox" checked={termsAccepted} onChange={event => setTermsAccepted(event.target.checked)} /> <span>I agree to the Terms &amp; Conditions.</span></label>
-          <button className="primary" disabled={!termsAccepted} onClick={() => { onTermsAccepted(); setStep('packing'); }}>I agree &amp; continue</button>
+          <label className="onboarding-field"><span>Name</span><input value={name} autoComplete="name" onChange={event => updateAccount({ name: event.target.value })} placeholder="Your name" /></label>
+          <label className="onboarding-field"><span>Country code</span><select aria-label="Country code" value={countryCode} onChange={event => updateAccount({ countryCode: event.target.value })}>{countryCodes.map(country => <option value={country.value} key={country.value}>{country.label}</option>)}</select></label>
+          <label className="onboarding-field"><span>Phone number</span><input value={phone} inputMode="tel" autoComplete="tel" onChange={event => setPhone(event.target.value)} placeholder="012 345 6789" /></label>
+          <label className="onboarding-field"><span>Password</span><input value={password} type="password" autoComplete="new-password" onChange={event => setPassword(event.target.value)} placeholder="At least 8 characters" /></label>
+          <label className="onboarding-field"><span>Birthday</span><input type="date" aria-label="Birthday" value={birthday} onChange={event => updateAccount({ birthday: event.target.value })} /></label>
+          <label className="onboarding-consent onboarding-consent--inline"><input type="checkbox" checked={termsAccepted} onChange={event => setTermsAccepted(event.target.checked)} /><span>I agree to the <button type="button" className="onboarding-terms-link" onClick={event => { event.preventDefault(); event.stopPropagation(); setTermsOpen(open => !open); }}>Terms &amp; Conditions</button>.</span></label>
+          {termsOpen && <section className="onboarding-terms-disclosure" aria-label="Terms and Conditions"><div><b>Terms &amp; Conditions</b><button type="button" aria-label="Close Terms and Conditions" onClick={() => setTermsOpen(false)}>×</button></div><p>Use CocoCrunch responsibly and keep your account details private. Travel recommendations and plans should be checked against current provider information before you book or travel.</p></section>}
+          <div className="onboarding-actions onboarding-actions--primary"><button className="secondary" onClick={() => setStep('entry')}>Back</button><button className="primary" disabled={!name.trim() || !phone.trim() || !passwordValid || !termsAccepted} onClick={advanceToTingo}>Continue</button></div>
         </>}
 
         {step === 'packing' && <>
-          <span className="drawer-kicker">PACKING BASICS</span>
-          <h1>One last little habit check.</h1>
-          <p>We will use these as your starting packing preferences. You can change them later.</p>
+          <span className="drawer-kicker">PACKING</span>
+          <h1>Packing basics.</h1>
           <div className="onboarding-packing-questions">{packingQuestions.map(question => <label key={question.id}><input type="checkbox" checked={preferences.includes(question.id)} onChange={() => togglePreference(question.id)} /> <span>{question.label}</span></label>)}</div>
-          <button className="primary" onClick={() => onComplete(preferences)}>Finish setup</button>
-          <button className="onboarding-skip" onClick={() => onComplete([])}>Skip for now</button>
+          <div className="onboarding-actions onboarding-actions--primary"><button className="secondary" onClick={() => onComplete([])}>Skip</button><button className="primary" onClick={() => onComplete(preferences)}>Finish setup</button></div>
         </>}
       </section>
     </main>

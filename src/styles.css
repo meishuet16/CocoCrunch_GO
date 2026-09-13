@@ -6801,6 +6801,135 @@ main {
   font-family: 'Inter', sans-serif !important;
 }
 
+/* Tingo assessment: shared CocoCrunch journal palette and type hierarchy. */
+.tingo-overlay { background: var(--line); }
+.tingo-flow-drawer { background: var(--cream); color: var(--ink); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); }
+.tingo-flow { background: var(--cream); }
+.tingo-flow-top div, .tingo-stat-list i { background: var(--cream-deep); }
+.tingo-flow-top i { background: var(--sangria); }
+.tingo-flow-top button, .tingo-flow-top span, .tingo-result-head { color: var(--ink); }
+.tingo-flow h2, .tingo-how-header h2, .tingo-question-screen h2, .tingo-result-hero span { color: var(--ink); font-family: Georgia, serif; }
+.tingo-flow-kicker, .tingo-question-kicker, .tingo-role-card span, .tingo-result-head b, .tingo-result-quote, .tingo-role-card b, .tingo-role-card small { color: var(--sangria); font-family: 'Caveat', cursive !important; }
+.tingo-how-header p, .tingo-how-list b, .tingo-how-list small, .tingo-choice-grid b, .tingo-choice-grid small, .tingo-creating p, .tingo-stat-list b, .tingo-stat-list strong { color: var(--ink); }
+.tingo-how-list article, .tingo-how-list .how-card, .tingo-choice-grid button, .tingo-role-card { background: var(--paper-solid); box-shadow: var(--shadow-sm); }
+.how-card.how-card-1, .how-card.how-card-2, .how-card.how-card-3, .how-card.how-card-4 { background: var(--paper-solid); border-color: var(--line); }
+.how-step-num.num-maroon, .how-step-num.num-travel, .how-step-num.num-heart, .how-step-num.num-sparkles { background: var(--cream-deep); border-color: var(--line); color: var(--sangria); box-shadow: none; }
+.how-feature-tag, .tag-maroon, .tag-travel, .tag-heart, .tag-sparkles, .tingo-choice-grid span, .tingo-choice-grid small, .tingo-result-hero strong { background: var(--cream-deep); border-color: var(--line); color: var(--ink); }
+.tingo-flow-primary, .tingo-flow-primary.tingo-how-maroon-btn, .tingo-red-primary { background: var(--sangria); color: var(--paper-solid); box-shadow: var(--shadow); font-family: Inter, system-ui, sans-serif; border-radius: var(--radius); }
+.tingo-neither { background: var(--paper-solid); color: var(--ink); box-shadow: var(--shadow-sm); }
+.tingo-result-hero { background: linear-gradient(105deg, var(--cream-soft), var(--paper)), url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=620&auto=format&fit=crop&q=80') center/cover; box-shadow: var(--shadow-sm); }
+
+/* Tingo intro follows the same calm, concise onboarding hierarchy. */
+.tingo-how {
+  gap: 18px;
+  padding: 24px;
+}
+
+.tingo-how-header {
+  margin: 0;
+}
+
+.tingo-how-header h2 {
+  max-width: 280px;
+  margin: 0 0 8px;
+  font-size: clamp(28px, 8vw, 36px);
+}
+
+.tingo-how-header p {
+  max-width: 280px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.tingo-how-list {
+  gap: 10px;
+}
+
+.tingo-how-list .how-card {
+  min-height: 64px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.tingo-how-list .how-card:hover {
+  transform: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.tingo-how-list .how-card-body {
+  gap: 3px;
+}
+
+.tingo-how-list .how-card-body b {
+  font-size: 14px;
+}
+
+.tingo-how-list .how-card-body small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.tingo-how .tingo-flow-primary.tingo-how-maroon-btn {
+  width: 100%;
+  min-height: 46px;
+  margin-top: auto;
+  border-radius: var(--radius);
+}
+
+/* Keep the complete Tingo flow within the white-paper and Sangria palette. */
+.tingo-overlay {
+  background: rgba(147, 5, 0, .14);
+}
+
+.tingo-flow-drawer,
+.tingo-flow {
+  background: var(--paper-solid);
+  box-shadow: var(--shadow-lg);
+}
+
+.tingo-flow-top button,
+.tingo-flow-top span,
+.tingo-result-head,
+.tingo-choice-grid button,
+.tingo-neither {
+  color: var(--ink);
+}
+
+.tingo-choice-grid button,
+.tingo-result-hero,
+.tingo-role-card {
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+}
+
+.tingo-result-hero {
+  background: linear-gradient(105deg, var(--cream-soft), var(--paper));
+}
+
+.tingo-result-hero span,
+.tingo-choice-grid b,
+.tingo-role-card b {
+  color: var(--ink);
+  font-family: Georgia, "Times New Roman", serif !important;
+}
+
+.onboarding-welcome-copy h1,
+.onboarding-card--login h1,
+.onboarding-card--signup h1,
+.tingo-how-header h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+}
+
+.onboarding-card--login h1,
+.onboarding-card--signup h1,
+.tingo-how-header h2 {
+  font-size: clamp(30px, 8vw, 36px);
+  letter-spacing: -.03em;
+}
+
 .spatial-live-marker circle:first-child {
   fill: var(--blue);
   stroke: var(--blue-deep);
@@ -6874,21 +7003,24 @@ main {
 
 .onboarding-shell {
   min-height: 100dvh;
+  padding: 0;
 }
 
 .onboarding-flow {
-  display: grid;
+  display: block;
   min-height: 100dvh;
-  place-items: center;
-  padding: max(24px, env(safe-area-inset-top)) 18px max(24px, env(safe-area-inset-bottom));
+  padding: max(12px, env(safe-area-inset-top)) 18px max(12px, env(safe-area-inset-bottom));
   background: var(--cream);
 }
 
 .onboarding-card {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   width: min(100%, 480px);
+  min-height: calc(100dvh - max(24px, env(safe-area-inset-top) + env(safe-area-inset-bottom)));
+  margin: 0 auto;
   gap: 16px;
-  padding: 24px;
+  padding: 12px 24px;
   border: 1px solid var(--line);
   border-radius: 20px;
   background: var(--paper-solid);
@@ -6905,6 +7037,107 @@ main {
 .onboarding-card > p {
   margin: -8px 0 0;
   color: var(--muted);
+}
+
+.onboarding-card--entry {
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: clamp(80px, 15dvh, 132px);
+  text-align: center;
+}
+
+.onboarding-card--login,
+.onboarding-card--signup {
+  justify-content: center;
+  padding-top: clamp(40px, 9dvh, 84px);
+  padding-bottom: clamp(40px, 9dvh, 84px);
+}
+
+.onboarding-card--login .onboarding-actions--primary,
+.onboarding-card--signup .onboarding-actions--primary {
+  margin-top: 8px;
+}
+
+.onboarding-welcome-copy {
+  display: grid;
+  gap: 8px;
+}
+
+.onboarding-welcome-copy > span {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.onboarding-welcome-copy h1 {
+  color: var(--sangria);
+  font-size: clamp(38px, 11vw, 52px);
+}
+
+.onboarding-welcome-tagline {
+  margin: 0;
+  color: var(--ink);
+}
+
+.onboarding-welcome-art {
+  display: block;
+  width: min(100%, 300px);
+  height: auto;
+  margin: 8px auto;
+}
+
+.onboarding-entry-actions {
+  display: grid;
+  width: min(100%, 300px);
+  margin-top: 8px;
+}
+
+.onboarding-card--entry .onboarding-entry-actions {
+  display: grid;
+  margin-top: 8px;
+}
+
+.onboarding-card--entry .onboarding-welcome-copy,
+.onboarding-card--entry .onboarding-welcome-art,
+.onboarding-card--entry .onboarding-welcome-tagline,
+.onboarding-card--entry .onboarding-entry-actions {
+  animation: onboarding-enter .55s both ease-out;
+}
+
+.onboarding-card--entry .onboarding-welcome-art {
+  animation-delay: .12s;
+}
+
+.onboarding-card--entry .onboarding-welcome-tagline {
+  animation-delay: .22s;
+}
+
+.onboarding-card--entry .onboarding-entry-actions {
+  animation-delay: .32s;
+}
+
+@keyframes onboarding-enter {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .onboarding-card--entry .onboarding-welcome-art {
+    animation: onboarding-enter .55s .12s both ease-out, onboarding-art-float 4.5s 1s ease-in-out infinite;
+  }
+}
+
+@keyframes onboarding-art-float {
+  50% { transform: translateY(-6px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-card--entry .onboarding-welcome-copy,
+  .onboarding-card--entry .onboarding-welcome-art,
+  .onboarding-card--entry .onboarding-welcome-tagline,
+  .onboarding-card--entry .onboarding-entry-actions {
+    animation: none;
+  }
 }
 
 .onboarding-progress {
@@ -6939,6 +7172,11 @@ main {
   gap: 10px;
 }
 
+.onboarding-actions--primary,
+.onboarding-card > .primary {
+  margin-top: auto;
+}
+
 .onboarding-actions button,
 .onboarding-card > .primary {
   flex: 1;
@@ -6962,6 +7200,36 @@ main {
   background: var(--paper-solid);
   color: var(--ink);
   padding: 9px;
+}
+
+.onboarding-field {
+  display: grid;
+  gap: 6px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.onboarding-field input,
+.onboarding-field select {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 46px;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper-solid);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 400;
+  padding: 11px 12px;
+}
+
+.onboarding-field input:focus,
+.onboarding-field select:focus {
+  border-color: var(--sangria);
+  outline: 2px solid rgba(147, 5, 0, .16);
+  outline-offset: 1px;
 }
 
 .onboarding-permissions,
@@ -7005,6 +7273,58 @@ main {
   grid-template-columns: auto 1fr;
   color: var(--ink);
   font-weight: 700;
+}
+
+.onboarding-consent--inline {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.onboarding-terms-link {
+  display: inline;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--sangria);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.onboarding-terms-disclosure {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.onboarding-terms-disclosure > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--ink);
+}
+
+.onboarding-terms-disclosure button {
+  width: 28px;
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.onboarding-terms-disclosure p {
+  margin: 8px 0 0;
 }
 
 .trip-setup-wizard {
@@ -7386,9 +7706,748 @@ main {
   box-shadow: none;
 }
 
+/* Global navigation stays a single outline icon system: only the current tab carries colour. */
+.bottom-nav button svg { fill: none; stroke-width: 1.8; }
+.tab-me .bottom-nav button:not(.active) { color: var(--muted); }
+.tab-me .bottom-nav button.active { color: var(--sangria); }
+
+.home-active-hero.cc-card,
+.home-current-trip-card.cc-card,
+.home-tip-card.cc-card { padding: 17px; }
+.home-shortcuts button.cc-card { padding: 17px 8px; }
+
 @media (max-width: 360px) {
-  .home-active-hero { grid-template-columns: 78px minmax(0, 1fr) auto; padding: 12px; }
+  .home-active-hero { grid-template-columns: 78px minmax(0, 1fr) auto; }
   .home-trip-hero-art { min-height: 92px; }
   .home-shortcuts { gap: 7px; }
   .home-shortcuts button { min-height: 78px; font-size: 9px; }
+}
+
+/* Tingo follows the onboarding paper, Sangria, and typography system. */
+.tingo-flow-drawer,
+.tingo-flow {
+  background: var(--paper-solid);
+  color: var(--ink);
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.tingo-flow {
+  gap: 18px;
+  padding: 24px;
+}
+
+.tingo-flow h2,
+.tingo-how-header h2,
+.tingo-question-screen h2,
+.tingo-result-hero span,
+.tingo-result-head b {
+  color: var(--sangria);
+  font-family: var(--font-editorial, Georgia, serif) !important;
+  font-weight: 700;
+  letter-spacing: -.03em;
+}
+
+.tingo-flow-top,
+.tingo-result-head {
+  min-height: 40px;
+  color: var(--muted);
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.tingo-flow-top button,
+.tingo-result-head button {
+  width: 40px;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper-solid);
+  color: var(--sangria);
+  box-shadow: none;
+}
+
+.tingo-flow-top div,
+.tingo-stat-list i {
+  background: var(--cream-deep);
+}
+
+.tingo-flow-top i,
+.tingo-stat-list em {
+  background: var(--sangria) !important;
+}
+
+.tingo-flow-top span,
+.tingo-question-kicker,
+.tingo-role-card span {
+  color: var(--muted);
+  font-family: Inter, system-ui, sans-serif !important;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+
+.tingo-how-header p,
+.tingo-creating p,
+.tingo-result-quote,
+.tingo-role-card small {
+  color: var(--muted);
+  font-family: Inter, system-ui, sans-serif !important;
+}
+
+.tingo-how-list .how-card,
+.tingo-choice-grid button,
+.tingo-role-card,
+.tingo-neither {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper-solid);
+  box-shadow: var(--shadow-sm);
+}
+
+.tingo-how-list .how-card,
+.tingo-choice-grid button {
+  color: var(--ink);
+}
+
+.tingo-how-list .how-card-body b,
+.tingo-choice-grid b,
+.tingo-role-card b {
+  color: var(--ink);
+  font-family: Inter, system-ui, sans-serif !important;
+  font-weight: 750;
+}
+
+.tingo-how-list .how-card-body small,
+.tingo-choice-grid span,
+.tingo-choice-grid small {
+  color: var(--muted);
+  font-family: Inter, system-ui, sans-serif !important;
+}
+
+.how-step-num.num-maroon,
+.how-step-num.num-travel,
+.how-step-num.num-heart,
+.how-step-num.num-sparkles {
+  border: 1px solid var(--line);
+  background: var(--cream-deep);
+  color: var(--sangria);
+  box-shadow: none;
+}
+
+.tingo-choice-grid button:hover,
+.tingo-choice-grid button:focus-visible,
+.tingo-how-list .how-card:hover {
+  border-color: var(--sangria);
+  background: var(--cream-soft);
+  box-shadow: var(--shadow-sm);
+  transform: none;
+}
+
+.tingo-flow-primary,
+.tingo-flow-primary.tingo-how-maroon-btn,
+.tingo-red-primary {
+  min-height: 46px;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--sangria) !important;
+  color: var(--paper-solid) !important;
+  box-shadow: var(--shadow);
+  font-family: Inter, system-ui, sans-serif !important;
+  font-weight: 750;
+}
+
+.tingo-neither {
+  min-height: 44px;
+  color: var(--sangria);
+  font-family: Inter, system-ui, sans-serif;
+  font-weight: 700;
+}
+
+.tingo-creating-photo {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--cream-deep);
+  box-shadow: var(--shadow-sm);
+}
+
+.tingo-checks span {
+  padding-left: 0;
+  color: var(--muted);
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.tingo-checks span::before {
+  display: none;
+}
+
+.tingo-checks b {
+  color: var(--ink);
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.tingo-result-hero {
+  grid-template-columns: minmax(0, 1fr) 112px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--cream-soft);
+  box-shadow: var(--shadow-sm);
+}
+
+.tingo-result-hero strong {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper-solid);
+  color: var(--sangria);
+  font-family: Inter, system-ui, sans-serif !important;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.tingo-result-hero img {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  transform: none;
+}
+
+.tingo-result-hero i {
+  display: none;
+}
+
+.tingo-result-quote {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.tingo-role-card {
+  gap: 5px;
+  padding: 14px;
+}
+
+.tingo-stat-list div {
+  grid-template-columns: 78px minmax(0, 1fr) 28px;
+  gap: 8px;
+}
+
+.tingo-stat-list b,
+.tingo-stat-list strong {
+  color: var(--ink);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 11px;
+}
+
+.tingo-stat-list strong {
+  color: var(--sangria);
+}
+
+/* Final hierarchy pass: titles lead in ink; supporting copy carries Sangria. */
+.tingo-flow h2,
+.tingo-how-header h2,
+.tingo-question-screen h2,
+.tingo-result-hero span,
+.tingo-result-head b {
+  color: var(--ink);
+}
+
+.tingo-flow-top span,
+.tingo-question-kicker,
+.tingo-role-card span,
+.tingo-how-header p,
+.tingo-creating p,
+.tingo-result-quote,
+.tingo-role-card small,
+.tingo-how-list .how-card-body small,
+.tingo-choice-grid span,
+.tingo-choice-grid small {
+  color: var(--sangria);
+}
+
+.tingo-flow-top {
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  column-gap: 12px;
+  align-items: center;
+}
+
+.tingo-flow-top button {
+  width: 32px;
+  min-height: 32px;
+  margin-left: -8px;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.tingo-flow-top div {
+  min-width: 0;
+}
+
+.how-step-num.num-maroon,
+.how-step-num.num-travel,
+.how-step-num.num-heart,
+.how-step-num.num-sparkles {
+  display: inline-flex;
+  width: auto;
+  min-width: 58px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(147, 5, 0, .1);
+  color: var(--sangria);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: .02em;
+}
+
+.tingo-creating {
+  justify-content: center;
+  gap: 14px;
+  padding: 22px 24px;
+}
+
+.tingo-creating h2 {
+  margin: 0;
+  font-size: clamp(25px, 7vw, 30px);
+  line-height: 1.1;
+}
+
+.tingo-creating p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.tingo-creating-photo {
+  width: 100%;
+  min-height: 72px;
+  background: var(--cream-deep);
+}
+
+.tingo-checks {
+  gap: 7px;
+}
+
+.tingo-checks span,
+.tingo-checks b {
+  font-size: 12px;
+}
+
+.tingo-result-screen {
+  gap: 10px;
+  padding: 16px;
+}
+
+.tingo-result-head {
+  grid-template-columns: 32px minmax(0, 1fr) 32px;
+  gap: 8px;
+  align-items: center;
+}
+
+.tingo-result-head button {
+  width: 32px;
+  min-height: 32px;
+  font-size: 18px;
+}
+
+.tingo-result-head b {
+  font-size: 18px;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.tingo-result-hero {
+  min-height: 104px;
+  grid-template-columns: minmax(0, 1fr) 90px;
+  padding: 12px;
+}
+
+.tingo-result-hero span {
+  font-size: 22px;
+  line-height: 1.04;
+}
+
+.tingo-result-hero strong {
+  margin-top: 6px;
+  padding: 4px 7px;
+  font-size: 10px;
+}
+
+.tingo-result-hero img {
+  width: 86px;
+}
+
+.tingo-result-quote {
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.tingo-role-card {
+  padding: 11px 12px;
+}
+
+.tingo-role-card b {
+  font-size: 15px;
+}
+
+.tingo-role-card small {
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.tingo-stat-list {
+  gap: 4px;
+}
+
+.tingo-stat-list div {
+  min-height: 16px;
+}
+
+.tingo-stat-list b,
+.tingo-stat-list strong {
+  font-size: 10px;
+}
+
+.tingo-stat-list i {
+  height: 5px;
+}
+
+.tingo-question-screen.is-finalizing .tingo-choice-grid {
+  opacity: .55;
+}
+
+.tingo-finalizing {
+  display: grid;
+  gap: 8px;
+  padding: 10px 0 0;
+  color: var(--sangria);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tingo-finalizing i {
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--cream-deep);
+}
+
+.tingo-finalizing em {
+  display: block;
+  width: 38%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--sangria);
+  animation: tingo-finalizing-progress .65s ease-out forwards;
+}
+
+@keyframes tingo-finalizing-progress {
+  to { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tingo-finalizing em { animation: none; width: 100%; }
+}
+
+/* The result is one relaxed identity card, not a dense assessment report. */
+.tingo-result-screen {
+  gap: 16px;
+  padding: 20px;
+}
+
+.tingo-result-hero {
+  min-height: 132px;
+  grid-template-columns: minmax(0, 1fr) 104px;
+  padding: 16px;
+}
+
+.tingo-result-hero span {
+  font-size: clamp(24px, 7vw, 30px);
+  line-height: 1.05;
+}
+
+.tingo-result-hero strong {
+  margin-top: 9px;
+  font-size: 11px;
+}
+
+.tingo-result-hero img {
+  width: 100px;
+}
+
+.tingo-result-quote {
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.tingo-role-card {
+  gap: 6px;
+  padding: 14px;
+}
+
+.tingo-role-card b {
+  font-size: 17px;
+}
+
+.tingo-role-card small {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* Result details use neutral text; Sangria is reserved for progress and action. */
+.tingo-result-screen {
+  gap: 14px;
+}
+
+.tingo-result-hero {
+  min-height: 122px;
+  padding: 15px;
+}
+
+.tingo-persona-description {
+  display: block;
+  margin-top: 8px;
+  color: var(--ink);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.tingo-stat-list {
+  display: grid;
+  gap: 7px;
+}
+
+.tingo-stat-list div {
+  grid-template-columns: 78px minmax(0, 1fr) 28px;
+  gap: 8px;
+  min-height: 18px;
+}
+
+.tingo-stat-list b,
+.tingo-stat-list strong {
+  color: var(--ink);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 11px;
+}
+
+.tingo-stat-list strong {
+  color: var(--muted);
+  text-align: right;
+}
+
+.tingo-stat-list i {
+  height: 6px;
+  background: var(--cream-deep);
+}
+
+.tingo-stat-list em {
+  background: var(--sangria) !important;
+}
+
+.tingo-result-quote {
+  margin: 0;
+  color: var(--muted);
+  font-family: Inter, system-ui, sans-serif !important;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Match the Welcome display face for Tingo's named categories. */
+.tingo-stat-list b,
+.tingo-question-kicker {
+  font-family: var(--font-editorial, Georgia, serif) !important;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.tingo-stat-list b {
+  font-size: 12px;
+}
+
+/* Let the result breathe across the drawer instead of clustering at its centre. */
+.tingo-result-screen {
+  min-height: 100%;
+  align-content: space-between;
+  gap: 22px;
+  padding-top: 24px;
+  padding-bottom: 20px;
+}
+
+.tingo-stat-list {
+  gap: 9px;
+}
+
+.tingo-result-quote {
+  padding-top: 4px;
+}
+
+.tingo-result-screen .tingo-flow-primary {
+  margin-top: 4px;
+}
+
+/* Keep the last setup step as compact and consistent as login and sign-up. */
+.onboarding-card--packing {
+  justify-content: center;
+  padding-top: clamp(40px, 9dvh, 84px);
+  padding-bottom: clamp(40px, 9dvh, 84px);
+}
+
+.onboarding-card--packing .onboarding-actions--primary {
+  margin-top: 8px;
+}
+
+.onboarding-card--packing .onboarding-packing-questions label {
+  min-height: 46px;
+  align-items: center;
+  padding: 11px 12px;
+  background: var(--paper-solid);
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.tingo-result-screen .tingo-flow-primary {
+  min-height: 44px;
+  font-family: Inter, system-ui, sans-serif !important;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Give the Tingo introduction the same calm vertical rhythm as authentication. */
+.tingo-how {
+  min-height: 100%;
+  align-content: space-between;
+  gap: 24px;
+  padding-top: 28px;
+  padding-bottom: 22px;
+}
+
+.tingo-how-header {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.tingo-how-header h2,
+.tingo-how-header p {
+  margin: 0;
+}
+
+.tingo-how-list {
+  gap: 14px;
+}
+
+.tingo-how-list .how-card {
+  min-height: 70px;
+  padding: 14px;
+}
+
+.tingo-how .tingo-flow-primary.tingo-how-maroon-btn {
+  margin-top: 12px;
+}
+
+/* A shared, quiet brand curve keeps every signed-in screen in the same journey. */
+.topbar {
+  position: relative;
+  min-height: 64px;
+  margin: -18px -18px 26px;
+  padding: 12px 18px 24px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0 0 50% 50% / 0 0 20px 20px;
+  background: var(--paper-solid);
+}
+
+.topbar::after {
+  position: absolute;
+  right: 12%;
+  bottom: 0;
+  left: 12%;
+  height: 24px;
+  border-bottom: 1px solid var(--line);
+  border-radius: 50%;
+  content: '';
+}
+
+.topbar > * {
+  position: relative;
+  z-index: 1;
+}
+
+.brand-companion {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+
+.brand-lockup .wordmark b {
+  color: var(--sangria);
+  font-family: var(--font-editorial);
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1;
+  opacity: .72;
+}
+
+.brand-lockup .wordmark small {
+  max-width: 230px;
+  color: var(--ink);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.25;
+  opacity: .72;
+}
+
+.home-page-welcome {
+  margin: 0 0 2px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.home-empty {
+  min-height: calc(100dvh - 210px);
+  align-content: start;
+  padding-top: clamp(20px, 5dvh, 44px);
+}
+
+.home-empty-state {
+  grid-template-columns: 90px minmax(0, 1fr);
+  gap: 12px;
+  margin-top: 0;
+  padding: 20px;
+}
+
+.home-empty-status {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  opacity: .72;
+}
+
+.home-empty-state .coco-companion {
+  align-self: center;
+  justify-self: center;
+}
+
+.home-empty-state > div {
+  gap: 7px;
+}
+
+.home-empty-state h2 {
+  font-size: 20px;
+}
+
+.home-empty-state p {
+  font-size: 12px;
 }
