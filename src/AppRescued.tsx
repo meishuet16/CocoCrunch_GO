@@ -1140,7 +1140,7 @@ export default function AppRescued() {
       <section className="home-empty-state cc-card" aria-label="Trip inspiration">
         <p className="home-empty-status">No active trip</p>
         <CocoCompanion context="planning" size={98} />
-        <div><h2>Explore ideas</h2><p>Save a place for later.</p><button className="secondary" onClick={() => setTab('explore')}>Explore <ChevronRight size={16} /></button></div>
+        <div><h2>Explore ideas</h2><button className="secondary" onClick={() => setTab('explore')}>Explore <ChevronRight size={16} /></button></div>
       </section>
     </div>;
     if (tripLifecycleStatus === 'completed') return <div className="home-orientation">
