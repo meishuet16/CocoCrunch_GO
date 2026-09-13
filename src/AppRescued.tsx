@@ -1299,18 +1299,8 @@ export default function AppRescued() {
   }
 
   function renderTrips() {
-    const step = tripSetupStep;
-    const canContinue = step === 1 ? Boolean(destination.trim()) : step === 2 ? Boolean(tripDates?.start && tripDates?.end) : true;
-    const finish = () => { setReadyConfirmed(true); setTripCreated(true); setTripWorkspaceOpen(true); };
-    return <section className="trip-setup-wizard trip-index-setup" aria-label="Create a trip">
-      <div className="trip-setup-progress"><b>Step {step} of 5</b><div><i style={{ width: `${step * 20}%` }} /></div></div>
-      {step === 1 && <><h2>Destination</h2><label className="setup-field"><input className="big-input" value={destination} onChange={event => setDestination(event.target.value)} placeholder="Where are you going?" autoFocus /></label></>}
-      {step === 2 && <><h2>Dates</h2><div className="trip-date-grid"><label className="setup-field"><span>Departure</span><input type="date" value={tripDates?.start ?? ''} onChange={event => setTripDates(current => ({ start: event.target.value, end: current?.end ?? event.target.value }))} /></label><label className="setup-field"><span>Return</span><input type="date" min={tripDates?.start} value={tripDates?.end ?? ''} onChange={event => setTripDates(current => ({ start: current?.start ?? event.target.value, end: event.target.value }))} /></label></div></>}
-      {step === 3 && <><h2>Travel type</h2><div className="constraint-row"><button className={mode === 'solo' ? 'active' : ''} onClick={() => setMode('solo')}>Solo</button><button className={mode === 'group' ? 'active' : ''} onClick={() => setMode('group')}>Group</button></div></>}
-      {step === 4 && <><h2>Travel style</h2><div className="constraint-row">{['Relaxed', 'Balanced', 'Packed'].map(vibe => <button key={vibe} className={tripInputs.tripVibe.startsWith(vibe) ? 'active' : ''} onClick={() => setTripInputField('tripVibe', vibe === 'Relaxed' ? 'Relaxed and spacious' : vibe === 'Packed' ? 'Packed with highlights' : 'Balanced days with breathing room')}>{vibe}</button>)}</div></>}
-      {step === 5 && <><h2>Ready to go?</h2><div className="success-note"><div><b>{destination}</b><small>{tripDates?.start} → {tripDates?.end} · {mode === 'group' ? 'Group' : 'Solo'} · {tripInputs.tripVibe}</small></div></div></>}
-      <div className="trip-setup-actions">{step > 1 && <button className="secondary" onClick={() => setTripSetupStep(current => (current - 1) as TripSetupStep)}>Back</button>}{step < 5 ? <button className="primary" disabled={!canContinue} onClick={() => setTripSetupStep(current => (current + 1) as TripSetupStep)}>Continue <ChevronRight size={15} /></button> : <button className="primary" onClick={finish}>Create trip <ChevronRight size={15} /></button>}</div>
-    </section>;
+    if (!tripSetupModeChoice) return <section className="trip-setup-wizard trip-index-setup" aria-label="Trips"><button className="primary" onClick={() => setTripSetupModeChoice(true)}>Add Trip</button></section>;
+    return <section className="trip-setup-wizard trip-index-setup" aria-label="Choose trip type"><h2>How are you travelling?</h2><div className="onboarding-actions"><button className="primary" onClick={() => { setMode('solo'); startNewTrip(); }}>Solo</button><button className="secondary" onClick={() => { setMode('group'); startNewTrip(); }}>Group</button></div></section>;
   }
 
   function renderExplore() {
