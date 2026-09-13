@@ -161,11 +161,6 @@ export const ExplorePlaceCard: React.FC<ExplorePlaceCardProps> = ({
         </button>
       </div>
 
-      {mode === 'group' && (
-        <p className="governance-subnote">
-          Suggestion creates a candidate; official group itinerary updates only upon consensus.
-        </p>
-      )}
       </div>
     </article>
   );

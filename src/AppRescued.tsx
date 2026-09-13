@@ -1563,7 +1563,7 @@ export default function AppRescued() {
               <p>{typeCopy}</p>
 
               <div className="me-chip-row">
-                {personaTags.map(tag => (
+                {personaTags.slice(0, 3).map(tag => (
                   <small key={tag}>{tag}</small>
                 ))}
               </div>
