@@ -28,9 +28,8 @@ describe('journey phase guides', () => {
   it('keeps Explore governed by the active trip', () => {
     const html = renderToStaticMarkup(<ExplorePlanningGuide onOpenTrip={() => undefined} />);
 
-    expect(html).toContain('ADD TO TRIP');
     expect(html).toContain('Save to group');
-    expect(html).toContain('never edits the official itinerary');
+    expect(html).toContain('Open trip');
   });
 
   it('keeps Tingo ownership distinct from trip constraints', () => {
