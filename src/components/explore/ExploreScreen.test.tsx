@@ -96,12 +96,12 @@ describe('ExploreScreen (Community Trip Explore)', () => {
     );
 
     expect(html).toContain('role="search"');
-    expect(html).toContain('Search Tokyo, Kyoto, Osaka, cafés, vintage...');
+    expect(html).toContain('Search places');
     expect(html).toContain('Country:');
     expect(html).toContain('All Countries');
     expect(html).toContain('Japan');
     expect(html).toContain('South Korea');
-    expect(html).toContain('✦ All Categories');
+    expect(html).toContain('>All</button>');
     expect(html).toContain('Duration');
     expect(html).toContain('Budget');
     expect(html).toContain('Solo');

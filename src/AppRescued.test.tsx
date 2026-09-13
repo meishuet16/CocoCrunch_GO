@@ -148,9 +148,9 @@ describe('AppRescued journey status integration', () => {
     const html = renderToStaticMarkup(<AppRescued />);
 
     // Top Section (Search & Discovery)
-    expect(html).toContain('Search Tokyo, Kyoto, Osaka, cafés, vintage...');
+    expect(html).toContain('Search places');
     expect(html).toContain('DESTINATIONS COVERED');
-    expect(html).toContain('✦ All Categories');
+    expect(html).toContain('>All</button>');
 
     // Bottom Section (Community Post Feed)
     expect(html).toContain('COMMUNITY TRIPS');
