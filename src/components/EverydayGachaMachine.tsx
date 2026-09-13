@@ -25,10 +25,9 @@ export function EverydayGachaMachine({ result, onTurn, candidates }: EverydayGac
     turn();
   };
   return <section className="everyday-gacha-machine random-ritual" data-stage={stage} aria-labelledby="everyday-gacha-title">
-    <header className="everyday-gacha-machine__header"><span>EVERYDAY GACHA</span><h3 id="everyday-gacha-title">Choose a small everyday move.</h3></header>
+    <header className="everyday-gacha-machine__header"><h3 id="everyday-gacha-title">Everyday Gacha</h3></header>
     <div className="random-ritual__companion"><CocoCompanion context="gacha" pose={revealed && result ? 'expression-happy' : undefined} size={88}/></div>
     <div className="travel-machine" data-turnable={canTurn ? 'true' : 'false'} aria-label="Travel capsule machine">
-      <div className="travel-machine__roof">LITTLE DETOURS</div>
       <div className={`travel-machine__drum${candidates ? ' travel-machine__drum--candidates' : ''}`}>{candidates
         ? candidates.map((candidate, i) => <i className="drum-ball" title={candidate} key={`${i}-${candidate}`}><span>{i + 1}</span></i>)
         : Array.from({ length: 7 }, (_, i) => <i className={`drum-ball ball-${i}`} key={i}/>)}</div>
@@ -37,12 +36,9 @@ export function EverydayGachaMachine({ result, onTurn, candidates }: EverydayGac
         <div className="travel-machine__slot"/>
       </div>
       <div className="travel-capsule"><i/><b/><em>{revealed && result ? result : 'idea'}</em></div>
-      <div className="travel-machine__idea-note"><span>skipped idea</span></div>
-      <small>click the round knob</small>
+      <div className="travel-machine__idea-note"><span>idea</span></div>
     </div>
-    <p>Turn between reasonable everyday options when the next little choice feels too close to call.</p>
     {candidates && <div className="everyday-gacha-machine__options" aria-label="Everyday options">{candidates.map((candidate, i) => <span key={`${i}-${candidate}`}>{i + 1}. {candidate}</span>)}</div>}
-    <p className="everyday-gacha-machine__boundary">This is not a Court decision. It does not write the official itinerary or learning.</p>
     {stage === 'held' && <button type="button" className="ritual-hold" onClick={open}>Open capsule</button>}
     <button className="everyday-gacha-machine__button" type="button" disabled={!canTurn} onClick={turn}>{revealed ? 'Turn again' : 'Turn the Gacha'}</button>
     <div className="random-ritual__status" role="status" aria-live="polite">
