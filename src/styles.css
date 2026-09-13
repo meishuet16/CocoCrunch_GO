@@ -8451,3 +8451,7 @@ main {
 .home-empty-state p {
   font-size: 12px;
 }
+
+.brand-lockup .wordmark {
+  gap: 7px;
+}
