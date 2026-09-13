@@ -1246,3 +1246,73 @@
 
 .tab-me .emergency-contacts > .setup-field:last-child { order: 2; }
 .tab-me .emergency-contacts > .primary { order: 3; }
+
+/* Me uses the same shell measurements and navigation as every other signed-in page. */
+.tab-me {
+  padding: 18px 18px calc(104px + env(safe-area-inset-bottom)) !important;
+  background: var(--cream) !important;
+}
+
+.tab-me::before { display: none !important; }
+
+.tab-me .topbar {
+  min-height: 64px !important;
+  margin: -18px -18px 26px !important;
+  padding: 12px 18px 24px !important;
+}
+
+.tab-me .bottom-nav {
+  height: calc(74px + env(safe-area-inset-bottom)) !important;
+  padding: 7px 9px env(safe-area-inset-bottom) !important;
+  border: 0 !important;
+  border-top: 1px solid var(--line) !important;
+  border-radius: 0 !important;
+  background: rgba(255, 248, 231, .95) !important;
+  box-shadow: none !important;
+}
+
+.tab-me .bottom-nav button {
+  gap: 3px !important;
+  border-radius: var(--radius) !important;
+  color: var(--muted) !important;
+}
+
+.tab-me .bottom-nav button svg {
+  width: auto !important;
+  height: auto !important;
+  stroke-width: 1.8 !important;
+}
+
+.tab-me .bottom-nav button span {
+  font-size: 8px !important;
+  font-weight: 780 !important;
+}
+
+.tab-me .bottom-nav button.active { color: var(--sangria) !important; }
+.tab-me .bottom-nav button.active::before {
+  top: 1px !important;
+  bottom: auto !important;
+  width: 23px !important;
+  height: 3px !important;
+  background: var(--sangria) !important;
+}
+
+/* Tingo card uses the shared paper, serif-heading, and bordered-tag system. */
+.tab-me .me-tingo-card.redesign-card {
+  padding: 18px !important;
+  background: var(--paper-solid) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.tab-me .me-card-copy h2 {
+  color: var(--ink) !important;
+  font-family: var(--font-editorial) !important;
+}
+
+.tab-me .me-chip-row small {
+  border: 1px solid var(--line) !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  color: var(--muted) !important;
+  font-family: Inter, system-ui, sans-serif !important;
+}
