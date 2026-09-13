@@ -20,8 +20,8 @@ export function MemoryArchiveGuide({ onOpenTrip }: PhaseGuideButtonProps) {
 
 export function ExplorePlanningGuide({ onOpenTrip }: PhaseGuideButtonProps) {
   return <section className="explore-planning-note" aria-label="Explore planning handoff">
-    <div><span>ADD TO TRIP</span><h3>Save idea → Suggest to group</h3><small>Save an idea for the active trip, then suggest it to the group; it never edits the official itinerary or bypasses Group Court.</small></div>
-    <button className="secondary" onClick={onOpenTrip}>Open active trip</button>
+    <div><h3>Save to group</h3></div>
+    <button className="primary" onClick={onOpenTrip}>Open trip</button>
   </section>;
 }
 

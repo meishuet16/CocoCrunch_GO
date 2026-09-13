@@ -29,7 +29,7 @@ describe('journey phase guides', () => {
     const html = renderToStaticMarkup(<ExplorePlanningGuide onOpenTrip={() => undefined} />);
 
     expect(html).toContain('ADD TO TRIP');
-    expect(html).toContain('Save idea → Suggest to group');
+    expect(html).toContain('Save to group');
     expect(html).toContain('never edits the official itinerary');
   });
 
