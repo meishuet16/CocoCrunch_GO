@@ -526,11 +526,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
       {/* 1. Header Section */}
       <header className="explore-page-header">
         <div className="explore-header-lockup">
-          <span className="explore-kicker">EXPLORE</span>
-          <h2 className="explore-title">Borrow a feeling, make it yours.</h2>
-          <p className="explore-subtitle">
-            Discover places and itineraries shared by travellers. Save candidates for your trip, or suggest them to the group.
-          </p>
+          <h2 className="explore-title">Explore</h2>
         </div>
       </header>
 
@@ -548,7 +544,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
               className="explore-search-input"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search Tokyo, Kyoto, Osaka, cafés, vintage..."
+              placeholder="Search places"
               aria-label="Search destinations, tags, or itineraries"
             />
             {searchQuery && (
@@ -726,7 +722,7 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
                   onClick={() => setSelectedCategory(category)}
                   aria-pressed={isSelected}
                 >
-                  {category === 'All' ? '✦ All Categories' : category}
+                  {category === 'All' ? 'All' : category}
                 </button>
               );
             })}
@@ -788,21 +784,21 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
           className={`view-tab ${activeTab === 'all' ? 'active' : ''}`}
           onClick={() => setActiveTab('all')}
         >
-          All Discoveries
+          All
         </button>
         <button
           type="button"
           className={`view-tab ${activeTab === 'places' ? 'active' : ''}`}
           onClick={() => setActiveTab('places')}
         >
-          Places ({filteredPlaces.length})
+          Places
         </button>
         <button
           type="button"
           className={`view-tab ${activeTab === 'community' ? 'active' : ''}`}
           onClick={() => setActiveTab('community')}
         >
-          Community Trips ({filteredCommunityTrips.length})
+          Community
         </button>
       </nav>
 
@@ -812,7 +808,6 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
           <div className="explore-section-heading">
             <div className="heading-title-group">
               <span>TRIP PLACES</span>
-              <small>Tingo-ranked candidates</small>
             </div>
             <span className="provenance-quiet-tag">Truthful provenance</span>
           </div>
@@ -849,7 +844,6 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
           <div className="explore-section-heading">
             <div className="heading-title-group">
               <span>COMMUNITY TRIPS</span>
-              <small>Shared travel notebooks</small>
             </div>
             <span className="community-shared-badge">Explicitly shared</span>
           </div>
@@ -886,7 +880,6 @@ export const ExploreScreen: React.FC<ExploreScreenProps> = ({
           <Sparkles size={16} className="lens-icon" />
           <div className="lens-title-group">
             <h3>Your Discovery Lens</h3>
-            <p>Recommendations adapt to your long-term travel profile.</p>
           </div>
         </div>
 
