@@ -1299,16 +1299,18 @@ export default function AppRescued() {
   }
 
   function renderTrips() {
-    const tripIsActive = tripLifecycleStatus === 'active' || tripLifecycleStatus === 'ongoing';
-    const statusLabel = tripLifecycleStatus === 'planning' ? 'PLANNING' : tripLifecycleStatus === 'active' ? 'ACTIVE' : tripLifecycleStatus === 'ongoing' ? 'ONGOING' : 'COMPLETED';
-    return <>
-      <SectionTitle kicker="TRIPS · YOUR NOTEBOOK" title="Keep the trip in view." copy="Planning, traveling, and remembering all belong to the same journey." />
-      <button className="new-trip-link" onClick={startNewTrip}>+ Start a new trip</button>
-      <section className={`trip-card ${tripIsActive ? 'active-trip' : 'planning-trip'} paper-sheet`}><div className="trip-card-art"><span>COCOCRUNCH</span><b>{destination}</b><small>{tripIntent.dates ? `${tripIntent.dates.start}–${tripIntent.dates.end}` : 'Dates to be confirmed'} · {travellerCount} travellers</small><i>✦</i></div><div className="trip-card-body"><div className="trip-card-heading"><div><span>{statusLabel}</span><h3>{destination} · slow food + small discoveries</h3></div><b>{planHealth.overall}</b></div><div className="trip-phase-preview"><span className={tripLifecycleStatus === 'planning' ? 'active' : ''}>Planning</span><span className={tripLifecycleStatus === 'active' ? 'active' : ''}>Active</span><span className={tripLifecycleStatus === 'ongoing' ? 'active' : ''}>Ongoing</span></div><p>{tripLifecycleStatus === 'planning' ? 'Finish setup and confirm to make this trip active.' : `Today: ${tripInputs.mustGo} · one open pocket`}</p><button className="primary" onClick={openTrip}>{tripLifecycleStatus === 'planning' ? 'Continue planning' : 'Open trip'} <ChevronRight size={16} /></button></div></section>
-      <section className="trip-packing-summary cc-card" aria-label="Packing summary"><div><span>PACKING</span><h3>Packing summary</h3><p>14 / 20 items packed</p></div><button className="primary" onClick={openPacking}>Open list <ChevronRight size={16} /></button></section>
-      <section className="trip-list"><div className="section-rule"><span>OTHER TRIPS</span><button onClick={() => setTab('explore')}>Find inspiration <ChevronRight size={14} /></button></div><article className="trip-list-row"><div className="trip-thumb sea-thumb" /><div><b>Jeju · salt air and citrus</b><small>Completed · 5 days · shared privately</small></div><button onClick={openTrip} aria-label="Open Jeju trip"><ChevronRight size={17} /></button></article><article className="trip-list-row"><div className="trip-thumb blue-thumb" /><div><b>Kyoto · temple mornings</b><small>Draft · solo · 3 anchor ideas</small></div><button onClick={openTrip} aria-label="Open Kyoto trip"><ChevronRight size={17} /></button></article></section>
-      <section className="trip-footer-note"><Coco tiny mood="happy" context="travel" /><div><b>Every trip gets a little wiser.</b><small>Reviews and category-level actual spend feed back into your private Tingo Card.</small></div></section>
-    </>;
+    const step = tripSetupStep;
+    const canContinue = step === 1 ? Boolean(destination.trim()) : step === 2 ? Boolean(tripDates?.start && tripDates?.end) : true;
+    const finish = () => { setReadyConfirmed(true); setTripCreated(true); setTripWorkspaceOpen(true); };
+    return <section className="trip-setup-wizard trip-index-setup" aria-label="Create a trip">
+      <div className="trip-setup-progress"><b>Step {step} of 5</b><div><i style={{ width: `${step * 20}%` }} /></div></div>
+      {step === 1 && <><h2>Destination</h2><label className="setup-field"><input className="big-input" value={destination} onChange={event => setDestination(event.target.value)} placeholder="Where are you going?" autoFocus /></label></>}
+      {step === 2 && <><h2>Dates</h2><div className="trip-date-grid"><label className="setup-field"><span>Departure</span><input type="date" value={tripDates?.start ?? ''} onChange={event => setTripDates(current => ({ start: event.target.value, end: current?.end ?? event.target.value }))} /></label><label className="setup-field"><span>Return</span><input type="date" min={tripDates?.start} value={tripDates?.end ?? ''} onChange={event => setTripDates(current => ({ start: current?.start ?? event.target.value, end: event.target.value }))} /></label></div></>}
+      {step === 3 && <><h2>Travel type</h2><div className="constraint-row"><button className={mode === 'solo' ? 'active' : ''} onClick={() => setMode('solo')}>Solo</button><button className={mode === 'group' ? 'active' : ''} onClick={() => setMode('group')}>Group</button></div></>}
+      {step === 4 && <><h2>Travel style</h2><div className="constraint-row">{['Relaxed', 'Balanced', 'Packed'].map(vibe => <button key={vibe} className={tripInputs.tripVibe.startsWith(vibe) ? 'active' : ''} onClick={() => setTripInputField('tripVibe', vibe === 'Relaxed' ? 'Relaxed and spacious' : vibe === 'Packed' ? 'Packed with highlights' : 'Balanced days with breathing room')}>{vibe}</button>)}</div></>}
+      {step === 5 && <><h2>Ready to go?</h2><div className="success-note"><div><b>{destination}</b><small>{tripDates?.start} → {tripDates?.end} · {mode === 'group' ? 'Group' : 'Solo'} · {tripInputs.tripVibe}</small></div></div></>}
+      <div className="trip-setup-actions">{step > 1 && <button className="secondary" onClick={() => setTripSetupStep(current => (current - 1) as TripSetupStep)}>Back</button>}{step < 5 ? <button className="primary" disabled={!canContinue} onClick={() => setTripSetupStep(current => (current + 1) as TripSetupStep)}>Continue <ChevronRight size={15} /></button> : <button className="primary" onClick={finish}>Create trip <ChevronRight size={15} /></button>}</div>
+    </section>;
   }
 
   function renderExplore() {
