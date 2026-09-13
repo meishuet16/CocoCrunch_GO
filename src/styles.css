@@ -7726,6 +7726,7 @@ main {
 }
 
 .trips-index { display: grid; gap: 12px; padding-top: 28px; }
+.trip-list-section { display: grid; gap: 9px; }
 .trips-index-heading { color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .08em; }
 .trips-index-card { display: grid; grid-template-columns: 64px 1fr auto; align-items: center; gap: 10px; text-align: left; color: var(--ink); background: var(--paper); }
 .trips-index-card > div { display: grid; gap: 3px; }
