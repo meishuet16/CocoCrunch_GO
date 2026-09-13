@@ -1443,7 +1443,21 @@
 }
 
 .me-grid-tagline,
-.me-grid-copy p,
 .me-grid-chips {
   display: none !important;
+}
+
+/* Persona cards keep one concise explanation, not the old blue handwritten stack. */
+.me-persona-grid-card {
+  min-height: 158px !important;
+}
+
+.me-grid-copy p {
+  display: -webkit-box !important;
+  margin: 4px 0 0 !important;
+  overflow: hidden !important;
+  color: rgba(43, 33, 31, .66) !important;
+  font: 10px/1.35 Inter, system-ui, sans-serif !important;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
