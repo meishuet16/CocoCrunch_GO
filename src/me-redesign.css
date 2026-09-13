@@ -1477,3 +1477,23 @@
 .tab-me .profile-menu > div {
   z-index: 21;
 }
+
+/* The completed card carries legacy .redesign-card / .is-complete selectors.
+   Match that specificity so the neutral Me design always wins. */
+.tab-me .me-tingo-card.redesign-card .me-card-copy h2,
+.tab-me .me-tingo-card.is-complete .me-card-copy h2 {
+  max-width: none !important;
+  margin: 0 !important;
+  color: var(--ink) !important;
+  font: 700 23px/1.15 var(--font-editorial) !important;
+  letter-spacing: normal !important;
+}
+
+.tab-me .me-tingo-card.is-complete .me-chip-row small {
+  min-height: 28px !important;
+  padding: 4px 9px !important;
+  border: 1px solid var(--line) !important;
+  background: rgba(43, 33, 31, .07) !important;
+  color: var(--muted) !important;
+  font: 700 12px/1 Inter, system-ui, sans-serif !important;
+}
