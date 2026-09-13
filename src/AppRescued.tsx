@@ -869,7 +869,7 @@ export default function AppRescued() {
 
   function printReceipt() {
     setReceiptPrinted(true);
-    emitExperience({ type: 'print-receipt', total: spent, participants: mode === 'group' ? members.filter(member => member.inviteStatus === 'joined').map(member => member.name) : ['Mei'] });
+    emitExperience({ type: 'print-receipt', total: spent, participants: mode === 'group' ? members.filter(member => member.inviteStatus === 'joined').map(member => member.name) : ['Priya'] });
   }
 
   function sendFamilyReassurance() {
@@ -2065,7 +2065,7 @@ export default function AppRescued() {
       <header className="topbar">
         <button className="brand-lockup" onClick={() => { setTripWorkspaceOpen(false); setTab('home'); }} aria-label="Go to Home">
           <img className="brand-companion" src={cocoAsset('scene-home')} alt="Coco, your travel companion" />
-          <span className="wordmark"><b>COCOCRUNCH</b><small>Plan together, design transparently, recover gracefully.</small>{tab === 'home' && <span className="brand-welcome">Welcome, {onboardingName || 'Traveller'}</span>}</span>
+          <span className="wordmark"><b>COCOCRUNCH</b><small>Plan together, design transparently, recover gracefully.</small></span>
         </button>
         {tab !== 'me' && <button className="bell" aria-label="Notifications"><Bell size={19} /><i /></button>}
         {tab === 'me' && (

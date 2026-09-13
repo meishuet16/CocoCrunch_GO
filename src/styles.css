@@ -8387,10 +8387,10 @@ main {
 
 .brand-lockup .wordmark b {
   color: var(--sangria);
-  font-family: Inter, system-ui, sans-serif;
-  font-size: 19px;
+  font-family: var(--font-editorial);
+  font-size: 24px;
   font-weight: 900;
-  letter-spacing: .06em;
+  letter-spacing: 0;
   line-height: 1;
 }
 
@@ -8398,16 +8398,16 @@ main {
   max-width: 230px;
   color: var(--ink);
   font-family: Inter, system-ui, sans-serif;
-  font-size: 9px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0;
   line-height: 1.25;
 }
 
-.brand-welcome {
-  margin-top: 2px;
-  color: var(--muted);
-  font-size: 10px;
+.home-page-welcome {
+  margin: 0 0 2px;
+  color: var(--ink);
+  font-size: 13px;
   font-weight: 700;
 }
 
