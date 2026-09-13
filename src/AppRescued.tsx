@@ -1936,8 +1936,6 @@ export default function AppRescued() {
       {drawer === 'all-personas' && (
         <section className="me-all-personas-drawer">
           <span className="drawer-kicker">16 TRAVEL PERSONAS</span>
-          <h3>Explore Every Travel Style</h3>
-          <p className="drawer-copy">From spontaneous food hunters to meticulous planners, find every way CocoCrunch understands travellers.</p>
           <div className="me-personas-grid">
             {Object.entries(tingoPersonaDetails).map(([key, item]) => {
               const isCurrent = key === (personaOverride ?? tingoIdentity.personaKey);

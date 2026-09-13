@@ -1461,3 +1461,7 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
+
+.tab-me .me-logout-button {
+  font: 700 12px/1 Inter, system-ui, sans-serif !important;
+}
