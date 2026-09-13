@@ -10,6 +10,8 @@
 .ritual-v2 .rv-close { position:absolute; right:8px; top:8px; border:0; background:transparent; color:inherit; font-size:28px; }
 .ritual-v2 .rv-primary { display:block; width:100%; padding:12px 16px; border:1px solid var(--ink-strong); border-radius:12px; color:var(--cream-soft); background:var(--ink-strong); margin:12px 0; }
 .ritual-v2 .rv-note,.ritual-v2 .rv-provenance { font-size:12px; color:var(--sangria-deep); }
+.ritual-v2 .prayer-intents { display:block; margin:0 0 8px; }
+.ritual-v2 .prayer-intents select { width:100%; min-height:44px; border:1px solid var(--line); border-radius:var(--radius-sm); padding:0 12px; background:var(--paper); color:var(--ink); font:600 14px/1 Inter,system-ui,sans-serif; }
 .ritual-v2 .rv-choice { display:flex; align-items:center; gap:10px; min-height:44px; text-align:left; }
 .ritual-v2 .rv-choice input { width:24px; height:24px; flex-shrink:0; }
 .ritual-v2 .rv-scene { height:210px; position:relative; overflow:hidden; isolation:isolate; }

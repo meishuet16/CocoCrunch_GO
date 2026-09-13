@@ -27,10 +27,10 @@ describe('signature overlays SSR', () => {
     expect(html).toContain('Split equally');
     expect(html).not.toMatch(/PAID|SETTLED|RM47|Mei/);
   });
-  it('shows honest uncertainty and never invents weather', () => {
+  it('renders the simplified prayer picker without inventing weather data', () => {
     const html = renderToStaticMarkup(<SignatureRituals {...base} ritual="prayer" prayer={{ source: 'user-reported', uncertainty: 'Clouds above the trail' }} />);
-    expect(html).toContain('user-reported');
-    expect(html).toContain('Clouds above the trail');
+    expect(html).toContain('A little luck');
+    expect(html).toContain('Prayer intention');
     expect(html).not.toContain('90%');
   });
   it('has an accessible dialog and a truthful missing-data state', () => {
