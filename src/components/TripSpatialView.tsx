@@ -53,6 +53,7 @@ type TripSpatialViewProps = {
   plan: TripPlan;
   source?: SpatialSource;
   candidates?: SpatialCandidate[];
+  visibleItemIds?: string[];
   currentItem?: SpatialStopSnapshot;
   nextItem?: SpatialStopSnapshot;
   reunionLabel?: string;
@@ -62,12 +63,13 @@ type TripSpatialViewProps = {
   liveRoute?: SpatialLiveRoute;
   servicePins?: SpatialServicePin[];
   photoPins?: SpatialPhotoPin[];
+  showWalkPreview?: boolean;
   overlay?: ReactNode;
 };
 
 const sourceLabels: Record<SpatialSource, string> = {
   'local-schematic': 'Local schematic · trip context only',
-  'prototype-catalog': 'Prototype catalog candidates · planning context only',
+  'prototype-catalog': 'Saved place candidates · planning context only',
   'photo-metadata': 'Imported photo metadata · no live location',
   unavailable: 'Spatial data unavailable',
 };
@@ -98,6 +100,7 @@ export function TripSpatialView({
   plan,
   source = 'local-schematic',
   candidates = [],
+  visibleItemIds,
   currentItem,
   nextItem,
   reunionLabel,
@@ -107,16 +110,17 @@ export function TripSpatialView({
   liveRoute,
   servicePins = [],
   photoPins = [],
+  showWalkPreview = true,
   overlay,
 }: TripSpatialViewProps) {
-  const visibleStops = plan.items.filter(item => item.kind !== 'buffer').slice(0, stopPositions.length);
+  const visibleStops = plan.items.filter(item => item.kind !== 'buffer' && (!visibleItemIds || visibleItemIds.includes(item.id))).slice(0, stopPositions.length);
   const previewFromIndex = currentItem
     ? visibleStops.findIndex(item => item.name === currentItem.name && item.timeLabel === currentItem.timeLabel)
     : 0;
   const previewToIndex = nextItem
     ? visibleStops.findIndex(item => item.name === nextItem.name && item.timeLabel === nextItem.timeLabel)
     : previewFromIndex + 1;
-  const canPreviewWalk = mode === 'traveling' && source === 'local-schematic'
+  const canPreviewWalk = showWalkPreview && mode === 'traveling' && source === 'local-schematic'
     && previewFromIndex >= 0 && previewToIndex >= 0 && previewFromIndex !== previewToIndex
     && Boolean(visibleStops[previewFromIndex] && visibleStops[previewToIndex]);
   const privacyLabel = privacy ? `Sharing: ${privacy === 'exact' ? 'exact location' : privacy === 'area' ? 'approx. area' : 'status only'}` : null;
@@ -128,12 +132,12 @@ export function TripSpatialView({
 
   return (
     <section className={`trip-spatial-view paper-sheet spatial-secondary spatial-${mode} spatial-source-${source}`}>
-      <div className="section-rule spatial-rule">
+      {mode !== 'planning' && <div className="section-rule spatial-rule">
         <span>
           {modeLabels[mode]} · {destination.toUpperCase()}
         </span>
         <small>{sourceLabels[source]}</small>
-      </div>
+      </div>}
 
       <div className={`spatial-stage ${source === 'unavailable' ? 'is-unavailable' : ''}`}>
         <svg viewBox="0 0 340 180" role="img" aria-label={`${destination} ${mode} contextual spatial view`}>
@@ -157,7 +161,7 @@ export function TripSpatialView({
           {mode === 'traveling' && servicePins.map((pin, index) => {
             const point = [{ x: 250, y: 122 }, { x: 290, y: 142 }, { x: 174, y: 135 }][index];
             if (!point) return null;
-            return <a className={`spatial-service-pin ${pin.kind}`} href={`https://maps.google.com/?q=${encodeURIComponent(pin.query)}`} target="_blank" rel="noreferrer" key={pin.id} aria-label={`Navigate to ${pin.label} in a map app (prototype link)`}>
+            return <a className={`spatial-service-pin ${pin.kind}`} href={`https://maps.google.com/?q=${encodeURIComponent(pin.query)}`} target="_blank" rel="noreferrer" key={pin.id} aria-label={`Navigate to ${pin.label} in a map app`}>
               <circle cx={point.x} cy={point.y} r="8" />
               <text x={point.x} y={point.y + 3} textAnchor="middle">{pin.kind === 'hospital' ? 'H' : pin.kind === 'pharmacy' ? 'P' : 'L'}</text>
             </a>;
@@ -174,7 +178,7 @@ export function TripSpatialView({
         {overlay && <div className="spatial-overlay">{overlay}</div>}
       </div>
 
-      {source === 'unavailable' ? (
+      {mode !== 'planning' && (source === 'unavailable' ? (
         <p className="spatial-empty">No saved schematic or imported metadata is available for this view yet.</p>
       ) : (
         <div className="spatial-stop-list">
@@ -186,47 +190,15 @@ export function TripSpatialView({
             </article>
           ))}
         </div>
-      )}
-
-      {mode === 'planning' && (
-        <>
-          <div className="spatial-context-grid">
-            <article>
-              <span>Planned stops</span>
-              <b>{visibleStops.length} in view</b>
-              <small>Anchor and flexible blocks come from the saved trip plan.</small>
-            </article>
-            <article>
-              <span>Candidates</span>
-              <b>{candidates.length} nearby ideas</b>
-              <small>Catalog and fallback examples stay labeled as planning inputs.</small>
-            </article>
-          </div>
-          {candidates.length > 0 ? (
-            <div className="spatial-chip-list">
-              {candidates.map(candidate => (
-                <span className={`spatial-chip ${candidate.source === 'prototype-catalog' ? 'catalog' : 'fallback'}`} key={candidate.id}>
-                  {candidate.name}
-                </span>
-              ))}
-            </div>
-          ) : (
-            <small className="spatial-detail">No planning candidates are attached to this view yet.</small>
-          )}
-          <div className="adapter-note">
-            <b>Planning context only</b>
-            <small>No live routing, traffic, travel time, weather, or place status is connected.</small>
-          </div>
-        </>
-      )}
+      ))}
 
       {mode === 'traveling' && (
         <>
-          {liveRoute && <section className="spatial-live-route" aria-label="Live routing prototype">
+          {liveRoute && <section className="spatial-live-route" aria-label="Route overview">
             <div><span>{liveRoute.locationStatus === 'live' ? 'CURRENT LOCATION' : 'SAMPLE ROUTE'}</span><b>{liveRoute.currentLocation} → {liveRoute.target}</b><small>{liveRoute.eta} · {liveRoute.timelineLabel}</small>{liveRoute.coordinates && <small>{liveRoute.coordinates.latitude.toFixed(5)}, {liveRoute.coordinates.longitude.toFixed(5)} · local session only</small>}</div>
             <small>{liveRoute.weatherLabel}</small>
           </section>}
-          {servicePins.length > 0 && <div className="spatial-service-pins" aria-label="Nearby service prototype pins">
+          {servicePins.length > 0 && <div className="spatial-service-pins" aria-label="Nearby service pins">
             <span>NEARBY HELP</span>
             {servicePins.map(pin => <a href={`https://maps.google.com/?q=${encodeURIComponent(pin.query)}`} target="_blank" rel="noreferrer" key={pin.id}>{pin.label} ↗</a>)}
           </div>}
@@ -265,8 +237,8 @@ export function TripSpatialView({
             <small className="spatial-detail spatial-detail--saved">Saved {travelingContextParts.join(' · ')} context</small>
           )}
           <div className="adapter-note">
-            <b>{liveRoute ? 'Prototype routing boundary' : 'Travel context only'}</b>
-            <small>{liveRoute ? 'Real traffic navigation and ETA require Google Routes or an equivalent Directions API plus a backend key proxy; this prototype is not connected. Route and ETA remain schematic.' : 'Current and next stops come from saved trip state and manual check-ins only.'}</small>
+            <b>{liveRoute ? 'Route overview' : 'Travel context only'}</b>
+            <small>{liveRoute ? 'Route and ETA are shown for planning. Open your map app for live navigation.' : 'Current and next stops come from saved trip state and manual check-ins only.'}</small>
           </div>
         </>
       )}

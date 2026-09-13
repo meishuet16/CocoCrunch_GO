@@ -10,26 +10,26 @@ export type ResponsibilitySuggestion = { memberId: string; memberName: string; s
 
 export const defaultMembers: TripMember[] = [
   {
-    id: 'mei', name: 'Mei', role: 'Trip lead', inviteStatus: 'joined', pace: 'steady',
+    id: 'priya', name: 'Priya', role: 'Trip lead', inviteStatus: 'joined', pace: 'steady',
     preferenceProfile: {
       tingoAssessed: false,
-      preferences: [{ id: 'mei-cafe', label: 'Scenic café', kind: 'preference', strength: 'optional', source: 'member' }],
+      preferences: [{ id: 'priya-cafe', label: 'Scenic café', kind: 'preference', strength: 'optional', source: 'member' }],
       budget: { min: 600, max: 1000, sensitivity: 'medium' },
     },
   },
   {
-    id: 'jh', name: 'JH', role: 'Food scout', inviteStatus: 'joined', pace: 'fast',
+    id: 'sam', name: 'Sam', role: 'Food scout', inviteStatus: 'joined', pace: 'fast',
     preferenceProfile: {
       tingoAssessed: false,
-      preferences: [{ id: 'jh-ramen', label: 'Ramen tonight', kind: 'preference', strength: 'strong', source: 'member' }],
+      preferences: [{ id: 'sam-ramen', label: 'Ramen tonight', kind: 'preference', strength: 'strong', source: 'member' }],
       budget: { min: 500, max: 850, sensitivity: 'high' },
     },
   },
   {
-    id: 'zishan', name: 'Zi Shan', role: 'Memory keeper', inviteStatus: 'joined', pace: 'slow',
+    id: 'riley', name: 'Riley', role: 'Memory keeper', inviteStatus: 'joined', pace: 'slow',
     preferenceProfile: {
       tingoAssessed: false,
-      preferences: [{ id: 'zishan-sushi', label: 'Sushi tonight', kind: 'preference', strength: 'strong', source: 'member' }],
+      preferences: [{ id: 'riley-sushi', label: 'Sushi tonight', kind: 'preference', strength: 'strong', source: 'member' }],
       budget: { min: 700, max: 1100, sensitivity: 'medium' },
     },
   },
@@ -47,8 +47,8 @@ export const defaultReminders: TripReminder[] = [
 ];
 
 export const defaultCommitments: HumanCommitment[] = [
-  { id: 'video', label: 'Family video call', time: 'Oct 15 · 20:30', owner: 'Mei', fixed: true },
-  { id: 'medicine', label: 'Medicine reminder', time: 'Daily · 08:00', owner: 'Zi Shan', fixed: true },
+  { id: 'video', label: 'Family video call', time: 'Oct 15 · 20:30', owner: 'Priya', fixed: true },
+  { id: 'medicine', label: 'Medicine reminder', time: 'Daily · 08:00', owner: 'Riley', fixed: true },
 ];
 
 export const defaultReunion: ReunionAgreement = { time: '19:30', place: 'Shinjuku station west exit', tolerance: 15 };

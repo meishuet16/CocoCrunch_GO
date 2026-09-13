@@ -124,13 +124,13 @@ describe('TripPlanOverview', () => {
     expect(html).toContain('Buffer / breathing room');
     expect(html).toContain('Day 1');
     expect(html).toContain('Day 2');
-    expect(html).toContain('MAP · TOKYO');
+    expect(html).toContain('spatial-stage');
     expect(html).toContain('itinerary-row-thumb');
     expect(html).toContain('10:00');
     expect(html).toContain('Why this?');
     expect(html).toContain('constraint: Tsukiji food walk');
     expect(html).toContain('drag to reschedule');
-    expect(html).toContain('Prototype route details · not live provider data');
+    expect(html).toContain('Route details for planning');
     expect(html).toContain('Buffer · no venue hours');
   });
 });

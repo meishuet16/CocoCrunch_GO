@@ -756,8 +756,6 @@ export function DuolingoVoterGirl({
  */
 const AIRPLANE_SQUAD_CANDIDATES = [
   '/characters/airplane_squad.png',
-  '/airplane_squad.png',
-  '/@fs/C:/Users/Zi Shan/.gemini/antigravity/brain/d62c36e5-ee89-4021-8a4e-8fb066dfe1a6/.user_uploaded/media_1789039313939.png',
 ];
 
 export function DuolingoAirplaneSquad({ size = 260 }: { size?: number }) {

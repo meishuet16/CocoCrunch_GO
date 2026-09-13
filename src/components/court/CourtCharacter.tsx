@@ -40,28 +40,13 @@ export interface CourtCharacterProps {
   alt?: string;
 }
 
-// Canonical source mappings (clean public URL with fallback to root original)
-const CHARACTER_SOURCES: Record<CharacterId, { clean: string; fallback: string }> = {
-  judge: {
-    clean: '/characters/judge.png',
-    fallback: '/Codex Image Sep 10, 2026, 06_21_43 PM.png',
-  },
-  boy_yellow: {
-    clean: '/characters/boy_yellow.png',
-    fallback: '/Codex Image Sep 10, 2026, 06_21_47 PM.png',
-  },
-  boy_green: {
-    clean: '/characters/boy_green.png',
-    fallback: '/Codex Image Sep 10, 2026, 06_21_35 PM.png',
-  },
-  girl_redhat: {
-    clean: '/characters/girl_redhat.png',
-    fallback: '/Codex Image Sep 10, 2026, 06_21_38 PM.png',
-  },
-  girl_blonde: {
-    clean: '/characters/girl_blonde.png',
-    fallback: '/Codex Image Sep 10, 2026, 06_21_31 PM.png',
-  },
+// Court sprites are versioned public assets, so they work in every checkout.
+const CHARACTER_SOURCES: Record<CharacterId, string> = {
+  judge: '/characters/judge.png',
+  boy_yellow: '/characters/boy_yellow.png',
+  boy_green: '/characters/boy_green.png',
+  girl_redhat: '/characters/girl_redhat.png',
+  girl_blonde: '/characters/girl_blonde.png',
 };
 
 export function resolveCharacterId(variant: CharacterVariant): CharacterId {
@@ -275,7 +260,6 @@ export const CourtCharacter: React.FC<CourtCharacterProps> = ({
 }) => {
   const charId = useMemo(() => resolveCharacterId(character), [character]);
   const [internalPose, setInternalPose] = useState<CharacterPose>(status);
-  const [useFallback, setUseFallback] = useState(false);
   const [transparentSrc, setTransparentSrc] = useState<string | null>(null);
 
   // Sync external status
@@ -306,8 +290,7 @@ export const CourtCharacter: React.FC<CourtCharacterProps> = ({
     };
   }, [autoBlink, animated, status]);
 
-  const sources = CHARACTER_SOURCES[charId];
-  const baseSrc = useFallback ? sources.fallback : sources.clean;
+  const baseSrc = CHARACTER_SOURCES[charId];
 
   // Background transparency processing
   useEffect(() => {
@@ -401,7 +384,6 @@ const AVATAR_CONFIGS: Record<CharacterId, { scale: number; shiftX: number; shift
           <img
             src={currentImgSrc}
             alt={alt || `${charId} avatar`}
-            onError={() => setUseFallback(true)}
             className="duo-avatar-sprite-img"
             style={{
               position: 'absolute',
@@ -462,7 +444,6 @@ const AVATAR_CONFIGS: Record<CharacterId, { scale: number; shiftX: number; shift
         <img
           src={currentImgSrc}
           alt={alt || `${charId} ${internalPose}`}
-          onError={() => setUseFallback(true)}
           style={{
             position: 'absolute',
             width: '300%',

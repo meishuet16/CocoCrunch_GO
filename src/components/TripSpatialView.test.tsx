@@ -94,14 +94,10 @@ describe('TripSpatialView', () => {
       />,
     );
 
-    expect(html).toContain('MAP · TOKYO');
     expect(html).toContain('spatial-secondary');
-    expect(html).toContain('Prototype catalog candidates · planning context only');
-    expect(html).toContain('Tsukiji food walk');
-    expect(html).toContain('Scenic cafe block');
-    expect(html).toContain('Kiyosumi garden cafe');
-    expect(html).toContain('Vintage street snack lane');
-    expect(html).toContain('No live routing, traffic, travel time, weather, or place status is connected.');
+    expect(html).toContain('spatial-stage');
+    expect(html).toContain('spatial-node');
+    expect(html).not.toContain('Planning context only');
   });
 
   it('renders traveling current and next context without live-location claims', async () => {
@@ -143,7 +139,7 @@ describe('TripSpatialView', () => {
     expect(html).toContain('SAMPLE ROUTE');
     expect(html).toContain('Last manual check-in → Scenic cafe block');
     expect(html).toContain('Weather refreshes in the panel above · Open-Meteo');
-    expect(html).toContain('Real traffic navigation and ETA require Google Routes or an equivalent Directions API plus a backend key proxy');
+    expect(html).toContain('Route and ETA are shown for planning. Open your map app for live navigation.');
     expect(html).toContain('NEARBY HELP');
     expect(html).toContain('https://maps.google.com/?q=hospital%20near%20Tokyo');
   });
@@ -237,7 +233,7 @@ describe('TripSpatialView', () => {
       />,
     );
 
-    expect(html).toContain('Spatial data unavailable');
-    expect(html).toContain('No saved schematic or imported metadata is available for this view yet.');
+    expect(html).toContain('spatial-stage is-unavailable');
+    expect(html).not.toContain('No saved schematic or imported metadata is available for this view yet.');
   });
 });

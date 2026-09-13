@@ -17,7 +17,7 @@ describe('persisted journey lifecycle', () => {
     const journey: PersistedState = {
       version: 1,
       onboardingComplete: true,
-      onboardingName: 'Mei',
+      onboardingName: 'Priya',
       onboardingCountryCode: '+65',
       onboardingBirthday: '1998-05-16',
       basePackingPreferences: ['carry power bank', 'pack umbrella'],
@@ -33,7 +33,7 @@ describe('persisted journey lifecycle', () => {
         preference: 'One cafe break each day', flexible: 'Leave one evening open', budget: 2400,
       },
       profile: { vibe: 'Slow food and side streets', mustGo: 'Tsukiji food walk', veto: 'No red-eye return', preference: 'One cafe break each day', flexible: 'Leave one evening open' },
-      plannerTurn: 'Mei',
+      plannerTurn: 'Priya',
       courtVotes: [],
       courtConfirmed: true,
       courtDecision: 'Tsukiji food walk',
@@ -49,11 +49,11 @@ describe('persisted journey lifecycle', () => {
       profileLearned: true,
       tingoAnswers: [{ questionId: 'morning', optionId: 'slow' }],
       tingoDimensions: { pace: -2, experience: 0, budget: 0, comfort: 0, food: 3, adventure: 0, planning: 0, flexibility: 0, social: 0 },
-      groupMemberBudgets: { mei: 1200, alex: 1200 },
-      groupMemberVibes: { mei: 'relaxed', alex: 'balanced' },
-      groupMemberDestinations: { mei: 'Tokyo' },
+      groupMemberBudgets: { priya: 1200, alex: 1200 },
+      groupMemberVibes: { priya: ['relaxed'], alex: ['balanced'] },
+      groupMemberDestinations: { priya: 'Tokyo' },
       members: [
-        { id: 'mei', name: 'Mei', role: 'Trip lead', inviteStatus: 'joined', pace: 'steady' },
+        { id: 'priya', name: 'Priya', role: 'Trip lead', inviteStatus: 'joined', pace: 'steady' },
         { id: 'alex', name: 'Alex', role: 'Food scout', inviteStatus: 'joined', pace: 'fast' },
       ],
       flightBooking: { flightNumber: 'CC 118', departureTime: '2026-09-01 09:00', arrivalTime: '2026-09-01 17:00', checkInTime: '2026-09-01 07:00', sharedWithGroup: true, source: 'email-prototype' },
@@ -78,7 +78,7 @@ describe('persisted journey lifecycle', () => {
 
     expect(afterRefresh.onboardingComplete).toBe(true);
     expect(afterRefresh).toMatchObject({
-      onboardingName: 'Mei', onboardingCountryCode: '+65', onboardingBirthday: '1998-05-16',
+      onboardingName: 'Priya', onboardingCountryCode: '+65', onboardingBirthday: '1998-05-16',
       basePackingPreferences: ['carry power bank', 'pack umbrella'],
       tripCreated: true, readyConfirmed: true, tripPhase: 'completed',
       destinationLockedByLeader: true,
@@ -98,6 +98,6 @@ describe('persisted journey lifecycle', () => {
       expect.objectContaining({ id: 'photo-2', isPublic: false }),
     ]));
     expect(afterRefresh.groupChannelMessages).toEqual(journey.groupChannelMessages);
-    expect(afterRefresh.groupMemberBudgets).toEqual({ mei: 1200, alex: 1200 });
+    expect(afterRefresh.groupMemberBudgets).toEqual({ priya: 1200, alex: 1200 });
   });
 });

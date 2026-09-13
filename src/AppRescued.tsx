@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Bell, BookOpen, Box, Calendar, Check, ChevronRight, CircleDollarSign, CloudRain,
+  ArrowLeft, Bell, BookOpen, Box, Calendar, Check, ChevronRight, CircleDollarSign, CloudRain,
   FileText, Gavel, Heart, Image, Link2, LogOut, Map, MapPin, PackageCheck, Plane,
-  ReceiptText, RotateCcw, Send, Sparkles, Users, X
+  RotateCcw, Send, Sparkles, Users, X
 } from 'lucide-react';
 import { emitExperience } from './experience';
 import { isPastPlannedCheckIn } from './during-deviation';
@@ -56,7 +56,7 @@ import { calculatePlanHealth } from './domain/plan-health';
 import { applyRepairToPlan, buildMinimumLossRepair, promoteCourtLosers, type BackupCandidate, type RepairResult } from './domain/backup-repair';
 import { deriveEverydayDrawPool } from './domain/random-pool';
 import {
-  applyResponsibilitySuggestions, defaultCommitments, defaultMembers, defaultReminders,
+  applyResponsibilitySuggestions, defaultCommitments, defaultReminders,
   accommodationCancellationReminder, defaultReunion, suggestResponsibilities, type HumanCommitment,
   type ReunionAgreement, type TripConstraint, type TripMember, type TripReminder,
 } from './domain/trip';
@@ -80,6 +80,8 @@ import { FlightDrawer } from './components/FlightDrawer';
 import { AccommodationDrawer } from './components/AccommodationDrawer';
 import { GroupChannel, type GroupChannelMessage } from './components/GroupChannel';
 import { GroupSplit } from './components/GroupSplit';
+import { BudgetDrawer } from './components/BudgetDrawer';
+import { DemoModePanel } from './components/DemoModePanel';
 import foodieHunter from './assets/coco/personas/foodie_hunter.png';
 import masterPlanner from './assets/coco/personas/master_planner.png';
 import transitNavigator from './assets/coco/personas/transit_navigator.png';
@@ -103,7 +105,7 @@ type TripMode = 'group' | 'solo';
 type Mood = 'great' | 'okay' | 'tired' | null;
 type Privacy = 'status' | 'area' | 'exact';
 type CourtView = 'upload' | 'discussion' | 'voting';
-type Drawer = 'group' | 'backup' | 'budget' | 'family' | 'location' | 'community' | 'import' | 'discover' | 'tingo' | 'tripSetup' | 'compare' | 'feasibility' | 'reminders' | 'commitments' | 'safety' | 'assistant' | 'gacha' | 'lucky' | 'memoryCard' | 'all-personas' | 'flight' | 'accommodation' | 'tripEnd' | null;
+type Drawer = 'group' | 'backup' | 'budget' | 'family' | 'location' | 'community' | 'import' | 'discover' | 'tingo' | 'tripSetup' | 'compare' | 'feasibility' | 'reminders' | 'commitments' | 'safety' | 'assistant' | 'gacha' | 'lucky' | 'memoryCard' | 'all-personas' | 'flight' | 'accommodation' | 'tripEnd' | 'demo' | null;
 type CommunityTrip = { id: number; title: string; author: string; match: number; saved: boolean };
 type PlaceRecommendation = DiscoveryPlace & { id: number; saved: boolean; added: boolean };
 type GhostWish = { id: number; name: string; reason: string; status: 'resting' | 'revived' | 'released' };
@@ -112,7 +114,31 @@ type TripScopedInputs = Pick<TripIntent, 'tripVibe' | 'mustGo' | 'dealBreaker' |
 type TripSetupStep = 1 | 2 | 3 | 4 | 5;
 type TripSetupLocationMethod = 'manual' | 'recommendation' | 'link';
 type TripReference = { destination: string; tripVibe: string; budget: number; title: string };
-type GroupSetupStep = 1 | 2 | 3 | 4 | 5 | 6;
+type GroupSetupStep = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+type TripListEntry = { id: string; name: string; destination: string; mode: TripMode; status: 'planning' | 'active' | 'ongoing' | 'completed'; createdAt: string };
+type BookingPage = 'flight' | 'accommodation';
+type BookingOffer = { id: string; provider: string; logo: string; price: string; originalPrice: string; route: string; timing: string; detail: string; perks: string[] };
+type PlanPlaceLabel = 'Must-Go' | 'Deal Breaker' | 'Preference' | 'Flexible';
+type DraftPlanPlace = { id: number; name: string; label: PlanPlaceLabel };
+
+function PlanSketchMap({ places, route = false }: { places: DraftPlanPlace[]; route?: boolean }) {
+  const points = places.map((place, index) => ({
+    ...place,
+    x: [19, 61, 39, 77, 24, 66][index % 6],
+    y: [69, 27, 48, 71, 25, 52][index % 6],
+  }));
+  const routePoints = points.map(point => `${point.x},${point.y}`).join(' ');
+  return <div className="plan-sketch-map" aria-label={route ? 'Generated route map' : 'Pinned places map'}>
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <path className="plan-map-water" d="M-8 18 C18 5 33 22 47 11 S74 3 110 14 L110 34 C81 23 70 42 48 29 S15 37 -8 31Z" />
+      <path className="plan-map-street plan-map-street--one" d="M-5 74 C19 58 35 66 51 49 S76 42 105 20" />
+      <path className="plan-map-street plan-map-street--two" d="M12 -4 C31 20 26 39 47 57 S74 82 95 105" />
+      <path className="plan-map-street plan-map-street--three" d="M-4 42 C21 38 41 34 55 47 S81 64 108 60" />
+      {route && points.length > 1 && <polyline className="plan-map-route-line" points={routePoints} />}
+    </svg>
+    {points.map((point, index) => <span className="plan-sketch-pin" style={{ left: `${point.x}%`, top: `${point.y}%` }} key={point.id}><i>{index + 1}</i><b>{point.name}</b></span>)}
+  </div>;
+}
 
 function reorderedPlan(plan: TripPlan, order: string[]): TripPlan {
   const byId = new globalThis.Map(plan.items.map(item => [item.id, item]));
@@ -129,6 +155,7 @@ function reorderedPlan(plan: TripPlan, order: string[]): TripPlan {
 
 export function deriveTripLifecycleStatus({ tripCreated, readyConfirmed, dates, phase, now = new Date() }: { tripCreated: boolean; readyConfirmed: boolean; dates: TripIntent['dates']; phase: TripPhase; now?: Date }): TripLifecycleStatus {
   if (phase === 'completed') return 'completed';
+  if (phase === 'traveling') return 'ongoing';
   if (!tripCreated || !readyConfirmed || !dates?.start) return 'planning';
   const departure = new Date(`${dates.start}T00:00:00`);
   if (Number.isNaN(departure.getTime())) return 'planning';
@@ -275,9 +302,9 @@ const defaultCourtOptions: CourtOptionState[] = [
 ];
 
 const defaultVotes: CourtVote[] = [
-  { member: 'Mei', pick: 'ramen' },
-  { member: 'JH', pick: 'sushi' },
-  { member: 'Zi Shan', pick: 'ramen' },
+  { member: 'Priya', pick: 'ramen' },
+  { member: 'Sam', pick: 'sushi' },
+  { member: 'Riley', pick: 'ramen' },
   { member: 'Alex', pick: 'sushi' },
 ];
 
@@ -382,7 +409,7 @@ export default function AppRescued() {
     flexible: initialTripIntent.flexible,
   });
   const [tripDates, setTripDates] = useState(storedTripDates);
-  const [plannerTurn, setPlannerTurn] = useState(stored.plannerTurn ?? 'Mei');
+  const [plannerTurn, setPlannerTurn] = useState(stored.plannerTurn ?? 'Priya');
   const [courtOpen, setCourtOpen] = useState(false);
   const [courtCocoContext, setCourtCocoContext] = useState<'court' | 'courtTie'>('court');
   const [courtInitialMode, setCourtInitialMode] = useState<'ideas' | 'case' | 'playground'>('case');
@@ -480,17 +507,40 @@ export default function AppRescued() {
   const [groupChannelMessages, setGroupChannelMessages] = useState<GroupChannelMessage[]>(stored.groupChannelMessages ?? []);
   const [groupCourtUnreadCount, setGroupCourtUnreadCount] = useState(stored.groupCourtUnreadCount ?? 0);
   const [tripCreated, setTripCreated] = useState(stored.tripCreated ?? true);
+  const [tripList, setTripList] = useState<TripListEntry[]>(stored.tripList ?? []);
+  const [currentTripListId, setCurrentTripListId] = useState<string | null>(null);
+  const [planningContentOpen, setPlanningContentOpen] = useState(false);
+  const [ongoingView, setOngoingView] = useState<'menu' | 'routing'>('menu');
+  const [flightPageOpen, setFlightPageOpen] = useState(false);
+  const [flightView, setFlightView] = useState<'not-booked' | 'booked'>('not-booked');
+  const [bookingPage, setBookingPage] = useState<BookingPage | null>(null);
+  const [bookingView, setBookingView] = useState<'not-booked' | 'booked'>('not-booked');
+  const [expandedBookingOffer, setExpandedBookingOffer] = useState<string | null>(null);
+  const [paymentOffer, setPaymentOffer] = useState<BookingOffer | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'wallet'>('card');
+  const [paymentComplete, setPaymentComplete] = useState(false);
+  const [bookingSearch, setBookingSearch] = useState('');
+  const [bookingSort, setBookingSort] = useState<'recommended' | 'lowest'>('recommended');
+  const [planPlaceQuery, setPlanPlaceQuery] = useState('');
+  const [planAiSuggestionsVisible, setPlanAiSuggestionsVisible] = useState(false);
+  const [planDraftPlaces, setPlanDraftPlaces] = useState<DraftPlanPlace[]>([]);
+  const [planGenerated, setPlanGenerated] = useState(false);
+  const [planSuggestionDetailsId, setPlanSuggestionDetailsId] = useState<number | null>(null);
+  const [groupWorkspaceView, setGroupWorkspaceView] = useState<'tasks' | 'chat' | 'change'>('tasks');
   const [tripSetupStep, setTripSetupStep] = useState<TripSetupStep>(1);
   const [tripSetupLocationMethod, setTripSetupLocationMethod] = useState<TripSetupLocationMethod>('manual');
   const [tripSetupPrompt, setTripSetupPrompt] = useState('');
+  const [tripSetupRecommendationsVisible, setTripSetupRecommendationsVisible] = useState(false);
   const [tripSetupLink, setTripSetupLink] = useState('');
   const [tripSetupLinkStatus, setTripSetupLinkStatus] = useState<'idle' | 'parsing' | 'ready'>('idle');
   const [tripSetupReference, setTripSetupReference] = useState<TripReference | null>(null);
   const [tripSetupModeChoice, setTripSetupModeChoice] = useState(false);
   const [groupSetupStep, setGroupSetupStep] = useState<GroupSetupStep>(1);
+  const [groupName, setGroupName] = useState(stored.groupName ?? '');
   const [destinationLockedByLeader, setDestinationLockedByLeader] = useState(Boolean(stored.destinationLockedByLeader));
+  const [datesLockedByLeader, setDatesLockedByLeader] = useState(Boolean(stored.datesLockedByLeader));
   const [groupMemberBudgets, setGroupMemberBudgets] = useState<Record<string, number>>(stored.groupMemberBudgets ?? {});
-  const [groupMemberVibes, setGroupMemberVibes] = useState<Record<string, string>>(stored.groupMemberVibes ?? {});
+  const [groupMemberVibes, setGroupMemberVibes] = useState<Record<string, string[]>>(stored.groupMemberVibes ?? {});
   const [groupMemberDestinations, setGroupMemberDestinations] = useState<Record<string, string>>(stored.groupMemberDestinations ?? {});
   const [groupUsernameSearch, setGroupUsernameSearch] = useState('');
   const [flightBooking, setFlightBooking] = useState<FlightBookingState | undefined>(stored.flightBooking);
@@ -498,10 +548,10 @@ export default function AppRescued() {
   const [accommodationBooking, setAccommodationBooking] = useState<AccommodationBookingState | undefined>(stored.accommodationBooking);
   const [accommodationBookingDraft, setAccommodationBookingDraft] = useState(stored.accommodationBookingDraft ?? '');
   const [members, setMembers] = useState<TripMember[]>(() => {
-    const loadedMembers = stored.members ?? defaultMembers;
+    const loadedMembers = stored.members ?? [];
     return loadedMembers.map(member => {
       if (member.preferenceProfile) return member;
-      const seededProfile = stored.memberPreferenceProfiles?.[member.id] ?? defaultMembers.find(candidate => candidate.id === member.id)?.preferenceProfile;
+      const seededProfile = stored.memberPreferenceProfiles?.[member.id];
       return seededProfile ? { ...member, preferenceProfile: seededProfile } : member;
     });
   });
@@ -563,7 +613,7 @@ export default function AppRescued() {
   const tingoIdentity = useMemo(() => deriveTingoIdentity(tingoDimensions), [tingoDimensions]);
   const tingoBehavior = useMemo(() => deriveTingoBehavior(tingoDimensions), [tingoDimensions]);
   const tingoPlanGuidance = useMemo(() => tingoGuidance(tingoDimensions), [tingoDimensions]);
-  const responsibilitySuggestions = useMemo(() => suggestResponsibilities(members, tingoBehavior, { mei: tingoBehavior }), [members, tingoBehavior]);
+  const responsibilitySuggestions = useMemo(() => suggestResponsibilities(members, tingoBehavior, { priya: tingoBehavior }), [members, tingoBehavior]);
   const memberPreferenceProfiles = useMemo<Record<string, MemberPreferenceProfile>>(() => Object.fromEntries(members.map(member => [member.id, member.preferenceProfile ?? { tingoAssessed: false, preferences: [] }])), [members]);
   const groupMemberInputs = useMemo(() => members.filter(member => member.inviteStatus === 'joined').map(member => ({
     id: member.id,
@@ -591,7 +641,7 @@ export default function AppRescued() {
   const categoryVariance = budgetVariance(budgetPlan, budgetActuals);
   const budgetLearningNotes = budgetLearning(budgetActuals, budgetPlan);
   const travellerCount = mode === 'group' ? members.filter(member => member.inviteStatus === 'joined').length : 1;
-  const destinationCandidates = useMemo(() => recommendations.map((place, index) => candidateFromDiscovery(place, index)), [recommendations]);
+  const destinationCandidates = useMemo(() => recommendations.filter(place => place.added).map((place, index) => candidateFromDiscovery(place, index)), [recommendations]);
   const resolvedConflictLabels = useMemo(() => courtConfirmed ? [activeConflict] : [], [courtConfirmed, activeConflict]);
   const baseTripPlan = useMemo(() => generateTripPlan({
     destination: tripIntent.destination,
@@ -714,9 +764,9 @@ export default function AppRescued() {
       recommendations: recommendations.map(({ name, saved, added }) => ({ name, saved, added })),
       tripIntent,
       worthIt, profileLearned, learningProposal: learningProposal?.status === 'confirmed' ? undefined : learningProposal ?? undefined, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, onboardingCountryCode, onboardingBirthday, basePackingPreferences, tripCreated, tripPhase,
-      members, memberPreferenceProfiles, backupCandidates, appliedRepair: appliedRepair ?? undefined, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, revivedWishIds: ghostWishes.filter(wish => wish.status === 'revived').map(wish => wish.id), destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, itineraryOrder, groupChannelMessages, groupCourtUnreadCount, groupSplitPlan, photoMemoryArtifacts, flightBooking, flightBookingDraft, accommodationBooking, accommodationBookingDraft,
+      members, memberPreferenceProfiles, backupCandidates, appliedRepair: appliedRepair ?? undefined, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, revivedWishIds: ghostWishes.filter(wish => wish.status === 'revived').map(wish => wish.id), tripList, groupName, destinationLockedByLeader, datesLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, itineraryOrder, groupChannelMessages, groupCourtUnreadCount, groupSplitPlan, photoMemoryArtifacts, flightBooking, flightBookingDraft, accommodationBooking, accommodationBookingDraft,
     });
-  }, [mode, destination, readyConfirmed, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals, delay, mood, arrivalChecked, privacy, continuousLocation, recommendations, tripIntent, worthIt, profileLearned, learningProposal, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, onboardingCountryCode, onboardingBirthday, basePackingPreferences, tripCreated, tripPhase, members, memberPreferenceProfiles, backupCandidates, appliedRepair, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, ghostWishes, destinationLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, itineraryOrder, groupChannelMessages, groupCourtUnreadCount, groupSplitPlan, photoMemoryArtifacts, automaticDeviationPrompted, completedTodayItemIds, tripEndPromptDismissed, emergencyContacts, emergencyCheckInFrequency, selectedEmergencyContactId, flightBooking, flightBookingDraft, accommodationBooking, accommodationBookingDraft]);
+  }, [mode, destination, readyConfirmed, profile, plannerTurn, courtVotes, courtConfirmed, courtDecision, courtOptions, activeConflict, decisionHistory, groupBudgetTotal, soloBudgetTotal, groupBudgetPlan, soloBudgetPlan, groupBudgetActuals, soloBudgetActuals, delay, mood, arrivalChecked, privacy, continuousLocation, recommendations, tripIntent, worthIt, profileLearned, learningProposal, confirmedLearningHistory, tingoAnswers, tingoDimensions, onboardingComplete, onboardingName, onboardingCountryCode, onboardingBirthday, basePackingPreferences, tripCreated, tripPhase, tripList, members, memberPreferenceProfiles, backupCandidates, appliedRepair, constraints, reminders, commitments, reunion, published, memoryPublic, itemReviews, ghostWishes, groupName, destinationLockedByLeader, datesLockedByLeader, groupMemberBudgets, groupMemberVibes, groupMemberDestinations, itineraryOrder, groupChannelMessages, groupCourtUnreadCount, groupSplitPlan, photoMemoryArtifacts, automaticDeviationPrompted, completedTodayItemIds, tripEndPromptDismissed, emergencyContacts, emergencyCheckInFrequency, selectedEmergencyContactId, flightBooking, flightBookingDraft, accommodationBooking, accommodationBookingDraft]);
 
   function setProfileField(field: keyof TravelProfile, value: string) {
     setProfile(current => ({ ...current, [field]: value }));
@@ -725,6 +775,15 @@ export default function AppRescued() {
 
   function setTripInputField(field: keyof TripScopedInputs, value: string) {
     setTripInputs(current => ({ ...current, [field]: value }));
+  }
+
+  function setTripVibeFacet(facet: string, value: string) {
+    setTripInputs(current => ({ ...current, tripVibe: [...current.tripVibe.split(' · ').filter(item => item && !item.startsWith(`${facet}:`)), `${facet}: ${value}`].join(' · ') }));
+  }
+
+  function setGroupVibeFacet(facet: string, value: string) {
+    const memberId = onboardingName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'you';
+    setGroupMemberVibes(current => ({ ...current, [memberId]: [...(current[memberId] ?? []).filter(item => !item.startsWith(`${facet}:`)), `${facet}: ${value}`] }));
   }
 
   function searchDestination() {
@@ -935,6 +994,7 @@ export default function AppRescued() {
   }
 
   function openTrip() {
+    if (tripLifecycleStatus === 'active') setTripPhase('traveling');
     setTripWorkspaceOpen(true);
     setTab('trips');
   }
@@ -1137,6 +1197,7 @@ export default function AppRescued() {
 
   function renderHome() {
     if (tripLifecycleStatus === 'planning') return <div className="home-orientation home-empty">
+      <p className="home-page-welcome">Welcome, {onboardingName || 'Traveller'}</p>
       <section className="home-empty-state cc-card" aria-label="Trip inspiration">
         <p className="home-empty-status">No active trip</p>
         <CocoCompanion context="planning" size={98} />
@@ -1154,25 +1215,24 @@ export default function AppRescued() {
       : 'Solo trip';
 
     return <div className="home-orientation home-dashboard">
-      <button className="home-active-hero" onClick={openTrip} aria-label={`Open ${destination} trip details`}>
+      <button className="home-active-hero cc-card" onClick={openTrip} aria-label={`Open ${destination} trip details`}>
         <div className="home-trip-hero-art" aria-hidden="true"><Map size={34} strokeWidth={1.5} /></div>
         <div className="home-active-hero-copy"><span>Active trip</span><h2>{destination}</h2><small>{tripIntent.dates ? `${tripIntent.dates.start} – ${tripIntent.dates.end}` : 'Dates to be confirmed'}</small></div>
         <ChevronRight className="home-active-hero-arrow" size={22} aria-hidden="true" />
       </button>
       <section className="home-current-trips" aria-label="Current trip">
         <div className="home-section-heading"><h2>Current trip</h2><button onClick={openTrip}>View details <ChevronRight size={15} /></button></div>
-        <button className="home-current-trip-card" onClick={openTrip}>
+        <button className="home-current-trip-card cc-card" onClick={openTrip}>
           <div><span>{workspacePhase === 'traveling' ? 'Travelling now' : 'Departure ahead'}</span><b>{destination}</b><small>Plan health {planHealth.overall}/100 · {groupStatus}</small></div><ChevronRight size={18} aria-hidden="true" />
         </button>
-        <TripJourneyStatus state={journeyState} destination={destination} onAction={handleJourneyAction} />
       </section>
       <section className="home-shortcuts" aria-label="Trip shortcuts">
-        <button onClick={openTrip}><Calendar size={20} /><span>Plan</span></button>
-        <button onClick={openTrip}><Map size={20} /><span>Map</span></button>
-        <button onClick={() => setTab('explore')}><BookOpen size={20} /><span>Saved places</span></button>
-        <button onClick={openPacking}><Box size={20} /><span>Packing list</span></button>
+        <button className="cc-card" onClick={openTrip}><Calendar size={20} /><span>Plan</span></button>
+        <button className="cc-card" onClick={openTrip}><Map size={20} /><span>Map</span></button>
+        <button className="cc-card" onClick={() => setTab('explore')}><BookOpen size={20} /><span>Saved places</span></button>
+        <button className="cc-card" onClick={openPacking}><Box size={20} /><span>Packing list</span></button>
       </section>
-      <section className="home-tip-card paper-sheet" aria-label="Trip tip"><WeatherGlance destination={destination} compact /></section>
+      <section className="home-tip-card cc-card" aria-label="Trip tip"><WeatherGlance destination={destination} compact /></section>
     </div>;
   }
 
@@ -1215,15 +1275,23 @@ export default function AppRescued() {
     setTripSetupModeChoice(false);
     setTripSetupLocationMethod('manual');
     setTripSetupPrompt('');
+    setTripSetupRecommendationsVisible(false);
     setTripSetupLink('');
     setTripSetupLinkStatus('idle');
     setTripSetupStep(1);
     setGroupSetupStep(1);
+    setGroupName('');
     setDestinationLockedByLeader(false);
+    setDatesLockedByLeader(false);
     setGroupMemberBudgets({});
     setGroupMemberVibes({});
     setGroupMemberDestinations({});
     setGroupUsernameSearch('');
+    setMembers([]);
+    setPlanPlaceQuery('');
+    setPlanAiSuggestionsVisible(false);
+    setPlanDraftPlaces([]);
+    setPlanGenerated(false);
     setDrawer('tripSetup');
   }
 
@@ -1232,14 +1300,10 @@ export default function AppRescued() {
   }
 
   function addGroupMemberFromUsername(username: string) {
-    const candidates: Record<string, Pick<TripMember, 'name' | 'role' | 'pace'>> = {
-      alex: { name: 'Alex', role: 'Transit buddy', pace: 'steady' },
-      hana: { name: 'Hana', role: 'Food scout', pace: 'fast' },
-      noah: { name: 'Noah', role: 'Memory keeper', pace: 'slow' },
-    };
-    const candidate = candidates[username.toLowerCase()];
-    if (!candidate) return;
-    setMembers(current => current.some(member => member.id === username.toLowerCase()) ? current.map(member => member.id === username.toLowerCase() ? { ...member, inviteStatus: 'joined' } : member) : [...current, { id: username.toLowerCase(), ...candidate, inviteStatus: 'joined' }]);
+    const name = username.trim();
+    const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    if (!id) return;
+    setMembers(current => current.some(member => member.id === id) ? current : [...current, { id, name, role: 'Member', pace: 'steady', inviteStatus: 'pending' }]);
     setGroupUsernameSearch('');
   }
 
@@ -1267,6 +1331,8 @@ export default function AppRescued() {
     setSoloBudgetTotal(reference.budget);
     setGroupBudgetTotal(reference.budget);
     setTripCreated(false);
+    setCurrentTripListId(null);
+    setPlanningContentOpen(false);
     setTripPhase('planning');
     setItineraryOrder([]);
     setTripSetupModeChoice(true);
@@ -1283,9 +1349,11 @@ export default function AppRescued() {
   }
 
   function runTripSetupRecommendation() {
+    if (!tripSetupPrompt.trim()) return;
     const suggestedDestination = /kyoto/i.test(tripSetupPrompt) ? 'Kyoto' : /osaka/i.test(tripSetupPrompt) ? 'Osaka' : /tokyo/i.test(tripSetupPrompt) ? 'Tokyo' : 'Tokyo';
     setDestination(suggestedDestination);
     setRecommendations(current => makeRecommendations(suggestedDestination, tingoDimensions, current));
+    setTripSetupRecommendationsVisible(true);
   }
 
   function parseTripSetupLink() {
@@ -1298,17 +1366,25 @@ export default function AppRescued() {
     }, 450);
   }
 
+  function savePlanningTrip() {
+    const entry: TripListEntry = { id: `trip-${Date.now()}`, name: groupName.trim() || destination, destination: destination.trim(), mode, status: 'planning', createdAt: new Date().toISOString() };
+    setTripList(current => [entry, ...current]);
+    setCurrentTripListId(entry.id);
+    setReadyConfirmed(false);
+    setTripCreated(true);
+    setDrawer(null);
+    openTrip();
+  }
+
+  function updateCurrentTripStatus(status: TripListEntry['status']) {
+    if (!currentTripListId) return;
+    setTripList(current => current.map(trip => trip.id === currentTripListId ? { ...trip, status } : trip));
+  }
+
   function renderTrips() {
-    const tripIsActive = tripLifecycleStatus === 'active' || tripLifecycleStatus === 'ongoing';
-    const statusLabel = tripLifecycleStatus === 'planning' ? 'PLANNING' : tripLifecycleStatus === 'active' ? 'ACTIVE' : tripLifecycleStatus === 'ongoing' ? 'ONGOING' : 'COMPLETED';
-    return <>
-      <SectionTitle kicker="TRIPS · YOUR NOTEBOOK" title="Keep the trip in view." copy="Planning, traveling, and remembering all belong to the same journey." />
-      <button className="new-trip-link" onClick={startNewTrip}>+ Start a new trip</button>
-      <section className={`trip-card ${tripIsActive ? 'active-trip' : 'planning-trip'} paper-sheet`}><div className="trip-card-art"><span>COCOCRUNCH</span><b>{destination}</b><small>{tripIntent.dates ? `${tripIntent.dates.start}–${tripIntent.dates.end}` : 'Dates to be confirmed'} · {travellerCount} travellers</small><i>✦</i></div><div className="trip-card-body"><div className="trip-card-heading"><div><span>{statusLabel}</span><h3>{destination} · slow food + small discoveries</h3></div><b>{planHealth.overall}</b></div><div className="trip-phase-preview"><span className={tripLifecycleStatus === 'planning' ? 'active' : ''}>Planning</span><span className={tripLifecycleStatus === 'active' ? 'active' : ''}>Active</span><span className={tripLifecycleStatus === 'ongoing' ? 'active' : ''}>Ongoing</span></div><p>{tripLifecycleStatus === 'planning' ? 'Finish setup and confirm to make this trip active.' : `Today: ${tripInputs.mustGo} · one open pocket`}</p><button className="primary" onClick={openTrip}>{tripLifecycleStatus === 'planning' ? 'Continue planning' : 'Open trip'} <ChevronRight size={16} /></button></div></section>
-      <section className="trip-packing-summary cc-card" aria-label="Packing summary"><div><span>PACKING</span><h3>Packing summary</h3><p>14 / 20 items packed</p></div><button className="primary" onClick={openPacking}>Open list <ChevronRight size={16} /></button></section>
-      <section className="trip-list"><div className="section-rule"><span>OTHER TRIPS</span><button onClick={() => setTab('explore')}>Find inspiration <ChevronRight size={14} /></button></div><article className="trip-list-row"><div className="trip-thumb sea-thumb" /><div><b>Jeju · salt air and citrus</b><small>Completed · 5 days · shared privately</small></div><button onClick={openTrip} aria-label="Open Jeju trip"><ChevronRight size={17} /></button></article><article className="trip-list-row"><div className="trip-thumb blue-thumb" /><div><b>Kyoto · temple mornings</b><small>Draft · solo · 3 anchor ideas</small></div><button onClick={openTrip} aria-label="Open Kyoto trip"><ChevronRight size={17} /></button></article></section>
-      <section className="trip-footer-note"><Coco tiny mood="happy" context="travel" /><div><b>Every trip gets a little wiser.</b><small>Reviews and category-level actual spend feed back into your private Tingo Card.</small></div></section>
-    </>;
+    if (!tripSetupModeChoice && tripList.length) return <section className="trips-index" aria-label="Trips">{(['group', 'solo'] as const).map(kind => { const trips = tripList.filter(trip => trip.mode === kind && trip.status === 'planning'); return trips.length ? <section className="trip-list-section" key={kind}><span className="trips-index-heading">{kind === 'group' ? 'GROUP TRIPS' : 'SOLO TRIPS'}</span>{trips.map(trip => <button className="trips-index-card cc-card" key={trip.id} onClick={() => { setCurrentTripListId(trip.id); setMode(trip.mode); setGroupName(trip.name); setDestination(trip.destination); openTrip(); }}><CocoCompanion context="planning" pose={kind === 'group' ? 'action-map' : 'action-journal'} size={58} /><div><b>{trip.name}</b><small>{trip.destination || 'To be confirmed'}</small></div><ChevronRight size={18} /></button>)}</section> : null; })}<button className="primary" onClick={() => setTripSetupModeChoice(true)}>Add Trip <ChevronRight size={16} /></button></section>;
+    if (!tripSetupModeChoice) return <div className="home-orientation home-empty" aria-label="Trips"><section className="home-empty-state cc-card"><p className="home-empty-status">No trip added</p><CocoCompanion context="planning" size={98} /><div><h2>Create a new trip</h2><button className="secondary" onClick={() => setTripSetupModeChoice(true)}>Add Trip <ChevronRight size={16} /></button></div></section></div>;
+    return <section className="trip-mode-picker" aria-label="Choose trip type"><p className="drawer-kicker">NEW TRIP</p><h2>How are you travelling?</h2><div><button className="trip-mode-card" onClick={() => { setMode('solo'); startNewTrip(); }}><CocoCompanion context="planning" size={72} /><span>Solo</span><small>Plan at your own pace</small></button><button className="trip-mode-card" onClick={() => { setMode('group'); startNewTrip(); }}><div className="trip-mode-cocos"><CocoCompanion context="planning" size={57} /><CocoCompanion context="planning" size={57} /></div><span>Group</span><small>Plan together</small></button></div></section>;
   }
 
   function renderExplore() {
@@ -1344,18 +1420,76 @@ export default function AppRescued() {
     </div>;
   }
 
+  function openBookingPage(page: BookingPage) {
+    setBookingPage(page);
+    setBookingView('not-booked');
+    setExpandedBookingOffer(null);
+    setPaymentOffer(null);
+    setPaymentComplete(false);
+    setBookingSearch('');
+    setBookingSort('recommended');
+  }
+
+  function renderBookingPage() {
+    if (!bookingPage) return null;
+    const isFlight = bookingPage === 'flight';
+    const title = isFlight ? 'Flight & Transport' : 'Accommodation';
+    const offers: BookingOffer[] = isFlight ? [
+      { id: 'airasia', provider: 'AirAsia', logo: 'airasia', price: 'RM 688', originalPrice: 'RM 738', route: 'KUL → Tokyo', timing: '09:15 → 16:40 · 7h 25m', detail: '1 stop in Bangkok · cabin bag included', perks: ['7 kg cabin bag', 'Seat selection', 'COCO10 voucher'] },
+      { id: 'sia', provider: 'Singapore Airlines', logo: 'SIA', price: 'RM 742', originalPrice: 'RM 782', route: 'KUL → Tokyo', timing: '08:40 → 15:35 · 6h 55m', detail: '1 stop in Singapore · meals included', perks: ['25 kg checked bag', 'Meal included', '1h 45m connection'] },
+      { id: 'mh', provider: 'Malaysia Airlines', logo: 'MH', price: 'RM 805', originalPrice: 'RM 850', route: 'KUL → Tokyo', timing: '10:20 → 16:50 · 6h 30m', detail: 'Direct flight · flexible change option', perks: ['Direct route', '20 kg checked bag', 'Changeable fare'] },
+    ] : [
+      { id: 'mimaru', provider: 'MIMARU Tokyo Ueno', logo: 'M', price: 'RM 1,280', originalPrice: 'RM 1,360', route: 'Ueno · Tokyo', timing: '12 Oct → 17 Oct · 5 nights', detail: 'Apartment stay · 8 min walk to Ueno Station', perks: ['Free cancellation', 'Private kitchen', '4.7 guest rating'] },
+      { id: 'sequence', provider: 'sequence SUIDOBASHI', logo: 'S', price: 'RM 1,095', originalPrice: 'RM 1,155', route: 'Suidobashi · Tokyo', timing: '12 Oct → 17 Oct · 5 nights', detail: 'Modern hotel · breakfast included', perks: ['Breakfast', '24h front desk', '4.5 guest rating'] },
+      { id: 'kanda', provider: 'Kanda Pocket Hotel', logo: 'K', price: 'RM 860', originalPrice: 'RM 910', route: 'Kanda · Tokyo', timing: '12 Oct → 17 Oct · 5 nights', detail: 'Compact central stay · pay at property', perks: ['Near JR station', 'Free Wi-Fi', 'Pay at property'] },
+    ];
+    const visibleOffers = offers
+      .filter(offer => `${offer.provider} ${offer.route}`.toLowerCase().includes(bookingSearch.trim().toLowerCase()))
+      .sort((a, b) => bookingSort === 'lowest' ? Number(a.price.replace(/[^0-9]/g, '')) - Number(b.price.replace(/[^0-9]/g, '')) : 0);
+    const booked = isFlight ? flightBooking : accommodationBooking;
+    const savePayment = () => {
+      if (!paymentOffer) return;
+      if (isFlight) setFlightBooking({ flightNumber: paymentOffer.id === 'mh' ? 'MH 088' : paymentOffer.id === 'sia' ? 'SQ 012' : 'AK 518', departureTime: paymentOffer.timing.split(' · ')[0], arrivalTime: paymentOffer.timing.split(' → ')[1]?.split(' · ')[0] ?? '16:40', checkInTime: '07:15', provider: paymentOffer.provider, sharedWithGroup: false, source: 'quote-prototype' });
+      else setAccommodationBooking({ propertyName: paymentOffer.provider, checkInTime: '12 Oct · 15:00', checkOutTime: '17 Oct · 11:00', cancellationDeadline: '09 Oct · 23:59', notes: paymentOffer.perks.join(' · '), provider: paymentOffer.provider, sharedWithGroup: false, source: 'quote-prototype' });
+      setPaymentComplete(true);
+    };
+    if (paymentOffer) return <section className="booking-page payment-page" aria-label="Payment"><button className="planning-back" aria-label={`Back to ${title}`} onClick={() => setPaymentOffer(null)}><ArrowLeft size={20} /></button><div className="planning-trip-title"><span>SECURE PAYMENT</span><h2>Review &amp; pay</h2><CocoCompanion context="planning" pose="action-journal" size={58} /></div>{paymentComplete ? <section className="payment-success cc-card"><Check size={28} /><h3>Booking confirmed</h3><p>{paymentOffer.provider} is now saved to this trip.</p><button className="primary" onClick={() => { setPaymentOffer(null); setBookingView('booked'); }}>View booking</button></section> : <><section className="payment-summary cc-card"><div className={`provider-logo ${paymentOffer.id}`}>{paymentOffer.logo}</div><div><b>{paymentOffer.provider}</b><small>{paymentOffer.route}</small><small>{paymentOffer.timing}</small></div><div className="payment-price"><del>{paymentOffer.originalPrice}</del><strong>{paymentOffer.price}</strong><small>CocoCrunch price</small></div></section><section className="payment-methods"><span>PAYMENT METHOD</span><button className={paymentMethod === 'card' ? 'active' : ''} onClick={() => setPaymentMethod('card')}><b>Card</b><small>Visa · Mastercard</small></button><button className={paymentMethod === 'wallet' ? 'active' : ''} onClick={() => setPaymentMethod('wallet')}><b>eWallet</b><small>Touch 'n Go eWallet</small></button></section>{paymentMethod === 'card' && <section className="payment-fields"><label className="setup-field"><span>Name on card</span><input placeholder="Cardholder name" /></label><label className="setup-field"><span>Card number</span><input inputMode="numeric" placeholder="1234  5678  9012  3456" /></label><div><label className="setup-field"><span>Expiry</span><input placeholder="MM / YY" /></label><label className="setup-field"><span>CVV</span><input inputMode="numeric" placeholder="•••" /></label></div></section>}<button className="primary payment-submit" onClick={savePayment}>Pay {paymentOffer.price}</button><small className="payment-note">Your booking details will be saved to this trip.</small></>}</section>;
+    return <section className="booking-page" aria-label={title}><button className="planning-back" aria-label="Back to planning" onClick={() => setBookingPage(null)}><ArrowLeft size={20} /></button><div className="planning-trip-title"><span>PLANNING PHASE</span><h2>{title}</h2><CocoCompanion context="planning" pose={isFlight ? 'action-transit' : 'action-bags'} size={70} /></div><div className="flight-page-tabs"><button className={bookingView === 'not-booked' ? 'active' : ''} onClick={() => setBookingView('not-booked')}>Not booked yet</button><button className={bookingView === 'booked' ? 'active' : ''} onClick={() => setBookingView('booked')}>Booked</button></div>{bookingView === 'booked' ? <section className="booking-upload cc-card">{booked ? <><div className="booking-confirmed"><Check size={20} /><div><b>{isFlight ? (booked as FlightBookingState).flightNumber : (booked as AccommodationBookingState).propertyName}</b><small>{isFlight ? (booked as FlightBookingState).departureTime : (booked as AccommodationBookingState).checkInTime}</small></div></div><button className="secondary" onClick={() => setBookingView('not-booked')}>Add another option</button></> : <><CocoCompanion context="planning" pose="action-journal" size={76} /><h3>Add an existing booking</h3><label className="setup-field"><span>Gmail, PDF, or confirmation file</span><input type="file" accept=".pdf,.eml,.msg,text/plain" /></label><button className="primary" onClick={() => isFlight ? setFlightBooking({ flightNumber: 'MH 772', departureTime: '12 Oct · 09:15', arrivalTime: '12 Oct · 16:40', checkInTime: '12 Oct · 07:15', provider: 'Uploaded confirmation', sharedWithGroup: false, source: 'email-prototype' }) : setAccommodationBooking({ propertyName: 'Uploaded stay', checkInTime: '12 Oct · 15:00', checkOutTime: '17 Oct · 11:00', cancellationDeadline: '09 Oct · 23:59', notes: 'Confirmation uploaded', provider: 'Uploaded confirmation', sharedWithGroup: false, source: 'email-prototype' })}>Save booking</button></>}</section> : <><section className="booking-search"><input value={bookingSearch} onChange={event => setBookingSearch(event.target.value)} placeholder={isFlight ? 'Search airline or route' : 'Search hotel or area'} /><select aria-label="Sort booking options" value={bookingSort} onChange={event => setBookingSort(event.target.value as 'recommended' | 'lowest')}><option value="recommended">Recommended</option><option value="lowest">Lowest price</option></select></section><section className="booking-offers">{visibleOffers.map(offer => <article className={`booking-offer cc-card ${expandedBookingOffer === offer.id ? 'expanded' : ''}`} key={offer.id}><div className="booking-offer-main"><span className={`provider-logo ${offer.id}`}>{offer.logo}</span><div><b>{offer.provider}</b><small>{offer.route}</small><small>{offer.timing}</small></div><div className="booking-price"><del>{offer.originalPrice}</del><strong>{offer.price}</strong></div></div><p>{offer.detail}</p>{expandedBookingOffer === offer.id && <ul>{offer.perks.map(perk => <li key={perk}><Check size={14} /> {perk}</li>)}</ul>}<div className="booking-offer-actions"><button className="secondary" onClick={() => setExpandedBookingOffer(current => current === offer.id ? null : offer.id)}>{expandedBookingOffer === offer.id ? 'Hide details' : 'Show details'}</button><button className="primary" onClick={() => setPaymentOffer(offer)}>Select</button></div></article>)}{visibleOffers.length === 0 && <p className="booking-no-results">No match found. Try another company or area.</p>}</section><button className="secondary booking-load-more">Load more</button></>}</section>;
+  }
+
   function renderTripWorkspace() {
+    if (bookingPage) return renderBookingPage();
+    if (flightPageOpen) return <section className="flight-page"><button className="planning-back" aria-label="Back to planning" onClick={() => setFlightPageOpen(false)}><ArrowLeft size={20} /></button><div className="planning-trip-title"><span>PLANNING PHASE</span><h2>{destination}</h2><CocoCompanion context="planning" pose="action-transit" size={70} /></div><div className="flight-page-tabs"><button className={flightView === 'not-booked' ? 'active' : ''} onClick={() => setFlightView('not-booked')}>Not booked yet</button><button className={flightView === 'booked' ? 'active' : ''} onClick={() => setFlightView('booked')}>Booked</button></div>{flightView === 'not-booked' ? <section className="flight-offers"><article><b>AirAsia</b><span>RM 688</span><small>09:15 → 16:40 · 7h 25m</small><button className="primary">Continue to payment</button></article><article><b>Singapore Airlines</b><span>RM 742</span><small>08:40 → 15:35 · 6h 55m</small><button className="primary">Continue to payment</button></article><article><b>Malaysia Airlines</b><span>RM 805</span><small>10:20 → 16:50 · 6h 30m</small><button className="primary">Continue to payment</button></article></section> : <section className="flight-upload"><CocoCompanion context="planning" pose="action-journal" size={76} /><h3>Add your booking</h3><label className="setup-field"><span>Gmail, PDF, or confirmation file</span><input type="file" accept=".pdf,.eml,.msg,text/plain" /></label><button className="primary">Upload booking</button></section>}</section>;
+    if (workspacePhase === 'planning' && !planningContentOpen) return <section className="planning-launcher" aria-label="Trip planning"><button className="planning-back" aria-label="Back to Trips" onClick={openTripsIndex}><ArrowLeft size={20} /></button><div className="planning-trip-title"><span>PLANNING PHASE</span><h2>{groupName || destination}</h2><CocoCompanion context="planning" pose="scene-planning" size={70} /></div>{mode === 'group' && <><div className="group-workspace-tabs"><button className={groupWorkspaceView === 'tasks' ? 'active' : ''} onClick={() => setGroupWorkspaceView('tasks')}>Tasks</button><button className={groupWorkspaceView === 'chat' ? 'active' : ''} onClick={() => setGroupWorkspaceView('chat')}>Chat {groupCourtUnreadCount ? `· ${groupCourtUnreadCount}` : ''}</button><button className={groupWorkspaceView === 'change' ? 'active' : ''} onClick={() => setGroupWorkspaceView('change')}>Change task</button></div>{groupWorkspaceView === 'chat' ? <GroupChannel messages={groupChannelMessages} unreadCount={groupCourtUnreadCount} onMarkRead={() => setGroupCourtUnreadCount(0)} onSend={text => setGroupChannelMessages(messages => [...messages, { id: `message-${Date.now()}`, author: onboardingName || 'You', text, createdAt: 'Now' }])} /> : <section className="group-task-assignment cc-card"><b>{groupWorkspaceView === 'change' ? 'Assign team tasks' : 'Team tasks'}</b>{['Plan', 'Flight & Transport', 'Accommodation', 'Luggage'].map((task, index) => <button key={task} disabled={groupWorkspaceView !== 'change'} onClick={() => setGroupWorkspaceView('tasks')}><span>{task}</span><small>{responsibilitySuggestions[index]?.memberName ?? (onboardingName || 'Leader')}</small></button>)}</section>}</>}<div className="planning-launcher-grid"><button onClick={() => openBookingPage('flight')}><CocoCompanion context="planning" pose="action-transit" size={62} /><b>Flight &amp; Transport</b></button><button onClick={() => setPlanningContentOpen(true)}><CocoCompanion context="planning" pose="action-map" size={62} /><b>Plan</b></button><button onClick={() => openBookingPage('accommodation')}><CocoCompanion context="planning" pose="action-bags" size={62} /><b>Accommodation</b></button><button onClick={openPacking}><CocoCompanion context="planning" pose="action-luggage" size={62} /><b>Luggage</b></button></div></section>;
     return <>
-      <TripWorkspaceHeader destination={destination} mode={mode} travellerCount={travellerCount} planHealth={planHealth.overall} onBack={openTripsIndex} />
-      <TripLifecycleTabs status={tripLifecycleStatus} />
-      <TripWorkspaceContext phase={workspacePhase} onExit={openTripsIndex} />
-      <TripJourneyStatus state={journeyState} destination={destination} onAction={handleJourneyAction} />
-      <JourneyProgress destination={destination} currentPhase={workspacePhase} nextActionLabel={journeyState.nextAction?.label} />
+      {workspacePhase === 'completed' && <TripWorkspaceHeader destination={destination} mode={mode} travellerCount={travellerCount} planHealth={planHealth.overall} onBack={() => openTripsIndex()} />}
+      {workspacePhase === 'completed' && <TripLifecycleTabs status={tripLifecycleStatus} />}
+      {workspacePhase === 'completed' && <TripWorkspaceContext phase={workspacePhase} onExit={() => openTripsIndex()} />}
+      {workspacePhase === 'completed' && <TripJourneyStatus state={journeyState} destination={destination} onAction={handleJourneyAction} />}
+      {workspacePhase === 'completed' && <JourneyProgress destination={destination} currentPhase={workspacePhase} nextActionLabel={journeyState.nextAction?.label} />}
       {workspacePhase === 'planning' ? renderPlan() : workspacePhase === 'traveling' ? renderDuring() : renderMemories()}
     </>;
   }
 
+  function addPlanPlace(name: string, label: PlanPlaceLabel = 'Must-Go') {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    const matched = recommendations.find(place => place.name.toLowerCase() === trimmed.toLowerCase());
+    const id = matched?.id ?? Date.now();
+    if (!matched) setRecommendations(current => [...current, { id, name: trimmed, type: 'Saved place', match: 80, cost: 'RM 30 est.', duration: '1.5h', why: 'Added to this trip by you.', source: 'fallback', estimatedCost: 30, durationMinutes: 90, transferMinutes: 15, walkingKm: 1, indoor: false, tags: ['saved'], saved: true, added: true }]);
+    else setRecommendations(current => current.map(place => place.id === id ? { ...place, added: true } : place));
+    setPlanDraftPlaces(current => current.some(place => place.id === id) ? current : [...current, { id, name: trimmed, label }]);
+    setPlanPlaceQuery('');
+  }
+
+  function setPlanPlaceLabel(id: number, label: PlanPlaceLabel) {
+    setPlanDraftPlaces(current => current.map(place => place.id === id ? { ...place, label } : place));
+  }
+
   function renderPlan() {
+    const selectedPlanPlaces = planDraftPlaces.length ? planDraftPlaces : recommendations.filter(place => place.added).map(place => ({ id: place.id, name: place.name, label: 'Must-Go' as PlanPlaceLabel }));
+    if (!planGenerated) return <section className="plan-builder" aria-label="Build your plan"><section className="plan-search-card cc-card"><label className="setup-field"><span>Search a place</span><div className="plan-search-row"><input value={planPlaceQuery} onChange={event => setPlanPlaceQuery(event.target.value)} placeholder="Search a location or place" /><button className="primary" onClick={() => addPlanPlace(planPlaceQuery)}>Add</button></div></label><button className="secondary plan-ai-button" onClick={() => setPlanAiSuggestionsVisible(current => !current)}><Sparkles size={16} />AI suggestions</button>{planAiSuggestionsVisible && <div className="plan-suggestion-list">{recommendations.slice(0, 3).map(place => <article key={place.id}><div className="plan-suggestion-photo" /><div><b>{place.name}</b>{planSuggestionDetailsId === place.id && <section className="plan-place-details"><button className="plan-details-close" onClick={() => setPlanSuggestionDetailsId(null)}>×</button><b>{place.name}</b><small>{place.type} · {place.cost}</small><small>Open 09:00–18:00 · Rating {(place.match / 20 + .2).toFixed(1)}</small><p>{place.why}</p></section>}<div className="plan-suggestion-actions"><button onClick={() => setPlanSuggestionDetailsId(place.id)}>Details</button><button onClick={() => addPlanPlace(place.name)}>Pin to map</button></div></div></article>)}</div>}</section>{selectedPlanPlaces.length > 0 && <><section className="plan-draft-map cc-card"><span>MAP PREVIEW</span><PlanSketchMap places={selectedPlanPlaces} /></section><section className="plan-label-board">{(['Must-Go','Deal Breaker','Preference','Flexible'] as const).map(label => <section key={label} onDragOver={event => event.preventDefault()} onDrop={event => setPlanPlaceLabel(Number(event.dataTransfer.getData('text/plain')), label)}><b>{label}</b>{selectedPlanPlaces.filter(place => place.label === label).map(place => <button draggable key={place.id} onDragStart={event => event.dataTransfer.setData('text/plain', String(place.id))} onClick={() => { const labels: PlanPlaceLabel[] = ['Must-Go', 'Deal Breaker', 'Preference', 'Flexible']; setPlanPlaceLabel(place.id, labels[(labels.indexOf(place.label) + 1) % labels.length]); }} title="Tap to move to the next label">{place.name}</button>)}</section>)}</section><button className="primary plan-generate" onClick={() => setPlanGenerated(true)}>Generate itinerary <ChevronRight size={16} /></button></>}</section>;
+    if (planGenerated) return <section className="plan-builder plan-generated" aria-label="Generated itinerary"><WeatherGlance destination={destination} compact /><section className="generated-trip-goal"><span>TRIP GOAL</span><b>{tripInputs.tripVibe || 'Your trip preferences'}</b></section><TripPlanOverview plan={visibleTripPlan} planHealth={planHealth} tripIntent={tripIntent} onOpenWhy={setPlanWhyItemId} onOpenHealth={() => setDrawer('feasibility')} onReorder={setItineraryOrder} mapSource="local-schematic" mapCandidates={selectedPlanPlaces.map(place => ({ id: `selected-${place.id}`, name: place.name, source: 'fallback' as const }))} />{planWhyItemId && <section className="why-note"><Sparkles size={19} /><div><b>Why this stop?</b><p><RecommendationEvidenceText evidence={visibleTripPlan.items.find(item => item.id === planWhyItemId)?.evidence ?? []} /></p></div><button className="secondary" onClick={() => setPlanWhyItemId(null)}>Close</button></section>}<button className="primary plan-confirm-only" onClick={() => setDrawer('feasibility')}>Confirm plan <ChevronRight size={15} /></button><div className="plan-generated-actions"><button className="secondary" onClick={() => setPlanGenerated(false)}>Add locations</button>{mode === 'group' && <button className="secondary" onClick={() => openCourt()}>Group Court</button>}</div></section>;
     const first = courtOptions[0];
     const second = courtOptions[1];
     const firstCount = first ? tally.counts[first.id] ?? 0 : 0;
@@ -1378,7 +1512,7 @@ export default function AppRescued() {
         {mode === 'group' && <section className="group-signal-summary paper-sheet"><div><span>GROUP DETAILS</span><h3>{groupDNA.conflicts.length ? `${groupDNA.conflicts.length} decision${groupDNA.conflicts.length === 1 ? '' : 's'} remain visible.` : 'Shared signals are explicit, not averaged.'}</h3><p>{groupDNA.sharedPriorities[0]?.label ?? 'No shared priority yet'} · {groupDNA.budgetSensitivity} budget sensitivity</p></div><button className="secondary" onClick={() => setDrawer('group')}>Open people <ChevronRight size={14} /></button></section>}
       </section>
       <section className="trip-plan-intent-fields paper-sheet"><span>EDIT PLAN</span><h3>Protect what matters, then leave room to move.</h3><div className="setup-fields"><label><span>Must-Go anchor</span><input value={tripInputs.mustGo} onChange={event => setTripInputField('mustGo', event.target.value)} /></label><label><span>Deal breaker</span><input value={tripInputs.dealBreaker} onChange={event => setTripInputField('dealBreaker', event.target.value)} /></label><label><span>Preference</span><input value={tripInputs.preference} onChange={event => setTripInputField('preference', event.target.value)} /></label><label><span>Flexible</span><input value={tripInputs.flexible} onChange={event => setTripInputField('flexible', event.target.value)} /></label></div></section>
-      <details className="trip-add-menu"><summary aria-label="Add to trip">+</summary><div><button onClick={() => setDrawer('flight')}>Flight</button><button onClick={() => setDrawer('accommodation')}>Accommodation</button><button onClick={() => setDrawer(null)}>Plan</button></div></details>
+      <details className="trip-add-menu"><summary aria-label="Add to trip">+</summary><div><button onClick={() => setDrawer('flight')}>Flight &amp; Transport</button><button onClick={() => setPlanningContentOpen(true)}>Plan</button><button onClick={() => setDrawer('accommodation')}>Accommodation</button><button onClick={openPacking}>Luggage</button></div></details>
       {mode === 'group' && <section className="conflict-ticket"><span>{courtConfirmed ? 'COURT DECISION RECORDED' : 'UNRESOLVED CONFLICT'}</span><b>{activeConflict}</b><small>{first?.label ?? 'Option A'} {firstCount} · {second?.label ?? 'Option B'} {secondCount} · {tally.tied ? 'tie · Gacha is eligible' : `${optionLabel(tally.majority)} has majority`}</small><button className="ritual-trigger" onClick={() => openCourt()}>{courtConfirmed ? 'Review Group Court' : 'Open Group Court'} <Gavel size={18} /></button></section>}
       {mode === 'group' && <GroupChannel messages={groupChannelMessages} unreadCount={groupCourtUnreadCount} onMarkRead={() => setGroupCourtUnreadCount(0)} onSend={text => setGroupChannelMessages(messages => [...messages, { id: `message-${Date.now()}`, author: onboardingName || 'You', text, createdAt: 'Now' }])} />}
       <div className="planning-plan">
@@ -1389,13 +1523,16 @@ export default function AppRescued() {
         <section className="plan-health"><div className="section-rule"><span>PLAN HEALTH</span><button onClick={() => setDrawer('feasibility')}>Run checks <ChevronRight size={14} /></button></div><div className="health-score"><b>{planHealth.overall}</b><span><strong>{planHealth.overall >= 80 ? 'Healthy with watch items shown' : planHealth.overall >= 60 ? 'Usable with meaningful watch items' : 'Needs a planning decision'}</strong><small>{planHealth.reasons[0] ?? 'No current risk deductions; inputs fit the generated structure.'}</small></span></div><div className="health-metrics"><span>Walk <b>{planHealth.metrics.walkingKm.toFixed(1)} km</b></span><span>Pressure <b>{planHealth.metrics.timePressureMinutes} min</b></span><span>Budget <b>{planHealth.metrics.budgetOverrun ? `RM ${planHealth.metrics.budgetOverrun} over` : 'Within cap'}</b></span><span>Transfer <b>{planHealth.metrics.transferMinutes} min</b></span><span>Anchors <b>{planHealth.metrics.protectedAnchors} protected</b></span><span>Risks <b>{planHealth.metrics.unresolvedRisks}</b></span></div></section>
       </div>
       <details className="secondary-launcher"><summary>Plan details & tools</summary><ContextualToolList tools={planTools} /></details>
-      <section className="ready-to-go-card paper-sheet"><div><span>READY TO GO</span><h3>{readyConfirmed ? 'This plan is ready to continue.' : 'Review the joins before you go.'}</h3><p>{readyConfirmed ? 'You can still inspect the workspace and change course when reality changes.' : 'Coco will show the current risks; confirmation stays yours.'}</p></div><button className="primary" onClick={() => setDrawer('feasibility')}>{readyConfirmed ? 'Review readiness' : 'Confirm Ready to Go'} <ChevronRight size={15} /></button></section>
+      <section className="ready-to-go-card paper-sheet"><div><span>CONFIRM PLAN</span><h3>{readyConfirmed ? 'This trip is active.' : 'Review the plan before you confirm.'}</h3><p>{readyConfirmed ? 'You can still inspect the workspace and change course when reality changes.' : 'Only confirmation makes this trip active on Home.'}</p></div><button className="primary" onClick={() => setDrawer('feasibility')}>{readyConfirmed ? 'Review plan' : 'Confirm plan'} <ChevronRight size={15} /></button></section>
     </div>;
   }
 
   function renderDuring() {
     const anchorItem = visibleTripPlan.items.find(item => item.kind === 'anchor');
     const floatingItem = visibleTripPlan.items.find(item => item.kind === 'floating');
+    const focusedOngoingView = Boolean(true);
+    if (focusedOngoingView && ongoingView === 'routing') return <section className="routing-page" aria-label="Routing"><button className="planning-back" aria-label="Back to ongoing menu" onClick={() => setOngoingView('menu')}><ArrowLeft size={20} /></button><TripSpatialView mode="traveling" destination={destination} source="local-schematic" showWalkPreview={false} plan={visibleTripPlan} currentItem={anchorItem ? { name: anchorItem.name, timeLabel: anchorItem.timeLabel } : undefined} nextItem={floatingItem ? { name: floatingItem.name, timeLabel: floatingItem.timeLabel } : undefined} liveRoute={{ currentLocation: browserLocation ? 'Your location' : 'Current stop', target: floatingItem?.name ?? anchorItem?.name ?? 'Next stop', eta: '12 min', timelineLabel: 'Next stop', weatherLabel: 'Weather below', coordinates: browserLocation ?? undefined, locationStatus: browserLocation ? 'live' : 'unavailable' }} overlay={<Coco tiny mood="happy" context="travel" />} /><section className="routing-next cc-card"><span>Next stop</span><b>{floatingItem?.name ?? anchorItem?.name ?? 'Choose your next stop'}</b><small>{floatingItem ? `${floatingItem.timeLabel} · about ${floatingItem.transferMinutes || 12} min away` : 'Your next route will appear here.'}</small></section><WeatherGlance destination={destination} compact /><div className="routing-tools">{mode === 'group' && <button className="secondary" onClick={() => openGovernedAction('split-on')}><Users size={16} />Group split</button>}<button className="secondary" onClick={() => setDrawer('safety')}><Heart size={16} />Nearby medical</button>{mode === 'group' && <button className="secondary" onClick={() => openCourt()}><Gavel size={16} />Group call</button>}<button className="secondary" onClick={() => setDrawer('budget')}><CircleDollarSign size={16} />Pay money</button></div></section>;
+    if (focusedOngoingView) return <section className="ongoing-dashboard ongoing-launcher" aria-label="Ongoing trip"><button className="ongoing-launcher-card cc-card" onClick={() => setOngoingView('routing')}><CocoCompanion context="map" pose="action-gps" size={88} /><b>Routing</b></button><button className="ongoing-launcher-card cc-card" onClick={() => setDrawer('budget')}><CocoCompanion context="map" pose="action-snack" size={88} /><b>Budgeting</b></button></section>;
     return <>
       <SectionTitle kicker="DURING · LIVE TRIP" title={delay ? 'Reality changed.' : 'The trip is moving.'} copy="Coco watches the plan, not your every step." />
       <WeatherGlance destination={destination} compact />
@@ -1780,6 +1917,7 @@ export default function AppRescued() {
       </section>
 
       <EmergencyContactsManager contacts={emergencyContacts} frequency={emergencyCheckInFrequency} onChange={contacts => { setEmergencyContacts(contacts); if (selectedEmergencyContactId && !contacts.some(contact => contact.id === selectedEmergencyContactId)) setSelectedEmergencyContactId(''); }} onFrequencyChange={setEmergencyCheckInFrequency} />
+      <section className="paper-sheet"><span className="drawer-kicker">APP SETTINGS</span><h3>Demo mode</h3><p className="drawer-copy">Review how this version handles your trip data.</p><button className="secondary" onClick={() => setDrawer('demo')}>View demo mode details</button></section>
       {learningProposal?.status === 'proposed' && <section className="learning-handoff paper-sheet"><div><span>TRIP LEARNING · REVIEW BEFORE APPLY</span><h3>{destination} has a proposal for your long-term Tingo.</h3><p>These changes came from this trip’s actual outcome and will not apply until you confirm them.</p>{learningProposal.changes.map(change => <small key={change.questionId}>{change.questionId}: {change.beforeOptionId ?? 'none'} → {change.afterOptionId} · {change.reason}</small>)}</div><div className="learning-handoff-actions"><button className="secondary" onClick={() => setTab('memories')}>Review in Memories</button><button className="primary" onClick={confirmLearning}>Confirm this learning</button><button className="secondary" onClick={dismissLearning}>Dismiss</button></div></section>}
       {confirmedLearningHistory.length > 0 && <section className="learning-history paper-sheet"><span>CONFIRMED TINGO LEARNING</span><h3>What you chose to carry forward</h3>{confirmedLearningHistory.slice(0, 3).map(record => <div key={record.id}><b>{record.sourceTripReview === 'yes' ? 'Worth it' : record.sourceTripReview === 'mixed' ? 'Mixed' : 'Not really'} · {new Date(record.confirmedAt).toLocaleDateString()}</b>{record.changes.map(change => <small key={change.questionId}>{change.questionId}: {change.beforeOptionId ?? 'none'} → {change.afterOptionId}</small>)}</div>)}</section>}
       <section className="me-logout-section" aria-label="Account actions">
@@ -1794,19 +1932,18 @@ export default function AppRescued() {
     const identity = deriveTingoIdentity(tingoDimensions);
     const currentQuestion = tingoQuestions[Math.max(0, Math.min(tingoStep, tingoQuestions.length - 1))];
     const barWidth = tingoStep < 0 ? 12 : complete ? 100 : Math.round(((tingoStep + 1) / tingoQuestions.length) * 100);
-    const statRows: { key: keyof TingoDimensions; label: string; icon: string; color: string }[] = [
-      { key: 'pace', label: 'Pace', icon: '🏝️', color: 'var(--sangria)' },
-      { key: 'experience', label: 'Experience', icon: '🌎', color: 'var(--blue)' },
-      { key: 'budget', label: 'Budget', icon: '💳', color: 'var(--warning)' },
-      { key: 'comfort', label: 'Comfort', icon: '🏨', color: 'var(--blue)' },
-      { key: 'food', label: 'Food', icon: '🍴', color: 'var(--sangria-deep)' },
-      { key: 'adventure', label: 'Adventure', icon: '⛰️', color: 'var(--sangria-soft)' },
-      { key: 'planning', label: 'Planning', icon: '🗂️', color: 'var(--warning)' },
-      { key: 'flexibility', label: 'Flexibility', icon: '🔁', color: 'var(--success)' },
-      { key: 'social', label: 'Social', icon: '👥', color: 'var(--success)' },
+    const statRows: { key: keyof TingoDimensions; label: string }[] = [
+      { key: 'pace', label: 'Pace' },
+      { key: 'experience', label: 'Experience' },
+      { key: 'budget', label: 'Budget' },
+      { key: 'comfort', label: 'Comfort' },
+      { key: 'food', label: 'Food' },
+      { key: 'adventure', label: 'Adventure' },
+      { key: 'planning', label: 'Planning' },
+      { key: 'flexibility', label: 'Flexibility' },
+      { key: 'social', label: 'Social' },
     ];
     const scoreValue = (key: keyof TingoDimensions) => Math.max(8, Math.min(98, Math.round(58 + tingoDimensions[key] * 7)));
-
     if (tingoStep < 0 && !complete) {
       return (
         <div className="tingo-flow tingo-how">
@@ -1892,36 +2029,38 @@ export default function AppRescued() {
 {drawer === 'tingo' && renderTingoAssessment()}
       {drawer === 'flight' && <FlightDrawer mode={mode} booking={flightBooking} draft={flightBookingDraft} onDraftChange={setFlightBookingDraft} onConfirm={setFlightBooking} onClose={() => setDrawer(null)} />}
       {drawer === 'accommodation' && <AccommodationDrawer mode={mode} booking={accommodationBooking} draft={accommodationBookingDraft} onDraftChange={setAccommodationBookingDraft} onConfirm={confirmAccommodationBooking} onClose={() => setDrawer(null)} />}
-      {drawer === 'tripEnd' && <section className="trip-end-prompt" aria-label="End trip confirmation"><CocoCompanion context="memory" size={96} /><span className="drawer-kicker">TRIP WRAP-UP</span><h3>This journey looks like it has ended. End this trip now?</h3><p className="drawer-copy">{allTodayItemsComplete ? 'Today’s saved itinerary items are all marked complete.' : 'The saved return date has passed.'} You can keep travelling if plans changed; CocoCrunch will not end it without your confirmation.</p><div className="action-row"><button className="secondary" onClick={() => { setTripEndPromptDismissed(true); setDrawer(null); }}>Not yet</button><button className="primary" onClick={() => { setTripPhase('completed'); setDrawer(null); }}>End trip &amp; open summary</button></div></section>}
-      {drawer === 'tripSetup' && !tripSetupModeChoice && mode === 'group' && groupSetupStep === 3 && <p className="adapter-note">Leader choice rule: confirming a destination and dates makes them read-only for members later. Skip only to send competing member candidates to Group Court.</p>}
-      {drawer === 'tripSetup' && !tripSetupModeChoice && mode === 'group' && groupSetupStep === 6 && <p className="adapter-note">{destinationLockedByLeader ? 'Read-only for members: the leader locked this shared destination and schedule in Step 3.' : 'No candidate is adopted directly: member destinations go to Group Court, with Gacha only if Court reaches a tie.'}</p>}
+{drawer === 'tripEnd' && <section className="trip-end-prompt" aria-label="End trip confirmation"><CocoCompanion context="memory" size={96} /><span className="drawer-kicker">TRIP WRAP-UP</span><h3>This journey looks like it has ended. End this trip now?</h3><p className="drawer-copy">{allTodayItemsComplete ? 'Today’s saved itinerary items are all marked complete.' : 'The saved return date has passed.'} You can keep travelling if plans changed; CocoCrunch will not end it without your confirmation.</p><div className="action-row"><button className="secondary" onClick={() => { setTripEndPromptDismissed(true); setDrawer(null); }}>Not yet</button><button className="primary" onClick={() => { setTripPhase('completed'); updateCurrentTripStatus('completed'); setDrawer(null); }}>End trip &amp; open summary</button></div></section>}
+      {drawer === 'demo' && <DemoModePanel onClose={() => setDrawer(null)} />}
+      {drawer === 'tripSetup' && !tripSetupModeChoice && mode === 'group' && groupSetupStep === 7 && <p className="adapter-note">Members add the missing details. The group confirms destinations in Group Court.</p>}
       {drawer === 'tripSetup' && tripSetupModeChoice && tripSetupReference && <section className="trip-setup-wizard"><span className="drawer-kicker">COPY THIS TRIP · PUBLIC REFERENCE</span><h3>How are you travelling?</h3><p className="drawer-copy">{tripSetupReference.title} supplies a starting vibe and estimated budget. Location is already copied; you can change every prefilled value.</p><div className="onboarding-actions"><button className="primary" onClick={() => startReferenceTrip('solo')}>Solo trip</button><button className="secondary" onClick={() => startReferenceTrip('group')}>Group trip</button></div></section>}
-      {drawer === 'tripSetup' && !tripSetupModeChoice && mode === 'group' && <section className="trip-setup-wizard"><div className="trip-setup-progress"><span>NEW GROUP TRIP</span><b>Step {groupSetupStep} of 6</b><div><i style={{ width: `${groupSetupStep * (100 / 6)}%` }} /></div></div>
-        {groupSetupStep === 1 && <><span className="drawer-kicker">STEP 1 · GROUP LEADER</span><h3>Who is leading this trip?</h3><label className="setup-field"><span>Leader name</span><input className="big-input" value={onboardingName} onChange={event => setOnboardingName(event.target.value)} placeholder="Your name" /></label></>}
-        {groupSetupStep === 2 && <><span className="drawer-kicker">STEP 2 · INVITE FRIENDS</span><h3>Bring the right people in.</h3><div className="group-invite-link"><input readOnly value="https://cococrunch.app/join/group-tokyo-demo" /><button className="secondary" onClick={() => void navigator.clipboard?.writeText('https://cococrunch.app/join/group-tokyo-demo')}>Copy link</button></div><small className="adapter-note">Prototype share link · no invitation is sent outside this local app.</small><label className="setup-field"><span>Add by username</span><input value={groupUsernameSearch} onChange={event => setGroupUsernameSearch(event.target.value)} placeholder="alex, hana, or noah" /></label><button className="secondary" disabled={!/^(alex|hana|noah)$/i.test(groupUsernameSearch.trim())} onClick={() => addGroupMemberFromUsername(groupUsernameSearch.trim())}>Add matching username</button><div className="group-setup-members">{members.map(member => <div key={member.id}><b>{member.name}</b><small>{member.inviteStatus === 'joined' ? 'Joined' : 'Invite pending'} · {member.role}</small>{member.inviteStatus === 'pending' && <button onClick={() => setMembers(current => current.map(item => item.id === member.id ? { ...item, inviteStatus: 'joined' } : item))}>Mark joined (prototype)</button>}</div>)}</div></>}
-        {groupSetupStep === 3 && <><span className="drawer-kicker">STEP 3 · LEADER LOCATION &amp; DATES</span><h3>Set the shared frame, or let the group decide.</h3><div className="trip-setup-methods"><button className={tripSetupLocationMethod === 'manual' ? 'active' : ''} onClick={() => setTripSetupLocationMethod('manual')}>Enter manually</button><button className={tripSetupLocationMethod === 'recommendation' ? 'active' : ''} onClick={() => setTripSetupLocationMethod('recommendation')}>Ask AI</button><button className={tripSetupLocationMethod === 'link' ? 'active' : ''} onClick={() => setTripSetupLocationMethod('link')}>Paste a link</button></div>{tripSetupLocationMethod === 'manual' && <label className="setup-field"><span>Destination</span><input className="big-input" value={destination} onChange={event => setDestination(event.target.value)} placeholder="Tokyo, Kyoto, Osaka…" /></label>}{tripSetupLocationMethod === 'recommendation' && <div className="trip-setup-panel"><label className="setup-field"><span>Describe the group trip</span><textarea value={tripSetupPrompt} onChange={event => setTripSetupPrompt(event.target.value)} /></label><button className="secondary" onClick={runTripSetupRecommendation}>Ask AI for recommendation</button><small className="adapter-note">Prototype catalog recommendation, not live AI data.</small></div>}{tripSetupLocationMethod === 'link' && <div className="trip-setup-panel"><label className="setup-field"><span>External trip link</span><input value={tripSetupLink} onChange={event => setTripSetupLink(event.target.value)} /></label><button className="secondary" onClick={parseTripSetupLink}>Parse link</button><small className="adapter-note">Prototype parsing only; no webpage is fetched.</small></div>}<div className="trip-date-grid"><label className="setup-field"><span>Departure</span><input type="date" value={tripDates?.start ?? ''} onChange={event => setTripDates(current => ({ start: event.target.value, end: current?.end ?? event.target.value }))} /></label><label className="setup-field"><span>Return</span><input type="date" value={tripDates?.end ?? ''} onChange={event => setTripDates(current => ({ start: current?.start ?? event.target.value, end: event.target.value }))} /></label></div><button className="onboarding-skip" onClick={() => { setDestinationLockedByLeader(false); setTripDates(null); setGroupSetupStep(4); }}>Skip location &amp; dates — let members propose</button></>}
-        {groupSetupStep === 4 && <><span className="drawer-kicker">STEP 4 · MEMBER BUDGETS</span><h3>Every joined member sets their own comfort number.</h3><div className="group-member-fields">{members.filter(member => member.inviteStatus === 'joined').map(member => <label key={member.id}><span><b>{member.name}</b><small>{groupMemberBudgets[member.id] ? 'Filled' : 'Pending'}</small></span><input type="number" min="0" value={groupMemberBudgets[member.id] ?? ''} onChange={event => setGroupMemberBudgets(current => ({ ...current, [member.id]: sanitizeAmount(Number(event.target.value)) }))} placeholder="RM" /></label>)}</div></>}
-        {groupSetupStep === 5 && <><span className="drawer-kicker">STEP 5 · MEMBER VIBES</span><h3>Every joined member adds their own trip rhythm.</h3><div className="group-member-fields">{members.filter(member => member.inviteStatus === 'joined').map(member => <label key={member.id}><span><b>{member.name}</b><small>{groupMemberVibes[member.id] ? 'Filled' : 'Pending'}</small></span><input value={groupMemberVibes[member.id] ?? ''} onChange={event => setGroupMemberVibes(current => ({ ...current, [member.id]: event.target.value }))} placeholder="e.g. slow food and cafés" /></label>)}</div></>}
-        {groupSetupStep === 6 && <><span className="drawer-kicker">STEP 6 · SHARED DESTINATION</span><h3>{destinationLockedByLeader ? 'The leader has set the shared frame.' : 'Let the group take destination candidates to Court.'}</h3>{destinationLockedByLeader ? <div className="success-note"><div><b>{destination}</b><small>{tripDates?.start} → {tripDates?.end} · set by the group leader</small></div></div> : <><div className="group-member-fields">{members.filter(member => member.inviteStatus === 'joined').map(member => <label key={member.id}><span><b>{member.name}</b><small>{groupMemberDestinations[member.id] ? 'Candidate added' : 'Pending'}</small></span><input value={groupMemberDestinations[member.id] ?? ''} onChange={event => setGroupMemberDestinations(current => ({ ...current, [member.id]: event.target.value }))} placeholder="Destination candidate" /></label>)}</div><div className="trip-date-grid"><label className="setup-field"><span>Departure</span><input type="date" value={tripDates?.start ?? ''} onChange={event => setTripDates(current => ({ start: event.target.value, end: current?.end ?? event.target.value }))} /></label><label className="setup-field"><span>Return</span><input type="date" value={tripDates?.end ?? ''} onChange={event => setTripDates(current => ({ start: current?.start ?? event.target.value, end: event.target.value }))} /></label></div><button className="secondary" disabled={new Set(Object.values(groupMemberDestinations).filter(Boolean)).size < 2} onClick={openDestinationCourt}>Send candidates to Group Court</button>{courtConfirmed && <div className="success-note"><div><b>Court selected: {courtDecision}</b><small>Destination is now ready for the group trip.</small></div></div>}</>}</>}
-        <div className="trip-setup-actions">{groupSetupStep > 1 && <button className="secondary" onClick={() => setGroupSetupStep(step => Math.max(1, step - 1) as GroupSetupStep)}>Back</button>}{groupSetupStep < 6 ? <button className="primary" disabled={(groupSetupStep === 1 && !onboardingName.trim()) || (groupSetupStep === 2 && !members.some(member => member.inviteStatus === 'joined')) || (groupSetupStep === 4 && members.filter(member => member.inviteStatus === 'joined').some(member => !groupMemberBudgets[member.id])) || (groupSetupStep === 5 && members.filter(member => member.inviteStatus === 'joined').some(member => !groupMemberVibes[member.id]))} onClick={() => { if (groupSetupStep === 3) setDestinationLockedByLeader(Boolean(destination.trim() && tripDates?.start && tripDates?.end)); setGroupSetupStep(step => (step + 1) as GroupSetupStep); }}>Continue <ChevronRight size={15} /></button> : <button className="primary" disabled={!tripDates?.start || !tripDates?.end || (!destinationLockedByLeader && !courtConfirmed)} onClick={() => { setGroupBudgetTotal(Object.values(groupMemberBudgets).reduce((total, value) => total + value, 0)); setReadyConfirmed(true); setTripCreated(true); setDrawer(null); openTrip(); }}>Create group trip &amp; open plan <ChevronRight size={15} /></button>}</div>
+      {drawer === 'tripSetup' && !tripSetupModeChoice && mode === 'group' && <section className="trip-setup-wizard">
+        <div className="trip-setup-progress"><span>NEW GROUP TRIP</span><b>Step {groupSetupStep} of 7</b><div><i style={{ width: `${groupSetupStep * (100 / 7)}%` }} /></div></div>
+        {groupSetupStep === 1 && <><span className="drawer-kicker">STEP 1 · GROUP NAME</span><h3>What should this group be called?</h3><label className="setup-field"><span>Group name</span><input className="big-input" value={groupName} onChange={event => setGroupName(event.target.value)} placeholder="e.g. S" autoFocus /></label></>}
+        {groupSetupStep === 2 && <><span className="drawer-kicker">STEP 2 · INVITE FRIENDS</span><h3>Invite your travel group.</h3><div className="group-invite-card"><span>Share link</span><div><input readOnly value={`https://cococrunch.app/join/${groupName.trim().toLowerCase().replace(/\s+/g, '-') || 'group'}`} /><button className="primary" onClick={() => void navigator.clipboard?.writeText(`https://cococrunch.app/join/${groupName.trim().toLowerCase().replace(/\s+/g, '-') || 'group'}`)}>Copy</button></div></div><label className="setup-field"><span>Member name</span><input value={groupUsernameSearch} onChange={event => setGroupUsernameSearch(event.target.value)} placeholder="Enter a name" /></label><button className="secondary" disabled={!groupUsernameSearch.trim()} onClick={() => addGroupMemberFromUsername(groupUsernameSearch)}>Add member</button><div className="group-setup-members">{members.map(member => <div key={member.id}><b>{member.name}</b><small>Pending</small></div>)}</div></>}
+        {groupSetupStep === 3 && <><span className="drawer-kicker">STEP 3 · DESTINATION</span><h3>Choose a destination, or let the group decide.</h3><div className="trip-setup-methods"><button className={tripSetupLocationMethod === 'manual' ? 'active' : ''} onClick={() => setTripSetupLocationMethod('manual')}>Enter manually</button><button className={tripSetupLocationMethod === 'recommendation' ? 'active' : ''} onClick={() => setTripSetupLocationMethod('recommendation')}>Get ideas</button><button className={tripSetupLocationMethod === 'link' ? 'active' : ''} onClick={() => setTripSetupLocationMethod('link')}>Paste a link</button></div>{tripSetupLocationMethod === 'manual' && <label className="setup-field"><span>Destination</span><input className="big-input" value={destination} onChange={event => setDestination(event.target.value)} placeholder="Tokyo, Kyoto, Osaka…" /></label>}{tripSetupLocationMethod === 'recommendation' && <div className="trip-setup-panel"><label className="setup-field"><span>Describe the group trip</span><textarea value={tripSetupPrompt} onChange={event => setTripSetupPrompt(event.target.value)} /></label><button className="secondary" onClick={runTripSetupRecommendation}>See suggestions</button></div>}{tripSetupLocationMethod === 'link' && <div className="trip-setup-panel"><label className="setup-field"><span>External trip link</span><input value={tripSetupLink} onChange={event => setTripSetupLink(event.target.value)} /></label><button className="secondary" onClick={parseTripSetupLink}>Review link</button></div>}<button className="onboarding-skip" onClick={() => { setDestination(''); setDestinationLockedByLeader(false); setGroupSetupStep(4); }}>Skip destination</button></>}
+        {groupSetupStep === 4 && <><span className="drawer-kicker">STEP 4 · DATES</span><h3>When are you travelling?</h3><div className="trip-date-grid"><label className="setup-field"><span>Departure</span><input type="date" value={tripDates?.start ?? ''} onChange={event => setTripDates(current => ({ start: event.target.value, end: current?.end ?? event.target.value }))} /></label><label className="setup-field"><span>Return</span><input type="date" value={tripDates?.end ?? ''} onChange={event => setTripDates(current => ({ start: current?.start ?? event.target.value, end: event.target.value }))} /></label></div><button className="onboarding-skip" onClick={() => { setTripDates(null); setDatesLockedByLeader(false); setGroupSetupStep(5); }}>Skip dates</button></>}
+        {groupSetupStep === 5 && <><span className="drawer-kicker">STEP 5 · YOUR BUDGET</span><h3>What feels comfortable for you?</h3><label className="budget-total-input"><span>Your total (RM)</span><input type="number" min="0" value={groupMemberBudgets[onboardingName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'you'] ?? ''} onChange={event => setGroupMemberBudgets(current => ({ ...current, [onboardingName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'you']: sanitizeAmount(Number(event.target.value)) }))} /></label></>}
+        {groupSetupStep === 6 && <><span className="drawer-kicker">STEP 6 · YOUR TRIP VIBES</span><h3>Shape the trip around you.</h3><div className="trip-vibe-ratings"><div className="trip-vibe-rating"><div><span>Relaxed</span><strong>Pace</strong><span>Full days</span></div><input type="range" min="0" max="2" step="1" value={groupMemberVibes[onboardingName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'you']?.includes('Pace: Full days') ? 2 : groupMemberVibes[onboardingName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'you']?.includes('Pace: Balanced') ? 1 : 0} onChange={event => setGroupVibeFacet('Pace', ['Relaxed', 'Balanced', 'Full days'][Number(event.target.value)])} /></div><div className="trip-vibe-rating"><div><span>Foodie</span><strong>Focus</strong><span>Local living</span></div><input type="range" min="0" max="2" step="1" value={groupMemberVibes[onboardingName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'you']?.includes('Focus: Local living') ? 2 : groupMemberVibes[onboardingName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'you']?.includes('Focus: A little of both') ? 1 : 0} onChange={event => setGroupVibeFacet('Focus', ['Foodie', 'A little of both', 'Local living'][Number(event.target.value)])} /></div><div className="trip-vibe-rating"><div><span>Planned</span><strong>Style</strong><span>Go with the flow</span></div><input type="range" min="0" max="2" step="1" value={groupMemberVibes[onboardingName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'you']?.includes('Style: Go with the flow') ? 2 : groupMemberVibes[onboardingName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'you']?.includes('Style: Flexible') ? 1 : 0} onChange={event => setGroupVibeFacet('Style', ['Planned', 'Flexible', 'Go with the flow'][Number(event.target.value)])} /></div><div className="trip-vibe-rating"><div><span>Slow mornings</span><strong>Energy</strong><span>Night out</span></div><input type="range" min="0" max="2" step="1" value={groupMemberVibes[onboardingName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'you']?.includes('Energy: Night out') ? 2 : groupMemberVibes[onboardingName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'you']?.includes('Energy: Mixed') ? 1 : 0} onChange={event => setGroupVibeFacet('Energy', ['Slow mornings', 'Mixed', 'Night out'][Number(event.target.value)])} /></div></div></>}
+        {groupSetupStep === 7 && <><span className="drawer-kicker">STEP 7 · GROUP DECISIONS</span><h3>{!destinationLockedByLeader || !datesLockedByLeader ? 'Share your missing details.' : 'Your group is ready.'}</h3>{!destinationLockedByLeader && <><label className="setup-field"><span>Your destination</span><input value={groupMemberDestinations[onboardingName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'you'] ?? ''} onChange={event => setGroupMemberDestinations(current => ({ ...current, [onboardingName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'you']: event.target.value }))} placeholder="Your destination idea" /></label><small className="adapter-note">Your group will see this when everyone has responded.</small></>}{!datesLockedByLeader && <div className="trip-date-grid"><label className="setup-field"><span>Departure</span><input type="date" value={tripDates?.start ?? ''} onChange={event => setTripDates(current => ({ start: event.target.value, end: current?.end ?? event.target.value }))} /></label><label className="setup-field"><span>Return</span><input type="date" value={tripDates?.end ?? ''} onChange={event => setTripDates(current => ({ start: current?.start ?? event.target.value, end: event.target.value }))} /></label></div>}</>}
+        <div className="trip-setup-actions">{groupSetupStep > 1 && <button className="secondary" onClick={() => setGroupSetupStep(step => Math.max(1, step - 1) as GroupSetupStep)}>Back</button>}{groupSetupStep < 7 ? <button className="primary" disabled={(groupSetupStep === 1 && !groupName.trim()) || (groupSetupStep === 5 && !groupMemberBudgets[onboardingName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'you']) || (groupSetupStep === 6 && !groupMemberVibes[onboardingName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'you']?.length)} onClick={() => { if (groupSetupStep === 3) setDestinationLockedByLeader(Boolean(destination.trim())); if (groupSetupStep === 4) setDatesLockedByLeader(Boolean(tripDates?.start && tripDates?.end)); setGroupSetupStep(step => (step + 1) as GroupSetupStep); }}>Continue <ChevronRight size={15} /></button> : <button className="primary" disabled={!tripDates?.start || !tripDates?.end || (!destinationLockedByLeader && !groupMemberDestinations[onboardingName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'you'])} onClick={() => { setGroupBudgetTotal(groupMemberBudgets[onboardingName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'you'] ?? 0); savePlanningTrip(); }}>Create group trip &amp; open plan <ChevronRight size={15} /></button>}</div>
       </section>}
       {drawer === 'tripSetup' && !tripSetupModeChoice && mode === 'solo' && <section className="trip-setup-wizard"><div className="trip-setup-progress"><span>NEW SOLO TRIP</span><b>Step {tripSetupStep} of 5</b><div><i style={{ width: `${tripSetupStep * 20}%` }} /></div></div>
         {tripSetupReference && <div className="adapter-note"><b>Starting from {tripSetupReference.title}</b><small>Its vibe and estimated budget are prefilled. You can change both.</small></div>}
-        {tripSetupStep === 1 && <><span className="drawer-kicker">STEP 1 · TRAVELLER</span><h3>Who is this trip for?</h3><label className="setup-field"><span>Your name</span><input className="big-input" value={onboardingName} onChange={event => setOnboardingName(event.target.value)} placeholder="Your name" autoFocus /></label></>}
+        {tripSetupStep === 1 && <><span className="drawer-kicker">STEP 1 · TRIP NAME</span><h3>Name this trip.</h3><label className="setup-field"><span>Trip name</span><input className="big-input" value={groupName} onChange={event => setGroupName(event.target.value)} placeholder="e.g. S" autoFocus /></label></>}
         {tripSetupStep === 2 && <><span className="drawer-kicker">STEP 2 · LOCATION</span><h3>Where should this trip begin?</h3><div className="trip-setup-methods"><button className={tripSetupLocationMethod === 'manual' ? 'active' : ''} onClick={() => setTripSetupLocationMethod('manual')}>Enter manually</button><button className={tripSetupLocationMethod === 'recommendation' ? 'active' : ''} onClick={() => setTripSetupLocationMethod('recommendation')}>Ask AI</button><button className={tripSetupLocationMethod === 'link' ? 'active' : ''} onClick={() => setTripSetupLocationMethod('link')}>Paste a link</button></div>
           {tripSetupLocationMethod === 'manual' && <label className="setup-field"><span>Destination</span><input className="big-input" value={destination} onChange={event => { setDestination(event.target.value); setDestinationSearched(false); }} placeholder="Tokyo, Kyoto, Osaka…" /></label>}
-          {tripSetupLocationMethod === 'recommendation' && <div className="trip-setup-panel"><label className="setup-field"><span>Describe your ideal trip</span><textarea value={tripSetupPrompt} onChange={event => setTripSetupPrompt(event.target.value)} placeholder="e.g. slow food, museums, and rainy-day cafés" /></label><button className="secondary" onClick={runTripSetupRecommendation}>Ask AI for recommendation</button><small className="adapter-note">Prototype recommendation · uses the local Tingo-aware catalog, not live AI or travel data.</small>{recommendations.slice(0, 3).map(place => <button className="trip-setup-recommendation" key={place.id} onClick={() => setDestination(place.name.includes('Kyoto') ? 'Kyoto' : place.name.includes('Osaka') ? 'Osaka' : 'Tokyo')}><b>{place.name}</b><small>{place.why}</small></button>)}<div className="trip-setup-reference-list"><span>PUBLIC TRIP REFERENCES</span>{communityTrips.slice(0, 2).map(trip => <CommunityTripCard key={trip.id} trip={trip} onToggleSave={() => undefined} onViewPlan={copyExploreTrip} onCopyTrip={copyExploreTrip} />)}</div></div>}
-          {tripSetupLocationMethod === 'link' && <div className="trip-setup-panel"><label className="setup-field"><span>External trip link</span><input className="big-input" value={tripSetupLink} onChange={event => { setTripSetupLink(event.target.value); setTripSetupLinkStatus('idle'); }} placeholder="https://…" /></label><button className="secondary" disabled={!tripSetupLink.trim() || tripSetupLinkStatus === 'parsing'} onClick={parseTripSetupLink}>{tripSetupLinkStatus === 'parsing' ? 'AI is parsing…' : 'Parse link'}</button><small className="adapter-note">Prototype parsing only — CocoCrunch does not fetch or read the external webpage.</small>{tripSetupLinkStatus === 'ready' && <div className="success-note"><div><b>Suggested destination: {destination}</b><small>Confirm it below or edit it manually.</small></div></div>}</div>}</>}
+          {tripSetupLocationMethod === 'recommendation' && <div className="trip-setup-panel"><label className="setup-field"><span>Describe your ideal trip</span><textarea value={tripSetupPrompt} onChange={event => { setTripSetupPrompt(event.target.value); setTripSetupRecommendationsVisible(false); }} placeholder="e.g. slow food, museums, and rainy-day cafés" /></label><button className="secondary" disabled={!tripSetupPrompt.trim()} onClick={runTripSetupRecommendation}>Ask Coco</button>{tripSetupRecommendationsVisible && <>{recommendations.slice(0, 3).map(place => <button className="trip-setup-recommendation" key={place.id} onClick={() => setDestination(place.name.includes('Kyoto') ? 'Kyoto' : place.name.includes('Osaka') ? 'Osaka' : 'Tokyo')}><b>{place.name}</b><small>{place.why}</small></button>)}<div className="trip-setup-reference-list"><span>PUBLIC TRIP REFERENCES</span>{communityTrips.slice(0, 2).map(trip => <CommunityTripCard key={trip.id} trip={trip} onToggleSave={() => undefined} onViewPlan={copyExploreTrip} onCopyTrip={copyExploreTrip} />)}</div></>}</div>}
+          {tripSetupLocationMethod === 'link' && <div className="trip-setup-panel"><label className="setup-field"><span>External trip link</span><input className="big-input" value={tripSetupLink} onChange={event => { setTripSetupLink(event.target.value); setTripSetupLinkStatus('idle'); }} placeholder="https://…" /></label><button className="secondary" disabled={!tripSetupLink.trim() || tripSetupLinkStatus === 'parsing'} onClick={parseTripSetupLink}>{tripSetupLinkStatus === 'parsing' ? 'Checking link…' : 'Review link'}</button>{tripSetupLinkStatus === 'ready' && <div className="success-note"><div><b>Suggested destination: {destination}</b><small>Confirm it below or edit it manually.</small></div></div>}</div>}</>}
         {tripSetupStep === 3 && <><span className="drawer-kicker">STEP 3 · BUDGET</span><h3>What feels comfortable for this trip?</h3><label className="budget-total-input"><span>Solo total (RM)</span><input type="number" min="0" value={soloBudgetTotal} onChange={event => setSoloBudgetTotal(sanitizeAmount(Number(event.target.value)))} /></label><div className="adapter-note"><b>Budget stays editable.</b><small>This is your starting total; category planning happens in the Plan workspace.</small></div></>}
-        {tripSetupStep === 4 && <><span className="drawer-kicker">STEP 4 · TRIP VIBE</span><h3>How much room should the days have?</h3><label className="trip-vibe-slider"><span>Relaxed</span><input type="range" min="0" max="100" value={tripInputs.tripVibe.includes('Packed') ? 80 : tripInputs.tripVibe.includes('Balanced') ? 50 : 20} onChange={event => { const value = Number(event.target.value); setTripInputField('tripVibe', value < 34 ? 'Relaxed and spacious' : value > 66 ? 'Packed with highlights' : 'Balanced days with breathing room'); }} /><span>Packed</span></label><div className="constraint-row">{['Slow food + cafés', 'Culture + museums', 'Nature + movement', 'Night markets + city lights'].map(vibe => <button key={vibe} className={tripInputs.tripVibe === vibe ? 'active' : ''} onClick={() => setTripInputField('tripVibe', vibe)}>{vibe}</button>)}</div><div className="adapter-note"><small>Current vibe: {tripInputs.tripVibe || 'Choose a starting rhythm'}</small></div></>}
+        {tripSetupStep === 4 && <><span className="drawer-kicker">STEP 4 · TRIP VIBE</span><h3>Shape the trip around you.</h3><div className="trip-vibe-ratings"><div className="trip-vibe-rating"><div><span>Relaxed</span><strong>Pace</strong><span>Full days</span></div><input aria-label="Pace" type="range" min="0" max="2" step="1" value={tripInputs.tripVibe.includes('Pace: Full days') ? 2 : tripInputs.tripVibe.includes('Pace: Balanced') ? 1 : 0} onChange={event => setTripVibeFacet('Pace', ['Relaxed', 'Balanced', 'Full days'][Number(event.target.value)])} /></div><div className="trip-vibe-rating"><div><span>Foodie</span><strong>Focus</strong><span>Local living</span></div><input aria-label="Focus" type="range" min="0" max="2" step="1" value={tripInputs.tripVibe.includes('Focus: Local living') ? 2 : tripInputs.tripVibe.includes('Focus: A little of both') ? 1 : 0} onChange={event => setTripVibeFacet('Focus', ['Foodie', 'A little of both', 'Local living'][Number(event.target.value)])} /></div><div className="trip-vibe-rating"><div><span>Planned</span><strong>Style</strong><span>Go with the flow</span></div><input aria-label="Style" type="range" min="0" max="2" step="1" value={tripInputs.tripVibe.includes('Style: Go with the flow') ? 2 : tripInputs.tripVibe.includes('Style: Flexible') ? 1 : 0} onChange={event => setTripVibeFacet('Style', ['Planned', 'Flexible', 'Go with the flow'][Number(event.target.value)])} /></div><div className="trip-vibe-rating"><div><span>Slow mornings</span><strong>Energy</strong><span>Night out</span></div><input aria-label="Energy" type="range" min="0" max="2" step="1" value={tripInputs.tripVibe.includes('Energy: Night out') ? 2 : tripInputs.tripVibe.includes('Energy: Mixed') ? 1 : 0} onChange={event => setTripVibeFacet('Energy', ['Slow mornings', 'Mixed', 'Night out'][Number(event.target.value)])} /></div></div></>}
         {tripSetupStep === 5 && <><span className="drawer-kicker">STEP 5 · DATES</span><h3>When are you going?</h3><div className="trip-date-grid"><label className="setup-field"><span>Departure</span><input type="date" value={tripDates?.start ?? ''} onChange={event => setTripDates(current => ({ start: event.target.value, end: current?.end ?? event.target.value }))} /></label><label className="setup-field"><span>Return</span><input type="date" min={tripDates?.start} value={tripDates?.end ?? ''} onChange={event => setTripDates(current => ({ start: current?.start ?? event.target.value, end: event.target.value }))} /></label></div><small className="adapter-note">Choose dates from the calendar fields. You can revise them later.</small></>}
-        <div className="trip-setup-actions">{tripSetupStep > 1 && <button className="secondary" onClick={() => setTripSetupStep(step => Math.max(1, step - 1) as TripSetupStep)}>Back</button>}{tripSetupStep < 5 ? <button className="primary" disabled={(tripSetupStep === 1 && !onboardingName.trim()) || (tripSetupStep === 2 && !destination.trim())} onClick={() => setTripSetupStep(step => (step + 1) as TripSetupStep)}>Continue <ChevronRight size={15} /></button> : <button className="primary" disabled={!tripDates?.start || !tripDates?.end} onClick={() => { setReadyConfirmed(true); setTripCreated(true); setDrawer(null); openTrip(); }}>Create trip &amp; open plan <ChevronRight size={15} /></button>}</div>
+        <div className="trip-setup-actions">{tripSetupStep > 1 && <button className="secondary" onClick={() => setTripSetupStep(step => Math.max(1, step - 1) as TripSetupStep)}>Back</button>}{tripSetupStep < 5 ? <button className="primary" disabled={(tripSetupStep === 1 && !groupName.trim()) || (tripSetupStep === 2 && !destination.trim())} onClick={() => setTripSetupStep(step => (step + 1) as TripSetupStep)}>Continue <ChevronRight size={15} /></button> : <button className="primary" disabled={!tripDates?.start || !tripDates?.end} onClick={savePlanningTrip}>Create trip &amp; open plan <ChevronRight size={15} /></button>}</div>
       </section>}
-      {drawer === 'group' && <><span className="drawer-kicker">GROUP DNA</span><h3>{groupDNA.conflicts.length ? `${groupDNA.conflicts.length} conflict${groupDNA.conflicts.length === 1 ? '' : 's'} stay visible until the group decides.` : 'Shared signals are explicit, not averaged from Mei.'}</h3><div className="dna-grid"><div><span>Trip Vibe</span><b>{tripInputs.tripVibe}</b></div><div><span>Shared priority</span><b>{groupDNA.sharedPriorities[0]?.label ?? 'None yet'}</b></div><div><span>Budget range</span><b>{groupDNA.budgetRange.max ? `RM${groupDNA.budgetRange.min}–${groupDNA.budgetRange.max}` : 'No ranges yet'}</b></div><div><span>Budget sensitivity</span><b>{groupDNA.budgetSensitivity}</b></div></div><div className="member-list">{members.map(member => <div key={member.id}><div><b>{member.name}</b><small>{member.inviteStatus === 'pending' ? 'Invite pending' : member.role} · {member.pace} pace · {memberPreferenceProfiles[member.id]?.tingoAssessed ? 'Tingo assessed' : 'Tingo not assessed'}</small></div><button onClick={() => setMembers(current => current.map(item => item.id === member.id ? { ...item, role: item.role === 'Trip lead' ? 'Food scout' : item.role === 'Food scout' ? 'Memory keeper' : 'Trip lead' } : item))}>Rotate role</button></div>)}</div><div className="adapter-note"><b>Coco responsibility preview</b>{responsibilitySuggestions.map(item => <small key={item.memberId}><strong>{item.source === 'member-tingo' ? 'Tingo-assessed' : 'Fallback'} · </strong>{item.memberName}: {item.suggestedRole} — {item.reason}</small>)}<button className="secondary" onClick={() => setMembers(current => applyResponsibilitySuggestions(current, responsibilitySuggestions))}>Confirm & apply suggested roles</button></div><button className="secondary" onClick={inviteMember}>+ Invite a traveller</button><div className="conflict-mini"><span>GROUP DNA SIGNALS</span>{groupDNA.conflicts.length ? groupDNA.conflicts.map(conflict => <div key={`${conflict.kind}-${conflict.label}`}><b>{conflict.label}</b><small>{conflict.reason}</small></div>) : <b>No strong conflict detected from explicit member inputs.</b>}<small>{groupDNA.evidence.join(' ')}</small><small>{tingoPlanGuidance.courtGuidance} AI can explain options, but cannot silently choose for the group.</small></div><label className="setup-field"><span>Mark another uncertainty</span><input className="big-input" value={draftConflict} onChange={e => setDraftConflict(e.target.value)} placeholder="e.g. Shinjuku hotel vs Asakusa hotel" /></label><button className="secondary" onClick={markConflict}>{conflictMarked ? 'Send another conflict to Court' : 'Mark conflict & open Court'}</button><div className="planner-turn"><span>Editing turn</span><b>{plannerTurn}</b><button onClick={() => setPlannerTurn(plannerTurn === 'Mei' ? 'JH' : plannerTurn === 'JH' ? 'Zi Shan' : plannerTurn === 'Zi Shan' ? 'Alex' : 'Mei')}>Pass turn</button></div><button className="secondary" onClick={() => setDrawer('reminders')}>Reminders & human commitments</button></>}
+      {drawer === 'group' && <><span className="drawer-kicker">GROUP DNA</span><h3>{groupDNA.conflicts.length ? `${groupDNA.conflicts.length} conflict${groupDNA.conflicts.length === 1 ? '' : 's'} stay visible until the group decides.` : 'Shared signals are explicit, not averaged from Priya.'}</h3><div className="dna-grid"><div><span>Trip Vibe</span><b>{tripInputs.tripVibe}</b></div><div><span>Shared priority</span><b>{groupDNA.sharedPriorities[0]?.label ?? 'None yet'}</b></div><div><span>Budget range</span><b>{groupDNA.budgetRange.max ? `RM${groupDNA.budgetRange.min}–${groupDNA.budgetRange.max}` : 'No ranges yet'}</b></div><div><span>Budget sensitivity</span><b>{groupDNA.budgetSensitivity}</b></div></div><div className="member-list">{members.map(member => <div key={member.id}><div><b>{member.name}</b><small>{member.inviteStatus === 'pending' ? 'Invite pending' : member.role} · {member.pace} pace · {memberPreferenceProfiles[member.id]?.tingoAssessed ? 'Tingo assessed' : 'Tingo not assessed'}</small></div><button onClick={() => setMembers(current => current.map(item => item.id === member.id ? { ...item, role: item.role === 'Trip lead' ? 'Food scout' : item.role === 'Food scout' ? 'Memory keeper' : 'Trip lead' } : item))}>Rotate role</button></div>)}</div><div className="adapter-note"><b>Coco responsibility preview</b>{responsibilitySuggestions.map(item => <small key={item.memberId}><strong>{item.source === 'member-tingo' ? 'Tingo-assessed' : 'Fallback'} · </strong>{item.memberName}: {item.suggestedRole} — {item.reason}</small>)}<button className="secondary" onClick={() => setMembers(current => applyResponsibilitySuggestions(current, responsibilitySuggestions))}>Confirm & apply suggested roles</button></div><button className="secondary" onClick={inviteMember}>+ Invite a traveller</button><div className="conflict-mini"><span>GROUP DNA SIGNALS</span>{groupDNA.conflicts.length ? groupDNA.conflicts.map(conflict => <div key={`${conflict.kind}-${conflict.label}`}><b>{conflict.label}</b><small>{conflict.reason}</small></div>) : <b>No strong conflict detected from explicit member inputs.</b>}<small>{groupDNA.evidence.join(' ')}</small><small>{tingoPlanGuidance.courtGuidance} AI can explain options, but cannot silently choose for the group.</small></div><label className="setup-field"><span>Mark another uncertainty</span><input className="big-input" value={draftConflict} onChange={e => setDraftConflict(e.target.value)} placeholder="e.g. Shinjuku hotel vs Asakusa hotel" /></label><button className="secondary" onClick={markConflict}>{conflictMarked ? 'Send another conflict to Court' : 'Mark conflict & open Court'}</button><div className="planner-turn"><span>Editing turn</span><b>{plannerTurn}</b><button onClick={() => setPlannerTurn(plannerTurn === 'Priya' ? 'Sam' : plannerTurn === 'Sam' ? 'Riley' : plannerTurn === 'Riley' ? 'Alex' : 'Priya')}>Pass turn</button></div><button className="secondary" onClick={() => setDrawer('reminders')}>Reminders & human commitments</button></>}
       {drawer === 'backup' && <><span className="drawer-kicker">BACKUP PLAN POOL</span><h3>Only viable, Deal-Breaker-safe alternatives are repair candidates.</h3>{backupPool.map(item => <div className={`backup-row ${item.viable && item.dealBreakerSafe ? '' : 'off'}`} key={item.id}><b>{item.name}</b><small>{item.support} supporters · {item.costDelta >= 0 ? '+' : ''}RM{item.costDelta} · {item.timeDeltaMinutes >= 0 ? '+' : ''}{item.timeDeltaMinutes} min · {item.viable && item.dealBreakerSafe ? 'viable' : 'blocked'}</small><small>{item.source} · {item.lossReason}</small></div>)}{backupPool.length === 0 && <div className="adapter-note">No Backup candidate has been retained yet. A confirmed Court loser appears here only when it is viable and Deal-Breaker-safe.</div>}{ghostWishes.filter(wish => wish.status === 'revived').map(wish => <div className="backup-row" key={`ghost-${wish.id}`}><b>👻 {wish.name}</b><small>Revived from Ghost Wish · preserved with original reason</small></div>)}</>}
-      {drawer === 'budget' && <><span className="drawer-kicker">TRIP BUDGET</span><h3>Editable plan and actual category spend.</h3><label className="budget-total-input"><span>{mode === 'group' ? 'Group' : 'Solo'} total</span><input type="number" min="0" value={budgetTotal} onChange={e => mode === 'group' ? setGroupBudgetTotal(sanitizeAmount(Number(e.target.value))) : setSoloBudgetTotal(sanitizeAmount(Number(e.target.value)))} /></label><div className="budget-big"><b>RM {remaining}</b><span>remaining after RM {spent} actual spend</span></div><div className="surprise-budget"><span>EXTRA BUDGET</span><b>RM {mode === 'group' ? 120 : 60}</b><small>Held outside the base plan for a real little surprise.</small></div><div className="budget-lines">{(['stay', 'food', 'transport', 'activities'] as BudgetCategory[]).map(category => <label key={category}><span>{category === 'transport' ? 'Transit' : category[0].toUpperCase() + category.slice(1)}</span><input type="number" min="0" value={budgetPlan[category]} onChange={e => changeBudgetCategory(category, Number(e.target.value))} /><small>Planned</small><input type="number" min="0" aria-label={`${category} actual spend`} value={budgetActuals[category]} onChange={e => changeBudgetActual(category, Number(e.target.value))} /><small>Actual · persisted for this prototype trip</small></label>)}</div><div className={`budget-balance ${planned > budgetTotal ? 'over' : ''}`}><span>Planned</span><b>RM {planned} / RM {budgetTotal}</b><small>{planned > budgetTotal ? `Over plan by RM ${planned - budgetTotal}` : `RM ${budgetTotal - planned} unallocated buffer`}</small></div><button className="receipt-button" onClick={printReceipt}><ReceiptText size={18} />{receiptPrinted ? 'Print receipt again' : 'Print split-bill receipt'}</button></>}
+      {drawer === 'budget' && <BudgetDrawer mode={mode} total={budgetTotal} planned={planned} spent={spent} remaining={remaining} plan={budgetPlan} actuals={budgetActuals} days={Math.max(1, Math.ceil(visibleTripPlan.items.length / 2))} onTotalChange={value => mode === 'group' ? setGroupBudgetTotal(sanitizeAmount(value)) : setSoloBudgetTotal(sanitizeAmount(value))} onPlanChange={changeBudgetCategory} onActualChange={changeBudgetActual} onPrintReceipt={printReceipt} receiptPrinted={receiptPrinted} />}
       {drawer === 'compare' && <><span className="drawer-kicker">COMPARE · HONEST PROTOTYPE</span><h3>Shortlist the option that fits the trip, not just the price.</h3><p className="drawer-copy">These are deterministic demo prices. No live supplier, inventory, or external checkout is connected.</p>{comparisonOptions.map(option => <article className="compare-option" key={option.id}><div><span>{option.category.toUpperCase()} · {option.fit}% fit</span><b>{option.label}</b><small>{option.why}</small></div><strong>RM {option.price}<em>{option.deal}</em></strong><small className={option.price <= remaining ? 'within-budget' : 'over-budget'}>{option.price <= remaining ? 'Within current remaining budget' : 'Over current remaining budget'}</small><button className="secondary" onClick={() => setDrawer(null)}>Preview in plan</button></article>)}</>}
-      {drawer === 'feasibility' && <><span className="drawer-kicker">PLAN HEALTH · FEASIBILITY</span><h3>Check the joins before the trip does.</h3><div className="health-check-list">{checkFeasibility().map(issue => <div className={issue.severity === 'block' ? 'block' : ''} key={issue.id}><span>{issue.resolved ? '✓' : '!'}</span><div><b>{issue.label}</b><small>{issue.detail}</small></div></div>)}</div><div className="adapter-note"><b>One watch item remains.</b><small>The local adapter can flag opening hours and buffer risks; it cannot verify live operating data.</small></div><button className="primary" onClick={() => { setReadyConfirmed(current => transitionReadyConfirmation(current, 'confirm-ready')); setDrawer(null); }}>Keep this reviewed plan</button></>}
+{drawer === 'feasibility' && <><h3>Plan health</h3><div className="health-check-list">{checkFeasibility().filter(issue => !issue.resolved).map(issue => <div className={issue.severity === 'block' ? 'block' : ''} key={issue.id}><span>!</span><div><b>{issue.label}</b><small>{issue.detail}</small></div></div>)}</div><button className="primary" onClick={() => { setReadyConfirmed(current => transitionReadyConfirmation(current, 'confirm-ready')); updateCurrentTripStatus('active'); setDrawer(null); }}>Confirm plan</button></>}
       {drawer === 'reminders' && <><span className="drawer-kicker">REMINDERS · PEOPLE COUNT TOO</span><h3>Important dates and human plans belong on the timeline.</h3><div className="reminder-list">{reminders.map(reminder => <button key={reminder.id} className={reminder.done ? 'done' : ''} onClick={() => setReminders(current => current.map(item => item.id === reminder.id ? { ...item, done: !item.done } : item))}><span>{reminder.done ? '✓' : '○'}</span><div><b>{reminder.label}</b><small>{reminder.date} · {reminder.kind}</small></div></button>)}</div><button className="secondary" onClick={() => setDrawer('commitments')}>Open human commitments & reunion</button></>}
       {drawer === 'commitments' && <><span className="drawer-kicker">HUMAN COMMITMENTS · REUNION</span><h3>Make the invisible parts of a day schedulable.</h3><div className="commitment-list">{commitments.map(item => <div key={item.id}><div><b>{item.label}</b><small>{item.time} · {item.owner} · {item.fixed ? 'fixed' : 'flexible'}</small></div><span>{item.fixed ? 'ANCHOR' : 'FLOATING'}</span></div>)}</div><div className="reunion-form"><span>REUNION AGREEMENT</span><label>Time<input value={reunion.time} onChange={e => setReunion(current => ({ ...current, time: e.target.value }))} /></label><label>Place<input value={reunion.place} onChange={e => setReunion(current => ({ ...current, place: e.target.value }))} /></label><label>Tolerance<input type="number" min="0" max="60" value={reunion.tolerance} onChange={e => setReunion(current => ({ ...current, tolerance: sanitizeAmount(Number(e.target.value)) }))} /></label></div><button className="primary" onClick={() => setDrawer(null)}>Save agreement</button></>}
       {drawer === 'safety' && <SafetyToolkit destination={destination} />}

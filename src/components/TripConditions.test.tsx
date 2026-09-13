@@ -11,7 +11,7 @@ describe('TripConditions presentation', () => {
     expect(html).toContain('TRIP CONDITIONS');
     expect(html).toContain('Today’s conditions are clear.');
     expect(html).toContain('No reported changes to Today’s plan.');
-    expect(html).toContain('No live weather or traffic provider is connected.');
+    expect(html).toContain('Weather and traffic updates will appear here.');
     expect(html).toContain('Manual check-in remains available.');
     expect(html).toContain('Simulate rain');
     expect(html).toContain('Simulate late transit');
@@ -24,7 +24,7 @@ describe('TripConditions presentation', () => {
     );
 
     expect(html).toContain('Something changed today.');
-    expect(html).toContain('Demo condition · not live weather');
+    expect(html).toContain('Weather update available to review');
     expect(html).toContain('Harbor walk');
     expect(html).toContain('Review the safest adjustment below.');
     expect(html).not.toContain('Simulate rain');

@@ -53,10 +53,10 @@ export function LocationPrivacyPanel({
   return <section className="sharing-panel location-privacy-panel">
     <span className="drawer-kicker">LOCATION PRIVACY</span>
     <h3>What location may CocoCrunch use?</h3>
-    <p className="drawer-copy">Manual check-in remains available without location permission. This prototype has no live GPS, route, traffic, or provider feed.</p>
+    <p className="drawer-copy">Manual check-in remains available without location permission.</p>
     <div className="privacy-grid"><button className={privacy === 'status' ? 'active' : ''} onClick={() => onPrivacyChange('status')}>Status only</button><button className={privacy === 'area' ? 'active' : ''} onClick={() => onPrivacyChange('area')}>Approx. area</button><button className={`unavailable ${privacy === 'exact' ? 'saved' : ''}`} disabled>Exact location · unavailable here</button></div>
-    <div className="location-provider-note"><b>Provider boundary</b><small>Exact location and continuous live updates are unavailable in this local prototype. Nothing is enabled from Family Window.</small></div>
-    <div className="toggle-row location-unavailable"><span><b>Continuous location</b><small>{continuousLocation ? 'Saved consent exists, but no provider data is being read here.' : 'Unavailable in this prototype · off by default.'}</small></span><span className="status-pill">Unavailable</span></div>
+    <div className="location-provider-note"><b>Location access</b><small>Exact location and continuous updates are currently unavailable. Nothing is enabled from Family Window.</small></div>
+    <div className="toggle-row location-unavailable"><span><b>Continuous location</b><small>{continuousLocation ? 'Saved consent exists, but location data is not being read here.' : 'Unavailable · off by default.'}</small></span><span className="status-pill">Unavailable</span></div>
     <div className="family-location-boundary"><div><b>Family Window</b><small>Trip and safety sharing is managed separately.</small></div><button className="secondary" onClick={onOpenFamily}>Open Family Window</button></div>
   </section>;
 }

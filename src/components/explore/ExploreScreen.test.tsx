@@ -324,7 +324,7 @@ describe('ExploreScreen (Community Trip Explore)', () => {
     expect(html).toContain('Why it fits:');
     expect(html).toContain('Food-first anchor with an easy morning slot.');
     expect(html).toContain('Suggest to group');
-    expect(html).toContain('Local prototype catalog');
+    expect(html).toContain('Saved place catalog');
     expect(html).not.toContain('Suggestion creates a candidate; official group itinerary updates only upon consensus.');
   });
 

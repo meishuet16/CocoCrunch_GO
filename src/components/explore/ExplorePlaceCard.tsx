@@ -116,7 +116,7 @@ export const ExplorePlaceCard: React.FC<ExplorePlaceCardProps> = ({
           <Info size={11} />
           <span>
             {place.source === 'prototype-catalog'
-              ? 'Local prototype catalog'
+              ? 'Saved place catalog'
               : 'Fallback example · not live destination data'}
           </span>
         </span>

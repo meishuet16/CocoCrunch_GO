@@ -32,21 +32,21 @@ describe('Group Travel DNA', () => {
     ]));
   });
 
-  it('does not project Mei Tingo assessment onto unassessed members', () => {
+  it('does not project Priya Tingo assessment onto unassessed members', () => {
     const dna = deriveGroupDNA([
-      { id: 'mei', name: 'Mei', tingoAssessed: true, preferences: [{ id: 'm', label: 'Food', kind: 'preference', strength: 'strong', source: 'tingo' }] },
-      { id: 'jh', name: 'JH', tingoAssessed: false, preferences: [] },
+      { id: 'priya', name: 'Priya', tingoAssessed: true, preferences: [{ id: 'p', label: 'Food', kind: 'preference', strength: 'strong', source: 'tingo' }] },
+      { id: 'sam', name: 'Sam', tingoAssessed: false, preferences: [] },
     ]);
 
     expect(dna.sharedPriorities).toHaveLength(0);
-    expect(dna.evidence.join(' ')).toContain('JH');
+    expect(dna.evidence.join(' ')).toContain('Sam');
     expect(dna.evidence.join(' ')).toContain('not assessed');
   });
 
   it('does not carry Group DNA conflicts into the active Solo operational state', () => {
     const groupDNA = deriveGroupDNA([
-      { id: 'mei', name: 'Mei', tingoAssessed: true, preferences: [{ id: 'm', label: 'Night market', kind: 'must-go', strength: 'strong', source: 'member' }] },
-      { id: 'jh', name: 'JH', tingoAssessed: false, preferences: [{ id: 'j', label: 'Night market', kind: 'strongly-avoid', strength: 'strong', source: 'member' }] },
+      { id: 'priya', name: 'Priya', tingoAssessed: true, preferences: [{ id: 'p', label: 'Night market', kind: 'must-go', strength: 'strong', source: 'member' }] },
+      { id: 'sam', name: 'Sam', tingoAssessed: false, preferences: [{ id: 's', label: 'Night market', kind: 'strongly-avoid', strength: 'strong', source: 'member' }] },
     ]);
 
     const soloDNA = scopeGroupDNAForMode('solo', groupDNA);
@@ -107,8 +107,8 @@ describe('deterministic itinerary generation', () => {
     const memberPreferencePlan = generateTripPlan({
       ...itineraryInput,
       members: [{
-        id: 'jh',
-        name: 'JH',
+        id: 'sam',
+        name: 'Sam',
         role: 'Food scout',
         inviteStatus: 'joined',
         pace: 'steady',
