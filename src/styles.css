@@ -8386,22 +8386,24 @@ main {
 }
 
 .brand-lockup .wordmark b {
-  color: var(--sangria);
+  color: var(--ink);
   font-family: var(--font-editorial);
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 900;
   letter-spacing: 0;
   line-height: 1;
+  opacity: .72;
 }
 
 .brand-lockup .wordmark small {
   max-width: 230px;
   color: var(--ink);
   font-family: Inter, system-ui, sans-serif;
-  font-size: 13px;
+  font-size: 9px;
   font-weight: 700;
   letter-spacing: 0;
   line-height: 1.25;
+  opacity: .72;
 }
 
 .home-page-welcome {
@@ -8429,6 +8431,7 @@ main {
   color: var(--ink);
   font-size: 13px;
   font-weight: 700;
+  opacity: .72;
 }
 
 .home-empty-state .coco-companion {
