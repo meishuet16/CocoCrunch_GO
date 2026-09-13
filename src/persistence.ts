@@ -137,9 +137,11 @@ export type PersistedState = {
   basePackingPreferences?: string[];
   tripCreated?: boolean;
   tripPhase?: 'planning' | 'traveling' | 'completed';
+  groupName?: string;
   destinationLockedByLeader?: boolean;
+  datesLockedByLeader?: boolean;
   groupMemberBudgets?: Record<string, number>;
-  groupMemberVibes?: Record<string, string>;
+  groupMemberVibes?: Record<string, string[]>;
   groupMemberDestinations?: Record<string, string>;
   itineraryOrder?: string[];
   groupChannelMessages?: GroupChannelMessage[];
@@ -185,8 +187,10 @@ export function resetTripScopedSharing(): Pick<PersistedState, 'privacy' | 'cont
 function normalizePersistedState(parsed: Partial<PersistedState>): Partial<PersistedState> {
   const normalizedPrivacy = parsed.privacy === 'exact' ? 'status' : parsed.privacy;
   const normalized = normalizedPrivacy ? { ...parsed, privacy: normalizedPrivacy, continuousLocation: false } : parsed;
-  if (!Array.isArray(parsed.tingoAnswers)) return normalized;
-  return { ...normalized, tingoDimensions: scoreTingo(parsed.tingoAnswers) };
+  const groupMemberVibes = Object.fromEntries(Object.entries(parsed.groupMemberVibes ?? {}).map(([memberId, vibes]) => [memberId, Array.isArray(vibes) ? vibes : [vibes].filter(Boolean)]));
+  const withVibes = { ...normalized, groupMemberVibes };
+  if (!Array.isArray(parsed.tingoAnswers)) return withVibes;
+  return { ...withVibes, tingoDimensions: scoreTingo(parsed.tingoAnswers) };
 }
 
 export function derivePersistedTripState(parsed: Partial<PersistedState>): PersistedTripState {

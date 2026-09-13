@@ -30,7 +30,7 @@ export function TripConditions({ delay, failedItemName, repairAvailable, repairS
     <CocoCompanion context={delay ? 'weather' : 'conditions'} size={80}/>
     <div className="trip-conditions-head">
       <div><span>TRIP CONDITIONS</span><h3>{delay ? 'Something changed today.' : 'Today’s conditions are clear.'}</h3></div>
-      <small>{automaticDeviationDetected ? 'Automatic prototype check: planned time passed without a manual check-in. Coco has asked you to review it.' : delay ? 'Demo condition · not live weather' : 'No live weather or traffic provider is connected.'}</small>
+      <small>{automaticDeviationDetected ? 'Planned time passed without a check-in. Coco has asked you to review it.' : delay ? 'Weather update available to review' : 'Weather and traffic updates will appear here.'}</small>
     </div>
     {delay ? <div className="trip-condition-alert">
       <b>Reported change is affecting {failedItemName ?? 'a flexible plan'}.</b>

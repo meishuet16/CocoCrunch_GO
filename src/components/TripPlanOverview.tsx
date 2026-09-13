@@ -40,9 +40,9 @@ function TransitDetail({ from, to }: { from: TripPlan['items'][number]; to: Trip
   const walkingMinutes = Math.max(5, Math.round(to.walkingKm * 14));
   const walk = to.walkingKm <= 1.2;
   const transport = walk ? `Walk · about ${walkingMinutes} min` : `Local transit · about ${to.transferMinutes || 18} min · RM ${Math.max(3, Math.round(to.estimatedCost * .08))}`;
-  const perPerson = to.estimatedCost ? `RM ${to.estimatedCost} per person` : 'No entry cost in prototype catalog';
-  const hours = to.kind === 'open' ? 'Flexible window · no venue hours' : to.kind === 'buffer' ? 'Buffer · no venue hours' : 'Prototype hours · 09:00–18:00';
-  return <div className="itinerary-transit-detail" aria-label={`Travel details from ${from.name} to ${to.name}`}><span>{transport}</span><small>{perPerson} · {hours}</small><em>Prototype route details · not live provider data</em></div>;
+  const perPerson = to.estimatedCost ? `RM ${to.estimatedCost} per person` : 'Entry cost not listed';
+  const hours = to.kind === 'open' ? 'Flexible window · no venue hours' : to.kind === 'buffer' ? 'Buffer · no venue hours' : 'Hours · 09:00–18:00';
+  return <div className="itinerary-transit-detail" aria-label={`Travel details from ${from.name} to ${to.name}`}><span>{transport}</span><small>{perPerson} · {hours}</small><em>Route details for planning</em></div>;
 }
 
 export function TripPlanOverview({ plan, planHealth, tripIntent, onOpenWhy, onOpenHealth, onReorder = () => undefined, mapSource, mapCandidates }: TripPlanOverviewProps) {
@@ -82,7 +82,7 @@ export function TripPlanOverview({ plan, planHealth, tripIntent, onOpenWhy, onOp
         <div className="itinerary-day-tabs" role="tablist" aria-label="Trip days">
           {Array.from({ length: dayCount }, (_, index) => <button type="button" role="tab" aria-selected={activeDay === index} className={activeDay === index ? 'active' : ''} key={index} onClick={() => setActiveDay(index)}>Day {index + 1}</button>)}
         </div>
-        <div className="itinerary-map-card"><TripSpatialView mode="planning" destination={plan.destination} source={mapSource} candidates={mapCandidates} plan={plan} /></div>
+        <div className="itinerary-map-card cc-card cc-card--flush"><TripSpatialView mode="planning" destination={plan.destination} source={mapSource} candidates={mapCandidates} plan={plan} /></div>
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={visibleItems.map(item => item.id)} strategy={verticalListSortingStrategy}>
             <div className="itinerary-timeline" aria-label={`Day ${activeDay + 1} trip timeline`}>{visibleItems.map((item, index) => <div key={item.id}><SortableItineraryRow item={item} label={itemLabels[item.kind]} flexible={tripIntent.flexible} onOpenWhy={onOpenWhy} />{visibleItems[index + 1] && <TransitDetail from={item} to={visibleItems[index + 1]} />}</div>)}</div>

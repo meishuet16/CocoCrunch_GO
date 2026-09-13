@@ -98,7 +98,14 @@ def make_background_transparent(im_cell):
     return im_rgba
 
 def process_all():
-    files = sorted(glob.glob("Codex Image*.png"))
+    sprite_names = [
+        "judge.png",
+        "boy_yellow.png",
+        "boy_green.png",
+        "girl_redhat.png",
+        "girl_blonde.png",
+    ]
+    files = [os.path.join("public", "characters", name) for name in sprite_names]
     print("Found files:", files)
     
     output_dir = os.path.join("public", "characters")
@@ -107,6 +114,9 @@ def process_all():
     processed_chars = {}
     
     for f in files:
+        if not os.path.exists(f):
+            print("Missing character sprite:", f)
+            continue
         im = Image.open(f)
         char_name = identify_character(im)
         processed_chars[char_name] = f

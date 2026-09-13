@@ -6,4 +6,4 @@ This directory holds the 5 Duolingo 6-state character sprite sheets:
 - `girl_redhat.png` (红帽女孩)
 - `girl_blonde.png` (金发女孩)
 
-Synced automatically from the root Codex images by the Vite copyCharacterAssets plugin.
+They are committed public assets and are served directly from `/characters/`.

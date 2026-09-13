@@ -26,13 +26,13 @@ export function GroupSplit({ members, value, active, onChange, onRequest, onRequ
     onChange({ ...value, meetingPoint: `Between ${value.destination} and ${selectedNames.join(', ') || 'your group'}`, meetingTime: 'Meet in about 35 min', suggestionSource: 'prototype-midpoint' });
   }
 
-  return <section className="split-note" aria-label="Group split prototype">
+  return <section className="split-note" aria-label="Group split">
     <div><span>GROUP SPLIT</span><b>{active ? 'Split is active.' : 'Make a split explicit before the group votes.'}</b><small>Choose the people going together, then agree a meeting point. This uses a local midpoint example, not live member locations.</small></div>
     {!active && <>
       <div className="split-member-picker" aria-label="Choose members for this split">{joined.map(member => <label key={member.id}><input type="checkbox" checked={value.memberIds.includes(member.id)} onChange={() => toggleMember(member.id)} />{member.name}</label>)}</div>
       <label className="setup-field"><span>Where does this group want to go?</span><input value={value.destination} onChange={event => onChange({ ...value, destination: event.target.value })} placeholder="e.g. Kappabashi kitchen street" /></label>
       <div className="inline-actions"><button type="button" className="secondary" disabled={!canSuggest} onClick={suggestMidpoint}>Suggest meeting point</button></div>
-      {value.meetingPoint && <div className="adapter-note"><b>{value.suggestionSource === 'prototype-midpoint' ? 'AI midpoint example' : 'Manual meeting point'}</b><small>{value.meetingPoint} · {value.meetingTime || 'Time to be agreed'}</small><small>Prototype calculation only: it does not analyze real member locations.</small></div>}
+      {value.meetingPoint && <div className="adapter-note"><b>{value.suggestionSource === 'prototype-midpoint' ? 'Suggested meeting point' : 'Manual meeting point'}</b><small>{value.meetingPoint} · {value.meetingTime || 'Time to be agreed'}</small><small>Review this meeting point with your group.</small></div>}
       <label className="setup-field"><span>Meeting point (you can set your own)</span><input value={value.meetingPoint} onChange={event => onChange({ ...value, meetingPoint: event.target.value, suggestionSource: 'manual' })} placeholder="e.g. Ueno Station central gate" /></label>
       <label className="setup-field"><span>Meet at</span><input value={value.meetingTime} onChange={event => onChange({ ...value, meetingTime: event.target.value })} placeholder="e.g. 18:30" /></label>
       <button type="button" disabled={!canRequest} onClick={onRequest}>Send split to Group Court</button>

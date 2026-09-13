@@ -130,7 +130,7 @@ describe('TripPlanOverview', () => {
     expect(html).toContain('Why this?');
     expect(html).toContain('constraint: Tsukiji food walk');
     expect(html).toContain('drag to reschedule');
-    expect(html).toContain('Prototype route details · not live provider data');
+    expect(html).toContain('Route details for planning');
     expect(html).toContain('Buffer · no venue hours');
   });
 });

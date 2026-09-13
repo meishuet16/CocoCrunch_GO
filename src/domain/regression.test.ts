@@ -106,7 +106,7 @@ describe('Tingo downstream rules', () => {
     const members = defaultMembers.map(member => ({ ...member }));
     const beforeRoles = members.map(member => member.role);
     const behavior = deriveTingoBehavior({ ...defaultTingoDimensions, social: 3 });
-    const suggestions = suggestResponsibilities(members, behavior, { mei: behavior });
+    const suggestions = suggestResponsibilities(members, behavior, { priya: behavior });
 
     expect(members.map(member => member.role)).toEqual(beforeRoles);
     expect(suggestions[0].suggestedRole).toBe('Group connector');

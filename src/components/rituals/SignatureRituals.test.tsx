@@ -25,7 +25,7 @@ describe('signature overlays SSR', () => {
     expect(html).toContain('10.01');
     expect(html).toContain('Lina');
     expect(html).toContain('Split equally');
-    expect(html).not.toMatch(/PAID|SETTLED|RM47|Mei/);
+    expect(html).not.toMatch(/PAID|SETTLED|RM47|Priya/);
   });
   it('renders the simplified prayer picker without inventing weather data', () => {
     const html = renderToStaticMarkup(<SignatureRituals {...base} ritual="prayer" prayer={{ source: 'user-reported', uncertainty: 'Clouds above the trail' }} />);
