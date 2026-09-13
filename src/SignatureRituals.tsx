@@ -40,19 +40,14 @@ function Prayer({ prayer, onClose }: Props) {
   const seq = useRitualSequence(sequences.prayer);
   const [wish, setWish] = useState(prayer?.wish ?? 'Just pray');
   const stage = seq.stage ?? 'review';
-  const copy: Record<string, string> = { review: 'We’ve done what we can. The rest is luck.', hands: '合十 · Hands together', incense: '上香 · A little incense', uncertainty: 'The uncertainty is still here.', talisman: '晴天符 · A symbolic sunshine talisman', ember: '化符 · A warm ember traces the edge', curl: '化符 · The paper curls', flames: '化符 · Illustrated flames consume the talisman', ash: '化符 · A little ash drifts away', appeal: '上诉天庭 · A playful appeal to the universe', tired: '尽力了 · Coco needs a rest', complete: 'We’ve done what we can. The rest is luck.' };
-  const actions: Record<string, string> = { review: 'Begin · 合十', hands: 'Offer incense · 上香', incense: 'Check uncertainty', uncertainty: 'Receive 晴天符', talisman: 'Burn talisman · 化符', appeal: 'We’ve done our best · 尽力了', tired: 'Complete ritual', complete: 'Back to the trip' };
-  return <RitualDialog title="做法祈愿 · A little luck" onClose={onClose}>
-    <p className="rv-provenance">{prayer?.source || 'unavailable'} · {prayer?.uncertainty || 'No uncertainty information supplied.'}</p>
-    {stage === 'review' && <div className="prayer-intents" aria-label="Optional prayer intention"><span>Optional intention</span><div>{['Weather', 'Smooth trip', 'Good food', 'Good luck', 'Anything'].map(option => <button type="button" className={wish === option ? 'active' : ''} key={option} onClick={() => setWish(option)}>{option}</button>)}</div><label>Custom<input value={wish} onChange={event => setWish(event.target.value)} placeholder="Just pray"/></label></div>}
+  const copy: Record<string, string> = { review: 'A little luck', hands: 'Hands together', incense: 'A little incense', uncertainty: 'A little luck', talisman: 'A little luck', ember: 'A little luck', curl: 'A little luck', flames: 'A little luck', ash: 'A little luck', appeal: 'A little luck', tired: 'A little luck', complete: 'A little luck' };
+  const actions: Record<string, string> = { review: 'Begin', hands: 'Continue', incense: 'Continue', uncertainty: 'Continue', talisman: 'Continue', appeal: 'Continue', tired: 'Done', complete: 'Done' };
+  return <RitualDialog title="A little luck" onClose={onClose}>
+    {stage === 'review' && <label className="prayer-intents"><select aria-label="Prayer intention" value={['Weather', 'Smooth trip', 'Good food', 'Good luck', 'Anything'].includes(wish) ? wish : 'Anything'} onChange={event => setWish(event.target.value)}>{['Weather', 'Smooth trip', 'Good food', 'Good luck', 'Anything'].map(option => <option key={option}>{option}</option>)}</select></label>}
     <div className="rv-prayer" data-stage={stage}>
       <CocoCompanion context="prayer" pose={['tired', 'complete'].includes(stage) ? 'expression-tired' : stage === 'uncertainty' ? 'expression-worried' : 'expression-love'} size={112}/>
-      {stage === 'hands' && <svg className="rv-hands" viewBox="0 0 100 90" aria-hidden="true"><path d="M15 75 38 35 47 8Q52 4 50 18L49 66 35 83Z"/><path d="M85 75 62 35 53 8Q48 4 50 18L51 66 65 83Z"/></svg>}
-      {stage === 'incense' && <div className="rv-incense" aria-hidden="true"><i/><i/><i/><span/></div>}
-      {['talisman', 'ember', 'curl', 'flames', 'ash'].includes(stage) && <PaperScene stage={stage} text="晴天符" talisman/>}
-      {stage === 'appeal' && <div className="rv-appeal" aria-hidden="true">✦ ↑ ✦</div>}
     </div>
-    <p role="status" aria-live="polite">{copy[stage]}{stage === 'review' && wish ? ` · ${wish}` : ''}</p><p className="rv-note">A symbolic ritual. Weather and trip plans remain unchanged.</p>
+    <p role="status" aria-live="polite">{copy[stage]}</p>
     <button type="button" className="rv-primary" disabled={!actions[stage] || !prayer} onClick={stage === 'review' ? () => seq.start() : stage === 'complete' ? onClose : () => seq.advance()}>{actions[stage] || 'Burning talisman…'}</button>
   </RitualDialog>;
 }
