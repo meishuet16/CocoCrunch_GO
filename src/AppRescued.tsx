@@ -1139,6 +1139,7 @@ export default function AppRescued() {
     if (tripLifecycleStatus === 'planning') return <div className="home-orientation home-empty">
       <section className="home-empty-state cc-card" aria-label="Trip inspiration">
         <p className="home-empty-status">No active trip</p>
+        <CocoCompanion context="planning" size={98} />
         <div><h2>Explore ideas</h2><p>Save a place for later.</p><button className="secondary" onClick={() => setTab('explore')}>Explore <ChevronRight size={16} /></button></div>
       </section>
     </div>;
@@ -2064,9 +2065,9 @@ export default function AppRescued() {
       <header className="topbar">
         <button className="brand-lockup" onClick={() => { setTripWorkspaceOpen(false); setTab('home'); }} aria-label="Go to Home">
           <img className="brand-companion" src={cocoAsset('scene-home')} alt="Coco, your travel companion" />
-          <span className="wordmark"><b>COCOCRUNCH</b><small>travel, with room to breathe</small></span>
+          <span className="wordmark"><b>COCOCRUNCH</b><small>Plan together. Decide transparently. Recover gracefully.</small></span>
         </button>
-        {tab === 'home' && <button className="bell" aria-label="Notifications"><Bell size={19} /><i /></button>}
+        {tab !== 'me' && <button className="bell" aria-label="Notifications"><Bell size={19} /><i /></button>}
         {tab === 'me' && (
           <div className="topbar-actions">
             <button className="bell" aria-label="Notifications"><Bell size={19} /><i /></button>

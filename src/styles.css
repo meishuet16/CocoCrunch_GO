@@ -8365,10 +8365,10 @@ main {
 .topbar::after {
   position: absolute;
   right: 12%;
-  bottom: -16px;
+  bottom: 0;
   left: 12%;
   height: 24px;
-  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
   border-radius: 50%;
   content: '';
 }
@@ -8385,23 +8385,47 @@ main {
   mix-blend-mode: multiply;
 }
 
+.brand-lockup .wordmark b {
+  color: var(--ink);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: .06em;
+}
+
+.brand-lockup .wordmark small {
+  max-width: 230px;
+  color: var(--sangria);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0;
+  line-height: 1.25;
+}
+
 .home-empty {
   min-height: calc(100dvh - 210px);
   align-content: center;
 }
 
 .home-empty-state {
-  grid-template-columns: 1fr;
+  grid-template-columns: 90px minmax(0, 1fr);
   gap: 12px;
   margin-top: 0;
   padding: 20px;
 }
 
 .home-empty-status {
+  grid-column: 1 / -1;
   margin: 0;
   color: var(--ink);
   font-size: 13px;
   font-weight: 700;
+}
+
+.home-empty-state .coco-companion {
+  align-self: center;
+  justify-self: center;
 }
 
 .home-empty-state > div {
