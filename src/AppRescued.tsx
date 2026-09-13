@@ -1136,9 +1136,11 @@ export default function AppRescued() {
   }
 
   function renderHome() {
-    if (tripLifecycleStatus === 'planning') return <div className="home-orientation">
-      <SectionTitle kicker="HOME · NO ACTIVE TRIP" title="Your trip is still taking shape." copy="Planning trips stay in Trips until their setup is confirmed." />
-      <button className="primary" onClick={openTrip}>Open planning trip <ChevronRight size={16} /></button>
+    if (tripLifecycleStatus === 'planning') return <div className="home-orientation home-empty">
+      <section className="home-empty-state cc-card" aria-label="Trip inspiration">
+        <p className="home-empty-status">No active trip</p>
+        <div><h2>Explore ideas</h2><p>Save a place for later.</p><button className="secondary" onClick={() => setTab('explore')}>Explore <ChevronRight size={16} /></button></div>
+      </section>
     </div>;
     if (tripLifecycleStatus === 'completed') return <div className="home-orientation">
       <SectionTitle kicker="HOME · TRIP COMPLETE" title="This journey now lives in Memories." copy="Review what happened and carry the useful parts forward." />
@@ -2059,11 +2061,12 @@ export default function AppRescued() {
 
   return (
     <div className={`app-shell tab-${tab}`}>
-      <header className={`topbar ${tab === 'home' ? 'topbar-home' : ''}`}>
-        {tab === 'home' ? <><div className="home-greeting"><span>Good to see you</span><b>{onboardingName || 'Traveller'}</b></div><button className="bell" aria-label="Notifications"><Bell size={19} /><i /></button></> : <button className="brand-lockup" onClick={() => { setTripWorkspaceOpen(false); setTab('home'); }} aria-label="Go to Home">
+      <header className="topbar">
+        <button className="brand-lockup" onClick={() => { setTripWorkspaceOpen(false); setTab('home'); }} aria-label="Go to Home">
           <img className="brand-companion" src={cocoAsset('scene-home')} alt="Coco, your travel companion" />
           <span className="wordmark"><b>COCOCRUNCH</b><small>travel, with room to breathe</small></span>
-        </button>}
+        </button>
+        {tab === 'home' && <button className="bell" aria-label="Notifications"><Bell size={19} /><i /></button>}
         {tab === 'me' && (
           <div className="topbar-actions">
             <button className="bell" aria-label="Notifications"><Bell size={19} /><i /></button>
