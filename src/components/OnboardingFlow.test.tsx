@@ -50,7 +50,7 @@ describe('OnboardingFlow', () => {
     const html = render('packing');
     expect(html).toContain('power bank');
     expect(html).toContain('umbrella or rain layer');
-    expect(html).toContain('Skip for now');
-    expect(html).toContain('4/4');
+    expect(html).toContain('Skip');
+    expect(html).not.toContain('4/4');
   });
 });

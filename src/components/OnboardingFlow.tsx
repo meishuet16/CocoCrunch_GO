@@ -43,7 +43,6 @@ export function OnboardingFlow({ initialStep = 'entry', initialAccount, onAccoun
   const [termsOpen, setTermsOpen] = useState(false);
   const [preferences, setPreferences] = useState<string[]>(['portable-charger', 'rain-layer']);
 
-  const displayStep = step === 'packing' ? 4 : step === 'entry' ? 1 : 2;
   const passwordValid = password.length >= 8;
 
   const account = (changes: Partial<OnboardingAccount> = {}): OnboardingAccount => ({ name, countryCode, birthday, ...changes });
@@ -64,12 +63,6 @@ export function OnboardingFlow({ initialStep = 'entry', initialAccount, onAccoun
   return (
     <main className="onboarding-flow" aria-label="CocoCrunch onboarding">
       <section className={`onboarding-card onboarding-card--${step}`}>
-        {step === 'packing' && <div className="onboarding-progress" aria-label={`Onboarding step ${displayStep} of 4`}>
-          <span>SETUP</span>
-          <b>{displayStep}/4</b>
-          <div><i style={{ width: `${displayStep * 25}%` }} /></div>
-        </div>}
-
         {step === 'entry' && <>
           <div className="onboarding-welcome-copy">
             <span>Welcome</span>
@@ -105,12 +98,10 @@ export function OnboardingFlow({ initialStep = 'entry', initialAccount, onAccoun
         </>}
 
         {step === 'packing' && <>
-          <span className="drawer-kicker">PACKING BASICS</span>
-          <h1>One last little habit check.</h1>
-          <p>We will use these as your starting packing preferences. You can change them later.</p>
+          <span className="drawer-kicker">PACKING</span>
+          <h1>Packing basics.</h1>
           <div className="onboarding-packing-questions">{packingQuestions.map(question => <label key={question.id}><input type="checkbox" checked={preferences.includes(question.id)} onChange={() => togglePreference(question.id)} /> <span>{question.label}</span></label>)}</div>
-          <button className="primary" onClick={() => onComplete(preferences)}>Finish setup</button>
-          <button className="onboarding-skip" onClick={() => onComplete([])}>Skip for now</button>
+          <div className="onboarding-actions onboarding-actions--primary"><button className="secondary" onClick={() => onComplete([])}>Skip</button><button className="primary" onClick={() => onComplete(preferences)}>Finish setup</button></div>
         </>}
       </section>
     </main>

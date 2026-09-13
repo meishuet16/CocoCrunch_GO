@@ -8289,3 +8289,63 @@ main {
 .tingo-result-screen .tingo-flow-primary {
   margin-top: 4px;
 }
+
+/* Keep the last setup step as compact and consistent as login and sign-up. */
+.onboarding-card--packing {
+  justify-content: center;
+  padding-top: clamp(40px, 9dvh, 84px);
+  padding-bottom: clamp(40px, 9dvh, 84px);
+}
+
+.onboarding-card--packing .onboarding-actions--primary {
+  margin-top: 8px;
+}
+
+.onboarding-card--packing .onboarding-packing-questions label {
+  min-height: 46px;
+  align-items: center;
+  padding: 11px 12px;
+  background: var(--paper-solid);
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.tingo-result-screen .tingo-flow-primary {
+  min-height: 44px;
+  font-family: Inter, system-ui, sans-serif !important;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Give the Tingo introduction the same calm vertical rhythm as authentication. */
+.tingo-how {
+  min-height: 100%;
+  align-content: space-between;
+  gap: 24px;
+  padding-top: 28px;
+  padding-bottom: 22px;
+}
+
+.tingo-how-header {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.tingo-how-header h2,
+.tingo-how-header p {
+  margin: 0;
+}
+
+.tingo-how-list {
+  gap: 14px;
+}
+
+.tingo-how-list .how-card {
+  min-height: 70px;
+  padding: 14px;
+}
+
+.tingo-how .tingo-flow-primary.tingo-how-maroon-btn {
+  margin-top: 12px;
+}
