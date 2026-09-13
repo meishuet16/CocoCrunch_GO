@@ -1140,3 +1140,22 @@
     padding: 12px 12px 12px 14px !important;
   }
 }
+
+/* Keep Me in the same quiet CocoCrunch system as Home. */
+.tab-me { color: var(--ink) !important; background: var(--cream) !important; }
+.tab-me .topbar { min-height: 64px !important; margin: -12px -14px 26px !important; padding: 12px 14px 24px !important; overflow: hidden !important; border-bottom: 1px solid var(--line) !important; border-radius: 0 0 50% 50% / 0 0 20px 20px !important; background: var(--paper-solid) !important; }
+.tab-me .brand-lockup { gap: 9px !important; }
+.tab-me .brand-lockup .brand-companion { display: block !important; width: 44px !important; height: 44px !important; }
+.tab-me .wordmark { gap: 7px !important; }
+.tab-me .wordmark b { color: var(--sangria) !important; font-family: var(--font-editorial) !important; font-size: 20px !important; font-weight: 900 !important; letter-spacing: 0 !important; line-height: 1 !important; text-shadow: none !important; }
+.tab-me .wordmark small { color: var(--ink) !important; font-family: Inter, system-ui, sans-serif !important; font-size: 9px !important; font-weight: 700 !important; line-height: 1.25 !important; }
+.tab-me .wordmark small::after, .tab-me .topbar-actions::before { display: none !important; content: none !important; }
+.tab-me .bell, .topbar-actions .user-profile-avatar-btn { border: 1px solid var(--line) !important; background: var(--paper-solid) !important; color: var(--sangria) !important; box-shadow: none !important; }
+.me-screen { gap: 14px !important; color: var(--ink) !important; font-family: Inter, system-ui, sans-serif !important; }
+.tab-me .me-tingo-card.redesign-card, .tab-me .me-trip-card.redesign-trip, .tab-me .me-summary-card.redesign-summary, .tab-me .me-history-card.redesign-history { border: 1px solid var(--line) !important; border-radius: var(--radius) !important; background: var(--paper-solid) !important; box-shadow: var(--shadow-sm) !important; color: var(--ink) !important; }
+.tab-me .me-card-bg-deco, .tab-me .me-handwritten-note-top, .tab-me .me-good-journeys-note, .tab-me .me-summary-bg-track, .tab-me .me-polaroid-stack-wrap, .tab-me .me-trip-scallop-divider { display: none !important; }
+.tab-me .me-card-copy h2, .tab-me .me-trip-hero-section h2, .tab-me .me-summary-content h3, .tab-me .me-history-content h3 { color: var(--ink) !important; font-family: var(--font-editorial) !important; text-shadow: none !important; }
+.tab-me .me-card-copy p, .tab-me .me-trip-blurb, .tab-me .me-summary-subtext, .tab-me .me-history-content p, .tab-me .me-trip-meta-item { color: var(--muted) !important; }
+.tab-me .me-tingo-kicker, .tab-me .me-trip-tag-pill, .tab-me .me-summary-pct, .tab-me .me-persona-badge { color: var(--sangria) !important; }
+.tab-me .me-all-types-link, .tab-me .me-retake-link, .tab-me .me-open-trip-btn, .tab-me .me-view-profile-btn, .tab-me .me-round-nav-btn { border: 0 !important; border-radius: var(--radius-sm) !important; background: var(--sangria) !important; color: var(--paper-solid) !important; box-shadow: none !important; }
+.tab-me .me-chip-row small, .tab-me .me-summary-pill { border: 1px solid var(--line) !important; background: var(--paper) !important; color: var(--muted) !important; }
