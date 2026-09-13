@@ -25,9 +25,9 @@
 | **Team** | **NJHL** — Wong Jia Hui, Lee Mei Shuet, Bong Zi Shan, Jasmine Khoo Jia Chee |
 | **Problem Statement** | Lifestyle Track — Planning an Escape: **Travel Planner** |
 | **Public GitHub Repository** | [CocoCrunch GitHub Repository](https://github.com/meishuet16/CocoCrunch_GO) |
-| **Video Presentation** | — |
+| **Video Presentation** | [CocoCrunch Video Presentation](https://youtu.be/RObeOnAuwfg) |
 | **Presentation Slides** | [CocoCrunch Presentation Slides](https://docs.google.com/presentation/d/1YB8I9-LLAYUdCpCPrLHCBnmvgW9vGhfmZWbKVdZdXAc/edit?usp=sharing) |
-| **UI Prototype / Deployed App** | — |
+| **UI Prototype / Deployed App** | [CocoCrunch Live App](https://coco-crunch-go.vercel.app/) |
 | **Ideation Boards** | Embedded in [Section 2.2](#22-ideation-boards) |
 
 ### Quick Navigation
@@ -263,7 +263,7 @@ We consulted **two mentors** and used their feedback to refine both the product 
 
 ## 3.1 UI Prototype
 
-**Public app / UI prototype:** —
+**Public app / UI prototype:** [CocoCrunch Live App](https://coco-crunch-go.vercel.app/)
 
 ## 3.2 End-to-End Prototype Journey
 
