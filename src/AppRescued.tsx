@@ -1305,6 +1305,7 @@ export default function AppRescued() {
       <SectionTitle kicker="TRIPS · YOUR NOTEBOOK" title="Keep the trip in view." copy="Planning, traveling, and remembering all belong to the same journey." />
       <button className="new-trip-link" onClick={startNewTrip}>+ Start a new trip</button>
       <section className={`trip-card ${tripIsActive ? 'active-trip' : 'planning-trip'} paper-sheet`}><div className="trip-card-art"><span>COCOCRUNCH</span><b>{destination}</b><small>{tripIntent.dates ? `${tripIntent.dates.start}–${tripIntent.dates.end}` : 'Dates to be confirmed'} · {travellerCount} travellers</small><i>✦</i></div><div className="trip-card-body"><div className="trip-card-heading"><div><span>{statusLabel}</span><h3>{destination} · slow food + small discoveries</h3></div><b>{planHealth.overall}</b></div><div className="trip-phase-preview"><span className={tripLifecycleStatus === 'planning' ? 'active' : ''}>Planning</span><span className={tripLifecycleStatus === 'active' ? 'active' : ''}>Active</span><span className={tripLifecycleStatus === 'ongoing' ? 'active' : ''}>Ongoing</span></div><p>{tripLifecycleStatus === 'planning' ? 'Finish setup and confirm to make this trip active.' : `Today: ${tripInputs.mustGo} · one open pocket`}</p><button className="primary" onClick={openTrip}>{tripLifecycleStatus === 'planning' ? 'Continue planning' : 'Open trip'} <ChevronRight size={16} /></button></div></section>
+      <section className="trip-packing-summary cc-card" aria-label="Packing summary"><div><span>PACKING</span><h3>Packing summary</h3><p>14 / 20 items packed</p></div><button className="primary" onClick={openPacking}>Open list <ChevronRight size={16} /></button></section>
       <section className="trip-list"><div className="section-rule"><span>OTHER TRIPS</span><button onClick={() => setTab('explore')}>Find inspiration <ChevronRight size={14} /></button></div><article className="trip-list-row"><div className="trip-thumb sea-thumb" /><div><b>Jeju · salt air and citrus</b><small>Completed · 5 days · shared privately</small></div><button onClick={openTrip} aria-label="Open Jeju trip"><ChevronRight size={17} /></button></article><article className="trip-list-row"><div className="trip-thumb blue-thumb" /><div><b>Kyoto · temple mornings</b><small>Draft · solo · 3 anchor ideas</small></div><button onClick={openTrip} aria-label="Open Kyoto trip"><ChevronRight size={17} /></button></article></section>
       <section className="trip-footer-note"><Coco tiny mood="happy" context="travel" /><div><b>Every trip gets a little wiser.</b><small>Reviews and category-level actual spend feed back into your private Tingo Card.</small></div></section>
     </>;
@@ -2071,9 +2072,10 @@ export default function AppRescued() {
         {tab === 'me' && (
           <div className="topbar-actions">
             <button className="bell" aria-label="Notifications"><Bell size={19} /><i /></button>
-            <button className="user-profile-avatar-btn" aria-label="My Profile" onClick={() => setDrawer('tingo')}>
-              <img className="me-top-user-avatar" src={userAvatar} alt="User profile" draggable={false} />
-            </button>
+            <details className="profile-menu">
+              <summary className="user-profile-avatar-btn" aria-label="Open profile menu"><img className="me-top-user-avatar" src={userAvatar} alt="User profile" draggable={false} /></summary>
+              <div><span>ACCOUNT</span><button onClick={() => setTab('me')}>Profile</button><button onClick={() => setTab('me')}>Settings</button></div>
+            </details>
           </div>
         )}
       </header>
